@@ -194,9 +194,10 @@ Deploy it manually:
 npm run deploy
 ```
 
-Cloudflare Builds uses `npm run deploy` for production deployments from the
-`main` branch. The Worker serves the IA² project homepage at `ia2.dev`; the
-HTML/RDF specification is published at its canonical path, `/spec/html-rdf`.
+Cloudflare Builds runs `npm run build`, then `npx wrangler deploy`, for
+production deployments from the `main` branch. The Worker serves the IA²
+project homepage at `ia2.dev`; the HTML/RDF specification is published at its
+canonical path, `/spec/html-rdf`.
 
 ## Status
 
