@@ -257,6 +257,44 @@ kbd { padding: 1px 5px; border: 1px solid var(--line); border-radius: 4px; backg
 .provenance-panel time { display: block; margin-top: 12px; color: var(--faint); font-size: 9px; }
 .issue-row.is-emphasized, .issue-row:target, .mail-row:target { outline: 3px solid color-mix(in oklch, var(--accent) 30%, transparent); outline-offset: -3px; background: var(--accent-soft); }
 
+.vendor-header { margin-bottom: 20px; }
+.review-posture { display: inline-flex; min-height: 32px; align-items: center; gap: 8px; padding: 0 11px; border: 1px solid color-mix(in oklch, var(--warning) 32%, var(--line)); border-radius: 999px; color: var(--warning); background: var(--warning-soft); font-size: 11px; font-weight: 720; }
+.review-posture i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.review-posture.is-approved { border-color: color-mix(in oklch, var(--success) 32%, var(--line)); color: var(--success); background: var(--success-soft); }
+.review-posture:not(.is-conditional):not(.is-approved) { border-color: var(--line); color: var(--muted); background: var(--surface-2); }
+.review-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 8px 0 22px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.review-summary > span { display: grid; grid-template-columns: 10px minmax(0, 1fr); gap: 2px 9px; align-content: center; min-height: 76px; padding: 13px 18px; border-right: 1px solid var(--line); }
+.review-summary > span:last-child { border-right: 0; }
+.review-summary strong, .review-summary small { grid-column: 2; }
+.review-summary strong { font-size: 13px; }
+.review-summary small { color: var(--faint); font-size: 10px; }
+.summary-signal { grid-row: 1 / 3; align-self: center; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.summary-signal.is-pass { background: var(--success); }
+.summary-signal.is-gap { background: var(--warning); }
+.review-layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(290px, .75fr); gap: 22px; align-items: start; }
+.requirements-panel, .evidence-register, .approval-panel, .assurance-contract { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.requirements-panel, .approval-panel { padding: 24px; }
+.evidence-register, .assurance-contract { padding: 22px; }
+.requirement-list { border-top: 1px solid var(--line); }
+.requirement-row { display: grid; grid-template-columns: 112px minmax(0, 1fr) auto; gap: 14px; align-items: center; min-height: 76px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.requirement-row:last-child { border-bottom: 0; }
+.requirement-family { color: var(--faint); font-size: 9px; font-weight: 720; letter-spacing: .05em; text-transform: uppercase; }
+.requirement-row strong, .requirement-row small { display: block; }
+.requirement-row strong { font-size: 12px; }
+.requirement-row small { margin-top: 3px; color: var(--faint); font-size: 10px; }
+.requirement-state { min-width: 78px; padding: 5px 8px; border-radius: 6px; text-align: center; font-size: 9px; font-weight: 740; }
+.requirement-state.is-pass { color: var(--success); background: var(--success-soft); }
+.requirement-state.is-gap { color: var(--warning); background: var(--warning-soft); }
+.assurance-lower { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr); gap: 22px; align-items: start; margin-top: 22px; }
+.approval-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+.approval-options button { min-height: 66px; padding: 10px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); background: transparent; text-align: left; transition: border-color 160ms var(--ease), background 160ms var(--ease), color 160ms var(--ease); }
+.approval-options button:hover { color: var(--ink); background: var(--surface-2); }
+.approval-options button.is-selected { border-color: color-mix(in oklch, var(--accent) 38%, var(--line)); color: var(--ink); background: var(--accent-soft); }
+.approval-options span, .approval-options small { display: block; }
+.approval-options span { font-size: 11px; font-weight: 700; }
+.approval-options small { margin-top: 3px; color: var(--faint); font-size: 9px; line-height: 1.35; }
+.assurance-contract { overflow: hidden; }
+
 .empty-state { padding: 70px 20px; text-align: center; color: var(--muted); }
 .empty-state > span { display: grid; width: 42px; height: 42px; place-items: center; margin: 0 auto 13px; border-radius: 50%; color: var(--accent); background: var(--accent-soft); font-size: 21px; }
 .empty-state h2 { color: var(--ink); font-size: 16px; }
@@ -279,6 +317,7 @@ kbd { padding: 1px 5px; border: 1px solid var(--line); border-radius: 4px; backg
   .mail-folders { flex-direction: row; overflow-x: auto; }
   .folder { flex: 0 0 auto; gap: 8px; }
   .briefing-layout { grid-template-columns: 1fr; }
+  .review-layout, .assurance-lower { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 650px) {
@@ -326,6 +365,12 @@ kbd { padding: 1px 5px; border: 1px solid var(--line); border-radius: 4px; backg
   .provenance-panel { border-top: 1px solid var(--line); border-left: 0; }
   .app-entry { grid-template-columns: 30px minmax(0, 1fr) 16px; gap: 10px; }
   .app-entry-state { display: none; }
+  .review-summary { grid-template-columns: 1fr; }
+  .review-summary > span { min-height: 62px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .review-summary > span:last-child { border-bottom: 0; }
+  .requirement-row { grid-template-columns: 1fr auto; gap: 7px 12px; }
+  .requirement-family { grid-column: 1 / -1; }
+  .approval-options { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 430px) {

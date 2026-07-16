@@ -6,10 +6,13 @@ import briefingHtml from "../../../demos/live-workspace/release-brief/index.html
 import issueHtml from "../../../demos/live-workspace/issues/index.html?raw";
 // @ts-expect-error Vitest supplies Vite's raw-fixture import during tests.
 import inboxHtml from "../../../demos/live-workspace/inbox/index.html?raw";
+// @ts-expect-error Vitest supplies Vite's raw-fixture import during tests.
+import vendorHtml from "../../../demos/live-workspace/vendor-review/index.html?raw";
 
 const BASE = "https://ia2.dev/demos/live-workspace/release-brief/";
 const ISSUE = "https://ia2.dev/demos/live-workspace/issues/";
 const INBOX = "https://ia2.dev/demos/live-workspace/inbox/";
+const VENDOR = "https://ia2.dev/demos/live-workspace/vendor-review/";
 const DECISION = "https://ontology.inferal.com/modules/decision/";
 const DCTERMS = "http://purl.org/dc/terms/";
 const PROV = "http://www.w3.org/ns/prov#";
@@ -100,5 +103,51 @@ describe("live workspace semantics", () => {
     expect(inboxResult.sourceDocumentIri).toBe(INBOX);
     expect(issueResult.quads.some((quad) => quad.subject.value.startsWith(INBOX))).toBe(false);
     expect(inboxResult.quads.some((quad) => quad.subject.value.startsWith(ISSUE))).toBe(false);
+  });
+
+  it("connects vendor requirements, evidence, policy, approval, and shapes", () => {
+    const page = new DOMParser().parseFromString(vendorHtml, "text/html");
+    Object.defineProperty(page, "URL", { configurable: true, value: "http://127.0.0.1:8791/vendor-review" });
+    const result = extractDataset(page);
+    const named = (fragment: string): string => `${VENDOR}#${fragment}`;
+    const hasNamed = (subject: string, predicate: string, object: string, graph?: string): boolean => (
+      result.quads.some((quad) => (
+        quad.subject.termType === "NamedNode"
+        && quad.subject.value === subject
+        && quad.predicate.value === predicate
+        && quad.object.termType === "NamedNode"
+        && quad.object.value === object
+        && (graph === undefined || (quad.graph?.termType === "NamedNode" && quad.graph.value === graph))
+      ))
+    );
+
+    expect(result.diagnostics).toEqual([]);
+    expect(result.sourceDocumentIri).toBe(VENDOR);
+    expect(hasNamed(
+      named("requirement-encryption"),
+      "https://current.example/security/satisfiedBy",
+      named("claim-encryption"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("claim-encryption"),
+      `${PROV}wasDerivedFrom`,
+      named("soc2-report"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("decision-northstar"),
+      `${DECISION}selectedOption`,
+      named("option-conditional"),
+      named("runtime-state"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("requirement-shape"),
+      `${SHACL}targetClass`,
+      "https://current.example/security/Requirement",
+      named("validation-contract"),
+    )).toBe(true);
+    expect(result.graphs).toEqual(expect.arrayContaining([
+      { termType: "NamedNode", value: named("runtime-state") },
+      { termType: "NamedNode", value: named("validation-contract") },
+    ]));
   });
 });

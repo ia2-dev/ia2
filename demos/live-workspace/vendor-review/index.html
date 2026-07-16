@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A vendor security review connecting requirements, claims, evidence, policy constraints, gaps, and approval state." rdf-subject="" rdf-predicate="http://purl.org/dc/terms/description">
+    <title rdf-subject="" rdf-predicate="http://purl.org/dc/terms/title">Northstar security review · Current</title>
+    <link rel="canonical" href="https://ia2.dev/demos/live-workspace/vendor-review/">
+    <link hidden href="https://schema.org/WebApplication" rdf-subject="" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+    <link rel="icon" href="/assets/ia2-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/demos/live-workspace/styles.css?v=0.4">
+    <script type="module" src="/packages/html-rdf-navigator/dist/html-rdf-navigator.js?v=0.4"></script>
+    <script type="module" src="/demos/live-workspace/app.js?v=0.4"></script>
+    <script type="module" src="/demos/live-workspace/vendor-review/vendor.js?v=0.4"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">Skip to vendor review</a>
+    <header class="topbar">
+      <a class="brand" href="/demos/live-workspace/" aria-label="Demo index"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Current</span></a>
+      <div class="workspace-label"><span class="workspace-dot" aria-hidden="true"></span> Trust operations <span class="environment">Vendor review</span></div>
+      <div class="topbar-actions"><button class="icon-button" id="theme-button" type="button" aria-label="Use dark theme" title="Change theme"><span aria-hidden="true">◐</span></button><span class="avatar" aria-label="Signed in as Maya Chen">MC</span></div>
+    </header>
+    <div class="app-shell">
+      <nav class="rail" aria-label="Demo applications">
+        <a class="rail-link" href="/demos/live-workspace/"><span aria-hidden="true">⌂</span><span>Overview</span></a>
+        <a class="rail-link" href="/demos/live-workspace/issues/"><span aria-hidden="true">◎</span><span>Issues</span></a>
+        <a class="rail-link" href="/demos/live-workspace/inbox/"><span aria-hidden="true">◇</span><span>Inbox</span></a>
+        <a class="rail-link" href="/demos/live-workspace/release-brief/"><span aria-hidden="true">◈</span><span>Briefing</span></a>
+        <a class="rail-link is-active" href="/demos/live-workspace/vendor-review/" aria-current="page"><span aria-hidden="true">▣</span><span>Vendor review</span><b>3</b></a>
+        <div class="rail-spacer"></div>
+      </nav>
+      <main id="workspace" tabindex="-1">
+        <aside class="demo-intro" aria-labelledby="demo-intro-title">
+          <span class="demo-intro-label"><i aria-hidden="true"></i> Assurance graph</span>
+          <p class="demo-intro-copy" id="demo-intro-title"><strong>Trace each conclusion to its basis.</strong> Requirements, vendor claims, evidence, policy rules, and approval state remain distinct but connected.</p>
+          <button class="demo-intro-action" id="open-rdf-navigator" type="button">Open RDF Navigator <span aria-hidden="true">↗</span></button>
+        </aside>
+
+        <section class="view vendor-view" aria-labelledby="vendor-heading">
+          <header class="view-header vendor-header">
+            <div><p class="eyebrow">Third-party assurance</p><h1 id="vendor-heading" rdf-subject="#review-northstar" rdf-predicate="http://purl.org/dc/terms/title">Northstar Cloud security review</h1></div>
+            <data class="review-posture is-conditional" id="review-posture" value="Conditional approval" rdf-subject="#decision-northstar" rdf-predicate="https://current.example/security/approvalStatus" rdf-graph="#runtime-state"><i aria-hidden="true"></i> Conditional approval</data>
+          </header>
+
+          <p class="briefing-lede" rdf-subject="#review-northstar" rdf-predicate="https://schema.org/reviewBody">Northstar meets the identity and encryption requirements. Its 72-hour incident notification commitment does not meet the internal 24-hour policy, so approval remains conditional on a contract amendment.</p>
+
+          <a hidden href="https://schema.org/Review" rdf-subject="#review-northstar" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+          <a hidden href="https://current.example/security/SecurityReview" rdf-subject="#review-northstar" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+          <a hidden href="#northstar-platform" rdf-subject="#review-northstar" rdf-predicate="https://schema.org/about"></a>
+          <a hidden href="#approval-record" rdf-subject="#review-northstar" rdf-predicate="http://purl.org/dc/terms/hasPart"></a>
+          <a hidden href="https://schema.org/SoftwareApplication" rdf-subject="#northstar-platform" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+          <span hidden rdf-subject="#northstar-platform" rdf-predicate="https://schema.org/name">Northstar Cloud Platform</span>
+          <a hidden href="#northstar" rdf-subject="#northstar-platform" rdf-predicate="https://schema.org/provider"></a>
+          <a hidden href="https://schema.org/Organization" rdf-subject="#northstar" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+          <span hidden rdf-subject="#northstar" rdf-predicate="https://schema.org/name">Northstar Systems</span>
+
+          <div class="review-summary" aria-label="Review summary">
+            <span><b class="summary-signal is-pass" aria-hidden="true"></b><strong>2 satisfied</strong><small>Requirements supported by evidence</small></span>
+            <span><b class="summary-signal is-gap" aria-hidden="true"></b><strong>1 policy gap</strong><small>Incident notice exceeds 24 hours</small></span>
+            <span><b class="summary-signal" aria-hidden="true"></b><strong>4 documents</strong><small>Vendor and internal evidence</small></span>
+          </div>
+
+          <div class="review-layout">
+            <section class="requirements-panel" aria-labelledby="requirements-title">
+              <header class="panel-heading"><div><p class="panel-kicker">Requirement matrix</p><h2 id="requirements-title">Policy to evidence</h2></div><span class="semantic-badge">3 requirements</span></header>
+              <div class="requirement-list">
+                <article class="requirement-row" id="requirement-encryption">
+                  <a hidden href="https://current.example/security/Requirement" rdf-subject="#requirement-encryption" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+                  <a hidden href="#policy-data-protection" rdf-subject="#requirement-encryption" rdf-predicate="https://current.example/security/requiredBy"></a>
+                  <a hidden href="#claim-encryption" rdf-subject="#requirement-encryption" rdf-predicate="https://current.example/security/satisfiedBy"></a>
+                  <span class="requirement-family">Data protection</span>
+                  <span><strong rdf-subject="#requirement-encryption" rdf-predicate="http://purl.org/dc/terms/title">Encrypt customer data at rest</strong><small>Production and backup storage</small></span>
+                  <data class="requirement-state is-pass" value="Satisfied" rdf-subject="#requirement-encryption" rdf-predicate="https://current.example/security/requirementStatus" rdf-graph="#runtime-state">Satisfied</data>
+                </article>
+                <article class="requirement-row" id="requirement-sso">
+                  <a hidden href="https://current.example/security/Requirement" rdf-subject="#requirement-sso" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+                  <a hidden href="#policy-access-control" rdf-subject="#requirement-sso" rdf-predicate="https://current.example/security/requiredBy"></a>
+                  <a hidden href="#claim-sso" rdf-subject="#requirement-sso" rdf-predicate="https://current.example/security/satisfiedBy"></a>
+                  <span class="requirement-family">Access control</span>
+                  <span><strong rdf-subject="#requirement-sso" rdf-predicate="http://purl.org/dc/terms/title">Support SAML single sign-on</strong><small>Enforce centralized workforce access</small></span>
+                  <data class="requirement-state is-pass" value="Satisfied" rdf-subject="#requirement-sso" rdf-predicate="https://current.example/security/requirementStatus" rdf-graph="#runtime-state">Satisfied</data>
+                </article>
+                <article class="requirement-row" id="requirement-notification">
+                  <a hidden href="https://current.example/security/Requirement" rdf-subject="#requirement-notification" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+                  <a hidden href="#policy-incident-response" rdf-subject="#requirement-notification" rdf-predicate="https://current.example/security/requiredBy"></a>
+                  <a hidden href="#claim-notification" rdf-subject="#requirement-notification" rdf-predicate="https://current.example/security/assessedAgainst"></a>
+                  <span class="requirement-family">Incident response</span>
+                  <span><strong rdf-subject="#requirement-notification" rdf-predicate="http://purl.org/dc/terms/title">Notify within 24 hours</strong><small>Vendor commitment is currently 72 hours</small></span>
+                  <data class="requirement-state is-gap" value="Gap" rdf-subject="#requirement-notification" rdf-predicate="https://current.example/security/requirementStatus" rdf-graph="#runtime-state">Policy gap</data>
+                </article>
+              </div>
+            </section>
+
+            <aside class="evidence-register" aria-labelledby="evidence-register-title">
+              <header class="panel-heading compact"><div><p class="panel-kicker">Evidence register</p><h2 id="evidence-register-title">What supports the claims</h2></div></header>
+              <div class="evidence-list">
+                <a class="evidence-row" href="#soc2-report" rdf-subject="#claim-encryption" rdf-predicate="http://www.w3.org/ns/prov#wasDerivedFrom"><span class="evidence-kind">Audit</span><span><strong id="soc2-report" rdf-predicate="https://schema.org/name">SOC 2 Type II report</strong><small>Coverage through 30 June 2026</small></span><span aria-hidden="true">↓</span></a>
+                <a class="evidence-row" href="#sso-response" rdf-subject="#claim-sso" rdf-predicate="http://www.w3.org/ns/prov#wasDerivedFrom"><span class="evidence-kind">Response</span><span><strong id="sso-response" rdf-predicate="https://schema.org/name">Identity architecture response</strong><small>SAML configuration and enforcement</small></span><span aria-hidden="true">↓</span></a>
+                <a class="evidence-row" href="#dpa" rdf-subject="#claim-notification" rdf-predicate="http://www.w3.org/ns/prov#wasDerivedFrom"><span class="evidence-kind">Contract</span><span><strong id="dpa" rdf-predicate="https://schema.org/name">Data processing addendum</strong><small>Section 8.2, 72-hour notice</small></span><span aria-hidden="true">↓</span></a>
+                <a class="evidence-row" href="#security-policy" rdf-subject="#review-northstar" rdf-predicate="http://purl.org/dc/terms/conformsTo"><span class="evidence-kind">Policy</span><span><strong id="security-policy" rdf-predicate="https://schema.org/name">Third-party security policy</strong><small>Internal baseline, revision 4</small></span><span aria-hidden="true">↓</span></a>
+              </div>
+            </aside>
+          </div>
+
+          <template rdf-fragment>
+            <a href="https://current.example/security/ControlClaim" rdf-subject="#claim-encryption" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+            <span rdf-subject="#claim-encryption" rdf-predicate="http://purl.org/dc/terms/description">Customer data is encrypted at rest using AES-256.</span>
+            <a href="#northstar" rdf-subject="#claim-encryption" rdf-predicate="http://www.w3.org/ns/prov#wasAttributedTo"></a>
+            <a href="https://current.example/security/ControlClaim" rdf-subject="#claim-sso" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+            <span rdf-subject="#claim-sso" rdf-predicate="http://purl.org/dc/terms/description">Enterprise accounts can enforce SAML 2.0 single sign-on.</span>
+            <a href="#northstar" rdf-subject="#claim-sso" rdf-predicate="http://www.w3.org/ns/prov#wasAttributedTo"></a>
+            <a href="https://current.example/security/ControlClaim" rdf-subject="#claim-notification" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+            <span rdf-subject="#claim-notification" rdf-predicate="http://purl.org/dc/terms/description">Northstar will notify customers within 72 hours of confirming a security incident.</span>
+            <a href="#northstar" rdf-subject="#claim-notification" rdf-predicate="http://www.w3.org/ns/prov#wasAttributedTo"></a>
+            <a href="https://schema.org/DigitalDocument" rdf-subject="#soc2-report" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+            <a href="https://schema.org/DigitalDocument" rdf-subject="#sso-response" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+            <a href="https://schema.org/DigitalDocument" rdf-subject="#dpa" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+            <a href="https://schema.org/DigitalDocument" rdf-subject="#security-policy" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+          </template>
+
+          <div class="assurance-lower">
+            <section class="approval-panel" aria-labelledby="approval-title">
+              <header class="panel-heading"><div><p class="panel-kicker">Approval decision</p><h2 id="approval-title" rdf-subject="#approval-record" rdf-predicate="http://purl.org/dc/terms/title">Procurement disposition</h2></div><span class="semantic-badge">Live decision</span></header>
+              <a hidden href="https://ontology.inferal.com/modules/decision/DecisionRecord" rdf-subject="#approval-record" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+              <a hidden href="#decision-northstar" rdf-subject="#approval-record" rdf-predicate="https://ontology.inferal.com/modules/decision/recordsDecision"></a>
+              <a hidden href="#approval-rationale" rdf-subject="#approval-record" rdf-predicate="https://ontology.inferal.com/modules/decision/hasRationale"></a>
+              <a hidden href="#maya-chen" rdf-subject="#approval-record" rdf-predicate="http://www.w3.org/ns/prov#wasAttributedTo"></a>
+              <a hidden href="https://ontology.inferal.com/modules/decision/Decision" rdf-subject="#decision-northstar" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+              <div class="approval-options" role="group" aria-label="Approval state">
+                <button type="button" data-approval="option-pending" aria-pressed="false"><span>Pending</span><small>More evidence needed</small></button>
+                <button class="is-selected" type="button" data-approval="option-conditional" aria-pressed="true"><span>Conditional</span><small>Proceed after amendment</small></button>
+                <button type="button" data-approval="option-approved" aria-pressed="false"><span>Approved</span><small>All requirements met</small></button>
+              </div>
+              <a hidden href="https://ontology.inferal.com/modules/decision/Option" rdf-subject="#option-pending" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+              <span hidden rdf-subject="#option-pending" rdf-predicate="http://purl.org/dc/terms/title">Pending review</span>
+              <a hidden href="https://ontology.inferal.com/modules/decision/Option" rdf-subject="#option-conditional" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+              <span hidden rdf-subject="#option-conditional" rdf-predicate="http://purl.org/dc/terms/title">Conditional approval</span>
+              <a hidden href="https://ontology.inferal.com/modules/decision/Option" rdf-subject="#option-approved" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+              <span hidden rdf-subject="#option-approved" rdf-predicate="http://purl.org/dc/terms/title">Approved</span>
+              <a hidden href="#option-conditional" id="approval-selection" rdf-subject="#decision-northstar" rdf-predicate="https://ontology.inferal.com/modules/decision/selectedOption" rdf-graph="#runtime-state"></a>
+              <p class="decision-rationale" id="approval-rationale" rdf-predicate="http://purl.org/dc/terms/description">Proceed only after the data processing addendum changes incident notification from 72 hours to 24 hours.</p>
+              <footer class="decision-meta"><span>Reviewed by <strong id="maya-chen" rdf-predicate="https://schema.org/name">Maya Chen</strong></span><time datetime="2026-07-15" rdf-subject="#approval-record" rdf-predicate="http://purl.org/dc/terms/date" rdf-datatype="http://www.w3.org/2001/XMLSchema#date">15 July 2026</time></footer>
+              <a hidden href="https://schema.org/Person" rdf-subject="#maya-chen" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+            </section>
+
+            <section class="contract-panel assurance-contract" aria-labelledby="assurance-contract-title">
+              <header class="panel-heading compact"><div><p class="panel-kicker">Published SHACL contract</p><h2 id="assurance-contract-title" rdf-subject="#assurance-contract" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#validation-contract">Machine-checkable completeness</h2></div><span class="contract-state">2 shapes</span></header>
+              <p class="contract-copy">Requirements must publish one status and identify their governing policy. Approval decisions must select exactly one option.</p>
+              <ul class="contract-rules"><li><span aria-hidden="true">✓</span><span rdf-subject-key="requirement-status-property" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#validation-contract">Every requirement must have exactly one review status.</span></li><li><span aria-hidden="true">✓</span><span rdf-subject-key="approval-option-property" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#validation-contract">Every approval decision must select exactly one option.</span></li></ul>
+              <a hidden href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#requirement-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#validation-contract"></a>
+              <a hidden href="https://current.example/security/Requirement" rdf-subject="#requirement-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetClass" rdf-graph="#validation-contract"></a>
+              <span hidden rdf-subject="#requirement-shape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-object-key="requirement-status-property" rdf-graph="#validation-contract"></span>
+              <a hidden href="https://current.example/security/requirementStatus" rdf-subject-key="requirement-status-property" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#validation-contract"></a>
+              <data hidden value="1" rdf-subject-key="requirement-status-property" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#validation-contract"></data>
+              <data hidden value="1" rdf-subject-key="requirement-status-property" rdf-predicate="http://www.w3.org/ns/shacl#maxCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#validation-contract"></data>
+              <a hidden href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#approval-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#validation-contract"></a>
+              <a hidden href="https://ontology.inferal.com/modules/decision/Decision" rdf-subject="#approval-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetClass" rdf-graph="#validation-contract"></a>
+              <span hidden rdf-subject="#approval-shape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-object-key="approval-option-property" rdf-graph="#validation-contract"></span>
+              <a hidden href="https://ontology.inferal.com/modules/decision/selectedOption" rdf-subject-key="approval-option-property" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#validation-contract"></a>
+              <data hidden value="1" rdf-subject-key="approval-option-property" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#validation-contract"></data>
+              <data hidden value="1" rdf-subject-key="approval-option-property" rdf-predicate="http://www.w3.org/ns/shacl#maxCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#validation-contract"></data>
+            </section>
+          </div>
+
+          <template rdf-fragment>
+            <a href="https://schema.org/DigitalDocument" rdf-subject="#policy-data-protection" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a><span rdf-subject="#policy-data-protection" rdf-predicate="https://schema.org/name">Data protection standard</span>
+            <a href="https://schema.org/DigitalDocument" rdf-subject="#policy-access-control" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a><span rdf-subject="#policy-access-control" rdf-predicate="https://schema.org/name">Access control standard</span>
+            <a href="https://schema.org/DigitalDocument" rdf-subject="#policy-incident-response" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a><span rdf-subject="#policy-incident-response" rdf-predicate="https://schema.org/name">Incident response standard</span>
+          </template>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  </body>
+</html>
