@@ -326,8 +326,9 @@ kbd { padding: 1px 5px; border: 1px solid var(--line); border-radius: 4px; backg
   .workspace-label { display: none; }
   .app-shell { display: block; min-height: calc(100vh - 108px); }
   .rail { position: fixed; z-index: 30; top: auto; right: 0; bottom: 0; left: 0; height: 54px; flex-direction: row; justify-content: center; padding: 5px 10px; border-top: 1px solid var(--line); border-right: 0; }
-  .rail-link { flex: 1 1 0; grid-template-columns: 22px auto; width: auto; max-width: 130px; min-height: 42px; }
-  .rail-link > span:nth-child(2) { display: inline; }
+  .rail-link { flex: 1 1 0; grid-template-columns: 1fr; justify-items: center; width: auto; max-width: 92px; min-width: 42px; min-height: 42px; }
+  .rail-link > span:nth-child(2) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  .rail-link b { display: none; }
   .rail-spacer { display: none; }
   .demo-intro { grid-template-columns: 1fr; gap: 8px; padding: 14px 16px; }
   .demo-intro-label { grid-column: auto; }
@@ -375,7 +376,6 @@ kbd { padding: 1px 5px; border: 1px solid var(--line); border-radius: 4px; backg
 
 @media (max-width: 430px) {
   .rail-link { grid-template-columns: 1fr; justify-items: center; gap: 0; padding: 3px; }
-  .rail-link > span:nth-child(2), .rail-link b { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

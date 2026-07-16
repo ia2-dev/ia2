@@ -1,8 +1,9 @@
 # Live semantic workspace demo
 
-This static demo combines an issue tracker and inbox with IA² `rdf-*` carriers.
-Creating, editing, moving, and deleting application data changes the live
-semantic DOM, so the RDF Navigator updates without a page reload.
+This demo directory contains separate IA² HTML/RDF application spaces. Their
+canonical identities connect across pages without combining unrelated graphs
+inside one DOM. Interactive pages change their semantic DOM as application
+state changes, so the RDF Navigator updates without a reload.
 
 ## Run
 
@@ -25,3 +26,5 @@ bundle at `../../packages/html-rdf-navigator/dist/html-rdf-navigator.js`.
 - Theme: switch between light and dark color schemes.
 - RDF: open the Navigator to watch statements appear, change, and disappear as
   the interface is used.
+- Knowledge model: filter visible layers, change a recorded latency decision,
+  and resolve or reintroduce model-to-code drift.

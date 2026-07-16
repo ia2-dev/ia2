@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A live knowledge architecture review connecting software concepts, terminology, decisions, implementation artifacts, revisions, quality measurements, and validation shapes." rdf-subject="" rdf-predicate="http://purl.org/dc/terms/description">
+    <title rdf-subject="" rdf-predicate="http://purl.org/dc/terms/title">Payment authorization knowledge model · IA²</title>
+    <link rel="canonical" href="https://ia2.dev/demos/live-workspace/knowledge-model/">
+    <link hidden href="https://schema.org/TechArticle" rdf-subject="" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+    <link rel="icon" href="/assets/ia2-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/demos/live-workspace/styles.css?v=0.5">
+    <link rel="stylesheet" href="/demos/live-workspace/knowledge-model/knowledge.css?v=0.1">
+    <script type="module" src="/packages/html-rdf-navigator/dist/html-rdf-navigator.js?v=0.5"></script>
+    <script type="module" src="/demos/live-workspace/app.js?v=0.5"></script>
+    <script type="module" src="/demos/live-workspace/knowledge-model/knowledge.js?v=0.1"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">Skip to knowledge model</a>
+    <header class="topbar">
+      <a class="brand" href="/demos/live-workspace/" aria-label="Demo index"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Current</span></a>
+      <div class="workspace-label"><span class="workspace-dot" aria-hidden="true"></span> Architecture knowledge <span class="environment">Payment platform</span></div>
+      <div class="topbar-actions"><button class="icon-button" id="theme-button" type="button" aria-label="Use dark theme" title="Change theme"><span aria-hidden="true">◐</span></button><span class="avatar" aria-label="Signed in as Rina Okafor">RO</span></div>
+    </header>
+
+    <div class="app-shell">
+      <nav class="rail" aria-label="Demo applications">
+        <a class="rail-link" href="/demos/live-workspace/"><span aria-hidden="true">⌂</span><span>Overview</span></a>
+        <a class="rail-link" href="/demos/live-workspace/issues/"><span aria-hidden="true">◎</span><span>Issues</span></a>
+        <a class="rail-link" href="/demos/live-workspace/inbox/"><span aria-hidden="true">◇</span><span>Inbox</span></a>
+        <a class="rail-link" href="/demos/live-workspace/release-brief/"><span aria-hidden="true">◈</span><span>Briefing</span></a>
+        <a class="rail-link" href="/demos/live-workspace/vendor-review/"><span aria-hidden="true">▣</span><span>Vendor review</span></a>
+        <a class="rail-link is-active" href="/demos/live-workspace/knowledge-model/" aria-current="page"><span aria-hidden="true">⌘</span><span>Knowledge model</span><b>1</b></a>
+        <div class="rail-spacer"></div>
+      </nav>
+
+      <main id="workspace" tabindex="-1">
+        <aside class="demo-intro" aria-labelledby="demo-intro-title">
+          <span class="demo-intro-label"><i aria-hidden="true"></i> Layered knowledge graph</span>
+          <p class="demo-intro-copy" id="demo-intro-title"><strong>Follow intent into implementation.</strong> This page connects prose, terms, relations, a live decision, code mappings, revisions, quality measurements, and SHACL constraints.</p>
+          <button class="demo-intro-action" id="open-rdf-navigator" type="button">Open RDF Navigator <span aria-hidden="true">↗</span></button>
+        </aside>
+
+        <section class="view knowledge-view" id="knowledge-view" aria-labelledby="knowledge-heading">
+          <header class="view-header knowledge-header">
+            <div>
+              <p class="eyebrow">Knowledge architecture review</p>
+              <h1 id="knowledge-heading" rdf-subject="#authorization-flow" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Payment authorization flow</h1>
+            </div>
+            <data class="knowledge-health is-drifted" id="knowledge-health" value="drifted" rdf-subject="#sync-measurement" rdf-predicate="http://www.w3.org/ns/dqv#value" rdf-graph="#runtime-state"><i aria-hidden="true"></i><span>Model drifted</span></data>
+          </header>
+
+          <p class="knowledge-lede" rdf-subject="#authorization-flow" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition" rdf-graph="#knowledge-model">Validate merchant credentials, available card limits, and fraud signals before returning an approval code or decline reason. The response must remain inside the network latency budget.</p>
+
+          <p class="source-note">Interaction pattern inspired by
+            <a href="https://clayers.com/" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/source">Cognitive Layers</a>
+            and its
+            <a href="https://github.com/CognitiveLayers/clayers" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/source">open repository</a>.
+          </p>
+
+          <a hidden href="http://www.w3.org/2004/02/skos/core#Concept" rdf-subject="#authorization-flow" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+          <a hidden href="#payment-concepts" rdf-subject="#authorization-flow" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme" rdf-graph="#knowledge-model"></a>
+          <a hidden href="#latency-record" rdf-subject="#authorization-flow" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#knowledge-model"></a>
+          <a hidden href="#artifact-map-auth" rdf-subject="#authorization-flow" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#knowledge-model"></a>
+
+          <div class="layer-lens" aria-label="Visible knowledge layers">
+            <span class="layer-lens-label"><strong>Layer lens</strong><small>View filter only. The graph stays intact.</small></span>
+            <button class="layer-toggle is-active" type="button" data-layer="prose" aria-pressed="true"><span>Pr</span>Prose</button>
+            <button class="layer-toggle is-active" type="button" data-layer="terminology" aria-pressed="true"><span>Tm</span>Terms</button>
+            <button class="layer-toggle is-active" type="button" data-layer="relations" aria-pressed="true"><span>Rl</span>Relations</button>
+            <button class="layer-toggle is-active" type="button" data-layer="decision" aria-pressed="true"><span>Dc</span>Decision</button>
+            <button class="layer-toggle is-active" type="button" data-layer="artifact" aria-pressed="true"><span>Ar</span>Artifact</button>
+            <button class="layer-toggle is-active" type="button" data-layer="revision" aria-pressed="true"><span>Rv</span>Revision</button>
+          </div>
+
+          <div class="knowledge-shell">
+            <aside class="concept-index" aria-labelledby="concept-index-title">
+              <div class="shell-heading">
+                <p class="panel-kicker">Model index</p>
+                <h2 id="concept-index-title">Payment processing</h2>
+              </div>
+              <nav aria-label="Model concepts">
+                <a class="concept-link is-current" href="#authorization-flow"><span>01</span><strong>Authorization</strong><small>Selected concept</small></a>
+                <a class="concept-link" href="#settlement"><span>02</span><strong id="settlement" rdf-subject="#settlement" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Settlement</strong><small>Downstream</small></a>
+                <a class="concept-link" href="#disputes"><span>03</span><strong id="disputes" rdf-subject="#disputes" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Disputes</strong><small>Related</small></a>
+                <a class="concept-link" href="#webhooks"><span>04</span><strong id="webhooks" rdf-subject="#webhooks" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Webhooks</strong><small>Unmapped</small></a>
+              </nav>
+              <div hidden>
+                <a href="http://www.w3.org/2004/02/skos/core#ConceptScheme" rdf-subject="#payment-concepts" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <span rdf-subject="#payment-concepts" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">Payment processing concepts</span>
+                <a href="http://www.w3.org/2004/02/skos/core#Concept" rdf-subject="#settlement" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <a href="#payment-concepts" rdf-subject="#settlement" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme" rdf-graph="#knowledge-model"></a>
+                <a href="http://www.w3.org/2004/02/skos/core#Concept" rdf-subject="#disputes" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <a href="#payment-concepts" rdf-subject="#disputes" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme" rdf-graph="#knowledge-model"></a>
+                <a href="http://www.w3.org/2004/02/skos/core#Concept" rdf-subject="#webhooks" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <a href="#payment-concepts" rdf-subject="#webhooks" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme" rdf-graph="#knowledge-model"></a>
+              </div>
+            </aside>
+
+            <article class="concept-workbench" id="authorization-flow" aria-labelledby="concept-title">
+              <header class="concept-header" data-layer-panel="prose">
+                <span class="layer-signature" aria-hidden="true">Pr</span>
+                <div><p class="panel-kicker">Concept</p><h2 id="concept-title">Authorization flow</h2></div>
+                <span class="review-state">Reviewed 16 Jul</span>
+              </header>
+
+              <section class="knowledge-section prose-layer" data-layer-panel="prose" aria-labelledby="purpose-title">
+                <div class="section-label"><span>01</span><h3 id="purpose-title">Purpose and operating rule</h3></div>
+                <p>The acquirer sends an authorization request to the issuer. The issuer validates account state and available funds, then returns an approval code or a decline reason within the selected latency budget.</p>
+                <aside class="knowledge-note"><strong>Operational constraint</strong><span>All changes to this path require replay testing against the network timeout suite.</span></aside>
+              </section>
+
+              <section class="knowledge-section" data-layer-panel="terminology" aria-labelledby="terms-title">
+                <div class="section-label"><span>02</span><h3 id="terms-title">Canonical terminology</h3></div>
+                <dl class="term-list">
+                  <div id="acquirer"><dt rdf-subject="#acquirer" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Acquirer</dt><dd rdf-subject="#acquirer" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition" rdf-graph="#knowledge-model">The financial institution that processes card payments for a merchant.</dd></div>
+                  <div id="issuer"><dt rdf-subject="#issuer" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Issuer</dt><dd rdf-subject="#issuer" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition" rdf-graph="#knowledge-model">The institution that issued the customer account and authorizes the transaction.</dd></div>
+                  <div id="approval-code"><dt rdf-subject="#approval-code" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Approval code</dt><dd rdf-subject="#approval-code" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition" rdf-graph="#knowledge-model">The issuer-provided identifier confirming that authorization succeeded.</dd></div>
+                </dl>
+                <div hidden>
+                  <a href="http://www.w3.org/2004/02/skos/core#Concept" rdf-subject="#acquirer" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a><a href="#payment-concepts" rdf-subject="#acquirer" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme" rdf-graph="#knowledge-model"></a>
+                  <a href="http://www.w3.org/2004/02/skos/core#Concept" rdf-subject="#issuer" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a><a href="#payment-concepts" rdf-subject="#issuer" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme" rdf-graph="#knowledge-model"></a>
+                  <a href="http://www.w3.org/2004/02/skos/core#Concept" rdf-subject="#approval-code" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a><a href="#payment-concepts" rdf-subject="#approval-code" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme" rdf-graph="#knowledge-model"></a>
+                </div>
+              </section>
+
+              <section class="knowledge-section" data-layer-panel="relations" aria-labelledby="relations-title">
+                <div class="section-label"><span>03</span><h3 id="relations-title">Connected concepts</h3></div>
+                <div class="relation-map" aria-label="Authorization flow relationships">
+                  <a href="#acquirer" rdf-subject="#authorization-flow" rdf-predicate="http://purl.org/dc/terms/requires" rdf-graph="#knowledge-model"><strong>Authorization</strong><span>requires</span><b>Acquirer</b></a>
+                  <a href="#issuer" rdf-subject="#authorization-flow" rdf-predicate="http://purl.org/dc/terms/requires" rdf-graph="#knowledge-model"><strong>Authorization</strong><span>requires</span><b>Issuer</b></a>
+                  <a href="#settlement" rdf-subject="#authorization-flow" rdf-predicate="http://purl.org/dc/terms/relation" rdf-graph="#knowledge-model"><strong>Authorization</strong><span>feeds</span><b>Settlement</b></a>
+                </div>
+              </section>
+
+              <section class="knowledge-section" data-layer-panel="decision" aria-labelledby="decision-title">
+                <div class="section-label"><span>04</span><h3 id="decision-title" rdf-subject="#latency-record" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">Authorization latency budget</h3></div>
+                <a hidden href="https://ontology.inferal.com/modules/decision/DecisionRecord" rdf-subject="#latency-record" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <a hidden href="#latency-decision" rdf-subject="#latency-record" rdf-predicate="https://ontology.inferal.com/modules/decision/recordsDecision" rdf-graph="#knowledge-model"></a>
+                <a hidden href="#latency-rationale" rdf-subject="#latency-record" rdf-predicate="https://ontology.inferal.com/modules/decision/hasRationale" rdf-graph="#knowledge-model"></a>
+                <a hidden href="#rina-okafor" rdf-subject="#latency-record" rdf-predicate="http://www.w3.org/ns/prov#wasAttributedTo" rdf-graph="#knowledge-model"></a>
+                <a hidden href="https://ontology.inferal.com/modules/decision/Decision" rdf-subject="#latency-decision" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <div class="latency-options" role="group" aria-label="Latency budget">
+                  <button type="button" data-option="option-150ms" aria-pressed="false"><strong>150 ms</strong><span>Maximum headroom</span></button>
+                  <button class="is-selected" type="button" data-option="option-200ms" aria-pressed="true"><strong>200 ms</strong><span>Current decision</span></button>
+                  <button type="button" data-option="option-250ms" aria-pressed="false"><strong>250 ms</strong><span>Lower implementation cost</span></button>
+                </div>
+                <a hidden href="#option-200ms" id="latency-selection" rdf-subject="#latency-decision" rdf-predicate="https://ontology.inferal.com/modules/decision/selectedOption" rdf-graph="#runtime-state"></a>
+                <p class="decision-rationale" id="latency-rationale" rdf-predicate="http://purl.org/dc/terms/description" rdf-graph="#knowledge-model">Card networks time out at 300 ms. A 200 ms application budget reserves 100 ms for transit variance and retries.</p>
+                <div hidden>
+                  <a href="https://ontology.inferal.com/modules/decision/Option" rdf-subject="#option-150ms" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a><span rdf-subject="#option-150ms" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">150 millisecond budget</span>
+                  <a href="https://ontology.inferal.com/modules/decision/Option" rdf-subject="#option-200ms" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a><span rdf-subject="#option-200ms" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">200 millisecond budget</span>
+                  <a href="https://ontology.inferal.com/modules/decision/Option" rdf-subject="#option-250ms" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a><span rdf-subject="#option-250ms" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">250 millisecond budget</span>
+                  <a href="https://schema.org/Person" rdf-subject="#rina-okafor" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a><span rdf-subject="#rina-okafor" rdf-predicate="https://schema.org/name" rdf-graph="#knowledge-model">Rina Okafor</span>
+                </div>
+              </section>
+
+              <section class="knowledge-section artifact-layer" data-layer-panel="artifact" aria-labelledby="artifact-title">
+                <div class="section-label"><span>05</span><h3 id="artifact-title" rdf-subject="#artifact-map-auth" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">Authorization handler mapping</h3></div>
+                <a hidden href="http://www.w3.org/ns/prov#Entity" rdf-subject="#artifact-map-auth" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <a hidden href="#authorization-flow" rdf-subject="#artifact-map-auth" rdf-predicate="http://purl.org/dc/terms/subject" rdf-graph="#knowledge-model"></a>
+                <a hidden href="#auth-handler" rdf-subject="#artifact-map-auth" rdf-predicate="http://www.w3.org/ns/prov#hadPrimarySource" rdf-graph="#knowledge-model"></a>
+                <a hidden href="https://schema.org/SoftwareSourceCode" rdf-subject="#auth-handler" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <span hidden rdf-subject="#auth-handler" rdf-predicate="https://schema.org/codeRepository" rdf-graph="#knowledge-model">payments/platform</span>
+                <span hidden rdf-subject="#auth-handler" rdf-predicate="https://schema.org/programmingLanguage" rdf-graph="#knowledge-model">TypeScript</span>
+                <div class="artifact-heading"><span><strong rdf-subject="#auth-handler" rdf-predicate="https://schema.org/name" rdf-graph="#knowledge-model">src/auth/handler.ts</strong><small>Lines 42–128 · TypeScript</small></span><data class="mapping-state is-drifted" id="mapping-state" value="drifted">Model drifted</data></div>
+                <pre aria-label="Authorization handler code excerpt"><code><span>export async function authorize(request) {</span>
+  const account = await issuer.lookup(request.pan);
+  const result = await risk.evaluate(account, request);
+  return network.respond(result, { timeout: 220 });
+}</code></pre>
+                <div class="hash-compare" aria-label="Content hash comparison">
+                  <span><small>Model mapping</small><code id="model-hash" rdf-subject="#model-revision-2-1" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#runtime-state">sha256:9d4c2a71</code></span>
+                  <span><small>Current code</small><code rdf-subject="#implementation-revision" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#knowledge-model">sha256:b17e6f09</code></span>
+                </div>
+                <button class="secondary-button drift-action" id="drift-action" type="button">Accept current implementation</button>
+              </section>
+
+              <section class="knowledge-section" data-layer-panel="revision" aria-labelledby="revision-title">
+                <div class="section-label"><span>06</span><h3 id="revision-title">Revision lineage</h3></div>
+                <ol class="revision-line">
+                  <li><span>v2.0</span><strong id="model-revision-2-0" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">Initial fraud checks</strong><time datetime="2026-06-21" rdf-subject="#model-revision-2-0" rdf-predicate="http://www.w3.org/ns/prov#generatedAtTime" rdf-datatype="http://www.w3.org/2001/XMLSchema#date" rdf-graph="#knowledge-model">21 Jun</time></li>
+                  <li class="is-current"><span>v2.1</span><strong id="model-revision-2-1" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">Latency budget clarified</strong><time datetime="2026-07-16" rdf-subject="#model-revision-2-1" rdf-predicate="http://www.w3.org/ns/prov#generatedAtTime" rdf-datatype="http://www.w3.org/2001/XMLSchema#date" rdf-graph="#knowledge-model">16 Jul</time></li>
+                </ol>
+                <a hidden href="http://www.w3.org/ns/prov#Entity" rdf-subject="#model-revision-2-0" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <a hidden href="http://www.w3.org/ns/prov#Entity" rdf-subject="#model-revision-2-1" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <a hidden href="#model-revision-2-0" rdf-subject="#model-revision-2-1" rdf-predicate="http://www.w3.org/ns/prov#wasRevisionOf" rdf-graph="#knowledge-model"></a>
+                <a hidden href="#authorization-flow" rdf-subject="#model-revision-2-1" rdf-predicate="http://www.w3.org/ns/prov#specializationOf" rdf-graph="#knowledge-model"></a>
+                <a hidden href="#rina-okafor" rdf-subject="#model-revision-2-1" rdf-predicate="http://www.w3.org/ns/prov#wasAttributedTo" rdf-graph="#knowledge-model"></a>
+                <a hidden href="http://www.w3.org/ns/prov#Entity" rdf-subject="#implementation-revision" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <a hidden href="#auth-handler" rdf-subject="#implementation-revision" rdf-predicate="http://www.w3.org/ns/prov#specializationOf" rdf-graph="#knowledge-model"></a>
+              </section>
+            </article>
+
+            <aside class="model-inspector" aria-labelledby="inspector-title">
+              <div class="shell-heading">
+                <p class="panel-kicker">Model health</p>
+                <h2 id="inspector-title">Traceability</h2>
+              </div>
+              <dl class="model-stats">
+                <div><dt>Concept coverage</dt><dd><meter min="0" max="1" value="0.75" rdf-subject="#coverage-measurement" rdf-predicate="http://www.w3.org/ns/dqv#value" rdf-datatype="http://www.w3.org/2001/XMLSchema#decimal" rdf-graph="#knowledge-model">75%</meter><span>75%</span></dd></div>
+                <div><dt>Artifact mappings</dt><dd><strong>3 / 4</strong><span>one unmapped</span></dd></div>
+                <div><dt>Graph shape</dt><dd><strong>12 links</strong><span>no cycles</span></dd></div>
+              </dl>
+              <div hidden>
+                <a href="http://www.w3.org/ns/dqv#QualityMeasurement" rdf-subject="#coverage-measurement" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <a href="#authorization-flow" rdf-subject="#coverage-measurement" rdf-predicate="http://www.w3.org/ns/dqv#computedOn" rdf-graph="#knowledge-model"></a>
+                <a href="#coverage-metric" rdf-subject="#coverage-measurement" rdf-predicate="http://www.w3.org/ns/dqv#isMeasurementOf" rdf-graph="#knowledge-model"></a>
+                <a href="http://www.w3.org/ns/dqv#Metric" rdf-subject="#coverage-metric" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <span rdf-subject="#coverage-metric" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Concept to artifact coverage</span>
+                <a href="http://www.w3.org/ns/dqv#QualityMeasurement" rdf-subject="#sync-measurement" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <a href="#artifact-map-auth" rdf-subject="#sync-measurement" rdf-predicate="http://www.w3.org/ns/dqv#computedOn" rdf-graph="#knowledge-model"></a>
+                <a href="#synchronization-metric" rdf-subject="#sync-measurement" rdf-predicate="http://www.w3.org/ns/dqv#isMeasurementOf" rdf-graph="#knowledge-model"></a>
+                <a href="http://www.w3.org/ns/dqv#Metric" rdf-subject="#synchronization-metric" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
+                <span rdf-subject="#synchronization-metric" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Model to implementation synchronization</span>
+              </div>
+
+              <section class="shape-summary" aria-labelledby="shape-title">
+                <p class="panel-kicker">Published contract</p>
+                <h3 id="shape-title" rdf-subject="#knowledge-contract" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#validation-contract">3 SHACL shapes</h3>
+                <ul>
+                  <li><span aria-hidden="true">✓</span><span rdf-subject-key="concept-label-property" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#validation-contract">Concepts need one canonical label.</span></li>
+                  <li><span aria-hidden="true">✓</span><span rdf-subject-key="decision-option-property" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#validation-contract">Decisions select exactly one option.</span></li>
+                  <li><span aria-hidden="true">✓</span><span rdf-subject-key="measurement-value-property" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#validation-contract">Measurements publish one value.</span></li>
+                </ul>
+              </section>
+
+              <article class="baseline-claim" rdf-subject-key="baseline-selection-claim" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#reifies">
+                <template><a href="#option-200ms" rdf-subject="#latency-decision" rdf-predicate="https://ontology.inferal.com/modules/decision/selectedOption">200 ms</a></template>
+                <p class="panel-kicker">RDF 1.2 triple term</p>
+                <h3>Reviewed baseline</h3>
+                <p rdf-subject-key="baseline-selection-claim" rdf-predicate="http://purl.org/dc/terms/description">The review records the original 200 ms selection even when the live decision changes.</p>
+              </article>
+            </aside>
+          </div>
+
+          <div hidden>
+            <a href="#concept-shape" rdf-subject="#knowledge-contract" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#validation-contract"></a>
+            <a href="#decision-shape" rdf-subject="#knowledge-contract" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#validation-contract"></a>
+            <a href="#measurement-shape" rdf-subject="#knowledge-contract" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#validation-contract"></a>
+            <a href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#concept-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#validation-contract"></a>
+            <a href="http://www.w3.org/2004/02/skos/core#Concept" rdf-subject="#concept-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetClass" rdf-graph="#validation-contract"></a>
+            <span rdf-subject="#concept-shape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-object-key="concept-label-property" rdf-graph="#validation-contract"></span>
+            <a href="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-subject-key="concept-label-property" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#validation-contract"></a>
+            <data value="1" rdf-subject-key="concept-label-property" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#validation-contract"></data>
+            <data value="1" rdf-subject-key="concept-label-property" rdf-predicate="http://www.w3.org/ns/shacl#maxCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#validation-contract"></data>
+            <a href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#decision-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#validation-contract"></a>
+            <a href="https://ontology.inferal.com/modules/decision/Decision" rdf-subject="#decision-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetClass" rdf-graph="#validation-contract"></a>
+            <span rdf-subject="#decision-shape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-object-key="decision-option-property" rdf-graph="#validation-contract"></span>
+            <a href="https://ontology.inferal.com/modules/decision/selectedOption" rdf-subject-key="decision-option-property" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#validation-contract"></a>
+            <data value="1" rdf-subject-key="decision-option-property" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#validation-contract"></data>
+            <data value="1" rdf-subject-key="decision-option-property" rdf-predicate="http://www.w3.org/ns/shacl#maxCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#validation-contract"></data>
+            <a href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#measurement-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#validation-contract"></a>
+            <a href="http://www.w3.org/ns/dqv#QualityMeasurement" rdf-subject="#measurement-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetClass" rdf-graph="#validation-contract"></a>
+            <span rdf-subject="#measurement-shape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-object-key="measurement-value-property" rdf-graph="#validation-contract"></span>
+            <a href="http://www.w3.org/ns/dqv#value" rdf-subject-key="measurement-value-property" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#validation-contract"></a>
+            <data value="1" rdf-subject-key="measurement-value-property" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#validation-contract"></data>
+            <data value="1" rdf-subject-key="measurement-value-property" rdf-predicate="http://www.w3.org/ns/shacl#maxCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#validation-contract"></data>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  </body>
+</html>

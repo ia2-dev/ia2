@@ -8,11 +8,14 @@ import issueHtml from "../../../demos/live-workspace/issues/index.html?raw";
 import inboxHtml from "../../../demos/live-workspace/inbox/index.html?raw";
 // @ts-expect-error Vitest supplies Vite's raw-fixture import during tests.
 import vendorHtml from "../../../demos/live-workspace/vendor-review/index.html?raw";
+// @ts-expect-error Vitest supplies Vite's raw-fixture import during tests.
+import knowledgeHtml from "../../../demos/live-workspace/knowledge-model/index.html?raw";
 
 const BASE = "https://ia2.dev/demos/live-workspace/release-brief/";
 const ISSUE = "https://ia2.dev/demos/live-workspace/issues/";
 const INBOX = "https://ia2.dev/demos/live-workspace/inbox/";
 const VENDOR = "https://ia2.dev/demos/live-workspace/vendor-review/";
+const KNOWLEDGE = "https://ia2.dev/demos/live-workspace/knowledge-model/";
 const DECISION = "https://ontology.inferal.com/modules/decision/";
 const DCTERMS = "http://purl.org/dc/terms/";
 const PROV = "http://www.w3.org/ns/prov#";
@@ -146,6 +149,68 @@ describe("live workspace semantics", () => {
       named("validation-contract"),
     )).toBe(true);
     expect(result.graphs).toEqual(expect.arrayContaining([
+      { termType: "NamedNode", value: named("runtime-state") },
+      { termType: "NamedNode", value: named("validation-contract") },
+    ]));
+  });
+
+  it("layers concepts, decisions, artifacts, quality, and constraints", () => {
+    const page = new DOMParser().parseFromString(knowledgeHtml, "text/html");
+    Object.defineProperty(page, "URL", { configurable: true, value: "http://127.0.0.1:8791/knowledge-model" });
+    const result = extractDataset(page);
+    const named = (fragment: string): string => `${KNOWLEDGE}#${fragment}`;
+    const hasNamed = (subject: string, predicate: string, object: string, graph?: string): boolean => (
+      result.quads.some((quad) => (
+        quad.subject.termType === "NamedNode"
+        && quad.subject.value === subject
+        && quad.predicate.value === predicate
+        && quad.object.termType === "NamedNode"
+        && quad.object.value === object
+        && (graph === undefined || (quad.graph?.termType === "NamedNode" && quad.graph.value === graph))
+      ))
+    );
+
+    expect(result.diagnostics).toEqual([]);
+    expect(result.sourceDocumentIri).toBe(KNOWLEDGE);
+    expect(hasNamed(
+      named("authorization-flow"),
+      `${RDF}type`,
+      "http://www.w3.org/2004/02/skos/core#Concept",
+      named("knowledge-model"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("latency-decision"),
+      `${DECISION}selectedOption`,
+      named("option-200ms"),
+      named("runtime-state"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("artifact-map-auth"),
+      `${PROV}hadPrimarySource`,
+      named("auth-handler"),
+      named("knowledge-model"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("sync-measurement"),
+      "http://www.w3.org/ns/dqv#computedOn",
+      named("artifact-map-auth"),
+      named("knowledge-model"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("concept-shape"),
+      `${SHACL}targetClass`,
+      "http://www.w3.org/2004/02/skos/core#Concept",
+      named("validation-contract"),
+    )).toBe(true);
+    expect(result.quads.some((quad) => (
+      quad.predicate.value === `${RDF}reifies`
+      && quad.object.termType === "Triple"
+      && quad.object.predicate.value === `${DECISION}selectedOption`
+      && quad.object.object.termType === "NamedNode"
+      && quad.object.object.value === named("option-200ms")
+    ))).toBe(true);
+    expect(result.graphs).toEqual(expect.arrayContaining([
+      { termType: "NamedNode", value: named("knowledge-model") },
       { termType: "NamedNode", value: named("runtime-state") },
       { termType: "NamedNode", value: named("validation-contract") },
     ]));
