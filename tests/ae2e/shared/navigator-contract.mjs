@@ -139,7 +139,8 @@ export async function runNavigatorContract({ expectedTag } = {}) {
     dispatchPointer(window, "pointerup", { clientX: before.left + 70, clientY: before.top + 30 });
     const moved = preview.getBoundingClientRect();
     assert(moved.left !== before.left || moved.top !== before.top, "resource preview did not move");
-    const resize = preview.querySelector(".resource-preview-resize");
+    const resize = preview.querySelector('.resize-handle[data-resize="se"]');
+    assert(resize, "resource preview southeast resize handle is missing");
     dispatchPointer(resize, "pointerdown", { clientX: moved.right, clientY: moved.bottom });
     dispatchPointer(window, "pointermove", { clientX: moved.right + 30, clientY: moved.bottom + 20 });
     dispatchPointer(window, "pointerup", { clientX: moved.right + 30, clientY: moved.bottom + 20 });
