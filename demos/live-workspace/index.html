@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A live IA2 issue tracker and inbox demo.">
+    <title>Current · Live IA² workspace</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="../../packages/html-rdf-navigator/dist/html-rdf-navigator.js"></script>
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">Skip to workspace</a>
+
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Current home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>Current</span>
+      </a>
+      <div class="workspace-label">
+        <span class="workspace-dot" aria-hidden="true"></span>
+        Product studio
+        <span class="environment">Live IA²</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-button" id="theme-button" type="button" aria-label="Use dark theme" title="Change theme">
+          <span aria-hidden="true">◐</span>
+        </button>
+        <span class="avatar" aria-label="Signed in as Maya Chen">MC</span>
+      </div>
+    </header>
+
+    <div class="app-shell">
+      <nav class="rail" aria-label="Workspace">
+        <button class="rail-link is-active" type="button" data-view="issues" aria-current="page">
+          <span aria-hidden="true">◎</span><span>Issues</span><b id="issue-nav-count">4</b>
+        </button>
+        <button class="rail-link" type="button" data-view="mail">
+          <span aria-hidden="true">◇</span><span>Inbox</span><b id="mail-nav-count">3</b>
+        </button>
+        <div class="rail-spacer"></div>
+        <div class="semantic-note">
+          <span class="pulse" aria-hidden="true"></span>
+          <p><strong>Live semantics</strong>Every change updates the document RDF.</p>
+        </div>
+      </nav>
+
+      <main id="workspace" tabindex="-1">
+        <section class="view is-active" id="issues-view" aria-labelledby="issues-heading">
+          <header class="view-header">
+            <div>
+              <p class="eyebrow">Plan and ship</p>
+              <h1 id="issues-heading" tabindex="-1">Issues</h1>
+            </div>
+            <div class="header-actions">
+              <label class="search-field">
+                <span class="sr-only">Search issues</span>
+                <span aria-hidden="true">⌕</span>
+                <input id="issue-search" type="search" placeholder="Search issues" autocomplete="off">
+              </label>
+              <button class="primary-button" id="new-issue-button" type="button"><span aria-hidden="true">＋</span> New issue</button>
+            </div>
+          </header>
+
+          <form class="inline-form" id="issue-form" hidden>
+            <div class="form-heading">
+              <div><p class="eyebrow">New work item</p><h2>Create issue</h2></div>
+              <button class="icon-button form-close" type="button" aria-label="Close issue form">×</button>
+            </div>
+            <div class="form-grid">
+              <label class="field field-wide"><span>Title</span><input name="title" required maxlength="90" placeholder="What needs attention?"></label>
+              <label class="field"><span>Assignee</span><input name="assignee" required maxlength="40" value="Maya Chen"></label>
+              <label class="field"><span>Status</span><select name="status"><option>Todo</option><option>In progress</option><option>Done</option></select></label>
+            </div>
+            <div class="form-actions"><button class="secondary-button form-cancel" type="button">Cancel</button><button class="primary-button" type="submit">Create issue</button></div>
+          </form>
+
+          <div class="view-toolbar">
+            <div class="filters" role="group" aria-label="Filter issues">
+              <button class="filter is-selected" type="button" data-filter="All" aria-pressed="true">All <span id="all-count">4</span></button>
+              <button class="filter" type="button" data-filter="Todo" aria-pressed="false">Todo <span id="todo-count">2</span></button>
+              <button class="filter" type="button" data-filter="In progress" aria-pressed="false">In progress <span id="progress-count">1</span></button>
+              <button class="filter" type="button" data-filter="Done" aria-pressed="false">Done <span id="done-count">1</span></button>
+            </div>
+            <p class="shortcut-hint"><kbd>N</kbd> new issue</p>
+          </div>
+
+          <div class="issue-table" role="table" aria-label="Issues">
+            <div class="table-head" role="row">
+              <span role="columnheader">Issue</span><span role="columnheader">Status</span><span role="columnheader">Assignee</span><span role="columnheader"><span class="sr-only">Actions</span></span>
+            </div>
+            <div id="issue-list" role="rowgroup"></div>
+          </div>
+          <div class="empty-state" id="issue-empty" hidden><span aria-hidden="true">◎</span><h2>No issues here</h2><p>Try a different filter or create the first one.</p></div>
+        </section>
+
+        <section class="view" id="mail-view" aria-labelledby="mail-heading" hidden>
+          <header class="view-header">
+            <div>
+              <p class="eyebrow">Team communication</p>
+              <h1 id="mail-heading" tabindex="-1">Inbox</h1>
+            </div>
+            <div class="header-actions">
+              <label class="search-field">
+                <span class="sr-only">Search inbox</span>
+                <span aria-hidden="true">⌕</span>
+                <input id="mail-search" type="search" placeholder="Search inbox" autocomplete="off">
+              </label>
+              <button class="primary-button" id="compose-button" type="button"><span aria-hidden="true">＋</span> Compose</button>
+            </div>
+          </header>
+
+          <form class="inline-form compose-form" id="compose-form" hidden>
+            <div class="form-heading">
+              <div><p class="eyebrow">New message</p><h2>Compose</h2></div>
+              <button class="icon-button form-close" type="button" aria-label="Close compose form">×</button>
+            </div>
+            <div class="form-grid">
+              <label class="field"><span>To</span><input name="to" type="email" required value="team@example.com"></label>
+              <label class="field"><span>Subject</span><input name="subject" required maxlength="100" placeholder="Message subject"></label>
+              <label class="field field-wide"><span>Message</span><textarea name="body" required rows="4" maxlength="500" placeholder="Write a clear, useful note"></textarea></label>
+            </div>
+            <div class="form-actions"><button class="secondary-button form-cancel" type="button">Cancel</button><button class="primary-button" type="submit">Send message</button></div>
+          </form>
+
+          <div class="mail-layout">
+            <aside class="mail-folders" aria-label="Mail folders">
+              <button class="folder is-selected" type="button" data-folder="inbox" aria-pressed="true"><span>Inbox</span><b id="unread-count">2</b></button>
+              <button class="folder" type="button" data-folder="starred" aria-pressed="false"><span>Starred</span><b id="starred-count">1</b></button>
+              <button class="folder" type="button" data-folder="archive" aria-pressed="false"><span>Archive</span><b id="archive-count">0</b></button>
+              <button class="folder" type="button" data-folder="sent" aria-pressed="false"><span>Sent</span><b id="sent-count">0</b></button>
+            </aside>
+            <div class="mail-content">
+              <div class="mail-list" id="mail-list" aria-label="Messages"></div>
+              <article class="message-reader" id="message-reader" hidden aria-live="polite"></article>
+              <div class="empty-state" id="mail-empty" hidden><span aria-hidden="true">◇</span><h2>This folder is clear</h2><p>Messages will appear here when they arrive.</p></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  </body>
+</html>
