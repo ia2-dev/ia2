@@ -42,12 +42,20 @@ describe("IA² homepage semantics", () => {
     )).toBe(true);
 
     const architecturalReferences = [
+      "https://www.w3.org/TR/activitystreams-vocabulary/",
+      "https://www.w3.org/TR/rdf12-concepts/",
+      "https://schema.org/docs/schemas.html",
+      "https://www.w3.org/TR/dx-prof/",
+      "https://www.w3.org/TR/r2rml/",
+      "https://www.w3.org/TR/shacl/",
+      "https://www.w3.org/TR/prov-o/",
       "https://ontology.inferal.com/modules/confidence/",
       "https://ontology.inferal.com/modules/scoped-statements/",
       "https://ontology.inferal.com/modules/decision/",
       "https://ontology.inferal.com/modules/conversation/",
       "https://ontology.inferal.com/modules/data-usage-processing-lineage/",
       "https://ontology.inferal.com/modules/artifact-evolution/",
+      "https://www.w3.org/TR/vocab-dcat-3/",
     ];
     for (const reference of architecturalReferences) {
       expect(has("https://ia2.dev/", `${DCTERMS}references`, "NamedNode", reference)).toBe(true);
