@@ -113,7 +113,7 @@ a:focus-visible {
 .project-name {
   font-size: clamp(2.25rem, 4.1vw, 4.9rem);
   font-weight: 780;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.015em;
   line-height: 0.98;
   margin: 0 0 clamp(2.75rem, 5vw, 4.75rem);
   max-width: 22ch;
