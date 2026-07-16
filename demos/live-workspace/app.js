@@ -1,9 +1,11 @@
 const NS = {
   schema: "https://schema.org/",
   current: "https://current.example/vocab/",
-  mail: "https://current.example/mail/",
+  rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
   xsd: "http://www.w3.org/2001/XMLSchema#",
 };
+
+const RUNTIME_GRAPH = "#runtime-state";
 
 const issues = [
   { id: 142, title: "Add keyboard navigation to command menu", status: "In progress", assignee: "Maya Chen", kind: "Accessibility" },
@@ -13,9 +15,9 @@ const issues = [
 ];
 
 const messages = [
-  { id: 31, from: "Jon Bell", to: "Maya Chen", subject: "Keyboard review notes", body: "I finished the keyboard pass. The command menu works well now. I left two notes on focus return and the empty search state.\n\nCould you take a look before Thursday?", time: "10:42", read: false, starred: true, archived: false, sent: false },
-  { id: 30, from: "Ari Soto", to: "Maya Chen", subject: "New density tokens", body: "The compact spacing tokens are ready. They preserve the current rhythm while making the issue table easier to scan on smaller screens.", time: "Yesterday", read: false, starred: false, archived: false, sent: false },
-  { id: 29, from: "RDF Working Group", to: "Maya Chen", subject: "Core 0.1 editor draft", body: "The latest editor draft is available for review. The examples now cover live DOM changes and source navigation.", time: "Mon", read: true, starred: false, archived: false, sent: false },
+  { id: 31, from: "Jon Bell", to: "Maya Chen", subject: "Keyboard review notes", body: "I finished the keyboard pass. The command menu works well now. I left two notes on focus return and the empty search state.\n\nCould you take a look before Thursday?", time: "10:42", received: "2026-07-14T17:42:00Z", read: false, starred: true, archived: false, sent: false },
+  { id: 30, from: "Ari Soto", to: "Maya Chen", subject: "New density tokens", body: "The compact spacing tokens are ready. They preserve the current rhythm while making the issue table easier to scan on smaller screens.", time: "Yesterday", received: "2026-07-13T19:20:00Z", read: false, starred: false, archived: false, sent: false },
+  { id: 29, from: "RDF Working Group", to: "Maya Chen", subject: "Core 0.1 editor draft", body: "The latest editor draft is available for review. The examples now cover live DOM changes and source navigation.", time: "Mon", received: "2026-07-12T16:05:00Z", read: true, starred: false, archived: false, sent: false },
 ];
 
 let issueSequence = 143;
@@ -43,19 +45,19 @@ function initials(name) {
 }
 
 function issueKey(id) {
-  return `issue-${id}`;
+  return `#issue-${id}`;
 }
 
 function mailSubject(id) {
-  return `${NS.mail}${id}`;
+  return `#message-${id}`;
 }
 
-function semanticAttrs(subject, predicate) {
-  return `rdf-subject="${subject}" rdf-predicate="${predicate}"`;
+function personSubject(name) {
+  return `#person-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
 }
 
-function semanticKeyAttrs(key, predicate) {
-  return `rdf-subject-key="${key}" rdf-predicate="${predicate}"`;
+function semanticAttrs(subject, predicate, graph = RUNTIME_GRAPH) {
+  return `rdf-subject="${subject}" rdf-predicate="${predicate}" rdf-graph="${graph}"`;
 }
 
 function showToast(message) {
@@ -71,16 +73,20 @@ function renderIssues() {
   const visible = issues.filter((issue) => (activeIssueFilter === "All" || issue.status === activeIssueFilter) && `${issue.title} ${issue.assignee} ${issue.kind} ${issue.id}`.toLowerCase().includes(query));
 
   issueList.innerHTML = visible.map((issue) => {
-    const key = issueKey(issue.id);
-    return `<article class="issue-row" role="row" data-issue-id="${issue.id}" rdf-subject="" rdf-predicate="${NS.current}hasIssue" rdf-object-key="${key}">
+    const subject = issueKey(issue.id);
+    const assignee = personSubject(issue.assignee);
+    return `<article class="issue-row" id="issue-${issue.id}" role="row" data-issue-id="${issue.id}">
+      <a hidden href="${NS.schema}Action" ${semanticAttrs(subject, `${NS.rdf}type`)}></a>
+      <a hidden href="${subject}" ${semanticAttrs("", `${NS.current}hasIssue`)}></a>
+      <a hidden href="${NS.schema}Person" ${semanticAttrs(assignee, `${NS.rdf}type`)}></a>
       <div class="issue-summary" role="cell">
-        <span class="issue-title" ${semanticKeyAttrs(key, `${NS.schema}name`)}>${escapeHtml(issue.title)}</span>
-        <span class="issue-meta"><span class="issue-id" ${semanticKeyAttrs(key, `${NS.schema}identifier`)}>CUR-${issue.id}</span><span class="issue-kind" ${semanticKeyAttrs(key, `${NS.schema}keywords`)}>${escapeHtml(issue.kind)}</span></span>
+        <span class="issue-title" ${semanticAttrs(subject, `${NS.schema}name`)}>${escapeHtml(issue.title)}</span>
+        <span class="issue-meta"><span class="issue-id" ${semanticAttrs(subject, `${NS.schema}identifier`)}>CUR-${issue.id}</span><span class="issue-kind" ${semanticAttrs(subject, `${NS.schema}keywords`)}>${escapeHtml(issue.kind)}</span></span>
       </div>
-      <data class="status-carrier" role="cell" value="${escapeHtml(issue.status)}" ${semanticKeyAttrs(key, `${NS.current}issueStatus`)}><select class="status-select" data-state="${slugStatus(issue.status)}" aria-label="Status for ${escapeHtml(issue.title)}">
+      <data class="status-carrier" role="cell" value="${escapeHtml(issue.status)}" ${semanticAttrs(subject, `${NS.current}issueStatus`)}><select class="status-select" data-state="${slugStatus(issue.status)}" aria-label="Status for ${escapeHtml(issue.title)}">
         ${["Todo", "In progress", "Done"].map((status) => `<option${status === issue.status ? " selected" : ""}>${status}</option>`).join("")}
       </select></data>
-      <span class="assignee" role="cell"><span class="assignee-avatar" aria-hidden="true">${initials(issue.assignee)}</span><span ${semanticKeyAttrs(key, `${NS.schema}assignee`)}>${escapeHtml(issue.assignee)}</span></span>
+      <span class="assignee" role="cell"><span class="assignee-avatar" aria-hidden="true">${initials(issue.assignee)}</span><a href="${assignee}" ${semanticAttrs(subject, `${NS.schema}agent`)}><span ${semanticAttrs(assignee, `${NS.schema}name`)}>${escapeHtml(issue.assignee)}</span></a></span>
       <div class="row-actions" role="cell"><button class="row-action edit" type="button" data-action="edit" aria-label="Edit ${escapeHtml(issue.title)}" title="Edit">✎</button><button class="row-action delete" type="button" data-action="delete" aria-label="Delete ${escapeHtml(issue.title)}" title="Delete">×</button></div>
     </article>`;
   }).join("");
@@ -148,13 +154,21 @@ function renderMail() {
   const listMessages = openMessageId === null ? visible : visible.filter((message) => message.id !== openMessageId);
   mailList.innerHTML = listMessages.map((message) => {
     const subject = mailSubject(message.id);
+    const senderSubject = personSubject(message.from);
+    const recipientSubject = personSubject(message.to);
+    const visiblePerson = message.sent ? recipientSubject : senderSubject;
     const sender = message.sent ? `To: ${message.to}` : message.from;
-    return `<article class="mail-row${message.read ? "" : " is-unread"}" data-mail-id="${message.id}">
+    return `<article class="mail-row${message.read ? "" : " is-unread"}" id="message-${message.id}" data-mail-id="${message.id}">
+      <a hidden href="${NS.schema}Message" ${semanticAttrs(subject, `${NS.rdf}type`)}></a>
+      <a hidden href="${senderSubject}" ${semanticAttrs(subject, `${NS.schema}sender`)}></a>
+      <a hidden href="${recipientSubject}" ${semanticAttrs(subject, `${NS.schema}recipient`)}></a>
+      <a hidden href="${NS.schema}Person" ${semanticAttrs(senderSubject, `${NS.rdf}type`)}></a>
+      <a hidden href="${NS.schema}Person" ${semanticAttrs(recipientSubject, `${NS.rdf}type`)}></a>
       <data class="mail-action-carrier" value="${message.starred}" rdf-datatype="${NS.xsd}boolean" ${semanticAttrs(subject, `${NS.current}isStarred`)}><button class="star-button${message.starred ? " is-starred" : ""}" type="button" data-action="star" aria-label="${message.starred ? "Unstar" : "Star"} ${escapeHtml(message.subject)}" aria-pressed="${message.starred}" title="${message.starred ? "Unstar" : "Star"}">${message.starred ? "★" : "☆"}</button></data>
-      <span class="mail-from" data-action="open" tabindex="0" role="button" ${semanticAttrs(subject, message.sent ? `${NS.schema}recipient` : `${NS.schema}sender`)}>${escapeHtml(sender)}</span>
+      <span class="mail-from" data-action="open" tabindex="0" role="button"><span ${semanticAttrs(visiblePerson, `${NS.schema}name`)}>${escapeHtml(sender)}</span></span>
       <span class="mail-preview" data-action="open" tabindex="0" role="button"><span class="mail-subject" ${semanticAttrs(subject, `${NS.schema}headline`)}>${escapeHtml(message.subject)}</span><span class="mail-snippet" ${semanticAttrs(subject, `${NS.schema}description`)}>${escapeHtml(message.body.replace(/\s+/g, " "))}</span></span>
       <data class="mail-state" value="${message.read}" rdf-datatype="${NS.xsd}boolean" ${semanticAttrs(subject, `${NS.current}isRead`)}>${message.read ? "Read" : "Unread"}</data>
-      <span class="mail-time" ${semanticAttrs(subject, `${NS.schema}dateReceived`)}>${escapeHtml(message.time)}</span>
+      <time class="mail-time" datetime="${message.received}" rdf-datatype="${NS.xsd}dateTime" ${semanticAttrs(subject, `${NS.schema}dateReceived`)}>${escapeHtml(message.time)}</time>
       <data class="mail-action-carrier" value="${message.archived ? "Archive" : "Inbox"}" ${semanticAttrs(subject, `${NS.current}mailbox`)}><button class="archive-button" type="button" data-action="archive" aria-label="${message.archived ? "Move to inbox" : "Archive"} ${escapeHtml(message.subject)}" title="${message.archived ? "Move to inbox" : "Archive"}">${message.archived ? "↩" : "⌑"}</button></data>
     </article>`;
   }).join("");
@@ -169,8 +183,15 @@ function renderReader() {
   const reader = $("#message-reader");
   if (!message) { openMessageId = null; reader.hidden = true; renderMail(); return; }
   const subject = mailSubject(message.id);
+  const senderSubject = personSubject(message.from);
+  const recipientSubject = personSubject(message.to);
   reader.hidden = false;
   reader.innerHTML = `
+    <a hidden href="${NS.schema}Message" ${semanticAttrs(subject, `${NS.rdf}type`)}></a>
+    <a hidden href="${senderSubject}" ${semanticAttrs(subject, `${NS.schema}sender`)}></a>
+    <a hidden href="${recipientSubject}" ${semanticAttrs(subject, `${NS.schema}recipient`)}></a>
+    <a hidden href="${NS.schema}Person" ${semanticAttrs(senderSubject, `${NS.rdf}type`)}></a>
+    <a hidden href="${NS.schema}Person" ${semanticAttrs(recipientSubject, `${NS.rdf}type`)}></a>
     <div class="reader-toolbar">
       <button class="reader-back" type="button">← Back to ${activeFolder}</button>
       <div>
@@ -181,8 +202,8 @@ function renderReader() {
     <h2 class="reader-subject" ${semanticAttrs(subject, `${NS.schema}headline`)}>${escapeHtml(message.subject)}</h2>
     <div class="reader-byline">
       <span class="assignee-avatar" aria-hidden="true">${initials(message.from)}</span>
-      <span>From <strong ${semanticAttrs(subject, `${NS.schema}sender`)}>${escapeHtml(message.from)}</strong> to <span ${semanticAttrs(subject, `${NS.schema}recipient`)}>${escapeHtml(message.to)}</span></span>
-      <span ${semanticAttrs(subject, `${NS.schema}dateReceived`)}>${escapeHtml(message.time)}</span>
+      <span>From <strong ${semanticAttrs(senderSubject, `${NS.schema}name`)}>${escapeHtml(message.from)}</strong> to <span ${semanticAttrs(recipientSubject, `${NS.schema}name`)}>${escapeHtml(message.to)}</span></span>
+      <time datetime="${message.received}" rdf-datatype="${NS.xsd}dateTime" ${semanticAttrs(subject, `${NS.schema}dateReceived`)}>${escapeHtml(message.time)}</time>
       <data value="${message.read}" rdf-datatype="${NS.xsd}boolean" ${semanticAttrs(subject, `${NS.current}isRead`)}>${message.read ? "Read" : "Unread"}</data>
     </div>
     <p class="reader-body" ${semanticAttrs(subject, `${NS.schema}text`)}>${escapeHtml(message.body)}</p>`;
@@ -275,7 +296,7 @@ $("#compose-form .form-cancel").addEventListener("click", closeCompose);
 $("#compose-form").addEventListener("submit", (event) => {
   event.preventDefault();
   const data = new FormData(event.currentTarget);
-  messages.unshift({ id: mailSequence++, from: "Maya Chen", to: String(data.get("to")).trim(), subject: String(data.get("subject")).trim(), body: String(data.get("body")).trim(), time: "Now", read: true, starred: false, archived: false, sent: true });
+  messages.unshift({ id: mailSequence++, from: "Maya Chen", to: String(data.get("to")).trim(), subject: String(data.get("subject")).trim(), body: String(data.get("body")).trim(), time: "Now", received: new Date().toISOString(), read: true, starred: false, archived: false, sent: true });
   closeCompose(); activeFolder = "sent"; openMessageId = null;
   $$("[data-folder]").forEach((item) => { const selected = item.dataset.folder === activeFolder; item.classList.toggle("is-selected", selected); item.setAttribute("aria-pressed", String(selected)); });
   renderMail(); showToast("Message sent. New RDF statements detected.");
@@ -304,6 +325,59 @@ $$('[data-folder]').forEach((button) => button.addEventListener("click", () => {
   $("#message-reader").hidden = true; renderMail();
 }));
 $("#mail-search").addEventListener("input", () => { openMessageId = null; renderMail(); });
+
+$("#briefing-view").addEventListener("click", (event) => {
+  const option = event.target.closest(".decision-option");
+  if (option) {
+    const optionId = option.dataset.optionId;
+    const optionTitle = $("strong", option).textContent.trim();
+    $$(".decision-option").forEach((item) => {
+      const selected = item === option;
+      item.classList.toggle("is-selected", selected);
+      item.setAttribute("aria-pressed", String(selected));
+    });
+    const selectedLink = $("#selected-option-link");
+    selectedLink.href = `#${optionId}`;
+    selectedLink.textContent = optionTitle;
+    showToast("Decision changed. The selectedOption statement updated.");
+    return;
+  }
+
+  const jump = event.target.closest("[data-jump-view]");
+  if (!jump) return;
+  event.preventDefault();
+
+  if (jump.dataset.jumpView === "issues") {
+    activeIssueFilter = "All";
+    $("#issue-search").value = "";
+    $$("[data-filter]").forEach((item) => {
+      const selected = item.dataset.filter === "All";
+      item.classList.toggle("is-selected", selected);
+      item.setAttribute("aria-pressed", String(selected));
+    });
+    renderIssues();
+    switchView("issues");
+    window.requestAnimationFrame(() => {
+      const resource = document.getElementById(jump.dataset.resourceId);
+      resource?.scrollIntoView({ block: "center" });
+      resource?.classList.add("is-emphasized");
+      window.setTimeout(() => resource?.classList.remove("is-emphasized"), 1800);
+    });
+  }
+
+  if (jump.dataset.jumpView === "mail") {
+    const message = messages.find((item) => item.id === Number(jump.dataset.messageId));
+    if (!message) return;
+    activeFolder = "inbox";
+    $$("[data-folder]").forEach((item) => {
+      const selected = item.dataset.folder === activeFolder;
+      item.classList.toggle("is-selected", selected);
+      item.setAttribute("aria-pressed", String(selected));
+    });
+    openMessage(message);
+    switchView("mail");
+  }
+});
 
 $$('.rail-link').forEach((button) => button.addEventListener("click", () => switchView(button.dataset.view)));
 $("#open-rdf-navigator").addEventListener("click", async () => {

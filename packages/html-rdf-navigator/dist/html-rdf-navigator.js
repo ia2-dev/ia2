@@ -678,7 +678,7 @@ var CSS = String.raw`
     background: var(--ink);
     border: 1px solid color-mix(in oklch, var(--ink), var(--paper) 18%);
     border-radius: 999px;
-    bottom: 20px;
+    bottom: var(--ia2-rdf-launcher-bottom, 20px);
     box-shadow: 0 8px 28px oklch(20% 0.03 286 / 22%);
     color: var(--paper);
     cursor: pointer;
@@ -863,7 +863,7 @@ var CSS = String.raw`
   .sr-only { height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; clip: rect(0,0,0,0); }
   @media (max-width: 760px) {
     .panel { border-left: 0; width: 100vw; }
-    .launcher { bottom: 14px; right: 14px; }
+    .launcher { bottom: var(--ia2-rdf-launcher-bottom, 14px); right: 14px; }
     .launcher[data-position^="left"] { left: 14px; right: auto; }
     .panel[data-position^="left"] { border-right: 0; }
     .panel[data-position="floating"] { border: 1px solid var(--line); border-radius: 12px; bottom: auto; height: calc(100vh - 20px); left: 10px; right: auto; top: 10px; width: calc(100vw - 20px); }
