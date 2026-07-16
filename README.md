@@ -1,7 +1,8 @@
 # IA² — Information Architecture for Intelligent Agents
 
 IA² (“IA-squared”) is an exploratory project about making digital information
-legible, navigable, and accountable to both people and intelligent agents.
+something people, applications, and intelligent agents can publish, inspect,
+and share with one another without losing its structure or accountability.
 
 The Web already contains the world's broadest information architecture, but
 its machine-facing layer is fragmented. Agents often have to infer meaning
@@ -9,11 +10,20 @@ from presentation, depend on application-specific APIs, or consume semantic
 payloads detached from the content a person actually sees. That makes
 information harder to verify, correlate, and move between tools.
 
-IA² explores a different path: documents and applications can publish explicit
-semantic information at the point where it is presented and used. An agent can
-download an inert document, inspect a live application state, follow linked
-definitions, evaluate constraints, and retain provenance without requiring the
-application to be absorbed into one AI platform.
+Markdown has become a useful common denominator for agents because it is
+compact, readable, and easy to produce. It is excellent for prose. As an
+information interchange, however, it usually flattens identity, relationships,
+provenance, constraints, quotation, and changing application state back into
+text. Every receiving agent must infer that structure again, and may infer it
+differently.
+
+IA² explores a richer path: documents and applications can publish explicit
+semantic information at the point where it is presented and used. One agent
+can share a claim, plan, decision, result, or live state; another can retain its
+exact entities, relationships, evidence, and constraints. An agent can download
+an inert document, inspect a live application state, follow linked definitions,
+evaluate constraints, and retain provenance without requiring the application
+to be absorbed into one AI platform.
 
 HTML is the first proving ground, not the boundary of the project. IA² asks
 what it would take for any information surface to explain what it contains,
@@ -25,6 +35,25 @@ useful outside the product that created it.
 The aim is not to turn documents into execution protocols. Meaning,
 validation, affordances, authority, and execution are separate layers.
 Publishing a description of an action does not grant permission to perform it.
+
+## Beyond Markdown interchange
+
+A Markdown message can say that an issue depends on a decision, quote a claim,
+name supporting evidence, or describe a constraint. Those relationships still
+live primarily in sentences. Their identifiers, assertion boundaries, graph
+context, provenance, confidence, and validation rules are conventions for the
+next reader to recover.
+
+An IA² surface can carry the readable explanation and the information graph
+together. Resources remain addressable. Claims can be distinguished from
+quotations. Evidence and provenance remain connected to what they qualify.
+SHACL constraints can travel with the data they govern. A live application can
+share its current state as structured information rather than a screenshot or
+a prose summary.
+
+This does not make Markdown obsolete. It gives agents a richer interchange
+when readable text alone is too lossy, while keeping the result inspectable by
+people and independent of any one model, application, or AI platform.
 
 ## North star
 
@@ -49,9 +78,10 @@ IA² explores a shared legibility layer for that world:
   proposal to approval, implementation, publication, and observed change
   without pretending those stages are the same event.
 
-The result would not be one universal agent API. It would be a web of
-addressable, composable information that many agents and applications can
-navigate without first translating everything into a platform-owned schema.
+The result would not be one universal agent API. It would be a web where one
+agent can publish richly structured information and another can receive it on
+its own terms: addressable, composable, attributable, and navigable without
+first translating everything into a platform-owned schema.
 
 ## Architectural horizon
 
