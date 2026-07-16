@@ -140,6 +140,12 @@ and inspected while the document is inert or changing at runtime.
   authored ReSpec source and an IA² document; there is no generated Markdown or
   template layer.
 
+### Guides
+
+- [`site/guide/index.html`](site/guide/index.html) — an example-driven guide
+  to authoring IA² HTML/RDF, from a first complete statement through named
+  graphs, RDF 1.2 triple terms, and live DOM extraction.
+
 ### Packages
 
 - [`@ia2/html-rdf-navigator`](packages/html-rdf-navigator/) — a dependency-free browser
@@ -200,6 +206,7 @@ npm run serve
 
 Then open:
 
+- <http://localhost:8000/site/guide/>
 - <http://localhost:8000/specs/html-rdf/>
 - <http://localhost:8000/demos/live-workspace/>
 
@@ -210,7 +217,7 @@ The npm scope must be controlled before publishing `@ia2/html-rdf-navigator`.
 The project is deployed as an assets-only Cloudflare Worker. `wrangler.jsonc`
 is the deployment source of truth, and `npm run build` assembles only the
 public specification, demo, and navigator bundle into the generated `.site/`
-directory.
+directory, including the authoring guide.
 
 Preview the Worker locally:
 
@@ -227,7 +234,8 @@ npm run deploy
 Cloudflare Builds runs `npm run build`, then `npx wrangler deploy`, for
 production deployments from the `main` branch. The Worker serves the IA²
 project homepage at `ia2.dev`; the HTML/RDF specification is published at its
-canonical path, `/spec/html-rdf`.
+canonical path, `/spec/html-rdf`, and the practical guide at
+`/guide/html-rdf`.
 
 ## Status
 

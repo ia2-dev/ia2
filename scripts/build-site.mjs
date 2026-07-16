@@ -8,6 +8,9 @@ const output = join(root, ".site");
 const assets = [
   ["site/index.html", "index.html"],
   ["site/home.css", "home.css"],
+  ["site/guide/index.html", "guide/html-rdf/index.html"],
+  ["site/guide.css", "guide.css"],
+  ["site/guide.js", "guide.js"],
   ["site/_redirects", "_redirects"],
   ["specs/html-rdf/index.html", "spec/html-rdf/index.html"],
   ["demos/live-workspace/index.html", "demos/live-workspace/index.html"],

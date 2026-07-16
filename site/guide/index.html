@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Using IA² HTML/RDF</title>
+    <meta
+      name="description"
+      content="A practical, example-driven guide to publishing RDF 1.2 directly in an HTML document with IA² attributes."
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/description"
+    >
+    <link rel="canonical" href="https://ia2.dev/guide/html-rdf">
+    <link rel="stylesheet" href="/home.css">
+    <link rel="stylesheet" href="/guide.css">
+    <script type="module" src="/guide.js"></script>
+    <script
+      type="module"
+      src="/packages/html-rdf-navigator/dist/html-rdf-navigator.js"
+    ></script>
+  </head>
+  <body class="guide-page">
+    <a class="skip-link" href="#guide-content">Skip to the guide</a>
+
+    <header class="site-header guide-site-header">
+      <a class="wordmark" href="/" aria-label="IA squared home">IA²</a>
+      <nav aria-label="Primary navigation">
+        <a href="/spec/html-rdf">HTML/RDF</a>
+        <a href="/guide/html-rdf" aria-current="page">Guide</a>
+        <a href="/#horizon">Horizon</a>
+        <a href="/#work">Current work</a>
+        <a href="https://github.com/ia2-dev/ia2">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="guide-mast" aria-labelledby="guide-title">
+        <div class="guide-mast-inner">
+          <div>
+            <p class="guide-kicker">Guide / current binding</p>
+            <h1
+              id="guide-title"
+              rdf-subject=""
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Use IA² in HTML</h1>
+            <p
+              class="guide-lede"
+              rdf-subject=""
+              rdf-predicate="https://schema.org/abstract"
+            >
+              Publish identities, relationships, provenance, and constraints
+              in the same HTML a person reads. No JSON-LD payload, remote
+              context, inherited parser state, or script execution is needed
+              to extract the graph.
+            </p>
+          </div>
+
+          <ol class="guide-promises" aria-label="The IA² authoring model">
+            <li><span>01</span><strong>One element</strong> carries one complete statement.</li>
+            <li><span>02</span><strong>Native HTML</strong> carries literal and IRI objects.</li>
+            <li><span>03</span><strong>Local extraction</strong> yields a complete RDF 1.2 dataset.</li>
+          </ol>
+        </div>
+
+        <div class="guide-contract">
+          <p>
+            <strong>This is the friendly tour.</strong> For exact processing,
+            conformance, recovery, and RDF 1.2 rules, use the
+            <a
+              href="/spec/html-rdf"
+              rdf-subject=""
+              rdf-predicate="http://purl.org/dc/terms/references"
+            >normative HTML/RDF model</a>.
+          </p>
+        </div>
+      </section>
+
+      <div class="guide-shell">
+        <aside class="guide-toc" aria-label="On this page">
+          <p>On this page</p>
+          <ol id="guide-toc-list">
+            <li><a href="#model">The model</a></li>
+            <li><a href="#quickstart">Quickstart</a></li>
+            <li><a href="#subjects">Subjects</a></li>
+            <li><a href="#objects">Objects</a></li>
+            <li><a href="#literals">Literal metadata</a></li>
+            <li><a href="#graphs">Graphs and triple terms</a></li>
+            <li><a href="#live-dom">Live DOM</a></li>
+            <li><a href="#checklist">Authoring checklist</a></li>
+            <li><a href="#next">Where next</a></li>
+          </ol>
+        </aside>
+
+        <article id="guide-content" class="guide-content">
+          <section id="model" class="guide-section" aria-labelledby="model-title">
+            <p class="guide-section-number">01 / The model</p>
+            <h2
+              id="model-title"
+              rdf-subject="#model"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Add statements, not a second document.</h2>
+            <p class="section-lede">
+              Any element with <code>rdf-predicate</code> is a statement
+              carrier. That element locally determines a subject, predicate,
+              object, and optional graph name. Nesting is useful HTML, but it
+              never supplies hidden RDF state.
+            </p>
+
+            <dl class="definition-rows">
+              <div>
+                <dt>Subject</dt>
+                <dd>The element itself by default, or an explicit IRI or local blank-node key.</dd>
+              </div>
+              <div>
+                <dt>Predicate</dt>
+                <dd>A full IRI reference in <code>rdf-predicate</code>.</dd>
+              </div>
+              <div>
+                <dt>Object</dt>
+                <dd>Visible text, a native HTML value, a native IRI, a local key, or a direct child template.</dd>
+              </div>
+              <div>
+                <dt>Graph</dt>
+                <dd>The default graph unless <code>rdf-graph</code> or <code>rdf-graph-key</code> is present.</dd>
+              </div>
+            </dl>
+
+            <div class="guide-note">
+              <p>
+                <strong>Use full IRI references.</strong> Core 0.1 has no prefix
+                declarations or compact-IRI expansion. Write
+                <code>https://schema.org/name</code>, not
+                <code>schema:name</code>, in an HTML attribute.
+              </p>
+            </div>
+          </section>
+
+          <section id="quickstart" class="guide-section" aria-labelledby="quickstart-title">
+            <p class="guide-section-number">02 / Quickstart</p>
+            <h2
+              id="quickstart-title"
+              rdf-subject="#quickstart"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Publish two facts in ordinary HTML.</h2>
+            <p class="section-lede">
+              Declare the binding on <code>html</code>, give the document a
+              stable canonical location, and annotate the elements already
+              carrying the information.
+            </p>
+
+            <span hidden rdf-subject="#quickstart-example" rdf-predicate="https://schema.org/encodingFormat">text/html</span>
+            <figure id="quickstart-example" class="code-sample">
+              <figcaption>
+                <span>HTML</span>
+                <button type="button" data-copy>Copy</button>
+              </figcaption>
+              <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en" rdf-version="1.2"&gt;
+  &lt;head&gt;
+    &lt;link rel="canonical" href="https://example.com/notes"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;article id="note-7"&gt;
+      &lt;h1
+        rdf-subject="#note-7"
+        rdf-predicate="https://schema.org/headline"
+      &gt;A field note&lt;/h1&gt;
+
+      &lt;time
+        datetime="2026-07-15"
+        rdf-subject="#note-7"
+        rdf-predicate="https://schema.org/dateCreated"
+        rdf-datatype="http://www.w3.org/2001/XMLSchema#date"
+      &gt;July 15, 2026&lt;/time&gt;
+    &lt;/article&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+              <div class="rdf-result">
+                <span>Yields</span>
+                <code>&lt;https://example.com/notes#note-7&gt;
+  &lt;https://schema.org/headline&gt; "A field note" ;
+  &lt;https://schema.org/dateCreated&gt;
+    "2026-07-15"^^&lt;http://www.w3.org/2001/XMLSchema#date&gt; .</code>
+              </div>
+            </figure>
+
+            <p>
+              The <code>article</code> is addressable because it has an
+              <code>id</code>. It does not assert anything by itself. Each child
+              statement explicitly names <code>#note-7</code>, so moving either
+              child elsewhere in the same document cannot silently change what
+              it describes.
+            </p>
+          </section>
+
+          <section id="subjects" class="guide-section" aria-labelledby="subjects-title">
+            <p class="guide-section-number">03 / Subjects</p>
+            <h2
+              id="subjects-title"
+              rdf-subject="#subjects"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Let the carrier describe itself, until it should not.</h2>
+            <p class="section-lede">
+              Subject construction follows one fixed order. An explicit
+              <code>rdf-subject</code> wins, then
+              <code>rdf-subject-key</code>, then the carrier’s own non-empty
+              <code>id</code>. With none of those, the carrier gets a fresh blank
+              node for that extraction.
+            </p>
+
+            <div class="example-pair">
+              <figure class="code-sample compact">
+                <figcaption><span>Self-subject</span><button type="button" data-copy>Copy</button></figcaption>
+                <pre><code>&lt;h1
+  id="alice"
+  rdf-predicate="https://schema.org/name"
+&gt;Alice&lt;/h1&gt;</code></pre>
+                <div class="rdf-result"><code>&lt;#alice&gt; &lt;https://schema.org/name&gt; "Alice" .</code></div>
+              </figure>
+
+              <figure class="code-sample compact">
+                <figcaption><span>Describe another element</span><button type="button" data-copy>Copy</button></figcaption>
+                <pre><code>&lt;article id="alice"&gt;
+  &lt;h1
+    rdf-subject="#alice"
+    rdf-predicate="https://schema.org/name"
+  &gt;Alice&lt;/h1&gt;
+&lt;/article&gt;</code></pre>
+                <div class="rdf-result"><code>&lt;#alice&gt; &lt;https://schema.org/name&gt; "Alice" .</code></div>
+              </figure>
+            </div>
+
+            <div class="guide-note">
+              <p>
+                <strong>There is no subject inheritance.</strong> A parent
+                <code>id</code> makes the parent referable; it does not become
+                the child’s RDF subject unless the child says so.
+              </p>
+            </div>
+          </section>
+
+          <section id="objects" class="guide-section" aria-labelledby="objects-title">
+            <p class="guide-section-number">04 / Objects</p>
+            <h2
+              id="objects-title"
+              rdf-subject="#objects"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Use the HTML value that already means the thing.</h2>
+            <p class="section-lede">
+              IA² does not add a general <code>rdf-object</code> mini-language.
+              The object comes from one native carrier on the statement
+              element.
+            </p>
+
+            <div class="guide-table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Object kind</th><th>Authoring form</th><th>Typical use</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Visible literal</td><td>Element text</td><td>Names, descriptions, labels</td></tr>
+                  <tr><td>Exact literal</td><td><code>meta[content]</code>, <code>data[value]</code>, <code>time[datetime]</code></td><td>Dates, codes, machine-exact values</td></tr>
+                  <tr><td>IRI</td><td>Native <code>href</code>, <code>src</code>, <code>cite</code>, or other allowed single-IRI carrier</td><td>Links to people, artifacts, sources</td></tr>
+                  <tr><td>Reusable blank node</td><td><code>rdf-object-key</code></td><td>Structured anonymous resources</td></tr>
+                  <tr><td>RDF 1.2 triple term</td><td>One direct child <code>template</code></td><td>Claims about an unasserted proposition</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>IRI objects stay native links</h3>
+            <figure class="code-sample compact">
+              <figcaption><span>HTML</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>&lt;a
+  href="https://orcid.org/0000-0002-1825-0097"
+  rdf-subject="#alice"
+  rdf-predicate="https://schema.org/sameAs"
+&gt;Alice’s ORCID&lt;/a&gt;</code></pre>
+              <div class="rdf-result"><code>&lt;#alice&gt; &lt;https://schema.org/sameAs&gt;
+  &lt;https://orcid.org/0000-0002-1825-0097&gt; .</code></div>
+            </figure>
+
+            <h3>Keys correlate anonymous structure</h3>
+            <figure class="code-sample compact">
+              <figcaption><span>HTML</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>&lt;span
+  rdf-subject="#ticket-42"
+  rdf-predicate="https://schema.org/location"
+  rdf-object-key="location"
+&gt;&lt;/span&gt;
+
+&lt;span
+  rdf-subject-key="location"
+  rdf-predicate="https://schema.org/name"
+&gt;Lab 3&lt;/span&gt;</code></pre>
+              <div class="rdf-result"><code>&lt;#ticket-42&gt; &lt;https://schema.org/location&gt; _:location .
+_:location &lt;https://schema.org/name&gt; "Lab 3" .</code></div>
+            </figure>
+            <p class="guide-fine-print">
+              The source key is only an extraction-local correlation handle.
+              A serializer chooses its own blank-node label.
+            </p>
+          </section>
+
+          <section id="literals" class="guide-section" aria-labelledby="literals-title">
+            <p class="guide-section-number">05 / Literal metadata</p>
+            <h2
+              id="literals-title"
+              rdf-subject="#literals"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Put datatype, language, and direction where they apply.</h2>
+            <p class="section-lede">
+              <code>rdf-datatype</code> gives a literal datatype. Native
+              <code>lang</code> and <code>dir</code> give language and base
+              direction, but only when directly present on the statement
+              carrier.
+            </p>
+
+            <figure class="code-sample compact">
+              <figcaption><span>HTML</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>&lt;time
+  datetime="2026-07-15"
+  rdf-subject="#release"
+  rdf-predicate="https://schema.org/datePublished"
+  rdf-datatype="http://www.w3.org/2001/XMLSchema#date"
+&gt;15 July 2026&lt;/time&gt;
+
+&lt;p
+  lang="fr"
+  rdf-subject="#release"
+  rdf-predicate="https://schema.org/name"
+&gt;Architecture de l’information&lt;/p&gt;</code></pre>
+              <div class="rdf-result"><code>&lt;#release&gt; &lt;https://schema.org/datePublished&gt;
+  "2026-07-15"^^&lt;http://www.w3.org/2001/XMLSchema#date&gt; ;
+  &lt;https://schema.org/name&gt; "Architecture de l’information"@fr .</code></div>
+            </figure>
+
+            <div class="guide-note">
+              <p>
+                <strong>Literal metadata never inherits for RDF.</strong> An
+                ancestor’s <code>lang</code> still affects HTML presentation and
+                accessibility, but it does not silently change an extracted
+                literal. Datatype and language are mutually exclusive.
+              </p>
+            </div>
+          </section>
+
+          <section id="graphs" class="guide-section" aria-labelledby="graphs-title">
+            <p class="guide-section-number">06 / Dataset depth</p>
+            <h2
+              id="graphs-title"
+              rdf-subject="#graphs"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Name graphs locally. Quote propositions without asserting them.</h2>
+
+            <h3>Named graphs</h3>
+            <p>
+              Put <code>rdf-graph</code> or <code>rdf-graph-key</code> directly
+              on every statement that belongs to that graph. A non-statement
+              element carrying the attribute declares an empty named graph.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>HTML</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>&lt;data
+  value="approved"
+  rdf-subject="#decision-9"
+  rdf-predicate="https://schema.org/status"
+  rdf-graph="#audit"
+&gt;&lt;/data&gt;
+
+&lt;span hidden rdf-graph="#empty-review-queue"&gt;&lt;/span&gt;</code></pre>
+            </figure>
+
+            <h3>RDF 1.2 triple terms</h3>
+            <p>
+              A direct child <code>template</code> can carry one unasserted
+              statement as the outer statement’s object. Template contents live
+              in a separate <code>DocumentFragment</code>, so the inner
+              proposition is not accidentally asserted by a document-wide DOM
+              query.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>HTML</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>&lt;div
+  rdf-subject="#review"
+  rdf-predicate="https://example.com/quotes"
+&gt;
+  &lt;template&gt;
+    &lt;a
+      href="https://example.com/bob"
+      rdf-subject="https://example.com/alice"
+      rdf-predicate="https://schema.org/knows"
+    &gt;Bob&lt;/a&gt;
+  &lt;/template&gt;
+&lt;/div&gt;</code></pre>
+              <div class="rdf-result"><code>&lt;#review&gt; &lt;https://example.com/quotes&gt;
+  &lt;&lt; &lt;https://example.com/alice&gt;
+     &lt;https://schema.org/knows&gt;
+     &lt;https://example.com/bob&gt; &gt;&gt; .</code></div>
+            </figure>
+          </section>
+
+          <section id="live-dom" class="guide-section" aria-labelledby="live-dom-title">
+            <p class="guide-section-number">07 / Runtime documents</p>
+            <h2
+              id="live-dom-title"
+              rdf-subject="#live-dom"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Extract the document you actually mean.</h2>
+            <p class="section-lede">
+              A downloaded HTML document is an inert observation. An
+              application-mutated DOM is a runtime observation. IA² permits
+              both. Each extraction is a snapshot of the supplied
+              <code>Document</code> or <code>DocumentFragment</code>; extraction
+              itself executes nothing.
+            </p>
+
+            <h3>Add the document navigator</h3>
+            <p>
+              The browser bundle mounts one navigator, extracts the current DOM,
+              and refreshes after semantic mutations. This guide includes it, so
+              its own RDF is available from the launcher on this page.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>HTML</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>&lt;script
+  type="module"
+  src="https://ia2.dev/packages/html-rdf-navigator/dist/html-rdf-navigator.js"
+&gt;&lt;/script&gt;</code></pre>
+            </figure>
+
+            <ul class="behavior-list">
+              <li><strong>Inert acquisition:</strong> parse downloaded HTML and extract without running its scripts.</li>
+              <li><strong>Live acquisition:</strong> extract the current light DOM after the host application changes it.</li>
+              <li><strong>Separate fragments:</strong> pass a template’s <code>content</code> explicitly when that inert fragment is the intended root.</li>
+            </ul>
+          </section>
+
+          <section id="checklist" class="guide-section" aria-labelledby="checklist-title">
+            <p class="guide-section-number">08 / Before publishing</p>
+            <h2
+              id="checklist-title"
+              rdf-subject="#checklist"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Check the statement at the carrier.</h2>
+
+            <ul class="authoring-checklist">
+              <li><span>Declare <code>rdf-version="1.2"</code> on the document element.</span></li>
+              <li><span>Publish exactly one valid, fragmentless canonical link when the public identity differs from the retrieval URL.</span></li>
+              <li><span>Use a full predicate IRI on every statement carrier.</span></li>
+              <li><span>Make every carrier determine exactly one object form.</span></li>
+              <li><span>Use explicit subjects for statements about another element or resource.</span></li>
+              <li><span>Put graph membership, datatype, language, and direction directly on the statement where they apply.</span></li>
+              <li><span>Inspect diagnostics, then verify the resulting Turtle and its DOM correlation.</span></li>
+            </ul>
+
+            <details class="mistakes">
+              <summary>Common mistakes</summary>
+              <div>
+                <p><strong>Expecting nesting to chain subjects.</strong> It never does.</p>
+                <p><strong>Using prefixed names in attributes.</strong> Core resolves IRI references; it does not expand prefixes.</p>
+                <p><strong>Combining object carriers.</strong> Do not put a native IRI, exact literal, local object key, and object template on the same statement.</p>
+                <p><strong>Treating local keys as persistent IDs.</strong> They correlate blank nodes only within one extraction.</p>
+                <p><strong>Assuming extraction validates or executes SHACL.</strong> Shapes and rules are extracted as RDF data; validation and execution are separate operations.</p>
+              </div>
+            </details>
+          </section>
+
+          <section id="next" class="guide-section" aria-labelledby="next-title">
+            <p class="guide-section-number">09 / Where next</p>
+            <h2
+              id="next-title"
+              rdf-subject="#next"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Move from the tour to the working artifacts.</h2>
+
+            <ul class="guide-next-list">
+              <li>
+                <a href="/spec/html-rdf">
+                  <span><strong>Read the HTML/RDF model</strong><small>Exact processing, conformance, RDF 1.2, SHACL, and recovery.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/demos/live-workspace"
+                  rdf-subject=""
+                  rdf-predicate="http://purl.org/dc/terms/hasPart"
+                >
+                  <span><strong>Change a live semantic DOM</strong><small>Watch an issue tracker and inbox update their extracted graph.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator">
+                  <span><strong>Use the navigator package</strong><small>Extract, correlate, navigate, and serialize from TypeScript.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/ia2-dev/ia2">
+                  <span><strong>Follow the project</strong><small>Source, decisions, open questions, and future host bindings.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+        </article>
+      </div>
+    </main>
+
+    <footer>
+      <a class="footer-mark" href="/">IA²</a>
+      <p>Information Architecture for Intelligent Agents</p>
+      <div>
+        <a href="/guide/html-rdf">Guide</a>
+        <a href="/spec/html-rdf">Specification</a>
+        <a href="/demos/live-workspace">Demo</a>
+        <a href="https://github.com/ia2-dev/ia2">Source</a>
+      </div>
+    </footer>
+
+    <p id="copy-status" class="sr-only" aria-live="polite"></p>
+    <a
+      hidden
+      href="https://schema.org/TechArticle"
+      rdf-subject=""
+      rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    >Guide</a>
+  </body>
+</html>

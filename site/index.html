@@ -30,6 +30,7 @@
       >IA²</a>
       <nav aria-label="Primary navigation">
         <a href="/spec/html-rdf">HTML/RDF</a>
+        <a href="/guide/html-rdf">Guide</a>
         <a href="#horizon">Horizon</a>
         <a href="#work">Current work</a>
         <a href="https://github.com/ia2-dev/ia2">GitHub</a>
@@ -81,7 +82,7 @@
             <pre aria-label="HTML carrying an explicit RDF statement"><code><span class="code-tag">&lt;article</span>
   <span class="code-attr">id</span>=<span class="code-value">"issue-42"</span>
   <span class="code-attr">rdf-subject</span>=<span class="code-value">"#issue-42"</span>
-  <span class="code-attr">rdf-predicate</span>=<span class="code-value">"schema:name"</span>
+  <span class="code-attr">rdf-predicate</span>=<span class="code-value">"https://schema.org/name"</span>
 <span class="code-tag">&gt;</span>
   Make meaning visible
 <span class="code-tag">&lt;/article&gt;</span></code></pre>
@@ -178,8 +179,23 @@
             </a>
           </li>
           <li>
-            <a href="/demos/live-workspace">
+            <a
+              href="/guide/html-rdf"
+              rdf-subject="https://ia2.dev/"
+              rdf-predicate="http://purl.org/dc/terms/hasPart"
+            >
               <span class="work-number">02</span>
+              <span class="work-copy">
+                <strong>Using IA² in HTML</strong>
+                <span>An example-driven authoring guide from first statement to live DOM.</span>
+              </span>
+              <span class="work-type">Guide</span>
+              <span class="work-arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a href="/demos/live-workspace">
+              <span class="work-number">03</span>
               <span class="work-copy">
                 <strong>Live semantic workspace</strong>
                 <span>An issue tracker and inbox whose RDF changes with the DOM.</span>
@@ -190,7 +206,7 @@
           </li>
           <li>
             <a href="https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator">
-              <span class="work-number">03</span>
+              <span class="work-number">04</span>
               <span class="work-copy">
                 <strong>HTML RDF Navigator</strong>
                 <span>Extraction, navigation, and serialization tied back to DOM carriers.</span>
@@ -227,6 +243,7 @@
       <a class="footer-mark" href="/">IA²</a>
       <p>Information Architecture for Intelligent Agents</p>
       <div>
+        <a href="/guide/html-rdf">Guide</a>
         <a href="/spec/html-rdf">Specification</a>
         <a href="/demos/live-workspace">Demo</a>
         <a href="https://github.com/ia2-dev/ia2">Source</a>
