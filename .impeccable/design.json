@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-16T03:53:09Z",
+  "title": "Design System: IA²",
+  "extensions": {
+    "colorMeta": {
+      "protocol-violet": {
+        "role": "primary",
+        "displayName": "Protocol Violet",
+        "canonical": "oklch(49% 0.18 294)",
+        "tonalRamp": ["oklch(15% 0.07 294)", "oklch(25% 0.11 294)", "oklch(35% 0.15 294)", "oklch(49% 0.18 294)", "oklch(62% 0.15 294)", "oklch(74% 0.11 294)", "oklch(86% 0.07 294)", "oklch(95% 0.025 294)"]
+      },
+      "deep-graph-violet": {
+        "role": "secondary",
+        "displayName": "Deep Graph Violet",
+        "canonical": "oklch(30% 0.12 294)",
+        "tonalRamp": ["oklch(15% 0.06 294)", "oklch(23% 0.09 294)", "oklch(30% 0.12 294)", "oklch(42% 0.12 294)", "oklch(55% 0.1 294)", "oklch(69% 0.075 294)", "oklch(83% 0.05 294)", "oklch(95% 0.02 294)"]
+      },
+      "semantic-ink": {
+        "role": "neutral",
+        "displayName": "Semantic Ink",
+        "canonical": "oklch(20% 0.075 294)",
+        "tonalRamp": ["oklch(15% 0.05 294)", "oklch(20% 0.075 294)", "oklch(32% 0.07 294)", "oklch(45% 0.06 294)", "oklch(58% 0.05 294)", "oklch(71% 0.04 294)", "oklch(84% 0.025 294)", "oklch(95% 0.012 294)"]
+      },
+      "context-violet": {
+        "role": "secondary",
+        "displayName": "Context Violet",
+        "canonical": "oklch(90% 0.065 294)",
+        "tonalRamp": ["oklch(15% 0.035 294)", "oklch(27% 0.05 294)", "oklch(40% 0.065 294)", "oklch(54% 0.065 294)", "oklch(68% 0.065 294)", "oklch(80% 0.065 294)", "oklch(90% 0.065 294)", "oklch(95% 0.03 294)"]
+      },
+      "luminous-paper": {
+        "role": "neutral",
+        "displayName": "Luminous Paper",
+        "canonical": "oklch(97% 0.012 294)",
+        "tonalRamp": ["oklch(15% 0.012 294)", "oklch(27% 0.012 294)", "oklch(40% 0.012 294)", "oklch(54% 0.012 294)", "oklch(68% 0.012 294)", "oklch(81% 0.012 294)", "oklch(90% 0.012 294)", "oklch(97% 0.012 294)"]
+      },
+      "extractable-signal": {
+        "role": "tertiary",
+        "displayName": "Extractable Signal",
+        "canonical": "oklch(81% 0.15 135)",
+        "tonalRamp": ["oklch(15% 0.05 135)", "oklch(27% 0.08 135)", "oklch(40% 0.11 135)", "oklch(54% 0.14 135)", "oklch(67% 0.15 135)", "oklch(81% 0.15 135)", "oklch(89% 0.1 135)", "oklch(95% 0.045 135)"]
+      },
+      "page-ink": {
+        "role": "neutral",
+        "displayName": "Page Ink",
+        "canonical": "oklch(23% 0.035 286)",
+        "tonalRamp": ["oklch(15% 0.025 286)", "oklch(23% 0.035 286)", "oklch(35% 0.035 286)", "oklch(48% 0.03 286)", "oklch(61% 0.026 286)", "oklch(74% 0.022 286)", "oklch(87% 0.016 286)", "oklch(95% 0.008 286)"]
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "oklch(47% 0.025 286)",
+        "tonalRamp": ["oklch(15% 0.02 286)", "oklch(27% 0.025 286)", "oklch(39% 0.025 286)", "oklch(47% 0.025 286)", "oklch(60% 0.022 286)", "oklch(73% 0.019 286)", "oklch(86% 0.014 286)", "oklch(95% 0.008 286)"]
+      },
+      "page-paper": {
+        "role": "neutral",
+        "displayName": "Page Paper",
+        "canonical": "oklch(98.5% 0.008 286)",
+        "tonalRamp": ["oklch(15% 0.008 286)", "oklch(28% 0.008 286)", "oklch(42% 0.008 286)", "oklch(56% 0.008 286)", "oklch(70% 0.008 286)", "oklch(83% 0.008 286)", "oklch(93% 0.008 286)", "oklch(98.5% 0.008 286)"]
+      },
+      "page-layer": {
+        "role": "neutral",
+        "displayName": "Page Layer",
+        "canonical": "oklch(94.5% 0.02 286)",
+        "tonalRamp": ["oklch(15% 0.015 286)", "oklch(28% 0.02 286)", "oklch(42% 0.02 286)", "oklch(56% 0.02 286)", "oklch(70% 0.02 286)", "oklch(82% 0.02 286)", "oklch(90% 0.02 286)", "oklch(94.5% 0.02 286)"]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Document Rule",
+        "canonical": "oklch(84% 0.025 286)",
+        "tonalRamp": ["oklch(15% 0.02 286)", "oklch(27% 0.025 286)", "oklch(40% 0.025 286)", "oklch(53% 0.025 286)", "oklch(66% 0.025 286)", "oklch(76% 0.025 286)", "oklch(84% 0.025 286)", "oklch(95% 0.01 286)"]
+      },
+      "interface-violet": {
+        "role": "primary",
+        "displayName": "Interface Violet",
+        "canonical": "oklch(55% 0.17 294)",
+        "tonalRamp": ["oklch(15% 0.06 294)", "oklch(27% 0.1 294)", "oklch(40% 0.14 294)", "oklch(55% 0.17 294)", "oklch(67% 0.15 294)", "oklch(78% 0.11 294)", "oklch(88% 0.07 294)", "oklch(95% 0.03 294)"]
+      },
+      "interface-violet-soft": {
+        "role": "primary",
+        "displayName": "Interface Violet Soft",
+        "canonical": "oklch(93% 0.035 294)",
+        "tonalRamp": ["oklch(15% 0.025 294)", "oklch(27% 0.035 294)", "oklch(40% 0.035 294)", "oklch(54% 0.035 294)", "oklch(68% 0.035 294)", "oklch(81% 0.035 294)", "oklch(90% 0.035 294)", "oklch(95% 0.02 294)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Thesis Display", "purpose": "One dominant public idea per fold." },
+      "headline": { "displayName": "Project Headline", "purpose": "The full IA² title and major page identity." },
+      "title": { "displayName": "Artifact Title", "purpose": "Linked work, screen headings, and named artifacts." },
+      "body": { "displayName": "Explanatory Body", "purpose": "Human-readable technical explanation." },
+      "label": { "displayName": "Structural Label", "purpose": "Indices, compact statuses, and control labels." },
+      "code": { "displayName": "Semantic Evidence", "purpose": "HTML, RDF terms, identifiers, and extracted source." }
+    },
+    "shadows": [
+      { "name": "launcher-lift", "value": "0 8px 28px oklch(20% 0.03 286 / 22%)", "purpose": "The compact RDF launcher above page content." },
+      { "name": "docked-drawer", "value": "-12px 0 48px oklch(20% 0.03 286 / 18%)", "purpose": "Separation between a document and a side-mounted navigator." },
+      { "name": "floating-navigator", "value": "0 18px 64px oklch(20% 0.03 286 / 24%)", "purpose": "Movable navigator and definition-preview windows." },
+      { "name": "workspace-overlay", "value": "0 18px 50px oklch(28% 0.03 60 / 9%), 0 2px 8px oklch(28% 0.03 60 / 5%)", "purpose": "Inline forms and toasts in the live workspace." }
+    ],
+    "motion": [
+      { "name": "state-response", "value": "180ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Hover, focus, and compact control transitions." },
+      { "name": "drawer-entry", "value": "240ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Navigator docking and drawer movement." },
+      { "name": "public-arrival", "value": "700ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "A single restrained hero entrance, disabled for reduced motion." }
+    ],
+    "breakpoints": [
+      { "name": "compact", "value": "640px" },
+      { "name": "navigator-compact", "value": "760px" },
+      { "name": "layout-stack", "value": "920px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Hero Action",
+      "kind": "button",
+      "refersTo": "action-primary",
+      "description": "The strongest public path into a concrete IA² artifact.",
+      "html": "<a class=\"ds-action-primary\" href=\"#\">Read HTML/RDF <span aria-hidden=\"true\">→</span></a>",
+      "css": ".ds-action-primary { align-items:center; background:var(--hero-ink, oklch(97% 0.012 294)); color:var(--violet-ink, oklch(20% 0.075 294)); display:inline-flex; font:750 .92rem/1.2 \"Avenir Next\", Avenir, sans-serif; gap:.75rem; justify-content:center; min-height:3.25rem; padding:.75rem 1.15rem; text-decoration:none; transition:background-color 180ms cubic-bezier(.22,1,.36,1), transform 180ms cubic-bezier(.22,1,.36,1); } .ds-action-primary:hover { background:var(--signal, oklch(81% 0.15 135)); transform:translateY(-2px); } .ds-action-primary:focus-visible { outline:3px solid var(--signal, oklch(81% 0.15 135)); outline-offset:5px; }"
+    },
+    {
+      "name": "Secondary Hero Action",
+      "kind": "button",
+      "refersTo": "action-secondary",
+      "description": "A quieter route that remains architectural and visibly interactive.",
+      "html": "<a class=\"ds-action-secondary\" href=\"#\">Open live workspace</a>",
+      "css": ".ds-action-secondary { align-items:center; background:transparent; border:1px solid oklch(90% 0.04 294 / 52%); color:oklch(97% 0.012 294); display:inline-flex; font:750 .92rem/1.2 \"Avenir Next\", Avenir, sans-serif; justify-content:center; min-height:3.25rem; padding:.75rem 1.15rem; text-decoration:none; transition:background-color 180ms cubic-bezier(.22,1,.36,1), transform 180ms cubic-bezier(.22,1,.36,1); } .ds-action-secondary:hover { background:oklch(30% 0.12 294); transform:translateY(-2px); } .ds-action-secondary:focus-visible { outline:3px solid oklch(81% 0.15 135); outline-offset:5px; }"
+    },
+    {
+      "name": "Semantic Specimen",
+      "kind": "custom",
+      "refersTo": "semantic-specimen",
+      "description": "Correlates a human-readable surface, HTML/RDF source, and extracted graph evidence.",
+      "html": "<figure class=\"ds-specimen\"><figcaption><span>A surface that explains itself</span><span class=\"ds-live\">● Extractable</span></figcaption><pre>&lt;article rdf-predicate=\"schema:name\"&gt;\n  Make meaning visible\n&lt;/article&gt;</pre><div class=\"ds-yields\"><strong>YIELDS</strong><code>&lt;#article&gt; schema:name \"Make meaning visible\" .</code></div></figure>",
+      "css": ".ds-specimen { background:oklch(30% 0.12 294); color:oklch(97% 0.012 294); margin:0; max-width:34rem; } .ds-specimen figcaption { align-items:center; border-bottom:1px solid oklch(75% 0.08 294 / 35%); display:flex; font:700 .72rem/1.2 \"Avenir Next\", Avenir, sans-serif; justify-content:space-between; letter-spacing:.03em; padding:.9rem 1rem; } .ds-live { color:oklch(81% 0.15 135); } .ds-specimen pre { font:400 .83rem/1.8 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin:0; overflow:auto; padding:1.5rem; white-space:pre-wrap; } .ds-yields { background:oklch(97% 0.012 294); color:oklch(20% 0.075 294); display:grid; gap:.6rem; padding:1.15rem 1.25rem 1.35rem; } .ds-yields strong { color:oklch(47% 0.025 286); font:750 .68rem/1.2 \"Avenir Next\", Avenir, sans-serif; letter-spacing:.08em; } .ds-yields code { font:400 .78rem/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap:anywhere; }"
+    },
+    {
+      "name": "Artifact Work Row",
+      "kind": "custom",
+      "refersTo": "work-row",
+      "description": "A rule-separated artifact link that replaces a generic feature card.",
+      "html": "<a class=\"ds-work-row\" href=\"#\"><span class=\"ds-work-number\">01</span><span><strong>HTML/RDF Core Model</strong><small>Attribute-based RDF tied to a readable document.</small></span><span class=\"ds-work-arrow\" aria-hidden=\"true\">↗</span></a>",
+      "css": ".ds-work-row { align-items:center; border-top:1px solid oklch(84% 0.025 286); color:oklch(23% 0.035 286); display:grid; gap:1.25rem; grid-template-columns:3rem minmax(0,1fr) 2rem; padding:clamp(1.4rem,3vw,2.2rem) 0; text-decoration:none; } .ds-work-row strong { display:block; font:700 clamp(1.25rem,2.5vw,2rem)/1.2 \"Avenir Next\", Avenir, sans-serif; letter-spacing:-.035em; transition:color 180ms cubic-bezier(.22,1,.36,1); } .ds-work-row small, .ds-work-number { color:oklch(47% 0.025 286); font:400 .78rem/1.5 \"Avenir Next\", Avenir, sans-serif; } .ds-work-arrow { color:oklch(49% 0.18 294); font-size:1.4rem; justify-self:end; } .ds-work-row:hover strong { color:oklch(49% 0.18 294); } .ds-work-row:focus-visible { outline:3px solid oklch(81% 0.15 135); outline-offset:5px; }"
+    },
+    {
+      "name": "Navigator Search",
+      "kind": "input",
+      "refersTo": "navigator-search",
+      "description": "A compact search and typeahead field for statements and ontology terms.",
+      "html": "<label class=\"ds-search\"><span class=\"ds-sr\">Filter statements</span><input type=\"search\" placeholder=\"Filter statements\"></label>",
+      "css": ".ds-search { display:block; width:min(28rem,100%); } .ds-search input { background:oklch(95.5% 0.012 286); border:1px solid oklch(86% 0.018 286); border-radius:8px; color:oklch(27% 0.018 286); font:400 14px/1.5 -apple-system, BlinkMacSystemFont, \"Segoe UI\", system-ui, sans-serif; height:36px; padding:6px 10px; width:100%; } .ds-search input:hover { border-color:color-mix(in oklch, oklch(55% 0.17 294), oklch(86% 0.018 286) 55%); } .ds-search input:focus { border-color:oklch(55% 0.17 294); outline:3px solid oklch(55% 0.17 294 / 22%); outline-offset:1px; } .ds-sr { clip:rect(0,0,0,0); height:1px; overflow:hidden; position:absolute; width:1px; }"
+    },
+    {
+      "name": "Namespace Filter",
+      "kind": "chip",
+      "refersTo": "namespace-chip",
+      "description": "A counted vocabulary filter with a separate definition link.",
+      "html": "<span class=\"ds-namespace\"><button type=\"button\" aria-pressed=\"true\">schema <span>12</span></button><a href=\"https://schema.org/\" aria-label=\"Open schema namespace\">↗</a></span>",
+      "css": ".ds-namespace { align-items:stretch; background:oklch(98.4% 0.007 286); border:1px solid oklch(86% 0.018 286); border-radius:999px; display:inline-flex; overflow:hidden; } .ds-namespace button { align-items:center; background:oklch(55% 0.17 294); border:0; color:oklch(98.4% 0.007 286); cursor:pointer; display:inline-flex; font:650 12px/1.2 -apple-system, BlinkMacSystemFont, \"Segoe UI\", system-ui, sans-serif; gap:6px; padding:5px 7px 5px 9px; } .ds-namespace button span { background:oklch(98.4% 0.007 286 / 18%); border-radius:999px; font-size:10px; font-weight:750; min-width:18px; padding:1px 5px; } .ds-namespace a { align-items:center; border-left:1px solid oklch(86% 0.018 286); color:oklch(52% 0.018 286); display:inline-flex; padding:5px 7px; text-decoration:none; } .ds-namespace a:hover { background:oklch(93% 0.035 294); color:oklch(55% 0.17 294); } .ds-namespace :focus-visible { outline:2px solid oklch(55% 0.17 294); outline-offset:-2px; }"
+    },
+    {
+      "name": "Navigator Tab",
+      "kind": "nav",
+      "refersTo": "navigator-tab",
+      "description": "A compact document view selector with a structural active underline.",
+      "html": "<nav class=\"ds-tabs\" aria-label=\"RDF views\"><button aria-selected=\"true\">Navigator</button><button aria-selected=\"false\">Turtle</button><button aria-selected=\"false\">JSON-LD</button></nav>",
+      "css": ".ds-tabs { align-items:end; border-bottom:1px solid oklch(86% 0.018 286); display:flex; gap:3px; } .ds-tabs button { background:transparent; border:0; border-bottom:2px solid transparent; color:oklch(52% 0.018 286); cursor:pointer; font:650 13px/1.2 -apple-system, BlinkMacSystemFont, \"Segoe UI\", system-ui, sans-serif; margin-bottom:-1px; padding:12px 10px 10px; } .ds-tabs button:hover { color:oklch(27% 0.018 286); } .ds-tabs button[aria-selected=\"true\"] { border-bottom-color:oklch(55% 0.17 294); color:oklch(27% 0.018 286); } .ds-tabs button:focus-visible { border-radius:5px 5px 2px 2px; outline:2px solid oklch(55% 0.17 294 / 75%); outline-offset:-4px; }"
+    },
+    {
+      "name": "RDF Launcher",
+      "kind": "button",
+      "refersTo": "rdf-launcher",
+      "description": "The persistent counted entry point into the document's extracted graph.",
+      "html": "<button class=\"ds-rdf-launcher\" type=\"button\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><circle cx=\"5\" cy=\"12\" r=\"2.6\"/><circle cx=\"18.5\" cy=\"5\" r=\"2.6\"/><circle cx=\"18.5\" cy=\"19\" r=\"2.6\"/><path d=\"M7.2 10.8 16 6.2M7.2 13.2 16 17.8\"/></svg><span>RDF</span><strong>42</strong></button>",
+      "css": ".ds-rdf-launcher { align-items:center; background:oklch(27% 0.018 286); border:1px solid color-mix(in oklch, oklch(27% 0.018 286), oklch(98.4% 0.007 286) 18%); border-radius:999px; box-shadow:0 8px 28px oklch(20% 0.03 286 / 22%); color:oklch(98.4% 0.007 286); cursor:pointer; display:flex; font:650 14px/1.2 -apple-system, BlinkMacSystemFont, \"Segoe UI\", system-ui, sans-serif; gap:9px; min-height:44px; padding:9px 13px 9px 11px; transition:background 180ms ease, transform 180ms cubic-bezier(.22,1,.36,1); } .ds-rdf-launcher svg { fill:currentColor; height:22px; width:22px; } .ds-rdf-launcher svg path { fill:none; stroke:currentColor; stroke-width:1.8; } .ds-rdf-launcher strong { background:oklch(55% 0.17 294); border-radius:999px; color:oklch(98.4% 0.007 286); font-size:11px; min-width:20px; padding:1px 6px; text-align:center; } .ds-rdf-launcher:hover { background:color-mix(in oklch, oklch(27% 0.018 286), oklch(55% 0.17 294) 22%); transform:translateY(-2px); } .ds-rdf-launcher:focus-visible { outline:3px solid oklch(55% 0.17 294 / 65%); outline-offset:3px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Legible Commons",
+    "overview": "IA² should feel like a shared technical surface whose structure can be inspected without specialist ceremony. The public site uses a committed violet field, overscale type, visible rules, and a real semantic specimen to make open standards feel consequential rather than institutional. Product surfaces turn the same idea into dense, calm controls where relationships remain easy to trace.\n\nThe system is rigorous, human-readable, and quietly optimistic. It rejects both machine mysticism and corporate abstraction. Layouts expose hierarchy through scale, alignment, and meaningful grouping, never through decorative complexity.",
+    "keyCharacteristics": [
+      "One committed violet voice on public surfaces, restrained violet emphasis in tools.",
+      "Strong sans-serif hierarchy with compact labels and generous reading measures.",
+      "Rules, rows, and semantic specimens instead of repetitive feature cards.",
+      "Flat document surfaces, with elevation reserved for movable or temporary layers.",
+      "Motion that confirms state and arrival, never motion that supplies meaning."
+    ],
+    "rules": [
+      { "name": "The Committed Field Rule", "body": "Protocol Violet may own an entire public section; do not dilute it with gradients or decorative companion colors.", "section": "colors" },
+      { "name": "The Signal Has Meaning Rule", "body": "Extractable Signal appears only for live, successful, focused, or otherwise actionable state. Never use it as confetti.", "section": "colors" },
+      { "name": "The Real Title Rule", "body": "“Information Architecture for Intelligent Agents” is a readable title, not a tracked-out eyebrow. Give it breathing room and never let display tracking make letters touch.", "section": "typography" },
+      { "name": "The Monospace Evidence Rule", "body": "Use monospace only when the content is itself code, syntax, an identifier, or machine-readable evidence.", "section": "typography" },
+      { "name": "The Structural Shadow Rule", "body": "If a surface does not move above, overlay, or detach from its document, it does not receive a shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "**Do** make structure visible through hierarchy, one-pixel rules, and source-to-meaning correlation.",
+      "**Do** let Protocol Violet own large public fields and use Interface Violet sparingly inside tools.",
+      "**Do** keep public body copy near 62ch and application reading copy below 70ch.",
+      "**Do** preserve WCAG 2.2 AA contrast, full keyboard navigation, strong focus states, and reduced-motion behavior.",
+      "**Do** keep description, validation, authority, and execution visibly distinct.",
+      "**Do** show real artifacts, code, graphs, and interactive tools instead of visual metaphors for intelligence."
+    ],
+    "donts": [
+      "**Don't** resemble an AI startup sales page.",
+      "**Don't** resemble a crypto or cyberpunk interface.",
+      "**Don't** use a generic developer-tool template.",
+      "**Don't** build an enterprise site filled with abstract claims.",
+      "**Don't** use chatbot imagery, glowing network graphics, feature-card grids, or agentic-web hype.",
+      "**Don't** drift into editorial-magazine affectation.",
+      "**Don't** use gradient text, decorative glassmorphism, or colored side-stripe borders.",
+      "**Don't** use monospace as a costume for technical credibility.",
+      "**Don't** animate meaning into existence; every state must remain understandable without motion."
+    ]
+  }
+}
