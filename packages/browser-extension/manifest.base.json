@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "IA² Navigator",
+  "version": "0.1.0",
+  "description": "Inspect the RDF dataset expressed by the current IA² HTML document.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "action": {
+    "default_title": "Open IA² Navigator",
+    "default_icon": {
+      "16": "icons/ia2-mark-16.png",
+      "32": "icons/ia2-mark-32.png"
+    }
+  },
+  "icons": {
+    "16": "icons/ia2-mark-16.png",
+    "32": "icons/ia2-mark-32.png",
+    "48": "icons/ia2-mark-48.png",
+    "128": "icons/ia2-mark-128.png",
+    "512": "icons/ia2-mark-512.png"
+  }
+}

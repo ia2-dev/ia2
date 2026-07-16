@@ -8,16 +8,26 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build:navigator && npm run build:site",
+    "build": "npm run build:navigator && npm run build:extension && npm run build:site",
+    "build:extension": "npm --prefix packages/browser-extension run build",
     "build:navigator": "npm --prefix packages/html-rdf-navigator run build",
     "build:site": "node scripts/build-site.mjs",
-    "check": "npm --prefix packages/html-rdf-navigator run check",
+    "check": "npm --prefix packages/html-rdf-navigator run check && npm --prefix packages/browser-extension run check",
     "dev": "npm run build && wrangler dev",
     "deploy": "npm run build && wrangler deploy",
-    "test": "npm --prefix packages/html-rdf-navigator test",
+    "test": "npm --prefix packages/html-rdf-navigator test && npm --prefix packages/browser-extension test",
+    "test:ae2e": "npm run test:ae2e:navigator && npm run test:ae2e:extension",
+    "test:ae2e:navigator": "npm run build:navigator && playwright test",
+    "test:ae2e:extension": "npm run test:ae2e:extension:chrome && npm run test:ae2e:extension:firefox && npm run test:ae2e:extension:safari",
+    "test:ae2e:extension:chrome": "npm --prefix packages/browser-extension run build:e2e && playwright test --config=playwright.extension.config.ts",
+    "test:ae2e:extension:firefox": "npm --prefix packages/browser-extension run build:e2e && node tests/ae2e/extension/firefox/run.mjs",
+    "test:ae2e:extension:safari": "npm --prefix packages/browser-extension run build:e2e && tests/ae2e/wkwebext/run.sh",
+    "test:e2e": "npm run test:ae2e",
     "serve": "python3 -m http.server 8000"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "web-ext": "^8.10.0",
     "wrangler": "^4.111.0"
   }
 }

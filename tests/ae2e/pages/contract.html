@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="canonical" href="http://127.0.0.1:4187/contract">
+  <link rel="stylesheet" href="/fixture.css">
+  <title>IA² Navigator AE2E contract</title>
+</head>
+<body>
+  <main>
+    <h1>Navigator contract fixture</h1>
+    <section id="Entity">
+      <a href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#Entity" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Class</a>
+      <span rdf-subject="#Entity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Entity</span>
+    </section>
+    <section id="Agent">
+      <a href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#Agent" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Class</a>
+      <a href="#Entity" rdf-subject="#Agent" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">Entity</a>
+      <span rdf-subject="#Agent" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Agent</span>
+    </section>
+    <section id="knows">
+      <a href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#knows" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Object property</a>
+      <span rdf-subject="#knows" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">knows</span>
+      <a href="#Agent" rdf-subject="#knows" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">Agent domain</a>
+      <a href="#Agent" rdf-subject="#knows" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">Agent range</a>
+    </section>
+    <section id="name">
+      <a href="http://www.w3.org/2002/07/owl#DatatypeProperty" rdf-subject="#name" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Datatype property</a>
+      <span rdf-subject="#name" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">name</span>
+      <a href="#Agent" rdf-subject="#name" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">Agent domain</a>
+      <a href="http://www.w3.org/2001/XMLSchema#string" rdf-subject="#name" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">String range</a>
+    </section>
+    <section id="Alice" rdf-subject="#Alice">
+      <span id="alice-name" rdf-predicate="#name">Alice</span>
+      <a id="alice-knows" href="#Bob" rdf-predicate="#knows">Bob</a>
+      <span id="bob-name" rdf-subject="#Bob" rdf-predicate="#name">Bob</span>
+    </section>
+    <p id="runtime" rdf-subject="#Alice" rdf-predicate="https://schema.org/status" rdf-graph="#runtime">ready</p>
+    <a id="discovery" href="http://127.0.0.1:4187/evidence" rdf-subject="#Alice" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#seeAlso">Evidence</a>
+    <a id="local-link" href="#Agent">Local Agent link</a>
+    <a id="invalid" href="#Bob" rdf-subject="#Alice" rdf-predicate="#knows" rdf-object-key="missing">Invalid keyed object</a>
+    <span id="late-carrier"></span>
+  </main>
+  <script type="module">
+    if (new URLSearchParams(location.search).has("embedded")) import("/navigator.js");
+  </script>
+  <script type="module" src="/contract-runner.mjs"></script>
+</body>
+</html>

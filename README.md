@@ -168,6 +168,9 @@ and inspected while the document is inert or changing at runtime.
 - [`@ia2-dev/html-rdf-navigator`](packages/html-rdf-navigator/) — a dependency-free browser
   component and TypeScript library for extracting, navigating, and serializing
   the RDF expressed by an IA² HTML document.
+- [`packages/browser-extension`](packages/browser-extension/): a least-permission
+  WebExtension adapter that opens the Navigator on demand in Chrome, Firefox,
+  and Safari.
 
 ### Demos
 

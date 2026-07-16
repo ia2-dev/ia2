@@ -3,3 +3,9 @@ node_modules/
 *.tgz
 .site/
 .wrangler/
+packages/browser-extension/artifacts/
+packages/browser-extension/dist/
+packages/browser-extension/dist-e2e/
+playwright-report/
+test-results/
+tests/ae2e/wkwebext/.build/
