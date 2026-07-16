@@ -63,7 +63,8 @@ future directions. Do not describe an experiment as an established standard.
   specification selector shared by public navigation and calls to action.
 - `site/guide/index.html`: HTML/RDF authoring guide.
 - `packages/html-rdf-navigator/`: dependency-free web component, extractor,
-  serializers, TypeScript sources, and tests for `@ia2/html-rdf-navigator`.
+  serializers, TypeScript sources, and tests for
+  `@ia2-dev/html-rdf-navigator`.
 - `demos/live-workspace/`: demo directory plus separately published issue,
   inbox, release-brief, and vendor-review application pages.
 - `scripts/build-site.mjs`: assembles public assets into `.site/`.

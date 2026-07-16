@@ -1,8 +1,17 @@
 {
-  "name": "@ia2/html-rdf-navigator",
+  "name": "@ia2-dev/html-rdf-navigator",
   "version": "0.1.0",
   "description": "A live RDF dataset navigator and inspector for IA² HTML/RDF documents.",
   "author": "Yurii Rashkovskii",
+  "homepage": "https://ia2.dev/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ia2-dev/ia2.git",
+    "directory": "packages/html-rdf-navigator"
+  },
+  "bugs": {
+    "url": "https://github.com/ia2-dev/ia2/issues"
+  },
   "type": "module",
   "sideEffects": true,
   "files": [

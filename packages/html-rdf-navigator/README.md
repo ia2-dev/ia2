@@ -1,6 +1,6 @@
 # IA² HTML/RDF Navigator
 
-`@ia2/html-rdf-navigator` is a zero-framework Web Component and TypeScript library
+`@ia2-dev/html-rdf-navigator` is a zero-framework Web Component and TypeScript library
 for inspecting the RDF dataset expressed by an IA² HTML document. It extracts
 the current DOM, leads with a source-oriented Navigator, provides Turtle/TriG
 and JSON-LD views, and correlates statements with their HTML carriers.
@@ -20,7 +20,7 @@ ready:
 After publication, the same artifact can be loaded from a package CDN:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@ia2/html-rdf-navigator/dist/html-rdf-navigator.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@ia2-dev/html-rdf-navigator/dist/html-rdf-navigator.js"></script>
 ```
 
 For programmatic control, disable automatic mounting before import:
@@ -71,7 +71,7 @@ import {
   mountRdfNavigator,
   serializeJsonLd,
   serializeTurtle,
-} from "@ia2/html-rdf-navigator";
+} from "@ia2-dev/html-rdf-navigator";
 ```
 
 `extractDataset(root?)` returns quads, declared graphs, diagnostics, and the
@@ -118,8 +118,8 @@ same-origin policy still isolates them from the host document. When a site
 permits cross-origin reading, a credential-free HTML fallback can render pages
 that reject framing inside a stricter opaque-origin sandbox and keeps in-preview
 navigation working. Every preview uses a no-referrer policy. `publishConfig`
-marks the scoped package as public; publication still requires control of the
-`@ia2` npm scope.
+marks the scoped package as public; releases are published from GitHub Actions
+through npm trusted publishing.
 
 ## Preview extractor limitations
 

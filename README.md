@@ -165,7 +165,7 @@ and inspected while the document is inert or changing at runtime.
 
 ### Packages
 
-- [`@ia2/html-rdf-navigator`](packages/html-rdf-navigator/) — a dependency-free browser
+- [`@ia2-dev/html-rdf-navigator`](packages/html-rdf-navigator/) — a dependency-free browser
   component and TypeScript library for extracting, navigating, and serializing
   the RDF expressed by an IA² HTML document.
 
@@ -228,7 +228,8 @@ Then open:
 - <http://localhost:8000/specs/discovery-enrichment/>
 - <http://localhost:8000/demos/live-workspace/>
 
-The npm scope must be controlled before publishing `@ia2/html-rdf-navigator`.
+Releases of `@ia2-dev/html-rdf-navigator` are published from GitHub Actions
+through npm trusted publishing.
 
 ## Deployment
 
