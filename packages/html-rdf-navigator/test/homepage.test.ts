@@ -13,6 +13,9 @@ describe("IA² homepage semantics", () => {
     Object.defineProperty(page, "URL", { configurable: true, value: "http://127.0.0.1:8791/" });
 
     const result = extractDataset(page);
+    expect(page.querySelector('a[href="#architecture"]')?.textContent).toBe("Architecture");
+    expect(page.querySelector("#architecture")).not.toBeNull();
+    expect(page.querySelector("#horizon")).toBeNull();
     const has = (
       subject: string,
       predicate: string,

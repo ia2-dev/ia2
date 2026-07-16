@@ -269,7 +269,7 @@ a:focus-visible {
 }
 
 .premise,
-.horizon,
+.architecture,
 .work,
 .north-star,
 footer {
@@ -326,7 +326,7 @@ footer {
   color: var(--muted);
 }
 
-.horizon {
+.architecture {
   background: var(--paper-deep);
   padding-bottom: clamp(5rem, 10vw, 9rem);
   padding-top: clamp(5rem, 10vw, 9rem);
