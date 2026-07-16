@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Atlas migration handoff</title>
+    <link
+      rel="canonical"
+      href="https://ia2.dev/spec/resource-envelope/examples/decision-handoff.html"
+    >
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline' blob: data:; img-src blob: data:; media-src blob: data:; font-src blob: data:; frame-src 'self' blob: about:"
+    >
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Avenir Next", Avenir, "Segoe UI Variable", "Segoe UI", sans-serif;
+        background: oklch(98.5% 0.008 286);
+        color: oklch(23% 0.035 286);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+      }
+
+      a { color: inherit; }
+
+      a:focus-visible {
+        outline: 3px solid oklch(81% 0.15 135);
+        outline-offset: 3px;
+      }
+
+      header {
+        background: oklch(49% 0.18 294);
+        color: oklch(97% 0.012 294);
+        display: grid;
+        gap: 1.25rem;
+        grid-template-columns: minmax(0, 1fr) minmax(13rem, 0.35fr);
+        padding: clamp(2rem, 7vw, 6rem) max(1.25rem, calc((100vw - 72rem) / 2));
+      }
+
+      header h1 {
+        font-size: clamp(2.5rem, 7vw, 5.5rem);
+        letter-spacing: -0.055em;
+        line-height: 0.94;
+        margin: 0;
+        max-width: 11ch;
+      }
+
+      header p {
+        align-self: end;
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        line-height: 1.55;
+        margin: 0;
+        max-width: 32ch;
+      }
+
+      nav,
+      main,
+      aside,
+      footer {
+        margin-inline: auto;
+        max-width: 72rem;
+        padding-inline: 1.25rem;
+      }
+
+      nav {
+        border-bottom: 1px solid oklch(84% 0.025 286);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.25rem;
+        padding-block: 1rem;
+      }
+
+      nav a {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-underline-offset: 0.28em;
+      }
+
+      main {
+        padding-block: clamp(3rem, 8vw, 7rem);
+      }
+
+      #manifest > h2 {
+        font-size: clamp(1.9rem, 4vw, 3.25rem);
+        letter-spacing: -0.04em;
+        margin: 0 0 2rem;
+      }
+
+      article {
+        border-top: 1px solid oklch(84% 0.025 286);
+        display: grid;
+        gap: 1rem 2rem;
+        grid-template-columns: minmax(11rem, 0.35fr) minmax(0, 1fr);
+        padding-block: clamp(1.75rem, 4vw, 3.25rem);
+      }
+
+      article h3 {
+        color: oklch(49% 0.18 294);
+        font-size: clamp(1.35rem, 3vw, 2rem);
+        letter-spacing: -0.035em;
+        margin: 0;
+      }
+
+      .resource-body {
+        min-width: 0;
+      }
+
+      dl {
+        display: grid;
+        grid-template-columns: max-content minmax(0, 1fr);
+        margin: 0 0 1.5rem;
+      }
+
+      dt,
+      dd {
+        border-bottom: 1px solid oklch(88% 0.02 286);
+        margin: 0;
+        padding: 0.6rem 0;
+      }
+
+      dt {
+        color: oklch(47% 0.025 286);
+        font-size: 0.75rem;
+        font-weight: 750;
+        padding-inline-end: 1.25rem;
+        text-transform: uppercase;
+      }
+
+      dd {
+        font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        font-size: 0.82rem;
+        overflow-wrap: anywhere;
+      }
+
+      pre {
+        background: oklch(30% 0.12 294);
+        color: oklch(97% 0.012 294);
+        font: 0.9rem/1.7 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        margin: 0;
+        overflow: auto;
+        padding: 1rem;
+        white-space: pre-wrap;
+      }
+
+      .relation {
+        margin: 0 0 1rem;
+      }
+
+      aside {
+        background: oklch(94.5% 0.02 286);
+        border-block: 1px solid oklch(84% 0.025 286);
+        display: grid;
+        gap: 0.75rem 2rem;
+        grid-template-columns: minmax(11rem, 0.35fr) minmax(0, 1fr);
+        padding-block: 1.5rem;
+      }
+
+      aside h2,
+      aside p { margin: 0; }
+
+      footer {
+        color: oklch(47% 0.025 286);
+        font-size: 0.82rem;
+        padding-block: 2rem 4rem;
+      }
+
+      @media (max-width: 700px) {
+        header,
+        article,
+        aside {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1
+        rdf-subject=""
+        rdf-predicate="http://purl.org/dc/terms/title"
+        rdf-graph="#manifest"
+      >Atlas migration handoff</h1>
+      <p>
+        A migration brief and the decision derived from it, carried together
+        in readable HTML. It needs no script, server, or network connection.
+      </p>
+    </header>
+
+    <nav aria-label="Bundled resources">
+      <a href="#brief">Migration brief</a>
+      <a href="#decision">Decision record</a>
+      <a href="#trust">Trust and execution</a>
+    </nav>
+
+    <main>
+      <section id="manifest" rdf-graph="#manifest">
+        <h2>Bundle manifest</h2>
+
+        <a
+          hidden
+          href="https://ia2.dev/spec/resource-envelope#Envelope"
+          rdf-subject=""
+          rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+          rdf-graph="#manifest"
+        ></a>
+        <a
+          hidden
+          href="https://ia2.dev/spec/resource-envelope#HARE-0.1"
+          rdf-subject=""
+          rdf-predicate="http://purl.org/dc/terms/conformsTo"
+          rdf-graph="#manifest"
+        ></a>
+        <a
+          hidden
+          href="#manifest"
+          rdf-subject=""
+          rdf-predicate="https://ia2.dev/spec/resource-envelope#manifestGraph"
+          rdf-graph="#manifest"
+        ></a>
+        <a
+          hidden
+          href="https://atlas-decision.hare.invalid/"
+          rdf-subject=""
+          rdf-predicate="https://ia2.dev/spec/resource-envelope#virtualBase"
+          rdf-graph="#manifest"
+        ></a>
+        <a
+          hidden
+          href="https://ia2.dev/spec/resource-envelope#DeclarativeProfile"
+          rdf-subject=""
+          rdf-predicate="http://purl.org/dc/terms/conformsTo"
+          rdf-graph="#manifest"
+        ></a>
+        <a
+          hidden
+          href="#brief"
+          rdf-subject=""
+          rdf-predicate="http://purl.org/dc/terms/hasPart"
+          rdf-graph="#manifest"
+        ></a>
+        <a
+          hidden
+          href="#decision"
+          rdf-subject=""
+          rdf-predicate="http://purl.org/dc/terms/hasPart"
+          rdf-graph="#manifest"
+        ></a>
+
+        <article id="brief">
+          <h3
+            rdf-subject="#brief"
+            rdf-predicate="http://purl.org/dc/terms/title"
+            rdf-graph="#manifest"
+          >Migration brief</h3>
+          <div class="resource-body">
+            <a
+              hidden
+              href="#brief-representation"
+              rdf-subject="#brief"
+              rdf-predicate="https://ia2.dev/spec/resource-envelope#representation"
+              rdf-graph="#manifest"
+            ></a>
+            <a
+              id="brief-representation"
+              hidden
+              href="https://ia2.dev/spec/resource-envelope#DOMRepresentation"
+              rdf-subject="#brief-representation"
+              rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+              rdf-graph="#manifest"
+            ></a>
+
+            <dl>
+              <dt>Path</dt>
+              <dd><data value="/brief.html" rdf-subject="#brief-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest">/brief.html</data></dd>
+              <dt>Media type</dt>
+              <dd><data value="text/html" rdf-subject="#brief-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest">text/html</data></dd>
+              <dt>Kind</dt>
+              <dd>Semantic DOM</dd>
+            </dl>
+
+            <a hidden href="#brief-content" rdf-subject="#brief-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+
+            <template id="brief-content">
+              <article>
+                <h1>Atlas account-index migration</h1>
+                <p>Move account search to the new index in a staged cutover on 21 July. Load tests show a 38% latency reduction; replay testing found no missing records.</p>
+                <h2>Recommendation</h2>
+                <p>Approve a 10% initial stage. Abort if the five-minute error rate exceeds 1%.</p>
+                <nav><a href="/decision.json">Inspect the decision data</a> · <a href="/">Return to the envelope</a></nav>
+              </article>
+            </template>
+          </div>
+        </article>
+
+        <article id="decision">
+          <h3
+            rdf-subject="#decision"
+            rdf-predicate="http://purl.org/dc/terms/title"
+            rdf-graph="#manifest"
+          >Decision record</h3>
+          <div class="resource-body">
+            <a
+              class="relation"
+              href="#brief"
+              rdf-subject="#decision"
+              rdf-predicate="http://www.w3.org/ns/prov#wasDerivedFrom"
+              rdf-graph="#manifest"
+            >Derived from the migration brief</a>
+            <a hidden href="#decision-representation" rdf-subject="#decision" rdf-predicate="https://ia2.dev/spec/resource-envelope#representation" rdf-graph="#manifest"></a>
+            <a id="decision-representation" hidden href="https://ia2.dev/spec/resource-envelope#ByteRepresentation" rdf-subject="#decision-representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+
+            <dl>
+              <dt>Path</dt>
+              <dd><data value="/decision.json" rdf-subject="#decision-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest">/decision.json</data></dd>
+              <dt>Media type</dt>
+              <dd><data value="application/json" rdf-subject="#decision-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest">application/json</data></dd>
+              <dt>Length</dt>
+              <dd><data value="203" rdf-subject="#decision-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#byteLength" rdf-datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" rdf-graph="#manifest">203 bytes</data></dd>
+              <dt>Integrity</dt>
+              <dd><data value="sha256-jE4LpTxnAOfic6rCW6V9Cv9hHzyjth2ejMQVa47Av+Q=" rdf-subject="#decision-representation" rdf-predicate="https://www.w3.org/2018/credentials#digestSRI" rdf-datatype="https://www.w3.org/2018/credentials#sriString" rdf-graph="#manifest">sha256-jE4LpTxnAOfic6rCW6V9Cv9hHzyjth2ejMQVa47Av+Q=</data></dd>
+            </dl>
+
+            <a hidden href="#decision-bytes" rdf-subject="#decision-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+
+            <pre aria-label="Decision JSON preview">{
+  "subject": "Atlas account-index migration",
+  "decision": "approve-with-conditions",
+  "owner": "Maya Chen",
+  "conditions": [
+    "stage at 10 percent",
+    "abort above 1 percent error rate"
+  ]
+}</pre>
+            <script id="decision-bytes" type="application/octet-stream" data-encoding="base64">ewogICJzdWJqZWN0IjogIkF0bGFzIGFjY291bnQtaW5kZXggbWlncmF0aW9uIiwKICAiZGVjaXNpb24iOiAiYXBwcm92ZS13aXRoLWNvbmRpdGlvbnMiLAogICJvd25lciI6ICJNYXlhIENoZW4iLAogICJjb25kaXRpb25zIjogWwogICAgInN0YWdlIGF0IDEwIHBlcmNlbnQiLAogICAgImFib3J0IGFib3ZlIDEgcGVyY2VudCBlcnJvciByYXRlIgogIF0KfQo=</script>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <aside id="trust">
+      <h2>Trust and execution</h2>
+      <p>
+        This declarative example contains no executable JavaScript. The visible
+        DOM representation is directly inspectable in its template. Consumers
+        verify the decision's optional byte representation against its length
+        and SHA-256 value.
+      </p>
+    </aside>
+
+    <footer>
+      IA² HTML Agent Resource Envelope 0.1 example. View source to inspect the
+      complete HTML/RDF manifest, semantic template, and inert byte carrier.
+    </footer>
+  </body>
+</html>

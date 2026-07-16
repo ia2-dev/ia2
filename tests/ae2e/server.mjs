@@ -8,6 +8,8 @@ const port = Number(process.env.IA2_AE2E_PORT ?? 4187);
 const results = [];
 const files = new Map([
   ["/contract", resolve(root, "tests/ae2e/pages/contract.html")],
+  ["/hare", resolve(root, "specs/resource-envelope/examples/decision-handoff.html")],
+  ["/hare-self-viewing", resolve(root, "specs/resource-envelope/examples/vendor-review.html")],
   ["/fixture.css", resolve(root, "tests/ae2e/pages/fixture.css")],
   ["/contract-runner.mjs", resolve(root, "tests/ae2e/shared/contract-runner.mjs")],
   ["/navigator-contract.mjs", resolve(root, "tests/ae2e/shared/navigator-contract.mjs")],
@@ -25,6 +27,13 @@ function evidenceHtml() {
     <span id="evidence-name" rdf-subject="" rdf-predicate="https://schema.org/name">Evidence set</span>
     <time rdf-subject="" rdf-predicate="https://schema.org/dateCreated" datetime="2026-07-16">2026-07-16</time>
   </body></html>`;
+}
+
+async function extensionOwnedHareHtml(filename) {
+  const source = await readFile(resolve(root, `specs/resource-envelope/examples/${filename}`), "utf8");
+  return source
+    .replace(/\s*<script type="module" src="[^"]+"><\/script>/, "")
+    .replace(/\s*<ia2-hare-viewer><\/ia2-hare-viewer>/, "");
 }
 
 const server = createServer(async (request, response) => {
@@ -45,6 +54,16 @@ const server = createServer(async (request, response) => {
   if (url.pathname === "/empty") {
     response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
     response.end("<!doctype html><html><head><title>Empty document</title></head><body><p>No HTML/RDF here.</p></body></html>");
+    return;
+  }
+  if (url.pathname === "/hare-bare") {
+    response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+    response.end(await extensionOwnedHareHtml("inspection-evidence.html"));
+    return;
+  }
+  if (url.pathname === "/hare-authored") {
+    response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+    response.end(await extensionOwnedHareHtml("release-handoff.html"));
     return;
   }
   if (url.pathname === "/results" && request.method === "POST") {

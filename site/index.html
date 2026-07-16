@@ -46,6 +46,7 @@
           <div class="spec-switcher__menu" role="menu" aria-label="Specifications">
             <a class="spec-switcher__option" role="menuitem" aria-current="true" href="/spec/html-rdf"><strong>HTML/RDF Core Model</strong><small>RDF 1.2 in an HTML document</small></a>
             <a class="spec-switcher__option" role="menuitem" href="/spec/discovery-enrichment"><strong>Discovery and Enrichment</strong><small>Purposeful links to additional knowledge</small></a>
+            <a class="spec-switcher__option" role="menuitem" href="/spec/resource-envelope"><strong>HTML Agent Resource Envelope</strong><small>HARE: Single-file HTML/RDF bundles for agents</small></a>
           </div>
         </div>
         <a href="/guide/html-rdf">Guide</a>
@@ -94,6 +95,7 @@
                 <div class="spec-switcher__menu" role="menu" aria-label="Specifications">
                   <a class="spec-switcher__option" role="menuitem" aria-current="true" href="/spec/html-rdf"><strong>HTML/RDF Core Model</strong><small>RDF 1.2 in an HTML document</small></a>
                   <a class="spec-switcher__option" role="menuitem" href="/spec/discovery-enrichment"><strong>Discovery and Enrichment</strong><small>Purposeful links to additional knowledge</small></a>
+                  <a class="spec-switcher__option" role="menuitem" href="/spec/resource-envelope"><strong>HTML Agent Resource Envelope</strong><small>HARE: Single-file HTML/RDF bundles for agents</small></a>
                 </div>
               </div>
               <a
@@ -403,11 +405,32 @@
           </li>
           <li>
             <a
-              href="/guide/html-rdf"
+              href="/spec/resource-envelope"
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
               <span class="work-number">03</span>
+              <span class="work-copy">
+                <strong
+                  rdf-subject="https://ia2.dev/spec/resource-envelope"
+                  rdf-predicate="http://purl.org/dc/terms/title"
+                >HTML Agent Resource Envelope</strong>
+                <span
+                  rdf-subject="https://ia2.dev/spec/resource-envelope"
+                  rdf-predicate="http://purl.org/dc/terms/description"
+                >A browser-openable HTML/RDF envelope for exact, related agent resources.</span>
+              </span>
+              <span class="work-type">Specification</span>
+              <span class="work-arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href="/guide/html-rdf"
+              rdf-subject="#project"
+              rdf-predicate="http://purl.org/dc/terms/hasPart"
+            >
+              <span class="work-number">04</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://ia2.dev/guide/html-rdf"
@@ -428,7 +451,7 @@
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
-              <span class="work-number">04</span>
+              <span class="work-number">05</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://ia2.dev/demos/live-workspace"
@@ -449,7 +472,7 @@
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
-              <span class="work-number">05</span>
+              <span class="work-number">06</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator"
@@ -459,6 +482,27 @@
                   rdf-subject="https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator"
                   rdf-predicate="http://purl.org/dc/terms/description"
                 >Extraction, navigation, and serialization tied back to DOM carriers.</span>
+              </span>
+              <span class="work-type">TypeScript package</span>
+              <span class="work-arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://github.com/ia2-dev/ia2/tree/main/packages/hare-viewer"
+              rdf-subject="#project"
+              rdf-predicate="http://purl.org/dc/terms/hasPart"
+            >
+              <span class="work-number">07</span>
+              <span class="work-copy">
+                <strong
+                  rdf-subject="https://github.com/ia2-dev/ia2/tree/main/packages/hare-viewer"
+                  rdf-predicate="http://purl.org/dc/terms/title"
+                >HARE Viewer</strong>
+                <span
+                  rdf-subject="https://github.com/ia2-dev/ia2/tree/main/packages/hare-viewer"
+                  rdf-predicate="http://purl.org/dc/terms/description"
+                >Optional verified file browsing for manifest-only and authored HARE documents.</span>
               </span>
               <span class="work-type">TypeScript package</span>
               <span class="work-arrow" aria-hidden="true">↗</span>
@@ -504,6 +548,7 @@
           <div class="spec-switcher__menu" role="menu" aria-label="Specifications">
             <a class="spec-switcher__option" role="menuitem" aria-current="true" href="/spec/html-rdf"><strong>HTML/RDF Core Model</strong><small>RDF 1.2 in an HTML document</small></a>
             <a class="spec-switcher__option" role="menuitem" href="/spec/discovery-enrichment"><strong>Discovery and Enrichment</strong><small>Purposeful links to additional knowledge</small></a>
+            <a class="spec-switcher__option" role="menuitem" href="/spec/resource-envelope"><strong>HTML Agent Resource Envelope</strong><small>HARE: Single-file HTML/RDF bundles for agents</small></a>
           </div>
         </div>
         <a href="/demos/live-workspace">Demo</a>

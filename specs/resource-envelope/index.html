@@ -1,0 +1,1381 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IA² HTML Agent Resource Envelope 0.1</title>
+    <link rel="icon" href="/assets/ia2-mark.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/assets/ia2-mark-512.png">
+    <link rel="canonical" href="https://ia2.dev/spec/resource-envelope">
+
+    <style class="remove">
+      html:not([data-respec-ready]) body { opacity: 0; }
+    </style>
+
+    <meta
+      name="description"
+      content="A single-file, browser-openable HTML/RDF envelope for exchanging graphs of inspectable resources between people, applications, and agents."
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/description"
+    >
+    <meta
+      content="IA² HTML Agent Resource Envelope 0.1"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/title"
+    >
+    <meta
+      content="HARE 0.1"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/alternative"
+    >
+    <meta
+      content="2026-07-16"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/created"
+      rdf-datatype="http://www.w3.org/2001/XMLSchema#date"
+    >
+    <meta
+      content="2026-07-16"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/modified"
+      rdf-datatype="http://www.w3.org/2001/XMLSchema#date"
+    >
+    <meta
+      content="0.1"
+      rdf-subject=""
+      rdf-predicate="http://www.w3.org/2002/07/owl#versionInfo"
+    >
+    <link
+      href="https://schema.org/TechArticle"
+      rdf-subject=""
+      rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    >
+    <link
+      href="http://www.w3.org/2002/07/owl#Ontology"
+      rdf-subject=""
+      rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    >
+    <link
+      href="#yurii-rashkovskii"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/creator"
+    >
+    <link
+      href="https://ia2.dev/spec/html-rdf"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/requires"
+    >
+    <link
+      href="https://ia2.dev/spec/discovery-enrichment"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/relation"
+    >
+
+    <script class="remove">
+      var respecConfig = {
+        specStatus: "unofficial",
+        shortName: "ia2-hare",
+        subtitle: "HARE: Single-file HTML/RDF bundles for agent interchange",
+        publishDate: "2026-07-16",
+        editors: [{ name: "Yurii Rashkovskii" }],
+        lint: {
+          "no-unused-dfns": false
+        },
+        localBiblio: {
+          "AIMEM": {
+            title: "Memory Interchange Bundle Format for AI Agents",
+            href: "https://www.ietf.org/archive/id/draft-vu-aimem-bundle-00.html",
+            status: "Internet-Draft"
+          },
+          "PORTABLEWEB": {
+            title: "PortableWeb Format: Container and Manifest Specification",
+            href: "https://www.ietf.org/archive/id/draft-selvaraj-portableweb-format-00.html",
+            status: "Internet-Draft"
+          },
+          "WACZ": {
+            title: "Web Archive Collection Zipped 1.1.1",
+            href: "https://specs.webrecorder.net/wacz/1.1.1/"
+          },
+          "ZUNDLER": {
+            title: "Zundler",
+            href: "https://github.com/AdrianVollmer/Zundler"
+          },
+          "DCMI-TERMS": {
+            title: "DCMI Metadata Terms",
+            href: "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/"
+          },
+          "VC-VOCABULARY": {
+            title: "Verifiable Credentials Vocabulary",
+            href: "https://www.w3.org/2018/credentials/"
+          },
+          "PREMIS-OWL": {
+            title: "Guidelines for Using the PREMIS Version 3 OWL Ontology",
+            href: "https://www.loc.gov/standards/premis/ontology/pdf/premis3-owl-guidelines-20180924.pdf"
+          }
+        }
+      };
+    </script>
+    <script
+      src="https://www.w3.org/Tools/respec/respec-w3c"
+      class="remove"
+      async
+    ></script>
+    <script class="remove">
+      (function () {
+        var started = Date.now();
+        function reveal() {
+          document.documentElement.setAttribute("data-respec-ready", "true");
+        }
+        function waitForReSpec() {
+          if (document.respec && document.respec.ready) {
+            document.respec.ready.then(reveal, reveal);
+            return;
+          }
+          if (Date.now() - started > 30000) {
+            reveal();
+            return;
+          }
+          setTimeout(waitForReSpec, 50);
+        }
+        waitForReSpec();
+      })();
+    </script>
+    <script
+      type="module"
+      src="../../packages/html-rdf-navigator/dist/html-rdf-navigator.js"
+    ></script>
+
+    <style data-purpose="responsive-tables">
+      @media (max-width: 720px) {
+        table.simple {
+          display: block;
+          max-width: 100%;
+          overflow-x: auto;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section id="sotd">
+      <p>
+        This is an exploratory editor's draft. It depends on the
+        <a href="https://ia2.dev/spec/html-rdf">IA² HTML/RDF Core Model</a>
+        for deterministic RDF 1.2 extraction. The format, vocabulary, example
+        carriers, and conformance roles remain proposals rather than an
+        established standard.
+      </p>
+    </section>
+
+    <section id="abstract">
+      <p>
+        The IA² HTML Agent Resource Envelope (HARE) is a single-file HTML
+        envelope for exchanging a graph of inspectable web resources between people,
+        applications, and agents. The envelope is an ordinary browser-openable
+        document. Its canonical manifest is a named RDF graph carried by
+        HTML/RDF statement elements. Semantic HTML can be carried directly as
+        inert DOM, while exact bytes remain available as an optional committed
+        representation. An optional runtime can enhance
+        the same file into an offline viewer without becoming the authority for
+        its contents.
+      </p>
+    </section>
+
+    <section id="introduction">
+      <h2>Introduction</h2>
+
+      <p>
+        Agent handoffs are rarely one document. A useful exchange can contain
+        source pages, Markdown, structured data, images, PDFs, validation
+        reports, citations, summaries, and derived decisions. Those parts need
+        stable identity, relationships, provenance, and an inspection surface
+        that does not depend on the producing system. Some handoffs also need
+        exact original files; others need only semantic content.
+      </p>
+
+      <p>
+        <strong>The HTML document is the envelope and the manifest carrier.</strong>
+        It is not a launch page around a detached JSON package. Human
+        presentation, RDF statements, and byte carriers remain directly
+        correlated in one inspectable DOM.
+      </p>
+
+      <p>
+        This specification standardizes the declarative container and its
+        processing model. It does not standardize how an agent reasons over the
+        resources, whether a relationship is trustworthy, or whether any
+        embedded program should execute.
+      </p>
+    </section>
+
+    <section id="goals">
+      <h2>Design goals</h2>
+      <ul>
+        <li>Open directly in a browser as <code>text/html</code>.</li>
+        <li>Travel as one self-contained file.</li>
+        <li>Expose its canonical manifest through HTML/RDF.</li>
+        <li>Remain useful without JavaScript or network access.</li>
+        <li>Carry semantic content directly and support exact byte commitments when needed.</li>
+        <li>Use graph identity first and logical paths second.</li>
+        <li>Support per-byte-representation hashing and partial validation.</li>
+        <li>Separate description, integrity, authority, and execution.</li>
+        <li>Remain straightforward to implement in Rust and TypeScript.</li>
+      </ul>
+    </section>
+
+    <section id="non-goals">
+      <h2>Non-goals</h2>
+      <ul>
+        <li>Replacing the live Web or HTTP.</li>
+        <li>Faithfully replaying arbitrary captured web applications.</li>
+        <li>Defining a browser origin, permission, or security model.</li>
+        <li>Optimizing first for minimum size or multi-gigabyte random access.</li>
+        <li>Requiring a server, service worker, or custom URL scheme.</li>
+        <li>Executing bundled resource content by default.</li>
+        <li>Giving filesystem hierarchy implicit semantic meaning.</li>
+      </ul>
+    </section>
+
+    <section id="conceptual-model">
+      <h2>Conceptual model</h2>
+
+      <dl>
+        <dt>Envelope</dt>
+        <dd>The HTML document and its source bytes.</dd>
+        <dt>Manifest</dt>
+        <dd>One named RDF graph extracted from the envelope.</dd>
+        <dt>Resource</dt>
+        <dd>An identified conceptual entity in the bundle.</dd>
+        <dt>Representation</dt>
+        <dd>A particular semantic or byte realization of a resource.</dd>
+        <dt>Carrier</dt>
+        <dd>The HTML element containing a representation.</dd>
+        <dt>Runtime</dt>
+        <dd>Optional code that presents the graph and its representations.</dd>
+      </dl>
+
+      <section id="hybrid-model">
+        <h3>Graph identity and logical paths</h3>
+        <p>
+          The primary abstraction is a graph. Resource IRIs carry identity;
+          RDF predicates carry relationships and provenance. Logical paths are
+          secondary aliases used for familiar web-relative lookup. Moving a
+          representation to another logical path does not create a new
+          resource unless the producer intentionally assigns a new identity.
+          The envelope's virtual base and these paths assign browser-like
+          navigation URLs without replacing RDF identity.
+        </p>
+        <p>
+          A directory boundary has no semantic meaning by itself. A producer
+          that needs collection, order, membership, or containment MUST express
+          that meaning as RDF.
+        </p>
+      </section>
+
+      <section id="resource-and-representation">
+        <h3>Resource and representation</h3>
+        <p>
+          A <em>resource</em> is the thing described. A
+          <em>representation</em> is a particular realization of it. A DOM
+          representation carries parsed semantic HTML. A byte representation
+          carries an exact sequence of octets. Media type, path, carrier, and
+          any byte commitment are properties of the representation, not the
+          abstract resource. A resource MAY have more than one representation.
+        </p>
+      </section>
+
+      <section id="canonical-retrieval-locations">
+        <h3>Canonical retrieval locations</h3>
+        <p>
+          The envelope's source document IRI is established according to the
+          HTML/RDF Core Model. When the envelope is published at a stable
+          retrievable location, its producer SHOULD include one usable HTML
+          <code>link</code> element whose <code>rel</code> token set contains
+          <code>canonical</code>. If such a link is present, there MUST be
+          exactly one and its <code>href</code> MUST resolve to a fragmentless
+          absolute IRI. When no stable canonical location is available, the
+          retrieval IRI remains the source document IRI.
+        </p>
+        <p>
+          If a bundled HTML representation is also published at a stable
+          retrievable location, its producer SHOULD include exactly one usable
+          canonical link in that representation's own <code>head</code>. This
+          allows the representation to retain the same semantic source IRI when
+          it is retrieved directly or extracted from the envelope.
+        </p>
+
+        <pre class="example html"><code>&lt;head&gt;
+  &lt;link rel="canonical" href="https://example.org/reports/atlas"&gt;
+&lt;/head&gt;</code></pre>
+
+        <p>
+          If a canonical link is included in a byte representation, a producer
+          MUST insert or update it before computing that representation's byte
+          length and integrity value because the link is part of the represented bytes. A consumer
+          MUST NOT treat a canonical link as evidence of availability,
+          integrity, authority, or permission, and MUST NOT dereference it
+          merely to process the envelope.
+        </p>
+        <p>
+          Non-HTML representations cannot carry an HTML canonical link. A
+          producer MAY describe their retrieval locations in the manifest
+          using an appropriate established or application vocabulary. HARE 0.1
+          does not define a general remote-location property.
+        </p>
+      </section>
+
+      <section id="relations">
+        <h3>Relations and derived artifacts</h3>
+        <p>
+          Ordinary relationships are ordinary RDF statements. The format does
+          not define a generic edge record. Producers SHOULD use established
+          vocabularies where their semantics fit. In particular,
+          <code>prov:wasDerivedFrom</code>, <code>prov:wasQuotedFrom</code>,
+          and <code>prov:wasGeneratedBy</code> can describe derivation without
+          introducing a packaging-specific model [[PROV-O]].
+        </p>
+        <p>
+          A derived artifact is a resource with one or more explicit
+          provenance relationships. It is not a separate container primitive.
+        </p>
+      </section>
+    </section>
+
+    <section id="document-conformance">
+      <h2>Envelope document conformance</h2>
+
+      <p>A conforming HARE document:</p>
+      <ol>
+        <li>MUST be an HTML document encoded as UTF-8.</li>
+        <li>MUST use the HTML doctype.</li>
+        <li>MUST set <code>rdf-version="1.2"</code> on <code>html</code>.</li>
+        <li>MUST contain exactly one node of type <a href="#Envelope"><code>Envelope</code></a>.</li>
+        <li>MUST state that the node <a href="#specification-profile">conforms to HARE 0.1</a>.</li>
+        <li>MUST state exactly one <a href="#artifact-profiles">artifact profile</a>.</li>
+        <li>MUST identify exactly one <a href="#manifestGraph"><code>manifestGraph</code></a>.</li>
+        <li>MUST identify exactly one <a href="#virtualBase"><code>virtualBase</code></a>.</li>
+        <li>MUST contain at least one resource and representation.</li>
+        <li>SHOULD declare a usable HTML canonical link when a stable retrievable location is available; if present, the link MUST satisfy <a href="#canonical-retrieval-locations">canonical retrieval location requirements</a>.</li>
+        <li>MUST remain meaningfully inspectable when scripting is unavailable.</li>
+      </ol>
+
+      <p>
+        A producer SHOULD use the compound file extension
+        <code>.hare.html</code>, short for HTML Agent Resource Envelope.
+        A server MUST serve the artifact as
+        <code>text/html; charset=utf-8</code>. This specification does not
+        define a new media type because direct HTML handling is a design goal.
+      </p>
+    </section>
+
+    <section id="manifest">
+      <h2>Canonical manifest</h2>
+
+      <p>
+        The canonical manifest is the named RDF graph identified by the
+        envelope's <a href="#manifestGraph"><code>manifestGraph</code></a>
+        statement. It is not a JSON or JSON-LD data block.
+      </p>
+
+      <p>
+        The manifest SHOULD be visibly grouped in a
+        <code>section</code> whose <code>id</code> is
+        <code>manifest</code>. The section SHOULD declare the named graph:
+      </p>
+
+      <pre class="example html"><code>&lt;section id="manifest" rdf-graph="#manifest"&gt;</code></pre>
+
+      <p>
+        HTML/RDF does not inherit graph state. Every manifest statement carrier
+        MUST therefore state <code>rdf-graph="#manifest"</code> explicitly.
+        This repetition keeps each statement locally complete.
+      </p>
+
+      <aside class="note">
+        <p>
+          A JSON, JSON-LD, Turtle, or search index MAY appear as an ordinary
+          bundled resource. Such a representation is a derived artifact and
+          MUST NOT outrank the HTML/RDF manifest.
+        </p>
+      </aside>
+
+      <section id="manifest-discovery">
+        <h3>Manifest discovery algorithm</h3>
+        <p>A consumer MUST perform these steps without executing code:</p>
+        <ol>
+          <li>Parse the source as an HTML document.</li>
+          <li>Extract its RDF dataset according to the declared HTML/RDF version.</li>
+          <li>Find subjects whose <code>rdf:type</code> is <a href="#Envelope"><code>Envelope</code></a>.</li>
+          <li>Fail if there is not exactly one such subject.</li>
+          <li>Require a <code>dcterms:conformsTo</code> statement naming the supported <a href="#specification-profile">HARE specification profile</a>.</li>
+          <li>Require exactly one supported <a href="#artifact-profiles">artifact profile</a>.</li>
+          <li>Read its <a href="#manifestGraph"><code>manifestGraph</code></a> object and select that named graph.</li>
+          <li>Fail if the named graph is absent from the extracted dataset.</li>
+          <li>Read and validate its <a href="#virtualBase"><code>virtualBase</code></a>.</li>
+        </ol>
+      </section>
+    </section>
+
+    <section id="vocabulary">
+      <h2>HARE vocabulary</h2>
+
+      <p>
+        The vocabulary namespace is
+        <code>https://ia2.dev/spec/resource-envelope#</code>. Terms not defined
+        here remain application vocabulary. Consumers MUST preserve unknown
+        statements and MUST NOT dereference the namespace to process a bundle.
+      </p>
+
+      <section id="classes">
+        <h3>Classes</h3>
+
+        <dl>
+          <dt><dfn id="Envelope" data-lt="Envelope class"><code>Envelope</code></dfn></dt>
+          <dd>The HTML artifact as a self-contained resource bundle.</dd>
+
+          <dt><dfn id="Representation" data-lt="Representation class"><code>Representation</code></dfn></dt>
+          <dd>A semantic or byte realization of a resource.</dd>
+
+          <dt><dfn id="DOMRepresentation" data-lt="DOMRepresentation class"><code>DOMRepresentation</code></dfn></dt>
+          <dd>A semantic HTML fragment carried by a <code>template</code>.</dd>
+
+          <dt><dfn id="ByteRepresentation" data-lt="ByteRepresentation class"><code>ByteRepresentation</code></dfn></dt>
+          <dd>An exact sequence of octets carried as base64.</dd>
+
+          <dt><dfn id="ViewerRuntime" data-lt="ViewerRuntime class"><code>ViewerRuntime</code></dfn></dt>
+          <dd>Executable enhancement code declared by a self-viewing envelope.</dd>
+        </dl>
+
+        <a hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#Envelope" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+        <a hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#Representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+        <a hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#DOMRepresentation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+        <a hidden href="#Representation" rdf-subject="#DOMRepresentation" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">RDF</a>
+        <a hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#ByteRepresentation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+        <a hidden href="#Representation" rdf-subject="#ByteRepresentation" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">RDF</a>
+        <a hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#ViewerRuntime" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+      </section>
+
+      <section id="properties">
+        <h3>Properties</h3>
+        <table class="simple">
+          <thead><tr><th>Term</th><th>Range</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><dfn id="manifestGraph"><code>manifestGraph</code></dfn></td><td>IRI</td><td>Canonical manifest graph name.</td></tr>
+            <tr><td><dfn id="virtualBase"><code>virtualBase</code></dfn></td><td>IRI</td><td>Non-retrievable root URL of the envelope's virtual document space.</td></tr>
+            <tr><td><span id="representation"><code>representation</code></span></td><td><a href="#Representation">Representation</a></td><td>Representation of a resource.</td></tr>
+            <tr><td><dfn id="carrier"><code>carrier</code></dfn></td><td>IRI</td><td>HTML element containing the representation.</td></tr>
+            <tr><td><dfn id="byteLength"><code>byteLength</code></dfn></td><td>non-negative integer</td><td>Decoded length of a byte representation.</td></tr>
+            <tr><td><dfn id="runtime"><code>runtime</code></dfn></td><td><a href="#ViewerRuntime">ViewerRuntime</a></td><td>Declared viewer runtime.</td></tr>
+          </tbody>
+        </table>
+
+        <a hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#manifestGraph" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+        <a hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#virtualBase" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+        <a hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+        <a hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#carrier" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+        <a hidden href="http://www.w3.org/2002/07/owl#DatatypeProperty" rdf-subject="#byteLength" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+        <a hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#runtime" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+      </section>
+
+      <section id="reused-vocabulary">
+        <h3>Reused vocabulary</h3>
+        <p>
+          HARE defines packaging mechanics only. Membership, conformance,
+          identifiers, media types, and SRI digests use established terms
+          [[DCMI-TERMS]] [[VC-VOCABULARY]]. The following meanings are
+          normative within a HARE manifest:
+        </p>
+        <table class="simple">
+          <thead><tr><th>Term</th><th>HARE use</th></tr></thead>
+          <tbody>
+            <tr><td><code>dcterms:conformsTo</code></td><td>Names the HARE version and artifact profile.</td></tr>
+            <tr><td><code>dcterms:hasPart</code></td><td>Relates the envelope to each included conceptual resource.</td></tr>
+            <tr><td><code>dcterms:identifier</code></td><td>Optionally gives a representation a logical path, unique within the envelope.</td></tr>
+            <tr><td><code>dc:format</code></td><td>Gives a representation its IANA media type string.</td></tr>
+            <tr><td><code>cred:digestSRI</code></td><td>Gives a byte representation its SHA-256 SRI digest.</td></tr>
+          </tbody>
+        </table>
+        <p>
+          HARE deliberately retains <a href="#byteLength"><code>byteLength</code></a>.
+          PREMIS <code>hasSize</code> is a useful archival mapping, but importing
+          its File or Bitstream domain would impose a preservation-specific
+          object model [[PREMIS-OWL]]. On a byte representation, HARE requires
+          the exact number of decoded octets.
+        </p>
+      </section>
+
+      <section id="specification-profile">
+        <h3>Specification and artifact profiles</h3>
+        <p>
+          <dfn id="HARE-0.1"><code>HARE-0.1</code></dfn> identifies this
+          version of the format. <dfn id="DeclarativeProfile"><code>DeclarativeProfile</code></dfn>
+          and <dfn id="SelfViewingProfile"><code>SelfViewingProfile</code></dfn>
+          identify the two artifact profiles. They are RDF resources rather
+          than version or policy string literals.
+        </p>
+        <a hidden href="http://purl.org/dc/terms/Standard" rdf-subject="#HARE-0.1" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+        <a hidden href="http://purl.org/dc/terms/Standard" rdf-subject="#DeclarativeProfile" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+        <a hidden href="http://purl.org/dc/terms/Standard" rdf-subject="#SelfViewingProfile" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+      </section>
+    </section>
+
+    <section id="validation-shapes">
+      <h2>Validation shapes</h2>
+
+      <p>
+        The minimum structural schema is a SHACL graph carried by this
+        specification as HTML/RDF. It is not a second serialization of the
+        manifest. Validators MUST apply these shapes to the canonical manifest
+        graph and MUST additionally perform the byte and uniqueness checks
+        defined by the processing rules.
+      </p>
+
+      <table class="simple">
+        <thead><tr><th>Target</th><th>Required properties</th><th>Additional constraint</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><a href="#Envelope"><code>Envelope</code></a></td>
+            <td><code>dcterms:conformsTo</code>, <code>manifestGraph</code>, <code>virtualBase</code>, one or more <code>dcterms:hasPart</code></td>
+            <td>Conforms to HARE 0.1 and exactly one artifact profile</td>
+          </tr>
+          <tr>
+            <td><a href="#Representation"><code>Representation</code></a></td>
+            <td><code>dc:format</code>, <code>carrier</code>; optional <code>dcterms:identifier</code></td>
+            <td>Exactly one representation kind</td>
+          </tr>
+          <tr>
+            <td><a href="#DOMRepresentation"><code>DOMRepresentation</code></a></td>
+            <td>Representation properties and <code>dcterms:identifier</code></td>
+            <td>The carrier is a <code>template</code>; the logical path assigns its virtual URL</td>
+          </tr>
+          <tr>
+            <td><a href="#ByteRepresentation"><code>ByteRepresentation</code></a></td>
+            <td>Representation properties, <code>byteLength</code>, <code>cred:digestSRI</code></td>
+            <td>The carrier is a base64 data block</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <aside class="note">
+        <p>
+          SHACL expresses local cardinality and datatype constraints. Unique
+          logical paths, carrier element lookup, representation-kind checks,
+          base64 decoding, byte length, and digest verification remain
+          procedural validation steps.
+        </p>
+      </aside>
+
+      <div hidden aria-hidden="true">
+        <a id="EnvelopeShape" href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#EnvelopeShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="#Envelope" rdf-subject="#EnvelopeShape" rdf-predicate="http://www.w3.org/ns/shacl#targetClass" rdf-graph="#shapes">RDF</a>
+        <a href="#EnvelopeConformanceShape" rdf-subject="#EnvelopeShape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-graph="#shapes">RDF</a>
+        <a href="#EnvelopeManifestGraphShape" rdf-subject="#EnvelopeShape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-graph="#shapes">RDF</a>
+        <a href="#EnvelopeVirtualBaseShape" rdf-subject="#EnvelopeShape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-graph="#shapes">RDF</a>
+        <a href="#EnvelopeResourceShape" rdf-subject="#EnvelopeShape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-graph="#shapes">RDF</a>
+
+        <a id="EnvelopeConformanceShape" href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#EnvelopeConformanceShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="http://purl.org/dc/terms/conformsTo" rdf-subject="#EnvelopeConformanceShape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#shapes">RDF</a>
+        <a href="#HARE-0.1" rdf-subject="#EnvelopeConformanceShape" rdf-predicate="http://www.w3.org/ns/shacl#hasValue" rdf-graph="#shapes">RDF</a>
+
+        <a id="EnvelopeManifestGraphShape" href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#EnvelopeManifestGraphShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="#manifestGraph" rdf-subject="#EnvelopeManifestGraphShape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#shapes">RDF</a>
+        <data value="1" rdf-subject="#EnvelopeManifestGraphShape" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+        <data value="1" rdf-subject="#EnvelopeManifestGraphShape" rdf-predicate="http://www.w3.org/ns/shacl#maxCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+        <a href="http://www.w3.org/ns/shacl#IRI" rdf-subject="#EnvelopeManifestGraphShape" rdf-predicate="http://www.w3.org/ns/shacl#nodeKind" rdf-graph="#shapes">RDF</a>
+
+        <a id="EnvelopeVirtualBaseShape" href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#EnvelopeVirtualBaseShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="#virtualBase" rdf-subject="#EnvelopeVirtualBaseShape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#shapes">RDF</a>
+        <data value="1" rdf-subject="#EnvelopeVirtualBaseShape" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+        <data value="1" rdf-subject="#EnvelopeVirtualBaseShape" rdf-predicate="http://www.w3.org/ns/shacl#maxCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+        <a href="http://www.w3.org/ns/shacl#IRI" rdf-subject="#EnvelopeVirtualBaseShape" rdf-predicate="http://www.w3.org/ns/shacl#nodeKind" rdf-graph="#shapes">RDF</a>
+
+        <a id="EnvelopeResourceShape" href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#EnvelopeResourceShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="http://purl.org/dc/terms/hasPart" rdf-subject="#EnvelopeResourceShape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#shapes">RDF</a>
+        <data value="1" rdf-subject="#EnvelopeResourceShape" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+
+        <a id="RepresentationShape" href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#RepresentationShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="#Representation" rdf-subject="#RepresentationShape" rdf-predicate="http://www.w3.org/ns/shacl#targetClass" rdf-graph="#shapes">RDF</a>
+        <a href="#DOMRepresentation" rdf-subject="#RepresentationShape" rdf-predicate="http://www.w3.org/ns/shacl#targetClass" rdf-graph="#shapes">RDF</a>
+        <a href="#ByteRepresentation" rdf-subject="#RepresentationShape" rdf-predicate="http://www.w3.org/ns/shacl#targetClass" rdf-graph="#shapes">RDF</a>
+        <a href="#RepresentationLogicalPathShape" rdf-subject="#RepresentationShape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-graph="#shapes">RDF</a>
+        <a href="#RepresentationMediaTypeShape" rdf-subject="#RepresentationShape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-graph="#shapes">RDF</a>
+        <a href="#RepresentationCarrierShape" rdf-subject="#RepresentationShape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-graph="#shapes">RDF</a>
+
+        <a id="RepresentationLogicalPathShape" href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#RepresentationLogicalPathShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="http://purl.org/dc/terms/identifier" rdf-subject="#RepresentationLogicalPathShape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#shapes">RDF</a>
+        <data value="1" rdf-subject="#RepresentationLogicalPathShape" rdf-predicate="http://www.w3.org/ns/shacl#maxCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+
+        <a id="RepresentationMediaTypeShape" href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#RepresentationMediaTypeShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="http://purl.org/dc/elements/1.1/format" rdf-subject="#RepresentationMediaTypeShape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#shapes">RDF</a>
+        <data value="1" rdf-subject="#RepresentationMediaTypeShape" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+        <data value="1" rdf-subject="#RepresentationMediaTypeShape" rdf-predicate="http://www.w3.org/ns/shacl#maxCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+
+        <a id="RepresentationCarrierShape" href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#RepresentationCarrierShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="#carrier" rdf-subject="#RepresentationCarrierShape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#shapes">RDF</a>
+        <data value="1" rdf-subject="#RepresentationCarrierShape" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+        <data value="1" rdf-subject="#RepresentationCarrierShape" rdf-predicate="http://www.w3.org/ns/shacl#maxCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+        <a href="http://www.w3.org/ns/shacl#IRI" rdf-subject="#RepresentationCarrierShape" rdf-predicate="http://www.w3.org/ns/shacl#nodeKind" rdf-graph="#shapes">RDF</a>
+
+        <a id="DOMRepresentationShape" href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#DOMRepresentationShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="#DOMRepresentation" rdf-subject="#DOMRepresentationShape" rdf-predicate="http://www.w3.org/ns/shacl#targetClass" rdf-graph="#shapes">RDF</a>
+        <a href="#DOMRepresentationMediaTypeShape" rdf-subject="#DOMRepresentationShape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-graph="#shapes">RDF</a>
+        <a href="#DOMRepresentationLogicalPathShape" rdf-subject="#DOMRepresentationShape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-graph="#shapes">RDF</a>
+
+        <a id="DOMRepresentationMediaTypeShape" href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#DOMRepresentationMediaTypeShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="http://purl.org/dc/elements/1.1/format" rdf-subject="#DOMRepresentationMediaTypeShape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#shapes">RDF</a>
+        <data value="text/html" rdf-subject="#DOMRepresentationMediaTypeShape" rdf-predicate="http://www.w3.org/ns/shacl#hasValue" rdf-graph="#shapes">text/html</data>
+
+        <a id="DOMRepresentationLogicalPathShape" href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#DOMRepresentationLogicalPathShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="http://purl.org/dc/terms/identifier" rdf-subject="#DOMRepresentationLogicalPathShape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#shapes">RDF</a>
+        <data value="1" rdf-subject="#DOMRepresentationLogicalPathShape" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+
+        <a id="ByteRepresentationShape" href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#ByteRepresentationShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="#ByteRepresentation" rdf-subject="#ByteRepresentationShape" rdf-predicate="http://www.w3.org/ns/shacl#targetClass" rdf-graph="#shapes">RDF</a>
+        <a href="#ByteRepresentationByteLengthShape" rdf-subject="#ByteRepresentationShape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-graph="#shapes">RDF</a>
+        <a href="#ByteRepresentationIntegrityShape" rdf-subject="#ByteRepresentationShape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-graph="#shapes">RDF</a>
+
+        <a id="ByteRepresentationByteLengthShape" href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#ByteRepresentationByteLengthShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="#byteLength" rdf-subject="#ByteRepresentationByteLengthShape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#shapes">RDF</a>
+        <data value="1" rdf-subject="#ByteRepresentationByteLengthShape" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+        <data value="1" rdf-subject="#ByteRepresentationByteLengthShape" rdf-predicate="http://www.w3.org/ns/shacl#maxCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+        <a href="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" rdf-subject="#ByteRepresentationByteLengthShape" rdf-predicate="http://www.w3.org/ns/shacl#datatype" rdf-graph="#shapes">RDF</a>
+
+        <a id="ByteRepresentationIntegrityShape" href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#ByteRepresentationIntegrityShape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#shapes">RDF</a>
+        <a href="https://www.w3.org/2018/credentials#digestSRI" rdf-subject="#ByteRepresentationIntegrityShape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#shapes">RDF</a>
+        <data value="1" rdf-subject="#ByteRepresentationIntegrityShape" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+        <data value="1" rdf-subject="#ByteRepresentationIntegrityShape" rdf-predicate="http://www.w3.org/ns/shacl#maxCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#shapes"></data>
+        <a href="https://www.w3.org/2018/credentials#sriString" rdf-subject="#ByteRepresentationIntegrityShape" rdf-predicate="http://www.w3.org/ns/shacl#datatype" rdf-graph="#shapes">RDF</a>
+      </div>
+    </section>
+
+    <section id="representation-model">
+      <h2>Representation model</h2>
+
+      <p>Each representation MUST have exactly one representation-kind type and MUST have exactly one:</p>
+      <ul>
+        <li><code>dc:format</code>, containing its media type;</li>
+        <li><a href="#carrier"><code>carrier</code></a>.</li>
+      </ul>
+      <p>
+        A representation MAY have one <code>dcterms:identifier</code> used as a
+        logical path. A representation without a path remains addressable by
+        its RDF IRI and MUST NOT be treated as a virtual file.
+      </p>
+
+      <section id="dom-representations">
+        <h3>DOM representations</h3>
+        <p>
+          A DOM representation MUST be typed as
+          <a href="#DOMRepresentation"><code>DOMRepresentation</code></a>, MUST
+          use media type <code>text/html</code>, and MUST identify a
+          <code>template</code> element with a unique <code>id</code> as its
+          carrier. It MUST have a logical path, which assigns it a URL in the
+          envelope's virtual document space. Its semantic content is the
+          template's parsed document fragment. It is not defined by an
+          original serialization.
+        </p>
+
+        <pre class="example html"><code>&lt;template id="brief-content"&gt;
+  &lt;article&gt;
+    &lt;h1&gt;Release brief&lt;/h1&gt;
+    &lt;p&gt;Approve the Atlas migration.&lt;/p&gt;
+  &lt;/article&gt;
+&lt;/template&gt;</code></pre>
+
+        <p>
+          Consumers MUST inspect or clone the fragment without executing its
+          scripts. Serializing or downloading the fragment produces a derived
+          artifact; it does not recover original source bytes. A producer that
+          needs an exact downloadable HTML file SHOULD add a separate byte
+          representation for the same resource.
+        </p>
+      </section>
+
+      <section id="byte-representations">
+        <h3>Byte representations</h3>
+        <p>
+          A byte representation MUST be typed as
+          <a href="#ByteRepresentation"><code>ByteRepresentation</code></a> and
+          MUST have exactly one <a href="#byteLength"><code>byteLength</code></a>
+          and <code>cred:digestSRI</code>. Its carrier MUST be a
+          <code>script</code> data block with a unique <code>id</code>, a
+          <code>type</code> of <code>application/octet-stream</code>, and a
+          <code>data-encoding</code> value of <code>base64</code>.
+        </p>
+
+        <pre class="example html"><code>&lt;script
+  id="brief-bytes"
+  type="application/octet-stream"
+  data-encoding="base64"
+&gt;IyBSZWxlYXNlIGJyaWVmCg==&lt;/script&gt;</code></pre>
+
+        <p>
+          Base64 preserves arbitrary bytes independently of HTML parsing,
+          entity decoding, and newline normalization [[RFC4648]]. Text SHOULD
+          use a semantic carrier when source-byte preservation is unnecessary.
+        </p>
+      </section>
+
+      <section id="carrier-processing">
+        <h3>Carrier processing</h3>
+        <p>
+          The <a href="#carrier"><code>carrier</code></a> object MUST resolve to
+          the envelope source IRI plus one fragment. The consumer MUST locate
+          the element with the decoded fragment identifier and then dispatch
+          according to representation kind.
+        </p>
+        <p>To process a DOM representation, a consumer MUST:</p>
+        <ol>
+          <li>Require the carrier to be a <code>template</code>.</li>
+          <li>Return its parsed document fragment without executing content.</li>
+        </ol>
+        <p>To process a byte representation, a consumer MUST:</p>
+        <ol>
+          <li>Require the carrier to have the required element name, type, and encoding attributes.</li>
+          <li>Read its DOM text content.</li>
+          <li>Remove ASCII whitespace.</li>
+          <li>Decode strict padded base64.</li>
+          <li>Compare the decoded length with <a href="#byteLength"><code>byteLength</code></a>.</li>
+          <li>Compute SHA-256 over the decoded bytes.</li>
+          <li>Compare the result with <code>cred:digestSRI</code>.</li>
+          <li>Return bytes only if every check succeeds.</li>
+        </ol>
+      </section>
+
+      <section id="integrity-values">
+        <h3>Byte commitments</h3>
+        <p>
+          Byte-representation integrity values MUST use the Subresource Integrity form
+          <code>sha256-&lt;base64-digest&gt;</code>. The digest is computed over
+          decoded representation bytes, not base64 source text [[SRI]].
+          The RDF literal MUST have datatype
+          <code>https://www.w3.org/2018/credentials#sriString</code>.
+          HARE 0.1 does not define a canonical serialization or digest for DOM
+          representations.
+        </p>
+      </section>
+    </section>
+
+    <section id="logical-paths">
+      <h2>Virtual document URLs and logical paths</h2>
+      <p>
+        Each envelope MUST declare one <a href="#virtualBase"><code>virtualBase</code></a>.
+        It assigns the host envelope document a virtual URL and establishes the
+        base for every path-addressed representation. The value MUST be a
+        credential-free HTTPS URL under the reserved <code>.invalid</code>
+        top-level domain, with path <code>/</code> and no query or fragment.
+        It is a routing identifier only and MUST NOT be dereferenced.
+        The reserved top-level domain prevents collision with a retrievable Web
+        origin [[RFC2606]].
+        Producers SHOULD choose a stable, collision-resistant host label for
+        the envelope. Consumers MUST scope virtual URLs to their declaring
+        envelope and MUST NOT use them for cross-envelope identity.
+      </p>
+
+      <pre class="example html"><code>&lt;a hidden href="https://northstar.hare.invalid/"
+  rdf-subject=""
+  rdf-predicate="https://ia2.dev/spec/resource-envelope#virtualBase"
+  rdf-graph="#manifest"&gt;&lt;/a&gt;</code></pre>
+
+      <p>
+        The virtual URL of the host document is the <code>virtualBase</code>
+        itself. The virtual URL of a representation with a logical path is the
+        result of resolving that path against the base. For example,
+        <code>/pages/summary.html</code> becomes
+        <code>https://northstar.hare.invalid/pages/summary.html</code>.
+        Virtual URLs provide browser-like navigation addresses; RDF IRIs remain
+        the identities of the envelope, resources, and representations.
+      </p>
+
+      <p>A logical path MUST:</p>
+      <ul>
+        <li>start with <code>/</code>;</li>
+        <li>not be <code>/</code>, which is reserved for the host document;</li>
+        <li>contain URI path segments separated by <code>/</code>;</li>
+        <li>contain no query or fragment;</li>
+        <li>contain no empty, <code>.</code>, or <code>..</code> segments;</li>
+        <li>use uppercase hexadecimal digits in percent-encoding;</li>
+        <li>not encode slash, backslash, dot segments, or NUL; and</li>
+        <li>be unique within the envelope using case-sensitive comparison.</li>
+      </ul>
+
+      <p>
+        A consumer MUST resolve links in a DOM representation against that
+        representation's virtual URL. A result matching another declared
+        virtual URL navigates to that representation. A result matching the
+        <code>virtualBase</code>, including <code>/</code>, navigates to the
+        host document. URL fragments identify elements within the selected
+        document. A result outside the declared virtual origin is external and
+        MUST require a deliberate user navigation; it MUST NOT be fetched merely
+        to render the envelope.
+      </p>
+
+      <pre class="example html"><code>&lt;template id="summary-content"&gt;
+  &lt;article&gt;
+    &lt;h1 id="result"&gt;Review result&lt;/h1&gt;
+    &lt;a href="../data/status.json"&gt;Structured status&lt;/a&gt;
+    &lt;a href="/"&gt;Envelope document&lt;/a&gt;
+  &lt;/article&gt;
+&lt;/template&gt;</code></pre>
+
+      <p>
+        A representation without a logical path has no virtual URL and cannot
+        be the target or base of a relative bundle link. Byte representations
+        MAY omit a logical path. DOM representations MUST supply one so that
+        every viewable document, including the host, has an unambiguous virtual
+        URL.
+      </p>
+    </section>
+
+    <section id="human-presentation">
+      <h2>Human presentation</h2>
+      <p>
+        The envelope MUST contain a visible title, description, resource list,
+        and trust statement. Each resource SHOULD have a visible
+        <code>article</code> showing its title, representation kind, media type,
+        optional logical path, and byte-commitment status. Semantic resources
+        SHOULD remain directly inspectable in the DOM.
+      </p>
+      <p>
+        A DOM carrier is canonical semantic content, not canonical source
+        bytes. A preview derived from a byte representation is presentation
+        only. A consumer MUST NOT treat visual similarity as an integrity check.
+      </p>
+    </section>
+
+    <section id="runtime-model">
+      <h2>Optional runtime model</h2>
+      <p>
+        A viewer runtime MAY index resources, search text, resolve links,
+        create Blob URLs, render previews, and maintain navigation state. It
+        MUST derive its inventory from the HTML/RDF manifest, MUST keep DOM
+        carriers inert, and MUST verify byte representations before rendering
+        or downloading them.
+      </p>
+
+      <p>A viewer SHOULD render:</p>
+      <ul>
+        <li>DOM representations in a sandboxed iframe without scripts;</li>
+        <li>HTML byte representations in a sandboxed iframe after verification;</li>
+        <li>Markdown as a derived safe DOM view that does not interpret raw HTML;</li>
+        <li>JSON as a tree and escaped source;</li>
+        <li>images through verified Blob URLs;</li>
+        <li>PDF through a sandboxed browser surface or explicit save action; and</li>
+        <li>unknown binaries as metadata with an explicit save action.</li>
+      </ul>
+
+      <p>
+        Runtime code required for an offline self-viewing envelope MUST be
+        inline or embedded. A conforming self-contained envelope MUST NOT
+        depend on CDN-hosted code, styles, fonts, contexts, or schemas.
+      </p>
+
+      <p>
+        To present a DOM representation as a document, a viewer MUST derive a
+        browsing document from the template fragment, set its base URL to the
+        representation's virtual URL, keep representation scripts disabled,
+        prevent automatic network loads, and route activated links according
+        to <a href="#logical-paths">virtual document URL processing</a>. The
+        derived browsing document is presentation state, not a byte
+        representation of the resource.
+      </p>
+
+      <p>
+        A viewer MUST prevent an authored navigation URL from being followed
+        directly by the derived browsing context. It SHOULD make anchors inert
+        in the derived document before presentation, preserve each authored
+        reference as routing data, and intercept activation in the capture
+        phase. This requirement applies before and after the viewer's routing
+        handler is installed. The viewer then resolves the preserved reference
+        through the envelope's virtual URL space. It MUST NOT navigate the
+        frame to a virtual <code>.invalid</code> URL or use the network as a
+        fallback. The template carrier itself remains unchanged.
+      </p>
+
+      <section id="host-content-security-policy">
+        <h3>Host Content Security Policy compatibility</h3>
+        <p>
+          A Content Security Policy on the envelope document and a policy in a
+          derived browsing document are cumulative. A derived document's policy
+          can further restrict its content, but it cannot loosen the envelope's
+          policy. In particular, a <code>srcdoc</code> document inherits the
+          relevant policy container from its embedder. Producers and viewer
+          authors MUST NOT assume that an inner policy can restore a frame,
+          stylesheet, image, media resource, or font blocked by the host policy
+          [[CSP3]].
+        </p>
+
+        <p>
+          A Self-Viewing Envelope that declares a host Content Security Policy
+          MUST permit the mechanisms used by its declared runtime. A
+          Declarative Envelope is not required to permit an in-document viewer.
+          When a producer intends a declarative envelope to remain compatible
+          with consumer-provided browser viewers, its host policy SHOULD permit
+          the local frame and passive-resource schemes used by the intended
+          rendering strategy while continuing to deny network and executable
+          destinations.
+        </p>
+
+        <p>
+          The following policy is a baseline for a scriptless envelope whose
+          consumer may use <code>srcdoc</code> frames and materialized
+          <code>blob:</code> or existing <code>data:</code> passive resources.
+          It is an example, not a universal policy:
+        </p>
+
+        <pre class="example html"><code>&lt;meta http-equiv="Content-Security-Policy" content="
+  default-src 'none';
+  style-src 'unsafe-inline' blob: data:;
+  img-src blob: data:;
+  media-src blob: data:;
+  font-src blob: data:;
+  frame-src 'self' blob: about:;
+  object-src 'none';
+  worker-src 'none'
+"&gt;</code></pre>
+
+        <p>
+          The <code>about:</code> frame source permits
+          <code>about:srcdoc</code>; <code>blob:</code> permits verified local
+          byte views; and the passive destination directives permit only local
+          materialized content. A self-viewing profile MAY add the narrowest
+          <code>script-src</code> needed for its declared runtime. It MUST NOT
+          grant script execution to representation content. A consumer-provided
+          viewer MUST report a host-policy block and MUST NOT weaken, replace,
+          or bypass the producer's policy by fetching the resource from the
+          network.
+        </p>
+
+        <p class="note">
+          Developer tools, automation frameworks, or unrelated extensions may
+          attempt to evaluate their own instrumentation inside a scriptless
+          representation frame. A user agent can report that attempt as
+          blocked script execution even when the derived document contains no
+          script. Viewers and validators SHOULD distinguish tooling injection
+          from representation content by inspecting the derived document and
+          the initiator. They MUST NOT add <code>allow-scripts</code> merely to
+          suppress this diagnostic.
+        </p>
+      </section>
+
+      <section id="subresource-materialization">
+        <h3>Verified subresource materialization</h3>
+        <p>
+          A viewer MAY materialize passive subresources referenced by a DOM
+          representation, a rendered Markdown byte representation, or an
+          explicit binding from the host document.
+          Materialization turns a virtual URL into a
+          viewer-local URL, such as a Blob URL, only after the referenced byte
+          representation has been verified. It does not change the carrier,
+          representation, manifest graph, or virtual URL and MUST NOT be
+          treated as a new representation.
+        </p>
+
+        <p>For each subresource reference, a materializing viewer MUST:</p>
+        <ol>
+          <li>resolve the reference against the containing representation's virtual URL, or against <code>virtualBase</code> for a host-document binding;</li>
+          <li>require the result, excluding its fragment, to match the virtual URL of a declared byte representation;</li>
+          <li>verify that representation's base64, decoded length, and digest before use;</li>
+          <li>require its declared media type to be suitable for the fetch destination;</li>
+          <li>create a viewer-local URL for the verified bytes and preserve any URL fragment; and</li>
+          <li>rewrite only the derived browsing document, rendered Markdown view, derived stylesheet, or runtime fetch attribute corresponding to an explicit inert host-document binding.</li>
+        </ol>
+
+        <p>
+          A materializing viewer SHOULD support passive image, audio, video,
+          track, SVG image, SVG use, stylesheet, <code>srcset</code>, inline
+          style, and CSS <code>url()</code> references. It SHOULD recursively
+          materialize CSS <code>@import</code> and <code>url()</code>
+          dependencies, cache verification and local URLs by representation,
+          detect import cycles, and revoke temporary URLs when the derived view
+          is discarded.
+        </p>
+
+        <p>
+          A viewer MUST NOT automatically fetch an unmatched or external
+          subresource reference. It MUST NOT materialize scripts, workers,
+          nested browsing contexts, plugins, or executable destinations, even
+          when a byte representation exists. A DOM representation is a
+          navigable document, not a passive subresource, and MUST NOT be
+          substituted into an image, stylesheet, media, or similar fetch
+          destination. Existing <code>data:</code> references MAY remain
+          inline; authored <code>blob:</code> references have no portable
+          meaning across consumers. Blocked, missing, incompatible, cyclic, or
+          unverifiable references MUST remain inert and SHOULD be reported to
+          the user.
+        </p>
+
+        <p>
+          A host document MUST NOT put a non-retrievable virtual URL directly
+          in <code>src</code>, because the browser can attempt that request
+          before a viewer runs. An authored host MAY instead use
+          <code>data-hare-src</code> on an element with a passive
+          <code>src</code> fetch destination. A supporting viewer resolves that
+          value against <code>virtualBase</code>, applies the same representation,
+          media-type, length, and digest checks, and writes only the resulting
+          viewer-local URL to <code>src</code>. It MUST retain
+          <code>data-hare-src</code> as the inspectable declarative reference.
+          Consumers that do not support this optional binding leave it inert.
+        </p>
+
+        <p>
+          A Markdown renderer MAY recognize image destinations in verified
+          Markdown bytes. It MUST resolve each destination against the
+          Markdown representation's virtual URL and apply the same declared
+          representation, media-type, length, and digest checks before placing
+          a viewer-local URL in the rendered image. It MUST preserve the
+          authored reference in the source bytes, MUST NOT fetch an unmatched
+          destination, and MUST NOT enable raw HTML or script execution merely
+          to render Markdown.
+        </p>
+
+        <p>
+          A Markdown renderer SHOULD support the conventional portable surface
+          of headings, paragraphs, emphasis, links, images, block quotations,
+          ordered and unordered lists, code, and tables. HARE does not define a
+          new Markdown dialect and version 0.1 does not require CommonMark
+          conformance. A renderer MUST construct or sanitize its derived view so
+          raw HTML remains inert. Markdown links MUST use the same virtual URL
+          routing rules as links in DOM representations; a consumer MUST NOT
+          turn an unresolved virtual link into a network request.
+        </p>
+
+        <pre class="example html"><code>&lt;template id="summary-content"&gt;
+  &lt;link rel="stylesheet" href="../styles/report.css"&gt;
+  &lt;article&gt;
+    &lt;img src="../images/verified.svg" alt="Verified"&gt;
+  &lt;/article&gt;
+&lt;/template&gt;</code></pre>
+
+        <pre class="example html"><code>&lt;figure&gt;
+  &lt;img data-hare-src="/images/verified.svg" alt="Verified bundle"&gt;
+  &lt;figcaption&gt;Image carried by this envelope.&lt;/figcaption&gt;
+&lt;/figure&gt;</code></pre>
+
+        <p>
+          In this example, the template remains directly inspectable. A
+          materializing viewer resolves both relative URLs in the virtual
+          document space, verifies the corresponding byte representations, and
+          rewrites a derived document to local URLs. It never edits the
+          template carrier. The second example opts the host document into the
+          same verified lookup without placing the virtual URL in a
+          browser-fetching attribute.
+        </p>
+      </section>
+
+      <p>
+        A consumer, including a browser extension, MAY provide its own viewer
+        for an envelope that contains no runtime. A consumer-provided viewer
+        does not change the envelope's declared artifact profile and MUST NOT
+        execute code found in bundled representations by default.
+      </p>
+    </section>
+
+    <section id="artifact-profiles">
+      <h2>Artifact profiles</h2>
+      <table class="simple">
+        <thead><tr><th>Profile</th><th>Requirements</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Declarative Envelope</td>
+            <td>No executable scripts, event-handler attributes, <code>javascript:</code> URLs, automatic remote fetches, or active embedded documents.</td>
+          </tr>
+          <tr>
+            <td>Self-Viewing Envelope</td>
+            <td>Declares every viewer runtime, remains meaningful without it, and does not execute scripts found inside bundled representations by default.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        The manifest MUST use <code>dcterms:conformsTo</code> to name exactly
+        one of <a href="#DeclarativeProfile"><code>DeclarativeProfile</code></a>
+        or <a href="#SelfViewingProfile"><code>SelfViewingProfile</code></a>.
+        Consumers MUST inspect actual HTML content rather than trusting that
+        profile statement as a security boundary.
+      </p>
+    </section>
+
+    <section id="conformance" class="conformance">
+      <h2>Implementation conformance</h2>
+
+      <section id="producer-conformance">
+        <h3>Envelope Producer</h3>
+        <p>An Envelope Producer MUST:</p>
+        <ul>
+          <li>generate conforming HTML and HTML/RDF;</li>
+          <li>emit one canonical manifest graph;</li>
+          <li>assign the host document one conforming virtual base;</li>
+          <li>give every resource and representation an IRI;</li>
+          <li>emit unique logical paths when paths are supplied;</li>
+          <li>use a conforming carrier for each representation kind;</li>
+          <li>for byte representations, encode bytes and compute commitments correctly; and</li>
+          <li>provide meaningful no-script presentation.</li>
+        </ul>
+      </section>
+
+      <section id="consumer-conformance">
+        <h3>Envelope Consumer</h3>
+        <p>An Envelope Consumer MUST:</p>
+        <ul>
+          <li>parse and extract without executing code;</li>
+          <li>locate the envelope and manifest graph;</li>
+          <li>validate the virtual base and derive virtual representation URLs;</li>
+          <li>dispatch requested representations according to kind;</li>
+          <li>verify a requested byte representation before use;</li>
+          <li>preserve unknown RDF statements; and</li>
+          <li>not dereference semantic IRIs merely to read the envelope.</li>
+        </ul>
+      </section>
+
+      <section id="viewer-conformance">
+        <h3>Viewer Runtime</h3>
+        <p>
+          A Viewer Runtime MUST satisfy Envelope Consumer requirements, route
+          internal links through declared virtual document URLs, distinguish
+          external links, render untrusted content in a sandbox, and expose
+          routing and verification failures.
+        </p>
+      </section>
+
+      <section id="materializing-viewer-conformance">
+        <h3>Materializing Viewer Runtime</h3>
+        <p>
+          A Viewer Runtime that claims subresource-materialization support MUST
+          additionally implement the processing and security requirements in
+          <a href="#subresource-materialization">Verified subresource
+          materialization</a>. It MUST expose materialization failures, MUST
+          prevent fallback network fetches, MUST distinguish host-policy blocks
+          from missing or unverifiable resources, and MUST release viewer-local
+          URLs when they are no longer used.
+        </p>
+      </section>
+
+      <section id="archival-conformance">
+        <h3>Archival Consumer</h3>
+        <p>
+          An Archival Consumer MUST preserve original envelope source bytes,
+          validate every byte carrier, preserve DOM carrier semantics and
+          unknown manifest statements, retain retrieval identity separately
+          from canonical identity, and avoid DOM reserialization as a
+          preservation step.
+        </p>
+      </section>
+
+      <section id="validator-conformance">
+        <h3>Validator</h3>
+        <p>A Validator MUST check:</p>
+        <ul>
+          <li>HTML and HTML/RDF diagnostics;</li>
+          <li>manifest and property cardinality;</li>
+          <li>SHACL constraints supplied by this specification;</li>
+          <li>identity and path uniqueness;</li>
+          <li>virtual-base syntax and virtual-URL uniqueness;</li>
+          <li>carrier existence and correspondence with representation kind;</li>
+          <li>byte-carrier base64, length, and digest;</li>
+          <li>undeclared byte-carrier blocks; and</li>
+          <li>active-content profile restrictions.</li>
+        </ul>
+      </section>
+    </section>
+
+    <section id="security">
+      <h2>Security and trust</h2>
+
+      <p>
+        HTML is an executable document format. Opening an untrusted
+        self-viewing envelope can run its inline JavaScript. A consumer MUST
+        distinguish declarative extraction from execution and SHOULD default to
+        the declarative path.
+      </p>
+
+      <p>Consumers SHOULD:</p>
+      <ul>
+        <li>enforce limits before allocating decoded buffers;</li>
+        <li>reject unmanifested byte-carrier blocks;</li>
+        <li>show whether bytes are verified, signed, or merely declared;</li>
+        <li>render HTML in a sandbox without script permission; if consumer-owned routing requires same-origin inspection, strip representation scripts and apply a deny-by-default CSP before rendering;</li>
+        <li>treat the host and derived Content Security Policies as cumulative and never weaken the host policy to make a preview work;</li>
+        <li>deny network access unless a user explicitly approves it;</li>
+        <li>treat SVG, PDF, fonts, media, and decoders as untrusted input; and</li>
+        <li>avoid overriding a declared media type in ways that enable execution.</li>
+      </ul>
+
+      <section id="signatures">
+        <h3>Byte, semantic, and source integrity</h3>
+        <p>The following layers are distinct:</p>
+        <ol>
+          <li>Byte integrity hashes decoded representation bytes.</li>
+          <li>Semantic integrity signs the canonical manifest graph.</li>
+          <li>Source integrity signs defined HTML source bytes.</li>
+        </ol>
+        <p>
+          Version 0.1 standardizes byte-representation integrity only. A future semantic
+          signature profile SHOULD restrict its signed manifest input to RDF
+          constructs supported by RDFC-1.0, canonicalize that graph, and bind
+          the signature to the HTML/RDF extraction version and canonicalization
+          algorithm [[RDF-CANON]]. Signature syntax and key discovery are
+          deferred.
+        </p>
+      </section>
+    </section>
+
+    <section id="comparison" class="informative">
+      <h2>Relationship to adjacent formats</h2>
+      <table class="simple">
+        <thead>
+          <tr><th>Format</th><th>Strength</th><th>Why it is not this format</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ZIP plus manifest</td><td>General packaging and compression</td><td>Requires extraction and leaves semantics to another format.</td></tr>
+          <tr><td>Web Bundles</td><td>Collections of HTTP exchanges</td><td>Binary and centered on delivery rather than inspectable agent handoff.</td></tr>
+          <tr><td>PortableWeb</td><td>Packaged web applications</td><td>ZIP and JSON manifest with a specialized viewer [[PORTABLEWEB]].</td></tr>
+          <tr><td>WARC and WACZ</td><td>Capture, indexing, and replay</td><td>Preserves web observations rather than an authored resource graph [[WACZ]].</td></tr>
+          <tr><td>EPUB</td><td>HTML-centered publications</td><td>ZIP container and publication-specific reading model [[EPUB-33]].</td></tr>
+          <tr><td>MHTML</td><td>One page and its dependencies</td><td>MIME aggregate without an agent-oriented graph manifest [[RFC2557]].</td></tr>
+          <tr><td>Plain JSON</td><td>Simple API interchange</td><td>Poor browser document and duplicates semantics outside visible HTML.</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        The AIMEM draft usefully separates encoding, transport, and reasoning,
+        and defines explicit producer and consumer roles. Its JSON schema is
+        specific to persistent agent memory rather than heterogeneous web
+        resources [[AIMEM]]. Zundler demonstrates the feasibility of embedding
+        a compressed virtual file tree in HTML, while also documenting the
+        fragility of patching browser navigation and fetch behavior [[ZUNDLER]].
+      </p>
+    </section>
+
+    <section id="examples" class="informative">
+      <h2>Examples</h2>
+      <p>
+        The following fragments are non-normative. They use full IRI
+        references because HTML/RDF does not define prefix expansion.
+      </p>
+
+      <h3>Envelope and manifest declaration</h3>
+      <pre class="example html"><code>&lt;section id="manifest"&gt;
+  &lt;a hidden href="https://ia2.dev/spec/resource-envelope#Envelope"
+    rdf-subject=""
+    rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    rdf-graph="#manifest"&gt;&lt;/a&gt;
+  &lt;a hidden href="https://ia2.dev/spec/resource-envelope#HARE-0.1"
+    rdf-subject=""
+    rdf-predicate="http://purl.org/dc/terms/conformsTo"
+    rdf-graph="#manifest"&gt;&lt;/a&gt;
+  &lt;a hidden href="https://ia2.dev/spec/resource-envelope#DeclarativeProfile"
+    rdf-subject=""
+    rdf-predicate="http://purl.org/dc/terms/conformsTo"
+    rdf-graph="#manifest"&gt;&lt;/a&gt;
+  &lt;a hidden href="#manifest"
+    rdf-subject=""
+    rdf-predicate="https://ia2.dev/spec/resource-envelope#manifestGraph"
+    rdf-graph="#manifest"&gt;&lt;/a&gt;
+  &lt;a hidden href="https://greeting.hare.invalid/"
+    rdf-subject=""
+    rdf-predicate="https://ia2.dev/spec/resource-envelope#virtualBase"
+    rdf-graph="#manifest"&gt;&lt;/a&gt;
+  &lt;a href="#greeting"
+    rdf-subject=""
+    rdf-predicate="http://purl.org/dc/terms/hasPart"
+    rdf-graph="#manifest"&gt;Greeting resource&lt;/a&gt;
+&lt;/section&gt;</code></pre>
+
+      <h3>Semantic HTML representation</h3>
+      <pre class="example html"><code>&lt;a hidden href="#greeting-representation"
+  rdf-subject="#greeting"
+  rdf-predicate="https://ia2.dev/spec/resource-envelope#representation"
+  rdf-graph="#manifest"&gt;&lt;/a&gt;
+&lt;a id="greeting-representation" hidden
+  href="https://ia2.dev/spec/resource-envelope#DOMRepresentation"
+  rdf-subject="#greeting-representation"
+  rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+  rdf-graph="#manifest"&gt;&lt;/a&gt;
+&lt;data value="/hello.html"
+  rdf-subject="#greeting-representation"
+  rdf-predicate="http://purl.org/dc/terms/identifier"
+  rdf-graph="#manifest"&gt;/hello.html&lt;/data&gt;
+&lt;data hidden value="text/html"
+  rdf-subject="#greeting-representation"
+  rdf-predicate="http://purl.org/dc/elements/1.1/format"
+  rdf-graph="#manifest"&gt;&lt;/data&gt;
+&lt;a hidden href="#greeting-content"
+  rdf-subject="#greeting-representation"
+  rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier"
+  rdf-graph="#manifest"&gt;&lt;/a&gt;
+&lt;template id="greeting-content"&gt;
+  &lt;article&gt;&lt;h1&gt;Hello&lt;/h1&gt;&lt;p&gt;Welcome, agent.&lt;/p&gt;&lt;/article&gt;
+&lt;/template&gt;</code></pre>
+
+      <h3>Optional byte representation</h3>
+      <pre class="example html"><code>&lt;a hidden href="#source-representation"
+  rdf-subject="#greeting"
+  rdf-predicate="https://ia2.dev/spec/resource-envelope#representation"
+  rdf-graph="#manifest"&gt;&lt;/a&gt;
+&lt;a hidden
+  href="https://ia2.dev/spec/resource-envelope#ByteRepresentation"
+  rdf-subject="#source-representation"
+  rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+  rdf-graph="#manifest"&gt;&lt;/a&gt;
+&lt;data hidden value="text/plain; charset=utf-8"
+  rdf-subject="#source-representation"
+  rdf-predicate="http://purl.org/dc/elements/1.1/format"
+  rdf-graph="#manifest"&gt;&lt;/data&gt;
+&lt;data hidden value="5"
+  rdf-subject="#source-representation"
+  rdf-predicate="https://ia2.dev/spec/resource-envelope#byteLength"
+  rdf-datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
+  rdf-graph="#manifest"&gt;&lt;/data&gt;
+&lt;data hidden value="sha256-LPJNul+wow4m6DsqxbninhsWHlwfp0JecwQzYpOLmCQ="
+  rdf-subject="#source-representation"
+  rdf-predicate="https://www.w3.org/2018/credentials#digestSRI"
+  rdf-datatype="https://www.w3.org/2018/credentials#sriString"
+  rdf-graph="#manifest"&gt;&lt;/data&gt;
+&lt;a hidden href="#source-bytes"
+  rdf-subject="#source-representation"
+  rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier"
+  rdf-graph="#manifest"&gt;&lt;/a&gt;
+&lt;script id="source-bytes" type="application/octet-stream"
+  data-encoding="base64"&gt;aGVsbG8=&lt;/script&gt;</code></pre>
+    </section>
+
+    <section id="minimal-profile">
+      <h2>Minimal viable 0.1</h2>
+      <p>
+        The first interoperable implementation should include only envelope
+        discovery, the manifest vocabulary, template-based DOM carriers,
+        optional base64 byte carriers, declarative profile checks, and a
+        compact SHACL graph. A TypeScript producer and a Rust validator should
+        pass the same fixtures before compression or signatures are added.
+      </p>
+    </section>
+
+    <section id="open-questions" class="informative">
+      <h2>Open questions</h2>
+      <ul>
+        <li>Vocabulary persistence policy and criteria for a future registered media type.</li>
+        <li>Recommended maximum envelope and representation sizes.</li>
+        <li>Selection and content-negotiation rules when a resource has multiple representations.</li>
+        <li>Byte-carrier chunking, compression, and deduplication.</li>
+        <li>Additional media-destination allowlists, responsive-image edge cases, and format-specific subresource policies beyond the initial passive profile.</li>
+        <li>Signature syntax, key discovery, and revocation.</li>
+        <li>Encryption, selective disclosure, and partial envelopes.</li>
+        <li>Delta envelopes and references to prior versions.</li>
+        <li>The conformance boundary for active web application replay.</li>
+      </ul>
+    </section>
+
+    <section id="recommendation" class="informative">
+      <h2>Recommendation</h2>
+      <p>
+        Standardize the inert declarative kernel first. Treat the viewer as a
+        proving implementation, not the source of truth. Interoperability is
+        demonstrated when independent consumers extract the same manifest
+        graph, recover the same semantic fragments and committed bytes, and
+        reach the same routing and verification results without running
+        envelope code.
+      </p>
+    </section>
+  </body>
+</html>

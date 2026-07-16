@@ -1814,6 +1814,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
   #configureTabCompaction(tabs) {
     this.#tabResizeObserver?.disconnect();
     this.#tabResizeObserver = null;
+    if (!tabs) return;
     const update = () => {
       tabs.dataset.compact = "0";
       if (tabs.clientWidth <= 0) return;
@@ -2295,7 +2296,14 @@ var Ia2RdfNavigator = class extends HTMLElement {
     this.shadowRoot?.querySelector(".launcher")?.setAttribute("aria-expanded", "false");
     const panel = this.shadowRoot?.querySelector(".panel");
     if (panel) panel.dataset.open = "false";
-    queueMicrotask(() => this.shadowRoot?.querySelector(".launcher")?.focus());
+    queueMicrotask(() => {
+      const launcher = this.shadowRoot?.querySelector(".launcher");
+      if (launcher?.hidden) {
+        this.shadowRoot?.activeElement?.blur();
+        return;
+      }
+      launcher?.focus();
+    });
   }
   toggle(focusTarget = "tab") {
     if (this.#open) this.close();
@@ -3327,7 +3335,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     if (this.#view === "vocabulary" && !this.#documentVocabulary.count) this.#view = "navigator";
     this.shadowRoot.innerHTML = `
       <style>${CSS}</style>
-      <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel">
+      <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel"${this.hasAttribute("data-ia2-extension") ? " hidden" : ""}>
         <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="2.6" fill="currentColor"/><circle cx="18.5" cy="5" r="2.6" fill="currentColor"/><circle cx="18.5" cy="19" r="2.6" fill="currentColor"/><path d="M7.2 10.8 16 6.2M7.2 13.2 16 17.8" stroke="currentColor" stroke-width="1.8"/></svg></span>
         <span>RDF</span><span class="count">${result.quads.length}</span>
       </button>
@@ -3357,7 +3365,9 @@ var Ia2RdfNavigator = class extends HTMLElement {
         <p class="sr-only" aria-live="polite">${this.#status}</p>
       </aside>`;
     const viewport = this.shadowRoot.querySelector(".viewport");
-    this.#configureTabCompaction(this.shadowRoot.querySelector(".tabs"));
+    const tabs = this.shadowRoot.querySelector(".tabs");
+    this.#configureTabCompaction(tabs);
+    if (!viewport) return;
     if (this.#view === "turtle") viewport.append(highlightedCode(serializeTurtle(result), "turtle", document));
     if (this.#view === "json") {
       if (containsTripleTerms(result)) {
@@ -3398,10 +3408,10 @@ var Ia2RdfNavigator = class extends HTMLElement {
     if (panel) {
       if (this.#position === "floating") this.#applyFloatingGeometry(panel);
       const toolbar = panel.querySelector(".toolbar");
-      const tabs = toolbar?.querySelector(".tabs");
+      const tabs2 = toolbar?.querySelector(".tabs");
       toolbar?.addEventListener("pointerdown", (event) => {
         const target = event.target instanceof Element ? event.target : null;
-        if (target !== toolbar && target !== tabs && !target?.closest(".drag-grip")) return;
+        if (target !== toolbar && target !== tabs2 && !target?.closest(".drag-grip")) return;
         this.#startFloatingInteraction(event, panel);
       });
       panel.querySelectorAll(".resize-handle").forEach((handle) => {
@@ -3463,4 +3473,3 @@ export {
   serializeTurtle,
   termToTurtle
 };
-//# sourceMappingURL=html-rdf-navigator.js.map

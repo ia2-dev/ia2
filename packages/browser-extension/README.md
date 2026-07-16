@@ -1,30 +1,58 @@
 # IA² Navigator browser extension
 
 This private workspace package adapts the existing IA² HTML/RDF Navigator for
-Chrome, Firefox, and Safari. Selecting the extension toolbar action injects one
-extension-owned Navigator into the current top-level HTML document and toggles
-its drawer. The browser action is the extension's launcher, so the embedded
-in-page launcher remains hidden.
+Chrome, Firefox, and Safari. HARE resource envelopes are enhanced
+automatically. An authored envelope receives the same Document and Files
+header as `@ia2-dev/hare-viewer`; a bare envelope opens directly into its
+verified file browser. Selecting the extension toolbar action still opens the
+Navigator on every supported document, including HARE. Document and Files
+navigation remains exclusively in the HARE header.
+
+## HARE file view
+
+The automatic enhancer recognizes the HARE `Envelope` declaration in the
+document's HTML/RDF and, when needed, mounts its own
+`ia2-extension-hare-viewer` in automatic mode. It does not require or execute a
+viewer runtime supplied by the envelope. If the page already has an
+`ia2-hare-viewer`, the extension leaves that viewer in place instead of adding
+a duplicate.
+
+The extension decodes and verifies each representation before preview or
+download. HTML previews use a sandbox without scripts. On an authored
+envelope, selecting **Document** or pressing Escape closes the file workspace
+while preserving the header. A bare envelope remains a full file browser
+because it has no authored document view to restore.
 
 ## Permission model
 
-The extension requests only `activeTab` and `scripting`. It receives temporary
-access to a page when a person explicitly selects its toolbar action. It does
-not request persistent host permissions, run on every page, add detached RDF,
-or route discovery retrieval through a privileged background process.
+The extension declares automatic content scripts for `<all_urls>` so it can
+recognize HARE without a toolbar click. This produces the browser's broad page
+access warning. Detection is local and deterministic: on a non-HARE document
+the automatic script adds no UI, and the extension does not transmit page data
+or route retrieval through a privileged background process. Access to local
+`file:` documents remains subject to the browser's separate extension setting.
 The Firefox target explicitly declares that it collects and transmits no data.
 
-After the toolbar action inspects a document, the action icon becomes gray when
-the Navigator finds no HTML/RDF statements. When statements are present, the
-icon returns to the IA² colors and its native browser badge shows the statement
-count, capped at `999+`. The tooltip retains the exact count. This state follows
-live semantic DOM changes while the Navigator is mounted. Navigation resets the
-icon and badge because the extension does not inspect the next document until
-the person selects the action again.
+`activeTab` and `scripting` remain scoped to the toolbar action. They let a
+person open the Navigator on any supported document without making that drawer
+appear automatically on every page.
 
-The action script runs in the page's main JavaScript world because the
-Navigator is a custom element. It uses no extension APIs there and carries no
-extension secrets, but page scripts can observe or interfere with its runtime.
+After a document is inspected, the action icon becomes gray when the Navigator
+finds no HTML/RDF statements. When statements are present, the icon returns to
+the IA² colors and its native browser badge shows the statement count, capped
+at `999+`. The tooltip retains the exact count. HARE documents are inspected
+automatically; ordinary documents are inspected after the toolbar action. The
+state follows live semantic DOM changes while the Navigator is mounted.
+
+For HARE, the tooltip identifies the HARE context and reports both the resource
+file count and RDF statement count while still describing the action as opening
+the Navigator. The badge continues to show the RDF statement count so its
+meaning remains stable across document types.
+
+The automatic HARE enhancer and toolbar action run in the page's main
+JavaScript world because they mount custom elements. They use no extension APIs
+there and carry no extension secrets, but page scripts can observe or interfere
+with their runtime.
 
 Browser-internal pages, extension stores, built-in document viewers, and other
 protected surfaces do not permit injection. The toolbar action shows an
@@ -70,6 +98,6 @@ changes in this package's shared sources and regenerate the project.
 The adapter intentionally preserves the Navigator's current extraction and
 network boundaries. It reads the top-level document light tree, observes live
 semantic DOM changes, and leaves cross-origin discovery subject to CORS. Page
-reloads remove the injected component; selecting the toolbar action adds it
-again. Shadow roots, embedded documents, templates, PDF viewers, and browser UI
-remain outside the observed document.
+reloads automatically restore HARE enhancement; ordinary Navigator drawers
+remain toolbar-initiated. Shadow roots, embedded documents, templates, PDF
+viewers, and browser UI remain outside the observed document.

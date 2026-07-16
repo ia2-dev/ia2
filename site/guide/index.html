@@ -37,6 +37,7 @@
           <div class="spec-switcher__menu" role="menu" aria-label="Specifications">
             <a class="spec-switcher__option" role="menuitem" aria-current="true" href="/spec/html-rdf"><strong>HTML/RDF Core Model</strong><small>RDF 1.2 in an HTML document</small></a>
             <a class="spec-switcher__option" role="menuitem" href="/spec/discovery-enrichment"><strong>Discovery and Enrichment</strong><small>Purposeful links to additional knowledge</small></a>
+            <a class="spec-switcher__option" role="menuitem" href="/spec/resource-envelope"><strong>HTML Agent Resource Envelope</strong><small>HARE: Single-file HTML/RDF bundles for agents</small></a>
           </div>
         </div>
         <a href="/guide/html-rdf" aria-current="page">Guide</a>
@@ -99,6 +100,7 @@
             <li><a href="#literals">Literal metadata</a></li>
             <li><a href="#graphs">Graphs and triple terms</a></li>
             <li><a href="#live-dom">Live DOM</a></li>
+            <li><a href="#hare">HARE bundles</a></li>
             <li><a href="#checklist">Authoring checklist</a></li>
             <li><a href="#next">Where next</a></li>
           </ol>
@@ -448,8 +450,318 @@ _:location &lt;https://schema.org/name&gt; "Lab 3" .</code></div>
             </ul>
           </section>
 
+          <section id="hare" class="guide-section" aria-labelledby="hare-title">
+            <p class="guide-section-number">08 / Portable resource bundles</p>
+            <h2
+              id="hare-title"
+              rdf-subject="#hare"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Carry a graph and its resources in one HTML document.</h2>
+            <p class="section-lede">
+              HARE, the proposed HTML Agent Resource Envelope, packages a
+              manifest, relationships, and inspectable representations in a
+              browser-openable file. Semantic HTML can live directly in the
+              document as template DOM. The manifest is HTML/RDF, not a
+              parallel JSON document, so agents can extract it without running
+              code.
+            </p>
+
+            <p>
+              Use HARE when a handoff must preserve meaning and the resources
+              that meaning describes. Keep the graph as the primary model.
+              Give DOM representations logical paths so they receive virtual
+              document URLs; paths remain optional for other representations.
+              Use byte representations only when exact octets, downloads, or
+              hashes matter. The envelope remains useful as HTML even when no
+              viewer runs.
+            </p>
+
+            <p>
+              HARE reuses <code>dcterms:hasPart</code> for membership,
+              <code>dcterms:identifier</code> for logical paths,
+              and <code>dc:format</code> for media types. It defines only the
+              envelope mechanics that those vocabularies do not provide,
+              including the manifest graph, virtual document base,
+              representation link, carrier, and optional runtime. Byte representations additionally use
+              <code>cred:digestSRI</code> for digests and HARE's decoded byte
+              length.
+            </p>
+
+            <dl class="definition-rows">
+              <div>
+                <dt>Envelope</dt>
+                <dd>The self-contained HTML artifact and its source document identity.</dd>
+              </div>
+              <div>
+                <dt>Manifest</dt>
+                <dd>One named RDF graph describing resources, representations, relationships, and policy.</dd>
+              </div>
+              <div>
+                <dt>Resource</dt>
+                <dd>A conceptual item in the handoff, such as a brief, dataset, image, or decision.</dd>
+              </div>
+              <div>
+                <dt>Representation</dt>
+                <dd>A semantic or byte realization of a resource, with a media type and an HTML carrier.</dd>
+              </div>
+            </dl>
+
+            <h3>Build the smallest declarative envelope</h3>
+            <p>
+              This complete envelope carries a small HTML resource as parsed,
+              directly inspectable template DOM. The logical path is a useful
+              alias, not the identity or source of truth for the resource.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>HARE 0.1</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en" rdf-version="1.2"&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;link rel="canonical" href="https://example.com/hello.hare.html"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;main&gt;
+      &lt;h1&gt;Hello handoff&lt;/h1&gt;
+      &lt;section id="manifest" aria-label="Bundle manifest"&gt;
+        &lt;a hidden href="https://ia2.dev/spec/resource-envelope#Envelope"
+          rdf-subject="" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+          rdf-graph="#manifest"&gt;&lt;/a&gt;
+        &lt;a hidden href="https://ia2.dev/spec/resource-envelope#HARE-0.1" rdf-subject=""
+          rdf-predicate="http://purl.org/dc/terms/conformsTo"
+          rdf-graph="#manifest"&gt;&lt;/a&gt;
+        &lt;a hidden href="https://ia2.dev/spec/resource-envelope#DeclarativeProfile" rdf-subject=""
+          rdf-predicate="http://purl.org/dc/terms/conformsTo"
+          rdf-graph="#manifest"&gt;&lt;/a&gt;
+        &lt;a hidden href="#manifest" rdf-subject=""
+          rdf-predicate="https://ia2.dev/spec/resource-envelope#manifestGraph"
+          rdf-graph="#manifest"&gt;&lt;/a&gt;
+        &lt;a hidden href="https://hello.hare.invalid/" rdf-subject=""
+          rdf-predicate="https://ia2.dev/spec/resource-envelope#virtualBase"
+          rdf-graph="#manifest"&gt;&lt;/a&gt;
+        &lt;a href="#greeting" rdf-subject=""
+          rdf-predicate="http://purl.org/dc/terms/hasPart"
+          rdf-graph="#manifest"&gt;Greeting resource&lt;/a&gt;
+
+        &lt;a hidden href="#greeting-representation" rdf-subject="#greeting"
+          rdf-predicate="https://ia2.dev/spec/resource-envelope#representation"
+          rdf-graph="#manifest"&gt;&lt;/a&gt;
+        &lt;a id="greeting-representation" hidden
+          href="https://ia2.dev/spec/resource-envelope#DOMRepresentation"
+          rdf-subject="#greeting-representation"
+          rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+          rdf-graph="#manifest"&gt;&lt;/a&gt;
+        &lt;data value="/hello.html" rdf-subject="#greeting-representation"
+          rdf-predicate="http://purl.org/dc/terms/identifier"
+          rdf-graph="#manifest"&gt;/hello.html&lt;/data&gt;
+        &lt;data hidden value="text/html" rdf-subject="#greeting-representation"
+          rdf-predicate="http://purl.org/dc/elements/1.1/format"
+          rdf-graph="#manifest"&gt;&lt;/data&gt;
+        &lt;a hidden href="#greeting-content" rdf-subject="#greeting-representation"
+          rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier"
+          rdf-graph="#manifest"&gt;&lt;/a&gt;
+      &lt;/section&gt;
+    &lt;/main&gt;
+    &lt;template id="greeting-content"&gt;
+      &lt;article&gt;
+        &lt;h1&gt;Hello, agent&lt;/h1&gt;
+        &lt;p&gt;This semantic HTML is readable directly in the envelope.&lt;/p&gt;
+        &lt;a href="/"&gt;Return to the envelope document&lt;/a&gt;
+      &lt;/article&gt;
+    &lt;/template&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </figure>
+
+            <p>
+              The declared <code>hare:virtualBase</code> gives the host envelope
+              the virtual URL <code>https://hello.hare.invalid/</code>. The
+              greeting's logical path gives it
+              <code>https://hello.hare.invalid/hello.html</code>. Inside the
+              template, <code>href="/"</code> returns to the host document, and
+              ordinary relative paths can address other bundled
+              representations. These virtual URLs are routing addresses, not
+              retrievable locations or RDF identity.
+            </p>
+
+            <p>
+              When exact bytes are part of the handoff contract, use a
+              <code>hare:ByteRepresentation</code> instead. Its carrier is an
+              inert base64 <code>&lt;script type="application/octet-stream"&gt;</code>
+              and its byte length and SRI digest describe the decoded octets.
+              One resource may have both semantic and byte representations.
+            </p>
+
+            <h3>Materialize a small site without inventing an origin</h3>
+            <p>
+              Template HTML can use ordinary relative URLs for passive
+              resources. A materializing viewer resolves each reference against
+              the containing document's virtual URL, finds the matching byte
+              representation, verifies it, and rewrites only the derived view
+              to a local Blob URL. The template stays readable and unchanged.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>Inspectable HTML with bundled dependencies</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>&lt;template id="report-content"&gt;
+  &lt;link rel="stylesheet" href="../styles/report.css"&gt;
+  &lt;article&gt;
+    &lt;img src="../images/verified.svg" alt="Verified"&gt;
+    &lt;a href="details.html"&gt;Details&lt;/a&gt;
+  &lt;/article&gt;
+&lt;/template&gt;</code></pre>
+            </figure>
+            <p>
+              Navigation and materialization deliberately differ. The anchor
+              routes to another virtual document when activated; the image and
+              stylesheet are passive fetch destinations and may be
+              materialized immediately. Stylesheet imports and CSS
+              <code>url()</code> references can recurse through the same
+              verified process. External, missing, incompatible, and
+              executable destinations stay inert; a viewer does not use the
+              live network as fallback.
+            </p>
+
+            <p>
+              Verified Markdown bytes can use the same virtual address space.
+              For example, a brief at <code>/docs/brief.md</code> may contain
+              <code>![Verified result](../assets/verified.svg)</code>. A safe
+              renderer resolves that reference to
+              <code>/assets/verified.svg</code>, verifies the declared image
+              representation, and gives only the rendered image a temporary
+              Blob URL. The Markdown bytes and reference remain unchanged;
+              unmatched images are never fetched from the network.
+            </p>
+
+            <p>
+              The optional <code>@ia2-dev/hare-viewer</code> runtime includes a
+              small dependency-free Markdown renderer for headings, emphasis,
+              links, images, quotations, lists, task items, tables, and code.
+              It creates DOM nodes directly, treats raw HTML as text, routes
+              links through HARE, and delegates images to verified resource
+              lookup. It is intentionally not advertised as CommonMark
+              conformant until it is tested against that specification's
+              corpus. Self-viewing envelopes can inline the renderer with the
+              rest of their runtime.
+            </p>
+
+            <p>
+              A safe viewer also makes links inert in its derived iframe before
+              showing it, retains the original <code>href</code> as routing
+              data, and resolves that value through the HARE virtual URL space
+              when the user activates the link. This prevents a timing gap from
+              turning a virtual <code>.invalid</code> address into a browser
+              navigation. The readable links in the authored template are not
+              changed.
+            </p>
+
+            <p>
+              The authored host document can refer to a bundled passive
+              resource too. Keep its virtual URL in an inert
+              <code>data-hare-src</code> attribute so the browser does not try
+              the non-retrievable address before verification. A supporting
+              viewer retains that declarative reference and supplies the
+              verified Blob URL to <code>src</code> at runtime.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>Verified image in the host document</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>&lt;figure&gt;
+  &lt;img
+    data-hare-src="https://hello.hare.invalid/images/verified.svg"
+    alt="Verified bundle"
+  &gt;
+  &lt;figcaption&gt;Image carried by this envelope.&lt;/figcaption&gt;
+&lt;/figure&gt;</code></pre>
+            </figure>
+
+            <div class="guide-note">
+              <p>
+                <strong>Keep the host policy compatible.</strong> A
+                <code>srcdoc</code> preview inherits the envelope's Content
+                Security Policy, and its inner policy can only restrict it
+                further. If browser viewers are intended to work, permit
+                <code>about:</code> and <code>blob:</code> frames plus
+                <code>blob:</code>/<code>data:</code> for the passive style,
+                image, media, and font destinations the viewer materializes.
+                Continue to deny scripts, workers, plugins, and network
+                fallback.
+              </p>
+              <p>
+                DevTools, test runners, and other extensions sometimes inject
+                inspection code into the preview. The browser may report that
+                attempt as blocked script execution even though the derived
+                document is script-free. That is the sandbox working. Confirm
+                the derived document contains no script; do not add
+                <code>allow-scripts</code> to silence the message.
+              </p>
+            </div>
+
+            <h3>Enhance it only when a viewer helps</h3>
+            <p>
+              A declarative envelope needs no executable code. During
+              development, <code>@ia2-dev/hare-viewer</code> can generate a file
+              browser when the body has no authored interface, or add Document
+              and Files tabs when authored content is present. A compatible
+              browser extension can add those modes automatically, including
+              the full file browser for a bare envelope, without requiring or
+              executing envelope-supplied code.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>Development convenience</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>&lt;script
+  type="module"
+  src="https://ia2.dev/packages/hare-viewer/dist/hare-viewer.js"
+&gt;&lt;/script&gt;</code></pre>
+            </figure>
+
+            <div class="guide-note">
+              <p>
+                <strong>Keep transport self-contained.</strong> The package URL
+                is convenient while authoring. Inline the built runtime into an
+                exported self-viewing envelope, and never execute bundled HTML
+                or scripts by default.
+              </p>
+            </div>
+
+            <ul class="guide-next-list" aria-label="HARE working artifacts">
+              <li>
+                <a
+                  href="/spec/resource-envelope"
+                  rdf-subject=""
+                  rdf-predicate="http://purl.org/dc/terms/references"
+                >
+                  <span><strong>Read the HARE proposal</strong><small>Exact envelope, manifest, representation, validation, and security rules.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+              <li>
+                <a href="/spec/resource-envelope/examples/decision-handoff.html">
+                  <span><strong>Open the Atlas decision handoff</strong><small>A migration brief and its derived decision remain readable with no JavaScript.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+              <li>
+                <a href="/spec/resource-envelope/examples/vendor-review.html">
+                  <span><strong>Inspect the Northstar vendor review</strong><small>A complete envelope embeds its own searchable, verified offline viewer.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+              <li>
+                <a href="/spec/resource-envelope/examples/inspection-evidence.html">
+                  <span><strong>Browse Riverside inspection evidence</strong><small>A field summary, sensor readings, and diagram become a verified file browser.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+              <li>
+                <a href="/spec/resource-envelope/examples/release-handoff.html">
+                  <span><strong>Open the Orion release handoff</strong><small>A useful host summary links to release notes, a rollback plan, and shared bundled imagery.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+
           <section id="checklist" class="guide-section" aria-labelledby="checklist-title">
-            <p class="guide-section-number">08 / Before publishing</p>
+            <p class="guide-section-number">09 / Before publishing</p>
             <h2
               id="checklist-title"
               rdf-subject="#checklist"
@@ -458,7 +770,7 @@ _:location &lt;https://schema.org/name&gt; "Lab 3" .</code></div>
 
             <ul class="authoring-checklist">
               <li><span>Declare <code>rdf-version="1.2"</code> on the document element.</span></li>
-              <li><span>Publish exactly one valid, fragmentless canonical link when the public identity differs from the retrieval URL.</span></li>
+              <li><span>Publish exactly one valid, fragmentless canonical link when a stable public identity is available and differs from the retrieval URL.</span></li>
               <li><span>Use a full predicate IRI on every statement carrier.</span></li>
               <li><span>Make every carrier determine exactly one object form.</span></li>
               <li><span>Use explicit subjects for statements about another element or resource.</span></li>
@@ -479,7 +791,7 @@ _:location &lt;https://schema.org/name&gt; "Lab 3" .</code></div>
           </section>
 
           <section id="next" class="guide-section" aria-labelledby="next-title">
-            <p class="guide-section-number">09 / Where next</p>
+            <p class="guide-section-number">10 / Where next</p>
             <h2
               id="next-title"
               rdf-subject="#next"
@@ -534,6 +846,7 @@ _:location &lt;https://schema.org/name&gt; "Lab 3" .</code></div>
           <div class="spec-switcher__menu" role="menu" aria-label="Specifications">
             <a class="spec-switcher__option" role="menuitem" aria-current="true" href="/spec/html-rdf"><strong>HTML/RDF Core Model</strong><small>RDF 1.2 in an HTML document</small></a>
             <a class="spec-switcher__option" role="menuitem" href="/spec/discovery-enrichment"><strong>Discovery and Enrichment</strong><small>Purposeful links to additional knowledge</small></a>
+            <a class="spec-switcher__option" role="menuitem" href="/spec/resource-envelope"><strong>HTML Agent Resource Envelope</strong><small>HARE: Single-file HTML/RDF bundles for agents</small></a>
           </div>
         </div>
         <a href="/demos/live-workspace">Demo</a>

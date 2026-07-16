@@ -205,6 +205,17 @@ describe("Ia2RdfNavigator", () => {
     }
   });
 
+  it("does not fail when a tab container is unavailable during a redraw", () => {
+    const drawer = mountRdfNavigator();
+    const root = drawer.shadowRoot!;
+    const querySelector = root.querySelector.bind(root);
+    root.querySelector = ((selectors: string) => (
+      selectors === ".tabs" ? null : querySelector(selectors)
+    )) as typeof root.querySelector;
+
+    expect(() => drawer.refresh()).not.toThrow();
+  });
+
   it("distinguishes pointer and keyboard focus when opening the drawer", async () => {
     const drawer = mountRdfNavigator();
     drawer.shadowRoot?.querySelector<HTMLButtonElement>(".launcher")

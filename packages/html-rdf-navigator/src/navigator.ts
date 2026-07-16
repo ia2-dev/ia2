@@ -1128,9 +1128,10 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.#vocabularyTreeCleanup = null;
   }
 
-  #configureTabCompaction(tabs: HTMLElement): void {
+  #configureTabCompaction(tabs: HTMLElement | null): void {
     this.#tabResizeObserver?.disconnect();
     this.#tabResizeObserver = null;
+    if (!tabs) return;
     const update = (): void => {
       tabs.dataset.compact = "0";
       if (tabs.clientWidth <= 0) return;
@@ -2798,8 +2799,10 @@ export class Ia2RdfNavigator extends HTMLElement {
         <p class="sr-only" aria-live="polite">${this.#status}</p>
       </aside>`;
 
-    const viewport = this.shadowRoot.querySelector<HTMLElement>(".viewport")!;
-    this.#configureTabCompaction(this.shadowRoot.querySelector<HTMLElement>(".tabs")!);
+    const viewport = this.shadowRoot.querySelector<HTMLElement>(".viewport");
+    const tabs = this.shadowRoot.querySelector<HTMLElement>(".tabs");
+    this.#configureTabCompaction(tabs);
+    if (!viewport) return;
     if (this.#view === "turtle") viewport.append(highlightedCode(serializeTurtle(result), "turtle", document));
     if (this.#view === "json") {
       if (containsTripleTerms(result)) {

@@ -2,10 +2,32 @@
   "manifest_version": 3,
   "name": "IA² Navigator",
   "version": "0.1.0",
-  "description": "Inspect the RDF dataset expressed by the current IA² HTML document.",
+  "description": "Inspect HTML/RDF datasets and browse verified files in HARE resource envelopes.",
   "permissions": [
     "activeTab",
     "scripting"
+  ],
+  "content_scripts": [
+    {
+      "js": [
+        "auto.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_idle",
+      "world": "MAIN"
+    },
+    {
+      "js": [
+        "status.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_idle",
+      "world": "ISOLATED"
+    }
   ],
   "action": {
     "default_title": "Open IA² Navigator",

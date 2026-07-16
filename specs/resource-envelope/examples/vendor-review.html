@@ -1,0 +1,1081 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Northstar vendor review</title>
+    <link
+      rel="canonical"
+      href="https://ia2.dev/spec/resource-envelope/examples/vendor-review.html"
+    >
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline' blob: data:; script-src 'unsafe-inline'; img-src blob: data:; media-src blob: data:; font-src blob: data:; frame-src 'self' blob: about:"
+    >
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Avenir Next", Avenir, "Segoe UI Variable", "Segoe UI", sans-serif;
+        background: oklch(98.5% 0.008 286);
+        color: oklch(23% 0.035 286);
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      button, input { font: inherit; }
+      a { color: inherit; }
+
+      :focus-visible {
+        outline: 3px solid oklch(81% 0.15 135);
+        outline-offset: 3px;
+      }
+
+      header {
+        background: oklch(49% 0.18 294);
+        color: oklch(97% 0.012 294);
+        padding: clamp(1.75rem, 5vw, 4.5rem) max(1.25rem, calc((100vw - 78rem) / 2));
+      }
+
+      .header-grid {
+        align-items: end;
+        display: grid;
+        gap: 1.25rem 3rem;
+        grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.4fr);
+      }
+
+      header h1 {
+        font-size: clamp(2.6rem, 7vw, 6.2rem);
+        letter-spacing: -0.06em;
+        line-height: 0.9;
+        margin: 0;
+        max-width: 11ch;
+      }
+
+      header p {
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        line-height: 1.55;
+        margin: 0;
+        max-width: 35ch;
+      }
+
+      .mode-line {
+        border-top: 1px solid oklch(78% 0.07 294 / 60%);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem 1.5rem;
+        margin-top: 2rem;
+        padding-top: 0.85rem;
+      }
+
+      .mode-line span {
+        font: 700 0.72rem/1.3 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        letter-spacing: 0.045em;
+        text-transform: uppercase;
+      }
+
+      #viewer,
+      #manifest,
+      noscript > p,
+      footer {
+        margin-inline: auto;
+        max-width: 78rem;
+        padding-inline: 1.25rem;
+      }
+
+      #viewer {
+        padding-block: clamp(2rem, 6vw, 5rem);
+      }
+
+      .viewer-toolbar {
+        align-items: end;
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.4fr);
+        margin-bottom: 1.25rem;
+      }
+
+      .viewer-toolbar h2 {
+        font-size: clamp(1.8rem, 4vw, 3.25rem);
+        letter-spacing: -0.045em;
+        margin: 0;
+      }
+
+      .search-label {
+        display: grid;
+        gap: 0.4rem;
+      }
+
+      .search-label span {
+        color: oklch(47% 0.025 286);
+        font-size: 0.72rem;
+        font-weight: 750;
+        letter-spacing: 0.045em;
+        text-transform: uppercase;
+      }
+
+      .search-label input {
+        background: oklch(94.5% 0.02 286);
+        border: 1px solid oklch(84% 0.025 286);
+        border-radius: 8px;
+        color: inherit;
+        min-height: 44px;
+        padding: 0.65rem 0.8rem;
+        width: 100%;
+      }
+
+      .viewer-grid {
+        border: 1px solid oklch(84% 0.025 286);
+        display: grid;
+        grid-template-columns: minmax(14rem, 0.32fr) minmax(0, 1fr);
+        min-height: 34rem;
+      }
+
+      #resource-list {
+        border-inline-end: 1px solid oklch(84% 0.025 286);
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+      }
+
+      .resource-button {
+        background: transparent;
+        border: 0;
+        border-bottom: 1px solid oklch(88% 0.02 286);
+        color: inherit;
+        cursor: pointer;
+        display: grid;
+        gap: 0.3rem;
+        padding: 1rem;
+        text-align: start;
+      }
+
+      .resource-button:hover {
+        background: oklch(94.5% 0.02 286);
+      }
+
+      .resource-button[aria-current="true"] {
+        background: oklch(93% 0.035 294);
+      }
+
+      .resource-button strong {
+        font-size: 0.95rem;
+      }
+
+      .resource-button span {
+        color: oklch(47% 0.025 286);
+        font: 0.72rem/1.4 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        overflow-wrap: anywhere;
+      }
+
+      #preview {
+        min-width: 0;
+        padding: clamp(1.2rem, 3vw, 2.25rem);
+      }
+
+      .preview-heading {
+        align-items: start;
+        border-bottom: 1px solid oklch(84% 0.025 286);
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+      }
+
+      .preview-heading h3 {
+        font-size: clamp(1.3rem, 3vw, 2rem);
+        letter-spacing: -0.035em;
+        margin: 0;
+      }
+
+      .preview-heading__actions {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: flex-end;
+      }
+
+      .download-link {
+        align-items: center;
+        background: oklch(30% 0.12 294);
+        color: oklch(97% 0.012 294);
+        display: inline-flex;
+        font-size: 0.75rem;
+        font-weight: 750;
+        min-height: 44px;
+        padding: 0.65rem 0.9rem;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .download-link:hover {
+        background: oklch(49% 0.18 294);
+      }
+
+      .verification {
+        align-items: center;
+        color: oklch(38% 0.11 135);
+        display: inline-flex;
+        font-size: 0.75rem;
+        font-weight: 750;
+        gap: 0.45rem;
+        white-space: nowrap;
+      }
+
+      .verification::before {
+        background: oklch(81% 0.15 135);
+        border-radius: 999px;
+        content: "";
+        height: 0.7rem;
+        width: 0.7rem;
+      }
+
+      .preview-meta {
+        color: oklch(47% 0.025 286);
+        display: flex;
+        flex-wrap: wrap;
+        font: 0.75rem/1.5 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        gap: 0.35rem 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .navigation-error {
+        background: oklch(95% 0.035 28);
+        border: 1px solid oklch(78% 0.08 28);
+        border-radius: 0.5rem;
+        color: oklch(42% 0.14 28);
+        padding: 0.75rem 0.9rem;
+      }
+
+      .rendered-markdown h1 {
+        color: oklch(49% 0.18 294);
+        font-size: clamp(1.5rem, 3vw, 2.3rem);
+        letter-spacing: -0.035em;
+      }
+
+      .rendered-markdown p {
+        font-size: 1.05rem;
+        line-height: 1.65;
+        max-width: 68ch;
+      }
+
+      .rendered-markdown h2 {
+        border-bottom: 1px solid oklch(84% 0.025 286);
+        padding-bottom: 0.35rem;
+      }
+
+      .rendered-markdown li { line-height: 1.65; margin-block: 0.25rem; }
+      .rendered-markdown .task-list-item { list-style: none; }
+      .rendered-markdown blockquote { border-left: 3px solid oklch(72% 0.08 294); color: oklch(43% 0.03 286); margin-inline: 0; padding-left: 1rem; }
+      .rendered-markdown code { background: oklch(93% 0.02 286); border-radius: 0.25rem; font: 0.88em/1.5 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; padding: 0.12rem 0.3rem; }
+      .rendered-markdown table { border-collapse: collapse; margin-block: 1.5rem; }
+      .rendered-markdown th, .rendered-markdown td { border: 1px solid oklch(84% 0.025 286); padding: 0.45rem 0.7rem; }
+
+      .rendered-markdown figure {
+        margin: 2rem 0 0;
+        max-width: 28rem;
+      }
+
+      .rendered-markdown figcaption {
+        color: oklch(47% 0.025 286);
+        font-size: 0.8rem;
+        margin-top: 0.55rem;
+      }
+
+      #preview pre {
+        background: oklch(30% 0.12 294);
+        color: oklch(97% 0.012 294);
+        font: 0.85rem/1.75 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        margin: 0;
+        overflow: auto;
+        padding: 1rem;
+        white-space: pre-wrap;
+      }
+
+      #preview iframe {
+        background: oklch(98.5% 0.008 286);
+        border: 1px solid oklch(84% 0.025 286);
+        min-height: 22rem;
+        width: 100%;
+      }
+
+      #preview img {
+        display: block;
+        height: auto;
+        max-width: min(100%, 40rem);
+      }
+
+      noscript > p {
+        background: oklch(94.5% 0.02 286);
+        border-block: 1px solid oklch(84% 0.025 286);
+        line-height: 1.6;
+        padding-block: 1rem;
+      }
+
+      #manifest {
+        padding-block: clamp(2rem, 6vw, 5rem);
+      }
+
+      #manifest > h2 {
+        font-size: clamp(1.8rem, 4vw, 3rem);
+        letter-spacing: -0.04em;
+        margin: 0 0 1rem;
+      }
+
+      #manifest > p {
+        color: oklch(47% 0.025 286);
+        line-height: 1.6;
+        max-width: 68ch;
+      }
+
+      .manifest-resources {
+        border-block: 1px solid oklch(84% 0.025 286);
+        margin-top: 2rem;
+      }
+
+      .manifest-resource {
+        display: grid;
+        gap: 0.75rem 2rem;
+        grid-template-columns: minmax(12rem, 0.3fr) minmax(0, 1fr);
+        padding-block: 1.5rem;
+      }
+
+      .manifest-resource + .manifest-resource {
+        border-top: 1px solid oklch(84% 0.025 286);
+      }
+
+      .manifest-resource h3 {
+        color: oklch(49% 0.18 294);
+        font-size: 1.25rem;
+        margin: 0;
+      }
+
+      .manifest-resource dl {
+        display: grid;
+        grid-template-columns: max-content minmax(0, 1fr);
+        margin: 0;
+      }
+
+      .manifest-resource dt,
+      .manifest-resource dd {
+        border-bottom: 1px solid oklch(90% 0.015 286);
+        margin: 0;
+        padding: 0.45rem 0;
+      }
+
+      .manifest-resource dt {
+        color: oklch(47% 0.025 286);
+        font-size: 0.7rem;
+        font-weight: 750;
+        padding-inline-end: 1rem;
+        text-transform: uppercase;
+      }
+
+      .manifest-resource dd {
+        font: 0.74rem/1.5 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        overflow-wrap: anywhere;
+      }
+
+      .manifest-resource p {
+        line-height: 1.6;
+        margin: 0 0 0.75rem;
+      }
+
+      footer {
+        border-top: 1px solid oklch(84% 0.025 286);
+        color: oklch(47% 0.025 286);
+        font-size: 0.82rem;
+        padding-block: 2rem 4rem;
+      }
+
+      @media (max-width: 760px) {
+        .header-grid,
+        .viewer-toolbar,
+        .viewer-grid,
+        .manifest-resource {
+          grid-template-columns: 1fr;
+        }
+
+        #resource-list {
+          border-bottom: 1px solid oklch(84% 0.025 286);
+          border-inline-end: 0;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .resource-button {
+          border-inline-end: 1px solid oklch(88% 0.02 286);
+        }
+      }
+
+      @media (max-width: 520px) {
+        .preview-heading {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .preview-heading__actions {
+          justify-content: space-between;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-grid">
+        <h1
+          rdf-subject=""
+          rdf-predicate="http://purl.org/dc/terms/title"
+          rdf-graph="#manifest"
+        >Northstar vendor review</h1>
+        <p>
+          Conditional approval. Northstar meets the security baseline, but the
+          contract must add a 30-day termination clause before procurement can
+          proceed.
+        </p>
+      </div>
+      <div class="mode-line">
+        <span>Self-viewing profile</span>
+        <span>4 resources</span>
+        <span>Offline</span>
+        <span>SHA-256 verification</span>
+      </div>
+    </header>
+
+    <section id="viewer" hidden aria-labelledby="viewer-title">
+      <div class="viewer-toolbar">
+        <h2 id="viewer-title">Inspect the bundle</h2>
+        <label class="search-label">
+          <span>Filter resources</span>
+          <input id="resource-search" type="search" placeholder="Path, title, or media type">
+        </label>
+      </div>
+      <div class="viewer-grid">
+        <div id="resource-list" aria-label="Resources"></div>
+        <div id="preview" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <noscript>
+      <p>
+        The optional viewer is unavailable because JavaScript is disabled. The
+        complete human-readable manifest remains below. Semantic HTML stays
+        inspectable as template DOM, and byte carriers remain available to an
+        HTML/RDF consumer.
+      </p>
+    </noscript>
+
+    <main>
+      <section id="manifest" rdf-graph="#manifest">
+        <h2>Visible manifest</h2>
+        <p>
+          This section is both the no-script inspection surface and the carrier
+          of the canonical manifest graph. Each machine statement explicitly
+          names the same graph.
+        </p>
+
+        <a hidden href="https://ia2.dev/spec/resource-envelope#Envelope" rdf-subject="" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+        <a hidden href="https://ia2.dev/spec/resource-envelope#HARE-0.1" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/conformsTo" rdf-graph="#manifest"></a>
+        <a hidden href="#manifest" rdf-subject="" rdf-predicate="https://ia2.dev/spec/resource-envelope#manifestGraph" rdf-graph="#manifest"></a>
+        <a hidden href="https://northstar.hare.invalid/" rdf-subject="" rdf-predicate="https://ia2.dev/spec/resource-envelope#virtualBase" rdf-graph="#manifest"></a>
+        <a hidden href="https://ia2.dev/spec/resource-envelope#SelfViewingProfile" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/conformsTo" rdf-graph="#manifest"></a>
+        <a hidden href="#viewer-runtime" rdf-subject="" rdf-predicate="https://ia2.dev/spec/resource-envelope#runtime" rdf-graph="#manifest"></a>
+        <a hidden href="https://ia2.dev/spec/resource-envelope#ViewerRuntime" rdf-subject="#viewer-runtime" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+
+        <a hidden href="#brief" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#manifest"></a>
+        <a hidden href="#status" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#manifest"></a>
+        <a hidden href="#summary" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#manifest"></a>
+        <a hidden href="#badge" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#manifest"></a>
+
+        <div class="manifest-resources">
+          <article class="manifest-resource" id="brief">
+            <h3 rdf-subject="#brief" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Vendor review brief</h3>
+            <div>
+              <p>Source analysis describing the approval condition.</p>
+              <a hidden href="#brief-representation" rdf-subject="#brief" rdf-predicate="https://ia2.dev/spec/resource-envelope#representation" rdf-graph="#manifest"></a>
+              <a hidden href="https://ia2.dev/spec/resource-envelope#ByteRepresentation" rdf-subject="#brief-representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+              <dl>
+                <dt>Path</dt><dd><data value="/docs/brief.md" rdf-subject="#brief-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest">/docs/brief.md</data></dd>
+                <dt>Type</dt><dd><data value="text/markdown; charset=utf-8" rdf-subject="#brief-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest">text/markdown; charset=utf-8</data></dd>
+                <dt>Length</dt><dd><data value="404" rdf-subject="#brief-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#byteLength" rdf-datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" rdf-graph="#manifest">404 bytes</data></dd>
+                <dt>Integrity</dt><dd><data value="sha256-JI/xLRsHxorxBdXiVUP60ZQsETgHCVLLpXIFfU4sPgk=" rdf-subject="#brief-representation" rdf-predicate="https://www.w3.org/2018/credentials#digestSRI" rdf-datatype="https://www.w3.org/2018/credentials#sriString" rdf-graph="#manifest">sha256-JI/xLRsHxorxBdXiVUP60ZQsETgHCVLLpXIFfU4sPgk=</data></dd>
+              </dl>
+              <a hidden href="#badge" rdf-subject="#brief" rdf-predicate="http://purl.org/dc/terms/references" rdf-graph="#manifest"></a>
+              <a hidden href="#status" rdf-subject="#brief" rdf-predicate="http://purl.org/dc/terms/references" rdf-graph="#manifest"></a>
+              <a hidden href="#brief-bytes" rdf-subject="#brief-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+              <script id="brief-bytes" type="application/octet-stream" data-encoding="base64">IyBWZW5kb3IgcmV2aWV3CgpOb3J0aHN0YXIgbWVldHMgdGhlICoqc2VjdXJpdHkgYmFzZWxpbmUqKi4gQXBwcm92YWwgaXMgY29uZGl0aW9uYWwuCgojIyBDb25kaXRpb25zCgotIFt4XSBTZWN1cml0eSByZXZpZXcgY29tcGxldGUKLSBbIF0gQWRkIGEgMzAtZGF5IHRlcm1pbmF0aW9uIGNsYXVzZQoKfCBFdmlkZW5jZSB8IFJlc3VsdCB8CnwgLS0tIHwgLS0tOiB8CnwgUG9saWN5IGNvbnRyb2xzIHwgYHZlcmlmaWVkYCB8CgpbT3BlbiBzdHJ1Y3R1cmVkIHN0YXR1c10oLi4vZGF0YS9zdGF0dXMuanNvbikKCiFbVmVyaWZpZWQgcmV2aWV3IHJlc3VsdF0oLi4vYXNzZXRzL3ZlcmlmaWVkLnN2ZykKCj4gUmF3IEhUTUwgcmVtYWlucyBpbmVydDogYDxzY3JpcHQ+d2luZG93LmJhZCA9IHRydWU8L3NjcmlwdD5gLgo=</script>
+            </div>
+          </article>
+
+          <article class="manifest-resource" id="status">
+            <h3 rdf-subject="#status" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Structured status</h3>
+            <div>
+              <p><a href="#brief" rdf-subject="#status" rdf-predicate="http://www.w3.org/ns/prov#wasDerivedFrom" rdf-graph="#manifest">Derived from the review brief</a>.</p>
+              <a hidden href="#status-representation" rdf-subject="#status" rdf-predicate="https://ia2.dev/spec/resource-envelope#representation" rdf-graph="#manifest"></a>
+              <a hidden href="https://ia2.dev/spec/resource-envelope#ByteRepresentation" rdf-subject="#status-representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+              <dl>
+                <dt>Path</dt><dd><data value="/data/status.json" rdf-subject="#status-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest">/data/status.json</data></dd>
+                <dt>Type</dt><dd><data value="application/json" rdf-subject="#status-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest">application/json</data></dd>
+                <dt>Length</dt><dd><data value="84" rdf-subject="#status-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#byteLength" rdf-datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" rdf-graph="#manifest">84 bytes</data></dd>
+                <dt>Integrity</dt><dd><data value="sha256-pnUtA8AY/SIa4aOorUlnwuQMcoaSZWvvotcCvE8dCKg=" rdf-subject="#status-representation" rdf-predicate="https://www.w3.org/2018/credentials#digestSRI" rdf-datatype="https://www.w3.org/2018/credentials#sriString" rdf-graph="#manifest">sha256-pnUtA8AY/SIa4aOorUlnwuQMcoaSZWvvotcCvE8dCKg=</data></dd>
+              </dl>
+              <a hidden href="#status-bytes" rdf-subject="#status-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+              <script id="status-bytes" type="application/octet-stream" data-encoding="base64">ewogICJ2ZW5kb3IiOiAiTm9ydGhzdGFyIiwKICAic3RhdHVzIjogImNvbmRpdGlvbmFsLWFwcHJvdmFsIiwKICAicmlzayI6ICJtZWRpdW0iCn0K</script>
+            </div>
+          </article>
+
+          <article class="manifest-resource" id="summary">
+            <h3 rdf-subject="#summary" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Browser summary</h3>
+            <div>
+              <p><a href="#status" rdf-subject="#summary" rdf-predicate="http://www.w3.org/ns/prov#wasDerivedFrom" rdf-graph="#manifest">Derived from the structured status</a>.</p>
+              <a hidden href="#summary-representation" rdf-subject="#summary" rdf-predicate="https://ia2.dev/spec/resource-envelope#representation" rdf-graph="#manifest"></a>
+              <a hidden href="https://ia2.dev/spec/resource-envelope#DOMRepresentation" rdf-subject="#summary-representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+              <dl>
+                <dt>Path</dt><dd><data value="/pages/summary.html" rdf-subject="#summary-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest">/pages/summary.html</data></dd>
+                <dt>Type</dt><dd><data value="text/html" rdf-subject="#summary-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest">text/html</data></dd>
+                <dt>Kind</dt><dd>Semantic DOM</dd>
+              </dl>
+              <a hidden href="#summary-content" rdf-subject="#summary-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+              <template id="summary-content"><main><h1 id="result">Northstar review</h1><p>Conditional approval. Add a 30-day termination clause.</p><nav><a href="../data/status.json">Open the structured status</a> · <a href="/">Return to the envelope</a></nav></main></template>
+            </div>
+          </article>
+
+          <article class="manifest-resource" id="badge">
+            <h3 rdf-subject="#badge" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Verification badge</h3>
+            <div>
+              <p>A visual artifact for the verified result.</p>
+              <a hidden href="#badge-representation" rdf-subject="#badge" rdf-predicate="https://ia2.dev/spec/resource-envelope#representation" rdf-graph="#manifest"></a>
+              <a hidden href="https://ia2.dev/spec/resource-envelope#ByteRepresentation" rdf-subject="#badge-representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+              <dl>
+                <dt>Path</dt><dd><data value="/assets/verified.svg" rdf-subject="#badge-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest">/assets/verified.svg</data></dd>
+                <dt>Type</dt><dd><data value="image/svg+xml" rdf-subject="#badge-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest">image/svg+xml</data></dd>
+                <dt>Length</dt><dd><data value="355" rdf-subject="#badge-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#byteLength" rdf-datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" rdf-graph="#manifest">355 bytes</data></dd>
+                <dt>Integrity</dt><dd><data value="sha256-xto8JemiPBGHGlDuTp119Un4lICLPCskyz77zHEEtoc=" rdf-subject="#badge-representation" rdf-predicate="https://www.w3.org/2018/credentials#digestSRI" rdf-datatype="https://www.w3.org/2018/credentials#sriString" rdf-graph="#manifest">sha256-xto8JemiPBGHGlDuTp119Un4lICLPCskyz77zHEEtoc=</data></dd>
+              </dl>
+              <a hidden href="#badge-bytes" rdf-subject="#badge-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+              <script id="badge-bytes" type="application/octet-stream" data-encoding="base64">PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTgwIj48cmVjdCB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0iIzM5Mjc2YiIvPjxjaXJjbGUgY3g9IjkwIiBjeT0iOTAiIHI9IjQ0IiBmaWxsPSIjYjllYzY1Ii8+PHBhdGggZD0ibTcwIDkwIDE0IDE0IDI5LTM0IiBmaWxsPSJub25lIiBzdHJva2U9IiMyNTE5NDQiIHN0cm9rZS13aWR0aD0iMTIiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiLz48dGV4dCB4PSIxNTQiIHk9Ijk4IiBmaWxsPSIjZmFmOGZmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiI+VmVyaWZpZWQ8L3RleHQ+PC9zdmc+Cg==</script>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Self-viewing IA² HTML Agent Resource Envelope example. Disable JavaScript
+      or view source to inspect the declarative layer independently.
+    </footer>
+
+    <script id="viewer-runtime" type="module">
+      const HARE = "https://ia2.dev/spec/resource-envelope#";
+      const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+      const DC_FORMAT = "http://purl.org/dc/elements/1.1/format";
+      const DCT_HAS_PART = "http://purl.org/dc/terms/hasPart";
+      const DCT_IDENTIFIER = "http://purl.org/dc/terms/identifier";
+      const DCT_TITLE = "http://purl.org/dc/terms/title";
+      const CRED_DIGEST_SRI = "https://www.w3.org/2018/credentials#digestSRI";
+      const decoder = new TextDecoder();
+      const canonical = document.querySelector('link[rel="canonical"]')?.href ?? document.URL;
+      const manifest = document.querySelector("#manifest");
+      const viewer = document.querySelector("#viewer");
+      const list = document.querySelector("#resource-list");
+      const preview = document.querySelector("#preview");
+      const search = document.querySelector("#resource-search");
+      const currentBlobUrls = new Set();
+
+      function createTrackedBlobUrl(bytes, mediaType) {
+        const url = URL.createObjectURL(new Blob([bytes], { type: mediaType }));
+        currentBlobUrls.add(url);
+        return url;
+      }
+
+      function iri(reference) {
+        return new URL(reference || "", canonical).href;
+      }
+
+      function statementValue(element) {
+        if (element.matches("a[href], link[href]")) return iri(element.getAttribute("href"));
+        if (element.matches("data[value]")) return element.getAttribute("value");
+        if (element.matches("meta[content]")) return element.getAttribute("content");
+        return element.textContent.replace(/[\t\n\f\r ]+/g, " ").trim();
+      }
+
+      function values(subject, predicate) {
+        return Array.from(manifest.querySelectorAll(`[rdf-predicate="${CSS.escape(predicate)}"]`))
+          .filter((element) => iri(element.getAttribute("rdf-subject")) === subject)
+          .map(statementValue);
+      }
+
+      function one(subject, predicate) {
+        const result = values(subject, predicate);
+        if (result.length !== 1) throw new Error(`Expected one ${predicate} for ${subject}.`);
+        return result[0];
+      }
+
+      function optional(subject, predicate) {
+        const result = values(subject, predicate);
+        if (result.length > 1) throw new Error(`Expected at most one ${predicate} for ${subject}.`);
+        return result[0] ?? null;
+      }
+
+      function carrierElement(carrierIri) {
+        const url = new URL(carrierIri);
+        const id = decodeURIComponent(url.hash.slice(1));
+        const element = document.getElementById(id);
+        if (!element) throw new Error(`Missing carrier ${id}.`);
+        return element;
+      }
+
+      function decodeBytes(carrierIri) {
+        const element = carrierElement(carrierIri);
+        if (!(element instanceof HTMLScriptElement)) throw new Error("A byte carrier must be a script element.");
+        if (element.type !== "application/octet-stream" || element.dataset.encoding !== "base64") {
+          throw new Error(`Unsupported byte carrier ${element.id}.`);
+        }
+        const encoded = element.textContent.replace(/[\t\n\f\r ]+/g, "");
+        const binary = atob(encoded);
+        return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+      }
+
+      function base64(bytes) {
+        let binary = "";
+        for (const byte of bytes) binary += String.fromCharCode(byte);
+        return btoa(binary);
+      }
+
+      async function verify(resource) {
+        const bytes = decodeBytes(resource.carrier);
+        if (bytes.byteLength !== resource.length) throw new Error(`Length mismatch for ${resource.path}.`);
+        const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+        if (`sha256-${base64(digest)}` !== resource.integrity) throw new Error(`Digest mismatch for ${resource.path}.`);
+        return bytes;
+      }
+
+      const envelope = canonical;
+      const virtualBase = one(envelope, `${HARE}virtualBase`);
+      const resources = values(envelope, DCT_HAS_PART).map((resourceIri) => {
+        const representation = one(resourceIri, `${HARE}representation`);
+        const types = values(representation, RDF_TYPE);
+        const kind = types.includes(`${HARE}DOMRepresentation`) ? "dom"
+          : types.includes(`${HARE}ByteRepresentation`) ? "bytes"
+          : null;
+        if (!kind) throw new Error(`Unknown representation kind for ${representation}.`);
+        return {
+          id: resourceIri,
+          title: one(resourceIri, DCT_TITLE),
+          representation,
+          kind,
+          path: optional(representation, DCT_IDENTIFIER),
+          mediaType: one(representation, DC_FORMAT),
+          length: kind === "bytes" ? Number(one(representation, `${HARE}byteLength`)) : null,
+          integrity: kind === "bytes" ? one(representation, CRED_DIGEST_SRI) : null,
+          carrier: one(representation, `${HARE}carrier`),
+        };
+      });
+
+      function virtualUrl(resource) {
+        return resource.path ? new URL(resource.path, virtualBase).href : null;
+      }
+
+      function withoutFragment(url) {
+        const copy = new URL(url);
+        copy.hash = "";
+        return copy.href;
+      }
+
+      function domSource(template, resource) {
+        const page = document.implementation.createHTMLDocument(resource.title);
+        const base = page.createElement("base");
+        base.href = virtualUrl(resource);
+        const policy = page.createElement("meta");
+        policy.httpEquiv = "Content-Security-Policy";
+        policy.content = "default-src 'none'; img-src data: blob:; media-src data: blob:; style-src 'unsafe-inline'; font-src data: blob:; form-action 'none'";
+        page.head.prepend(policy, base);
+        const content = template.content.cloneNode(true);
+        content.querySelectorAll("script, base, meta[http-equiv='refresh' i]").forEach((element) => element.remove());
+        page.body.replaceChildren(content);
+        return `<!doctype html>\n${page.documentElement.outerHTML}`;
+      }
+
+      function showLinkError(message) {
+        preview.querySelector(".navigation-error")?.remove();
+        const error = document.createElement("p");
+        error.className = "navigation-error";
+        error.setAttribute("role", "alert");
+        error.textContent = message;
+        preview.append(error);
+      }
+
+      function followLink(resource, reference) {
+        let target;
+        try {
+          target = new URL(reference, virtualUrl(resource));
+        } catch {
+          showLinkError(`Invalid link target: ${reference}`);
+          return;
+        }
+        const bundled = resources.find((candidate) => virtualUrl(candidate) === withoutFragment(target));
+        if (bundled) {
+          openResource(bundled, true, target.hash ? decodeURIComponent(target.hash.slice(1)) : null);
+          return;
+        }
+        if (withoutFragment(target) === virtualBase) {
+          const fragment = target.hash ? decodeURIComponent(target.hash.slice(1)) : null;
+          const hostTarget = fragment ? document.getElementById(fragment) : document.body;
+          if (hostTarget) hostTarget.scrollIntoView({ block: "start" });
+          else showLinkError(`No host-document fragment named #${fragment} exists.`);
+          return;
+        }
+        if (target.origin === new URL(virtualBase).origin) {
+          showLinkError(`No bundled representation has virtual URL ${withoutFragment(target)}.`);
+          return;
+        }
+        if (["http:", "https:", "mailto:", "tel:"].includes(target.protocol)) {
+          window.open(target.href, "_blank", "noopener,noreferrer");
+          return;
+        }
+        showLinkError(`The viewer does not allow ${target.protocol} links.`);
+      }
+
+      function clearPreview() {
+        for (const url of currentBlobUrls) URL.revokeObjectURL(url);
+        currentBlobUrls.clear();
+        preview.replaceChildren();
+      }
+
+      async function materializeMarkdownImage(resource, reference) {
+        const target = new URL(reference, virtualUrl(resource));
+        const bundled = resources.find((candidate) => virtualUrl(candidate) === withoutFragment(target));
+        if (!bundled) throw new Error(`No bundled image has virtual URL ${withoutFragment(target)}.`);
+        if (bundled.kind !== "bytes" || !bundled.mediaType.startsWith("image/")) {
+          throw new Error(`${reference} is not a byte-backed image representation.`);
+        }
+        const bytes = await verify(bundled);
+        return `${createTrackedBlobUrl(bytes, bundled.mediaType)}${target.hash}`;
+      }
+
+      async function renderMarkdown(text, container, resource) {
+        const section = document.createElement("section");
+        section.className = "rendered-markdown";
+
+        async function inline(parent, source) {
+          let index = 0;
+          let plain = "";
+          const flush = () => {
+            if (plain) parent.append(document.createTextNode(plain));
+            plain = "";
+          };
+          while (index < source.length) {
+            const rest = source.slice(index);
+            if (source[index] === "\\" && /[\\`*\[\]()_~]/.test(source[index + 1] || "")) {
+              plain += source[index + 1];
+              index += 2;
+              continue;
+            }
+            const media = rest.match(/^(!?)\[([^\]]*)\]\(([^\s)]+)(?:\s+["']([^"']*)["'])?\)/);
+            if (media) {
+              flush();
+              if (media[1]) {
+                const image = document.createElement("img");
+                image.alt = media[2];
+                image.dataset.hareSrc = media[3];
+                if (media[4]) image.title = media[4];
+                image.src = await materializeMarkdownImage(resource, media[3]);
+                parent.append(image);
+              } else {
+                const link = document.createElement("a");
+                link.href = "#hare-navigation";
+                link.dataset.hareHref = media[3];
+                if (media[4]) link.title = media[4];
+                await inline(link, media[2]);
+                parent.append(link);
+              }
+              index += media[0].length;
+              continue;
+            }
+            const code = rest.match(/^(`+)([\s\S]*?)\1/);
+            if (code) {
+              flush();
+              const element = document.createElement("code");
+              element.textContent = code[2].replace(/\s*\n\s*/g, " ");
+              parent.append(element);
+              index += code[0].length;
+              continue;
+            }
+            const styles = [["**", "strong"], ["__", "strong"], ["~~", "del"], ["*", "em"], ["_", "em"]];
+            const style = styles.find(([marker]) => rest.startsWith(marker) && source.indexOf(marker, index + marker.length) > index + marker.length);
+            if (style) {
+              flush();
+              const [marker, name] = style;
+              const end = source.indexOf(marker, index + marker.length);
+              const element = document.createElement(name);
+              await inline(element, source.slice(index + marker.length, end));
+              parent.append(element);
+              index = end + marker.length;
+              continue;
+            }
+            if (source[index] === "\n") plain += " ";
+            else plain += source[index];
+            index += 1;
+          }
+          flush();
+        }
+
+        const lines = text.replace(/\r\n?/g, "\n").split("\n");
+        let index = 0;
+        while (index < lines.length) {
+          const line = lines[index];
+          if (!line.trim()) { index += 1; continue; }
+          const fence = line.match(/^ {0,3}(`{3,}|~{3,})\s*([^\s`]*)/);
+          if (fence) {
+            const body = [];
+            index += 1;
+            while (index < lines.length && !new RegExp(`^ {0,3}${fence[1][0]}{${fence[1].length},}\\s*$`).test(lines[index])) body.push(lines[index++]);
+            index += index < lines.length ? 1 : 0;
+            const pre = document.createElement("pre");
+            const code = document.createElement("code");
+            code.textContent = body.join("\n");
+            if (fence[2]) code.className = `language-${fence[2].replace(/[^A-Za-z0-9_-]/g, "")}`;
+            pre.append(code);
+            section.append(pre);
+            continue;
+          }
+          const heading = line.match(/^ {0,3}(#{1,6})\s+(.*?)\s*#*$/);
+          if (heading) {
+            const element = document.createElement(`h${heading[1].length}`);
+            await inline(element, heading[2]);
+            section.append(element);
+            index += 1;
+            continue;
+          }
+          if (/^ {0,3}>/.test(line)) {
+            const quote = document.createElement("blockquote");
+            const body = [];
+            while (index < lines.length && /^ {0,3}>/.test(lines[index])) body.push(lines[index++].replace(/^ {0,3}> ?/, ""));
+            await inline(quote, body.join("\n"));
+            section.append(quote);
+            continue;
+          }
+          const item = line.match(/^ {0,3}([-+*]|\d+[.)])\s+(.*)$/);
+          if (item) {
+            const ordered = /\d/.test(item[1]);
+            const listElement = document.createElement(ordered ? "ol" : "ul");
+            while (index < lines.length) {
+              const match = lines[index].match(/^ {0,3}([-+*]|\d+[.)])\s+(.*)$/);
+              if (!match || /\d/.test(match[1]) !== ordered) break;
+              const listItem = document.createElement("li");
+              const task = match[2].match(/^\[([ xX])\]\s+(.*)$/);
+              if (task) {
+                listItem.classList.add("task-list-item");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.checked = task[1].toLowerCase() === "x";
+                checkbox.disabled = true;
+                listItem.append(checkbox, " ");
+              }
+              await inline(listItem, task ? task[2] : match[2]);
+              listElement.append(listItem);
+              index += 1;
+            }
+            section.append(listElement);
+            continue;
+          }
+          if (index + 1 < lines.length && line.includes("|") && /^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) {
+            const cells = (value) => value.trim().replace(/^\||\|$/g, "").split("|").map((cell) => cell.trim());
+            const align = cells(lines[index + 1]).map((cell) => cell.startsWith(":") && cell.endsWith(":") ? "center" : cell.endsWith(":") ? "right" : cell.startsWith(":") ? "left" : "");
+            const table = document.createElement("table");
+            const head = table.createTHead().insertRow();
+            for (const [cellIndex, value] of cells(line).entries()) {
+              const cell = document.createElement("th");
+              cell.style.textAlign = align[cellIndex];
+              await inline(cell, value);
+              head.append(cell);
+            }
+            index += 2;
+            const body = table.createTBody();
+            while (index < lines.length && lines[index].includes("|") && lines[index].trim()) {
+              const row = body.insertRow();
+              for (const [cellIndex, value] of cells(lines[index]).entries()) {
+                const cell = row.insertCell();
+                cell.style.textAlign = align[cellIndex];
+                await inline(cell, value);
+              }
+              index += 1;
+            }
+            section.append(table);
+            continue;
+          }
+          const paragraph = [line];
+          index += 1;
+          while (index < lines.length && lines[index].trim() && !/^(?: {0,3}(?:#{1,6}\s|>|[-+*]\s|\d+[.)]\s|`{3,}|~{3,}))/.test(lines[index])) paragraph.push(lines[index++]);
+          const element = document.createElement("p");
+          await inline(element, paragraph.join("\n"));
+          section.append(element);
+        }
+        section.addEventListener("click", (event) => {
+          const anchor = event.target instanceof Element ? event.target.closest("a[data-hare-href]") : null;
+          if (!anchor) return;
+          event.preventDefault();
+          followLink(resource, anchor.dataset.hareHref || "");
+        });
+        container.append(section);
+      }
+
+      async function openResource(resource, updateRoute = true, fragment = null) {
+        clearPreview();
+        const heading = document.createElement("div");
+        heading.className = "preview-heading";
+        const title = document.createElement("h3");
+        title.textContent = resource.title;
+        const actions = document.createElement("div");
+        actions.className = "preview-heading__actions";
+        const pending = document.createElement("span");
+        pending.textContent = resource.kind === "bytes" ? "Verifying" : "Semantic DOM";
+        actions.append(pending);
+        heading.append(title, actions);
+        preview.append(heading);
+
+        try {
+          if (resource.kind === "dom") {
+            const template = carrierElement(resource.carrier);
+            if (!(template instanceof HTMLTemplateElement)) throw new Error("A DOM carrier must be a template element.");
+            pending.textContent = "Semantic DOM";
+
+            const meta = document.createElement("div");
+            meta.className = "preview-meta";
+            for (const value of [virtualUrl(resource), resource.mediaType, `#${template.id}`].filter(Boolean)) {
+              const item = document.createElement("span");
+              item.textContent = value;
+              meta.append(item);
+            }
+            preview.append(meta);
+
+            const frame = document.createElement("iframe");
+            frame.title = `${resource.title} preview`;
+            frame.referrerPolicy = "no-referrer";
+            frame.setAttribute("sandbox", "allow-same-origin");
+            frame.addEventListener("load", () => {
+              const frameDocument = frame.contentDocument;
+              frameDocument?.addEventListener("click", (event) => {
+                const FrameElement = frameDocument.defaultView?.Element;
+                const anchor = FrameElement && event.target instanceof FrameElement
+                  ? event.target.closest("a[href]")
+                  : null;
+                if (!anchor) return;
+                event.preventDefault();
+                followLink(resource, anchor.getAttribute("href") || "");
+              });
+              if (fragment && frameDocument) {
+                const destination = frameDocument.getElementById(fragment) || frameDocument.getElementsByName(fragment)[0];
+                if (destination) destination.scrollIntoView({ block: "start" });
+                else showLinkError(`No fragment named #${fragment} exists in ${resource.path}.`);
+              }
+            }, { once: true });
+            frame.srcdoc = domSource(template, resource);
+            preview.append(frame);
+
+            for (const button of list.querySelectorAll("button")) {
+              button.setAttribute("aria-current", String(button.dataset.id === resource.representation));
+            }
+            if (updateRoute) history.replaceState(null, "", `#view=${encodeURIComponent(resource.path ?? resource.representation)}`);
+            return;
+          }
+
+          const bytes = await verify(resource);
+          pending.className = "verification";
+          pending.textContent = "Verified";
+
+          const filename = resource.path?.split("/").filter(Boolean).at(-1) || "resource";
+          const resourceBlobUrl = createTrackedBlobUrl(bytes, resource.mediaType);
+          const download = document.createElement("a");
+          download.className = "download-link";
+          download.href = resourceBlobUrl;
+          download.download = filename;
+          download.textContent = "Download file";
+          download.setAttribute("aria-label", `Download ${resource.title} as ${filename}`);
+          actions.append(download);
+
+          const meta = document.createElement("div");
+          meta.className = "preview-meta";
+          for (const value of [resource.path, resource.mediaType, `${resource.length} bytes`]) {
+            const item = document.createElement("span");
+            item.textContent = value;
+            meta.append(item);
+          }
+          preview.append(meta);
+
+          if (resource.mediaType.startsWith("text/markdown")) {
+            await renderMarkdown(decoder.decode(bytes), preview, resource);
+          } else if (resource.mediaType === "application/json") {
+            const source = document.createElement("pre");
+            source.textContent = JSON.stringify(JSON.parse(decoder.decode(bytes)), null, 2);
+            preview.append(source);
+          } else if (resource.mediaType.startsWith("text/html")) {
+            const frame = document.createElement("iframe");
+            frame.title = `${resource.title} preview`;
+            frame.sandbox = "";
+            frame.src = resourceBlobUrl;
+            preview.append(frame);
+          } else if (resource.mediaType.startsWith("image/")) {
+            const image = document.createElement("img");
+            image.alt = "Verified status badge included in the envelope";
+            image.src = resourceBlobUrl;
+            preview.append(image);
+          } else {
+            const source = document.createElement("pre");
+            source.textContent = decoder.decode(bytes);
+            preview.append(source);
+          }
+
+          for (const button of list.querySelectorAll("button")) {
+            button.setAttribute("aria-current", String(button.dataset.id === resource.representation));
+          }
+          if (updateRoute) history.replaceState(null, "", `#view=${encodeURIComponent(resource.path ?? resource.representation)}`);
+        } catch (error) {
+          pending.textContent = "Verification failed";
+          const message = document.createElement("p");
+          message.textContent = error instanceof Error ? error.message : String(error);
+          preview.append(message);
+        }
+      }
+
+      function renderList(query = "") {
+        const normalized = query.trim().toLowerCase();
+        list.replaceChildren();
+        const matches = resources.filter((resource) => (
+          `${resource.title} ${resource.path ?? ""} ${resource.mediaType}`.toLowerCase().includes(normalized)
+        ));
+        for (const resource of matches) {
+          const button = document.createElement("button");
+          button.className = "resource-button";
+          button.type = "button";
+          button.dataset.id = resource.representation;
+          const title = document.createElement("strong");
+          title.textContent = resource.title;
+          const path = document.createElement("span");
+          path.textContent = resource.path ?? "Semantic resource";
+          button.append(title, path);
+          button.addEventListener("click", () => openResource(resource));
+          list.append(button);
+        }
+        if (matches.length === 0) {
+          const empty = document.createElement("p");
+          empty.textContent = "No resources match this filter.";
+          empty.style.padding = "1rem";
+          list.append(empty);
+        }
+      }
+
+      search.addEventListener("input", () => renderList(search.value));
+      renderList();
+      viewer.hidden = false;
+      document.documentElement.setAttribute("data-viewer-ready", "true");
+
+      const route = location.hash.startsWith("#view=")
+        ? decodeURIComponent(location.hash.slice(6))
+        : (resources[0]?.path ?? resources[0]?.representation);
+      const initial = resources.find((resource) => (resource.path ?? resource.representation) === route) ?? resources[0];
+      if (initial) openResource(initial, false);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riverside inspection evidence</title>
+    <link rel="canonical" href="https://ia2.dev/spec/resource-envelope/examples/inspection-evidence.html">
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline' blob: data:; img-src blob: data:; media-src blob: data:; font-src blob: data:; frame-src 'self' blob: about:"
+    >
+    <style>body { margin: 0; }</style>
+    <script type="module" src="/packages/hare-viewer/dist/hare-viewer.js?v=0.1.1"></script>
+  </head>
+  <body>
+    <ia2-hare-viewer></ia2-hare-viewer>
+    <section id="manifest" hidden>
+      <a href="https://ia2.dev/spec/resource-envelope#Envelope" rdf-subject="" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+      <a href="#manifest" rdf-subject="" rdf-predicate="https://ia2.dev/spec/resource-envelope#manifestGraph" rdf-graph="#manifest"></a>
+      <a href="https://riverside-inspection.hare.invalid/" rdf-subject="" rdf-predicate="https://ia2.dev/spec/resource-envelope#virtualBase" rdf-graph="#manifest"></a>
+      <a href="https://ia2.dev/spec/resource-envelope#HARE-0.1" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/conformsTo" rdf-graph="#manifest"></a>
+      <a href="https://ia2.dev/spec/resource-envelope#SelfViewingProfile" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/conformsTo" rdf-graph="#manifest"></a>
+      <span rdf-subject="" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Riverside bridge inspection evidence</span>
+      <a href="#field-summary" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#manifest"></a>
+      <a href="#sensor-readings" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#manifest"></a>
+      <a href="#joint-diagram" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#manifest"></a>
+
+      <span rdf-subject="#field-summary" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Field summary</span>
+      <a href="#field-summary-representation" rdf-subject="#field-summary" rdf-predicate="https://ia2.dev/spec/resource-envelope#representation" rdf-graph="#manifest"></a>
+      <a href="https://ia2.dev/spec/resource-envelope#ByteRepresentation" rdf-subject="#field-summary-representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+      <data value="/README.md" rdf-subject="#field-summary-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest"></data>
+      <data value="text/markdown; charset=utf-8" rdf-subject="#field-summary-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest"></data>
+      <data value="184" rdf-subject="#field-summary-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#byteLength" rdf-datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" rdf-graph="#manifest"></data>
+      <data value="sha256-2g6Yhi/5+6798Q2Bgyn1Ti4xUVieVI2JRT/P6bWJAvk=" rdf-subject="#field-summary-representation" rdf-predicate="https://www.w3.org/2018/credentials#digestSRI" rdf-datatype="https://www.w3.org/2018/credentials#sriString" rdf-graph="#manifest"></data>
+      <a href="#field-summary-bytes" rdf-subject="#field-summary-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+
+      <span rdf-subject="#sensor-readings" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Joint J-04 readings</span>
+      <a href="#sensor-readings-representation" rdf-subject="#sensor-readings" rdf-predicate="https://ia2.dev/spec/resource-envelope#representation" rdf-graph="#manifest"></a>
+      <a href="https://ia2.dev/spec/resource-envelope#ByteRepresentation" rdf-subject="#sensor-readings-representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+      <data value="/data/joint-j04.json" rdf-subject="#sensor-readings-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest"></data>
+      <data value="application/json" rdf-subject="#sensor-readings-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest"></data>
+      <data value="177" rdf-subject="#sensor-readings-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#byteLength" rdf-datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" rdf-graph="#manifest"></data>
+      <data value="sha256-qb7ubyl0wJeeUpyCZTBgPkbfxFUmUxgUta/TFFkJL1I=" rdf-subject="#sensor-readings-representation" rdf-predicate="https://www.w3.org/2018/credentials#digestSRI" rdf-datatype="https://www.w3.org/2018/credentials#sriString" rdf-graph="#manifest"></data>
+      <a href="#sensor-readings-bytes" rdf-subject="#sensor-readings-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+
+      <span rdf-subject="#joint-diagram" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Expansion joint diagram</span>
+      <a href="#joint-diagram-representation" rdf-subject="#joint-diagram" rdf-predicate="https://ia2.dev/spec/resource-envelope#representation" rdf-graph="#manifest"></a>
+      <a href="https://ia2.dev/spec/resource-envelope#ByteRepresentation" rdf-subject="#joint-diagram-representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+      <data value="/images/joint-j04.svg" rdf-subject="#joint-diagram-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest"></data>
+      <data value="image/svg+xml" rdf-subject="#joint-diagram-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest"></data>
+      <data value="619" rdf-subject="#joint-diagram-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#byteLength" rdf-datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" rdf-graph="#manifest"></data>
+      <data value="sha256-vE5ca9lMSg3cfYFBJzyoG/PclOhqWtrq2RcoyUQpAus=" rdf-subject="#joint-diagram-representation" rdf-predicate="https://www.w3.org/2018/credentials#digestSRI" rdf-datatype="https://www.w3.org/2018/credentials#sriString" rdf-graph="#manifest"></data>
+      <a href="#joint-diagram-bytes" rdf-subject="#joint-diagram-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+    </section>
+
+    <script id="field-summary-bytes" type="application/octet-stream" data-encoding="base64">IyBSaXZlcnNpZGUgYnJpZGdlIGluc3BlY3Rpb24KCkluc3BlY3Rpb24gY29tcGxldGVkIDIwMjYtMDctMTQuIEV4cGFuc2lvbiBqb2ludCBKLTA0IHNob3dzIDcgbW0gbGF0ZXJhbCBkaXNwbGFjZW1lbnQsIGJlbG93IHRoZSAxMCBtbSBpbnRlcnZlbnRpb24gdGhyZXNob2xkLiBSZWluc3BlY3Qgd2l0aGluIDMwIGRheXMuCg==</script>
+    <script id="sensor-readings-bytes" type="application/octet-stream" data-encoding="base64">ewogICJzaXRlIjogIlJpdmVyc2lkZSBCcmlkZ2UiLAogICJpbnNwZWN0aW9uRGF0ZSI6ICIyMDI2LTA3LTE0IiwKICAiam9pbnQiOiAiSi0wNCIsCiAgImxhdGVyYWxEaXNwbGFjZW1lbnRNbSI6IDcsCiAgImludGVydmVudGlvblRocmVzaG9sZE1tIjogMTAsCiAgImRpc3Bvc2l0aW9uIjogIm1vbml0b3IiCn0K</script>
+    <script id="joint-diagram-bytes" type="application/octet-stream" data-encoding="base64">PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgMzYwIj48cmVjdCB3aWR0aD0iNjQwIiBoZWlnaHQ9IjM2MCIgZmlsbD0iI2Y3ZjRmYSIvPjxwYXRoIGQ9Ik03MCAxNTBoMjIwdjcySDcwem0yODAgMGgyMjB2NzJIMzUweiIgZmlsbD0iIzYyNDZjNyIvPjxwYXRoIGQ9Ik0zMDAgMTMwdjExMm00MC0xMTJ2MTEyIiBzdHJva2U9IiMyOTI0M2IiIHN0cm9rZS13aWR0aD0iOCIvPjxwYXRoIGQ9Ik0zMDQgMTAwaDMybS0zMiAwIDEyLTEwbS0xMiAxMCAxMiAxMG0yMC0xMC0xMi0xMG0xMiAxMC0xMiAxMCIgc3Ryb2tlPSIjMjkyNDNiIiBzdHJva2Utd2lkdGg9IjUiIGZpbGw9Im5vbmUiLz48dGV4dCB4PSIzMjAiIHk9Ijc2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic3lzdGVtLXVpLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjYiIGZpbGw9IiMyOTI0M2IiPjcgbW08L3RleHQ+PHRleHQgeD0iMzIwIiB5PSIyOTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzeXN0ZW0tdWksc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIgZmlsbD0iIzI5MjQzYiI+RXhwYW5zaW9uIGpvaW50IEotMDQ8L3RleHQ+PC9zdmc+Cg==</script>
+
+    <noscript>
+      <main>
+        <h1>Riverside bridge inspection evidence</h1>
+        <p>This envelope contains a field summary, structured joint readings, and an inspection diagram. Its optional viewer verifies and opens each file.</p>
+      </main>
+    </noscript>
+  </body>
+</html>

@@ -25,6 +25,9 @@ describe("IA² homepage semantics", () => {
       expect(switcher.querySelector(".spec-switcher__current")?.getAttribute("href")).toBe("/spec/html-rdf");
       expect(switcher.querySelector('.spec-switcher__option[aria-current="true"]')?.getAttribute("href")).toBe("/spec/html-rdf");
       expect(switcher.querySelector('a[href="/spec/discovery-enrichment"]')).not.toBeNull();
+      const hare = switcher.querySelector('a[href="/spec/resource-envelope"]');
+      expect(hare?.querySelector("strong")?.textContent).toBe("HTML Agent Resource Envelope");
+      expect(hare?.querySelector("small")?.textContent).toContain("HARE:");
     }
     expect(page.querySelector('script[src^="/home.js?"]')).not.toBeNull();
     const hero = page.querySelector(".hero");
@@ -108,10 +111,12 @@ describe("IA² homepage semantics", () => {
     const artifacts = [
       "https://ia2.dev/spec/html-rdf",
       "https://ia2.dev/spec/discovery-enrichment",
+      "https://ia2.dev/spec/resource-envelope",
       "https://ia2.dev/guide/html-rdf",
       "https://ia2.dev/demos/live-workspace",
       "https://ia2.dev/demos/live-workspace/vendor-review/",
       "https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator",
+      "https://github.com/ia2-dev/ia2/tree/main/packages/hare-viewer",
     ];
     for (const artifact of artifacts) {
       expect(has("https://ia2.dev/#project", `${DCTERMS}hasPart`, "NamedNode", artifact)).toBe(true);

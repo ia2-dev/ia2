@@ -33,7 +33,7 @@
   "module": "./dist/html-rdf-navigator.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "npm run clean && tsc -p tsconfig.build.json && esbuild src/index.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/html-rdf-navigator.js --sourcemap",
+    "build": "npm run clean && tsc -p tsconfig.build.json && esbuild src/index.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/html-rdf-navigator.js --sourcemap=external",
     "clean": "rm -rf dist",
     "test": "vitest run",
     "check": "tsc -p tsconfig.json --noEmit"

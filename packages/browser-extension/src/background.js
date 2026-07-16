@@ -16,12 +16,16 @@ export function statementBadge(statements) {
   return statements > 999 ? "999+" : String(statements);
 }
 
-export async function updateAction(api, tabId, state, statements = 0) {
+export async function updateAction(api, tabId, state, statements = 0, files = 0) {
   const unavailable = state === "unavailable";
   const empty = state === "empty";
   const available = state === "available";
   const badge = unavailable ? "!" : available ? statementBadge(statements) : "";
-  const availableTitle = `Open IA² Navigator (${statements} RDF statement${statements === 1 ? "" : "s"})`;
+  const fileCount = Number.isInteger(files) && files > 0 ? files : 0;
+  const rdfSummary = `${statements} RDF statement${statements === 1 ? "" : "s"}`;
+  const availableTitle = fileCount > 0
+    ? `Open IA² Navigator (${rdfSummary}; HARE: ${fileCount} file${fileCount === 1 ? "" : "s"})`
+    : `Open IA² Navigator (${rdfSummary})`;
   const operations = [
     api.action.setBadgeText?.({ tabId, text: badge }),
     api.action.setIcon?.({ path: empty || unavailable ? MUTED_ICONS : DEFAULT_ICONS, tabId }),
@@ -61,7 +65,7 @@ export function registerExtension(api) {
   api.runtime?.onMessage?.addListener((message, sender) => {
     if (message?.type !== "ia2:navigator-status" || !Number.isInteger(sender.tab?.id)) return;
     const state = Number.isInteger(message.statements) && message.statements > 0 ? "available" : "empty";
-    void updateAction(api, sender.tab.id, state, message.statements);
+    void updateAction(api, sender.tab.id, state, message.statements, message.files);
   });
   api.tabs?.onUpdated?.addListener((tabId, changeInfo) => {
     if (changeInfo.status === "loading") void updateAction(api, tabId, "unknown");

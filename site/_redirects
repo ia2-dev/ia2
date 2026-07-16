@@ -2,5 +2,12 @@
 /specs/html-rdf/         /spec/html-rdf 301
 /specs/discovery-enrichment          /spec/discovery-enrichment 301
 /specs/discovery-enrichment/         /spec/discovery-enrichment 301
+/specs/resource-envelope             /spec/resource-envelope 301
+/specs/resource-envelope/            /spec/resource-envelope 301
 /specs/html-rdf/*        /spec/html-rdf/:splat 301
 /specs/discovery-enrichment/*        /spec/discovery-enrichment/:splat 301
+/specs/resource-envelope/*           /spec/resource-envelope/:splat 301
+/spec/resource-envelope/examples/minimal.html          /spec/resource-envelope/examples/decision-handoff.html 301
+/spec/resource-envelope/examples/viewer.html           /spec/resource-envelope/examples/vendor-review.html 301
+/spec/resource-envelope/examples/viewer-bare.html      /spec/resource-envelope/examples/inspection-evidence.html 301
+/spec/resource-envelope/examples/viewer-authored.html  /spec/resource-envelope/examples/release-handoff.html 301

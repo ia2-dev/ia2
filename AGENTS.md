@@ -12,6 +12,13 @@ vertical slice lets an ordinary HTML document or live DOM carry a complete RDF
 1.2 dataset, correlate statements with their HTML carriers, and expose the
 result through a document navigator.
 
+HARE, the IA² HTML Agent Resource Envelope, is the second vertical slice. It
+uses a single HTML document as a self-contained, browser-openable envelope for
+resources exchanged between people, applications, and agents. Its canonical
+manifest is a named HTML/RDF graph; optional JavaScript may progressively
+enhance the document into a verified file browser without becoming the source
+of truth.
+
 The project is exploratory. Distinguish proposals, implemented behavior, and
 future directions. Do not describe an experiment as an established standard.
 
@@ -30,6 +37,13 @@ future directions. Do not describe an experiment as an established standard.
 - Prefer independently useful semantic islands over all-or-nothing adoption.
 - Treat HTML as one host binding. Do not assume its attribute syntax is right
   for every future medium.
+- Keep HARE declarative first. A conforming envelope must remain meaningful and
+  machine-readable without executing its own scripts.
+- Model a HARE bundle as a resource graph with optional, unique logical paths,
+  not as a virtual filesystem that replaces resource identity or relationships.
+- Treat semantic DOM, exact bytes, previews, and runtime behavior as separate
+  concerns. Verify byte-representation length and digest before preview or
+  download.
 
 ## Semantic modeling
 
@@ -52,12 +66,61 @@ future directions. Do not describe an experiment as an established standard.
   open to existing and future RDF vocabularies on equal terms.
 - Add or update extraction tests whenever semantic markup changes materially.
 
+## HARE modeling
+
+- Follow the envelope and manifest requirements in
+  `specs/resource-envelope/index.html`. HARE 0.1 is exploratory and must not be
+  presented as an established standard.
+- Keep the canonical manifest in the named HTML/RDF graph identified by
+  `hare:manifestGraph`. JSON or JSON-LD may be an embedded resource or derived
+  view, but must not compete with the HTML/RDF manifest.
+- Give every representation one explicit kind, a media type using `dc:format`,
+  and a `hare:carrier`. A `hare:DOMRepresentation` carries semantic HTML in a
+  `<template>`. A `hare:ByteRepresentation` carries inert base64 bytes and also
+  declares exact `hare:byteLength` and a SHA-256 `cred:digestSRI` value.
+- Use `dcterms:identifier` for an optional absolute logical path. Paths must be
+  unique when present, but resources and representations retain RDF identity.
+- Give each envelope a non-retrievable `hare:virtualBase` HTTPS URL under
+  `.invalid`. It is the host document's virtual URL. DOM representations must
+  have logical paths, and resolving those paths against the base assigns their
+  virtual document URLs. Use this address space for links, never as RDF identity.
+- Keep carriers inert. Runtime code must derive inventory from the manifest,
+  verify byte representations before use, and sandbox DOM representations and
+  HTML byte previews without scripts.
+- Materialize passive template subresources only through the envelope's virtual
+  URL space. Host documents may opt into the same verified lookup with inert
+  `data-hare-src` bindings that a viewer maps to runtime `src` values. Require a
+  matching verified byte representation and a compatible media type, rewrite
+  only derived views or explicit runtime bindings, never fall back to the
+  network, and keep scripts, workers, plugins, and nested browsing contexts
+  inert.
+- Treat host and derived Content Security Policies as cumulative. When an
+  envelope is intended to support a browser-local viewer, permit only the local
+  frame and passive-resource schemes that viewer requires; never weaken the
+  host policy or add network fallback to make a preview work.
+- Preserve graph identity and unknown manifest statements. Logical paths are
+  routing conveniences for linked resources, not global identifiers.
+- Recommend one HTML `link rel="canonical"` when a stable retrievable location
+  is available. Treat it as identity and retrieval metadata, not proof of
+  availability, integrity, authority, or permission.
+- Keep the HARE version and artifact profile explicit with
+  `dcterms:conformsTo`. A consumer-provided viewer or browser extension does
+  not change the profile declared by the envelope.
+- When changing HARE markup, update extraction, validation, integrity, viewer,
+  and browser-extension tests as applicable.
+
 ## Repository layout
 
 - `specs/html-rdf/index.html`: single-file ReSpec source and self-describing
   IA² HTML/RDF specification. Keep it as one authored HTML file for now.
 - `specs/discovery-enrichment/index.html`: supplemental ReSpec profile for
   advertising, qualifying, retrieving, and presenting additional RDF sources.
+- `specs/resource-envelope/index.html`: single-file ReSpec source for the IA²
+  HTML Agent Resource Envelope (HARE) 0.1 proposal and vocabulary.
+- `specs/resource-envelope/examples/`: scenario-led HARE examples: an Atlas
+  decision handoff, Northstar vendor review, Riverside inspection evidence
+  pack, and Orion release handoff. Together they cover declarative,
+  self-viewing, bare file-browser, and authored-plus-files modes.
 - `site/index.html` and `site/home.css`: public project homepage.
 - `site/spec-selector.css` and `site/spec-selector.js`: progressively enhanced
   specification selector shared by public navigation and calls to action.
@@ -65,6 +128,12 @@ future directions. Do not describe an experiment as an established standard.
 - `packages/html-rdf-navigator/`: dependency-free web component, extractor,
   serializers, TypeScript sources, and tests for
   `@ia2-dev/html-rdf-navigator`.
+- `packages/hare-viewer/`: dependency-free optional file-browser UI, parser,
+  integrity verification, TypeScript sources, generated distribution, and
+  tests for `@ia2-dev/hare-viewer`.
+- `packages/browser-extension/`: Chrome, Firefox, and Safari adapter. It
+  automatically enhances HARE documents while keeping the toolbar action
+  dedicated to the general HTML/RDF Navigator.
 - `demos/live-workspace/`: demo directory plus separately published issue,
   inbox, release-brief, and vendor-review application pages.
 - `scripts/build-site.mjs`: assembles public assets into `.site/`.
@@ -83,6 +152,13 @@ merely for navigation convenience.
 Interactive demos must update their semantic DOM when visible application state
 changes. The RDF Navigator should observe those changes without the application
 maintaining a detached duplicate graph.
+
+HARE examples must remain directly inspectable as source. Keep small normative
+examples embedded in the ReSpec document instead of making conformance depend
+on links to separate demos. Prefer `<template>` carriers for semantic HTML so
+agents can inspect the DOM without decoding escaped bytes. Self-viewing examples
+may include JavaScript, but their manifest, resource list, trust statement, and
+carriers must remain useful when scripting is unavailable.
 
 ## Interface and copy
 
@@ -113,6 +189,8 @@ Useful focused commands:
 
 ```sh
 npm run build:navigator
+npm run build:extension
+npm run build:hare-viewer
 npm run build:site
 npm run dev
 npm run serve
@@ -126,6 +204,10 @@ Before committing:
    widths when presentation or behavior changed.
 4. Check the browser console for warnings and errors.
 5. Verify canonical URLs and extracted RDF when adding or moving pages.
+6. For HARE changes, verify template-DOM rendering, declared byte lengths and
+   SHA-256 digests for byte representations, preview and download behavior,
+   recursive subresource materialization, no-script inspection, and authored
+   and bare viewer modes.
 
 ## Git and publication
 

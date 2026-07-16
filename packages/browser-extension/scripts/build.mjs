@@ -36,7 +36,12 @@ function manifestFor(target) {
   }
   if (e2e) {
     manifest.host_permissions = ["http://127.0.0.1/*"];
-    if (target !== "chrome") {
+    if (target === "chrome") {
+      manifest.content_scripts = manifest.content_scripts.map((entry) => ({
+        ...entry,
+        matches: ["http://127.0.0.1/*"],
+      }));
+    } else {
       manifest.content_scripts = [
         {
           js: ["content.js"],
@@ -75,9 +80,10 @@ async function bundle(entryPoint, outputName) {
 }
 
 await rm(distRoot, { force: true, recursive: true });
-const [background, content, status] = await Promise.all([
+const [background, content, auto, status] = await Promise.all([
   bundle("src/background.js", "background.js"),
   bundle("src/content.js", "content.js"),
+  bundle("src/auto.js", "auto.js"),
   bundle("src/status.js", "status.js"),
 ]);
 const iconSource = resolve(repositoryRoot, "site/assets/ia2-mark-512.png");
@@ -96,6 +102,7 @@ for (const target of targets) {
   await Promise.all([
     writeFile(resolve(targetRoot, "background.js"), background),
     writeFile(resolve(targetRoot, "content.js"), content),
+    writeFile(resolve(targetRoot, "auto.js"), auto),
     writeFile(resolve(targetRoot, "status.js"), status),
     writeFile(resolve(targetRoot, "manifest.json"), `${JSON.stringify(manifestFor(target), null, 2)}\n`),
     copyFile(resolve(repositoryRoot, "LICENSE"), resolve(targetRoot, "LICENSE")),

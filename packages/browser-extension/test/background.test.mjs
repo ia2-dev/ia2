@@ -106,6 +106,15 @@ test("mutes empty documents, badges RDF documents, and resets on navigation", as
     ["badge-color", { color: "#6842c2", tabId: 9 }],
   ]);
 
+  fixture.message({ files: 2, statements: 14, type: "ia2:navigator-status" }, { tab: { id: 9 } });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(fixture.calls.slice(-4), [
+    ["badge", { tabId: 9, text: "14" }],
+    ["icon", { path: { 16: "icons/ia2-mark-16.png", 32: "icons/ia2-mark-32.png" }, tabId: 9 }],
+    ["title", { tabId: 9, title: "Open IA² Navigator (14 RDF statements; HARE: 2 files)" }],
+    ["badge-color", { color: "#6842c2", tabId: 9 }],
+  ]);
+
   fixture.update(9, { status: "loading" });
   await new Promise((resolve) => setImmediate(resolve));
   assert.deepEqual(fixture.calls.slice(-3), [

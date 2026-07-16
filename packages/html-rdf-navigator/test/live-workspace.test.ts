@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { extractDataset } from "../src/extract.js";
 // @ts-expect-error Vitest supplies Vite's raw-fixture import during tests.
+import directoryHtml from "../../../demos/live-workspace/index.html?raw";
+// @ts-expect-error Vitest supplies Vite's raw-fixture import during tests.
 import briefingHtml from "../../../demos/live-workspace/release-brief/index.html?raw";
 // @ts-expect-error Vitest supplies Vite's raw-fixture import during tests.
 import issueHtml from "../../../demos/live-workspace/issues/index.html?raw";
@@ -12,6 +14,11 @@ import vendorHtml from "../../../demos/live-workspace/vendor-review/index.html?r
 import knowledgeHtml from "../../../demos/live-workspace/knowledge-model/index.html?raw";
 
 const BASE = "https://ia2.dev/demos/live-workspace/release-brief/";
+const DIRECTORY = "https://ia2.dev/demos/live-workspace/";
+const DECLARATIVE_ENVELOPE = "https://ia2.dev/spec/resource-envelope/examples/decision-handoff.html";
+const VIEWER_ENVELOPE = "https://ia2.dev/spec/resource-envelope/examples/vendor-review.html";
+const BARE_VIEWER_ENVELOPE = "https://ia2.dev/spec/resource-envelope/examples/inspection-evidence.html";
+const AUTHORED_VIEWER_ENVELOPE = "https://ia2.dev/spec/resource-envelope/examples/release-handoff.html";
 const ISSUE = "https://ia2.dev/demos/live-workspace/issues/";
 const INBOX = "https://ia2.dev/demos/live-workspace/inbox/";
 const VENDOR = "https://ia2.dev/demos/live-workspace/vendor-review/";
@@ -25,6 +32,33 @@ const SHACL = "http://www.w3.org/ns/shacl#";
 const XSD = "http://www.w3.org/2001/XMLSchema#";
 
 describe("live workspace semantics", () => {
+  it("relates the demo directory to both portable envelope examples", () => {
+    const page = new DOMParser().parseFromString(directoryHtml, "text/html");
+    Object.defineProperty(page, "URL", { configurable: true, value: "http://127.0.0.1:8791/demos/live-workspace/" });
+    const result = extractDataset(page);
+    const relations = result.quads.flatMap((quad) => {
+      if (
+        quad.subject.termType === "NamedNode"
+        && quad.subject.value === DIRECTORY
+        && quad.predicate.value === `${DCTERMS}relation`
+        && quad.object.termType === "NamedNode"
+      ) return [quad.object.value];
+      return [];
+    });
+
+    expect(result.diagnostics).toEqual([]);
+    expect(relations).toEqual(expect.arrayContaining([
+      DECLARATIVE_ENVELOPE,
+      VIEWER_ENVELOPE,
+      BARE_VIEWER_ENVELOPE,
+      AUTHORED_VIEWER_ENVELOPE,
+    ]));
+    expect(page.querySelector(`a[href="/spec/resource-envelope/examples/decision-handoff.html"]`)).not.toBeNull();
+    expect(page.querySelector(`a[href="/spec/resource-envelope/examples/vendor-review.html"]`)).not.toBeNull();
+    expect(page.querySelector(`a[href="/spec/resource-envelope/examples/inspection-evidence.html"]`)).not.toBeNull();
+    expect(page.querySelector(`a[href="/spec/resource-envelope/examples/release-handoff.html"]`)).not.toBeNull();
+  });
+
   it("connects the release, decision, evidence, claim, and contract", () => {
     const page = new DOMParser().parseFromString(briefingHtml, "text/html");
     Object.defineProperty(page, "URL", { configurable: true, value: "http://127.0.0.1:8791/demos/live-workspace/release-brief/" });

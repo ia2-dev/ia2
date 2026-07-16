@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Orion release handoff</title>
+    <link rel="canonical" href="https://ia2.dev/spec/resource-envelope/examples/release-handoff.html">
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline' blob: data:; img-src blob: data:; media-src blob: data:; font-src blob: data:; frame-src 'self' blob: about:"
+    >
+    <script type="module" src="/packages/hare-viewer/dist/hare-viewer.js?v=0.1.1"></script>
+    <style>
+      :root {
+        background: oklch(98.5% 0.008 286);
+        color: oklch(23% 0.035 286);
+        font-family: "Avenir Next", Avenir, "Segoe UI Variable", "Segoe UI", sans-serif;
+      }
+      body { margin: 0; }
+      main { margin-inline: auto; max-width: 72rem; padding: clamp(3rem, 9vw, 8rem) 1.25rem; }
+      h1 { color: oklch(49% 0.18 294); font-size: clamp(2.8rem, 8vw, 6rem); letter-spacing: -.06em; line-height: .92; margin: 0; max-width: 11ch; }
+      p { font-size: clamp(1.05rem, 2vw, 1.3rem); line-height: 1.65; max-width: 58ch; }
+      code { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+      .release-status { color: oklch(38% 0.11 135); font-size: .8rem; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; }
+      .host-resource { align-items: center; border-top: 1px solid oklch(84% 0.025 286); display: grid; gap: 1.25rem 2rem; grid-template-columns: minmax(15rem, 24rem) minmax(0, 1fr); margin: 3rem 0 0; padding-top: 2rem; }
+      .host-resource img { background: oklch(94.5% 0.02 286); display: block; height: auto; width: 100%; }
+      .host-resource figcaption { font-size: 1rem; line-height: 1.55; max-width: 42ch; }
+      .host-resource small { color: oklch(47% 0.025 286); display: block; margin-top: .35rem; }
+      @media (max-width: 700px) { .host-resource { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <ia2-hare-viewer></ia2-hare-viewer>
+    <main id="handoff">
+      <p class="release-status">Ready for launch</p>
+      <h1>Orion 4.2 release handoff</h1>
+      <p>The web, API, and data changes are approved for the 18 July launch window. The rollback owner is Priya Shah; the abort threshold is an error rate above 2% for five minutes.</p>
+      <p>Open <strong>Files</strong> for the release notes and linked rollback plan. Both documents travel with the diagram and styles they use.</p>
+      <figure class="host-resource">
+        <img
+          data-hare-src="https://orion-release.hare.invalid/assets/orion-release-map.svg"
+          alt="Orion release path from web through API to data"
+          width="640"
+          height="360"
+        >
+        <figcaption>
+          The host summary and bundled release notes use the same verified system map.
+          <small><code>https://orion-release.hare.invalid/assets/orion-release-map.svg</code></small>
+        </figcaption>
+      </figure>
+    </main>
+
+    <section id="manifest" hidden>
+      <a href="https://ia2.dev/spec/resource-envelope#Envelope" rdf-subject="" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+      <a href="#manifest" rdf-subject="" rdf-predicate="https://ia2.dev/spec/resource-envelope#manifestGraph" rdf-graph="#manifest"></a>
+      <a href="https://orion-release.hare.invalid/" rdf-subject="" rdf-predicate="https://ia2.dev/spec/resource-envelope#virtualBase" rdf-graph="#manifest"></a>
+      <a href="https://ia2.dev/spec/resource-envelope#HARE-0.1" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/conformsTo" rdf-graph="#manifest"></a>
+      <a href="https://ia2.dev/spec/resource-envelope#SelfViewingProfile" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/conformsTo" rdf-graph="#manifest"></a>
+      <span rdf-subject="" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Orion 4.2 release handoff</span>
+      <a href="#release-notes" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#manifest"></a>
+      <a href="#rollback-plan" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#manifest"></a>
+      <a href="#document-styles" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#manifest"></a>
+      <a href="#style-tokens" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#manifest"></a>
+      <a href="#release-map" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#manifest"></a>
+
+      <span rdf-subject="#release-notes" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Orion 4.2 release notes</span>
+      <a href="#release-notes-representation" rdf-subject="#release-notes" rdf-predicate="https://ia2.dev/spec/resource-envelope#representation" rdf-graph="#manifest"></a>
+      <a href="https://ia2.dev/spec/resource-envelope#DOMRepresentation" rdf-subject="#release-notes-representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+      <data value="/release-notes.html" rdf-subject="#release-notes-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest"></data>
+      <data value="text/html" rdf-subject="#release-notes-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest"></data>
+      <a href="#release-notes-content" rdf-subject="#release-notes-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+
+      <span rdf-subject="#rollback-plan" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Rollback plan</span>
+      <a href="#rollback-plan-representation" rdf-subject="#rollback-plan" rdf-predicate="https://ia2.dev/spec/resource-envelope#representation" rdf-graph="#manifest"></a>
+      <a href="https://ia2.dev/spec/resource-envelope#DOMRepresentation" rdf-subject="#rollback-plan-representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+      <data value="/rollback-plan.html" rdf-subject="#rollback-plan-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest"></data>
+      <data value="text/html" rdf-subject="#rollback-plan-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest"></data>
+      <a href="#rollback-plan-content" rdf-subject="#rollback-plan-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+
+      <span rdf-subject="#document-styles" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Document styles</span>
+      <a href="#document-styles-representation" rdf-subject="#document-styles" rdf-predicate="https://ia2.dev/spec/resource-envelope#representation" rdf-graph="#manifest"></a>
+      <a href="https://ia2.dev/spec/resource-envelope#ByteRepresentation" rdf-subject="#document-styles-representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+      <data value="/styles/document.css" rdf-subject="#document-styles-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest"></data>
+      <data value="text/css" rdf-subject="#document-styles-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest"></data>
+      <data value="705" rdf-subject="#document-styles-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#byteLength" rdf-graph="#manifest"></data>
+      <data value="sha256-mKev/Yq2y5SvgLiMaJbV3DSLHCXSojBqmCt3p5k8lNA=" rdf-subject="#document-styles-representation" rdf-predicate="https://www.w3.org/2018/credentials#digestSRI" rdf-datatype="https://www.w3.org/2018/credentials#sriString" rdf-graph="#manifest"></data>
+      <a href="#document-styles-bytes" rdf-subject="#document-styles-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+
+      <span rdf-subject="#style-tokens" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Style tokens</span>
+      <a href="#style-tokens-representation" rdf-subject="#style-tokens" rdf-predicate="https://ia2.dev/spec/resource-envelope#representation" rdf-graph="#manifest"></a>
+      <a href="https://ia2.dev/spec/resource-envelope#ByteRepresentation" rdf-subject="#style-tokens-representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+      <data value="/styles/tokens.css" rdf-subject="#style-tokens-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest"></data>
+      <data value="text/css" rdf-subject="#style-tokens-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest"></data>
+      <data value="45" rdf-subject="#style-tokens-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#byteLength" rdf-graph="#manifest"></data>
+      <data value="sha256-S7WaGyPsDsfxgf5DaFWZb1BwRI7TrhTRYGyFDiWqO9w=" rdf-subject="#style-tokens-representation" rdf-predicate="https://www.w3.org/2018/credentials#digestSRI" rdf-datatype="https://www.w3.org/2018/credentials#sriString" rdf-graph="#manifest"></data>
+      <a href="#style-tokens-bytes" rdf-subject="#style-tokens-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+
+      <span rdf-subject="#release-map" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#manifest">Orion release path</span>
+      <a href="#release-map-representation" rdf-subject="#release-map" rdf-predicate="https://ia2.dev/spec/resource-envelope#representation" rdf-graph="#manifest"></a>
+      <a href="https://ia2.dev/spec/resource-envelope#ByteRepresentation" rdf-subject="#release-map-representation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#manifest"></a>
+      <data value="/assets/orion-release-map.svg" rdf-subject="#release-map-representation" rdf-predicate="http://purl.org/dc/terms/identifier" rdf-graph="#manifest"></data>
+      <data value="image/svg+xml" rdf-subject="#release-map-representation" rdf-predicate="http://purl.org/dc/elements/1.1/format" rdf-graph="#manifest"></data>
+      <data value="777" rdf-subject="#release-map-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#byteLength" rdf-graph="#manifest"></data>
+      <data value="sha256-duNZmhHRjlMxJLQRI9RxVoSBwGkO06RBm3cOPxq9Jb4=" rdf-subject="#release-map-representation" rdf-predicate="https://www.w3.org/2018/credentials#digestSRI" rdf-datatype="https://www.w3.org/2018/credentials#sriString" rdf-graph="#manifest"></data>
+      <a href="#release-map-bytes" rdf-subject="#release-map-representation" rdf-predicate="https://ia2.dev/spec/resource-envelope#carrier" rdf-graph="#manifest"></a>
+    </section>
+
+    <script id="document-styles-bytes" type="application/octet-stream" data-encoding="base64">QGltcG9ydCAiLi90b2tlbnMuY3NzIjsKYXJ0aWNsZSB7IGNvbG9yOiB2YXIoLS1pbmspOyBmb250LWZhbWlseTogc3lzdGVtLXVpLCBzYW5zLXNlcmlmOyBtYXgtd2lkdGg6IDQ4cmVtOyBtYXJnaW46IDJyZW0gYXV0bzsgcGFkZGluZzogMnJlbTsgfQoucmVsZWFzZS1oZWFkZXIgeyBhbGlnbi1pdGVtczogc3RhcnQ7IGRpc3BsYXk6IGdyaWQ7IGdhcDogMS41cmVtOyBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IDE4MHB4IDFmcjsgfQouYnVuZGxlLWltYWdlIHsgbWFyZ2luOiAwOyB9Ci5idW5kbGUtaW1hZ2UgaW1nIHsgYmFja2dyb3VuZDogI2YzZWZmYTsgZGlzcGxheTogYmxvY2s7IGhlaWdodDogYXV0bzsgd2lkdGg6IDE4MHB4OyB9Ci5idW5kbGUtaW1hZ2UgZmlnY2FwdGlvbiB7IGZvbnQtc2l6ZTogLjc1cmVtOyBsaW5lLWhlaWdodDogMS40OyBtYXJnaW4tdG9wOiAuNXJlbTsgb3ZlcmZsb3ctd3JhcDogYW55d2hlcmU7IH0KLnN0YXR1cyB7IGNvbG9yOiB2YXIoLS1hY2NlbnQpOyBmb250LXdlaWdodDogNzAwOyB9CmEgeyBjb2xvcjogdmFyKC0tYWNjZW50KTsgfQpuYXYgeyBib3JkZXItdG9wOiAxcHggc29saWQgI2Q4ZDBlNDsgbWFyZ2luLXRvcDogMnJlbTsgcGFkZGluZy10b3A6IDFyZW07IH0KQG1lZGlhIChtYXgtd2lkdGg6IDYwMHB4KSB7IC5yZWxlYXNlLWhlYWRlciB7IGdyaWQtdGVtcGxhdGUtY29sdW1uczogMWZyOyB9IH0K</script>
+    <script id="style-tokens-bytes" type="application/octet-stream" data-encoding="base64">OnJvb3QgeyAtLWluazogIzI5MjQzYjsgLS1hY2NlbnQ6ICM2MjQ2Yzc7IH0K</script>
+    <script id="release-map-bytes" type="application/octet-stream" data-encoding="base64">PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgMzYwIj48cmVjdCB3aWR0aD0iNjQwIiBoZWlnaHQ9IjM2MCIgZmlsbD0iI2Y3ZjRmYSIvPjxnIGZvbnQtZmFtaWx5PSJzeXN0ZW0tdWksc2Fucy1zZXJpZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+PHJlY3QgeD0iNTIiIHk9IjEyNCIgd2lkdGg9IjE0NCIgaGVpZ2h0PSI5NiIgcng9IjEyIiBmaWxsPSIjNjI0NmM3Ii8+PHJlY3QgeD0iMjQ4IiB5PSIxMjQiIHdpZHRoPSIxNDQiIGhlaWdodD0iOTYiIHJ4PSIxMiIgZmlsbD0iIzRmM2FhNSIvPjxyZWN0IHg9IjQ0NCIgeT0iMTI0IiB3aWR0aD0iMTQ0IiBoZWlnaHQ9Ijk2IiByeD0iMTIiIGZpbGw9IiMzOTI3NmIiLz48ZyBmaWxsPSIjZmFmOGZmIiBmb250LXNpemU9IjI0Ij48dGV4dCB4PSIxMjQiIHk9IjE4MSI+V2ViPC90ZXh0Pjx0ZXh0IHg9IjMyMCIgeT0iMTgxIj5BUEk8L3RleHQ+PHRleHQgeD0iNTE2IiB5PSIxODEiPkRhdGE8L3RleHQ+PC9nPjxwYXRoIGQ9Ik0yMDQgMTcyaDMybS0xMC0xMCAxMCAxMC0xMCAxME00MDAgMTcyaDMybS0xMC0xMCAxMCAxMC0xMCAxMCIgc3Ryb2tlPSIjMjkyNDNiIiBzdHJva2Utd2lkdGg9IjYiIGZpbGw9Im5vbmUiLz48L2c+PHRleHQgeD0iMzIwIiB5PSIyODYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzeXN0ZW0tdWksc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMyIgZmlsbD0iIzI5MjQzYiI+T3Jpb24gNC4yIHJlbGVhc2UgcGF0aDwvdGV4dD48L3N2Zz4K</script>
+
+    <template id="release-notes-content">
+      <link rel="stylesheet" href="/styles/document.css">
+      <article>
+        <header class="release-header">
+          <figure class="bundle-image">
+            <img src="/assets/orion-release-map.svg" alt="Orion release path from web through API to data">
+            <figcaption>Verified bundled system map.</figcaption>
+          </figure>
+          <div>
+            <p class="status">Ready for launch</p>
+            <h1>Orion 4.2 release notes</h1>
+            <p>The release moves session validation into the API, adds resumable imports, and applies the account-index migration.</p>
+          </div>
+        </header>
+        <h2>Launch conditions</h2>
+        <ul><li>Error rate remains below 2%.</li><li>Import queue age remains below 90 seconds.</li><li>Priya Shah owns the rollback decision.</li></ul>
+        <nav><a href="rollback-plan.html#abort">Open the rollback plan</a> · <a href="/">Return to the handoff</a></nav>
+      </article>
+    </template>
+
+    <template id="rollback-plan-content">
+      <link rel="stylesheet" href="/styles/document.css">
+      <article>
+        <p class="status">Operator procedure</p>
+        <h1 id="abort">Rollback plan</h1>
+        <p>Abort when the five-minute error rate exceeds 2% or the import queue remains above 90 seconds for ten minutes.</p>
+        <ol><li>Disable Orion 4.2 traffic at the edge.</li><li>Restore API release 4.1.7.</li><li>Run the reversible account-index migration.</li><li>Notify the release channel and record observed metrics.</li></ol>
+        <nav><a href="release-notes.html">Back to the release notes</a> · <a href="/#handoff">Return to the handoff</a></nav>
+      </article>
+    </template>
+  </body>
+</html>

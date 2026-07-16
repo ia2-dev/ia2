@@ -19,6 +19,23 @@ const assets = [
   ["site/_redirects", "_redirects"],
   ["specs/html-rdf/index.html", "spec/html-rdf/index.html"],
   ["specs/discovery-enrichment/index.html", "spec/discovery-enrichment/index.html"],
+  ["specs/resource-envelope/index.html", "spec/resource-envelope/index.html"],
+  [
+    "specs/resource-envelope/examples/decision-handoff.html",
+    "spec/resource-envelope/examples/decision-handoff.html",
+  ],
+  [
+    "specs/resource-envelope/examples/vendor-review.html",
+    "spec/resource-envelope/examples/vendor-review.html",
+  ],
+  [
+    "specs/resource-envelope/examples/inspection-evidence.html",
+    "spec/resource-envelope/examples/inspection-evidence.html",
+  ],
+  [
+    "specs/resource-envelope/examples/release-handoff.html",
+    "spec/resource-envelope/examples/release-handoff.html",
+  ],
   [
     "packages/html-rdf-navigator/dist/html-rdf-navigator.js",
     "packages/html-rdf-navigator/dist/html-rdf-navigator.js",
@@ -26,6 +43,14 @@ const assets = [
   [
     "packages/html-rdf-navigator/dist/html-rdf-navigator.js.map",
     "packages/html-rdf-navigator/dist/html-rdf-navigator.js.map",
+  ],
+  [
+    "packages/hare-viewer/dist/hare-viewer.js",
+    "packages/hare-viewer/dist/hare-viewer.js",
+  ],
+  [
+    "packages/hare-viewer/dist/hare-viewer.js.map",
+    "packages/hare-viewer/dist/hare-viewer.js.map",
   ],
 ];
 
