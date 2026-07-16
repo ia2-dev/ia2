@@ -44,6 +44,13 @@ test("builds correctly sized PNG artwork for extension surfaces", async () => {
     assert.equal(metadata.format, "png");
     assert.equal(metadata.width, Number(declaredSize));
     assert.equal(metadata.height, Number(declaredSize));
+    const mutedPath = resolve(packageRoot, "dist/chrome", `icons/ia2-mark-muted-${declaredSize}.png`);
+    const mutedMetadata = await sharp(mutedPath).metadata();
+    const mutedStats = await sharp(mutedPath).stats();
+    assert.equal(mutedMetadata.width, Number(declaredSize));
+    assert.equal(mutedMetadata.height, Number(declaredSize));
+    assert.equal(Math.round(mutedStats.channels[0].mean), Math.round(mutedStats.channels[1].mean));
+    assert.equal(Math.round(mutedStats.channels[1].mean), Math.round(mutedStats.channels[2].mean));
   }
 });
 
@@ -65,10 +72,47 @@ test("content bundle mounts and toggles an extension-owned Navigator", async () 
   const navigator = dom.window.document.querySelector("ia2-extension-navigator");
   assert.ok(navigator);
   assert.equal(navigator.hasAttribute("data-ia2-extension"), true);
+  assert.equal(navigator.shadowRoot.querySelector(".launcher").hidden, true);
   assert.equal(navigator.shadowRoot.querySelector(".count").textContent, "1");
 
   dom.window.eval(bundle);
   await eventually(() => navigator.shadowRoot.querySelector(".panel")?.dataset.open, "false");
   assert.equal(dom.window.document.querySelectorAll("ia2-extension-navigator").length, 1);
+  dom.window.close();
+});
+
+test("status bundle reports empty and live HTML/RDF states", async () => {
+  const [contentBundle, statusBundle] = await Promise.all([
+    readFile(resolve(packageRoot, "dist/chrome/content.js"), "utf8"),
+    readFile(resolve(packageRoot, "dist/chrome/status.js"), "utf8"),
+  ]);
+  assert.doesNotMatch(statusBundle, /^\s*(?:import|export)\s/m);
+  const dom = new JSDOM(`<!doctype html><html><body>
+    <span rdf-subject="#item" rdf-predicate="https://schema.org/name">Item</span>
+    </body></html>`, {
+    pretendToBeVisual: true,
+    runScripts: "outside-only",
+    url: "https://example.test/page",
+  });
+  const reports = [];
+  dom.window.chrome = {
+    runtime: {
+      sendMessage(message) {
+        reports.push(message);
+        return Promise.resolve();
+      },
+    },
+  };
+
+  dom.window.eval(contentBundle);
+  await eventually(() => dom.window.document.querySelector("ia2-extension-navigator")?.shadowRoot?.querySelector(".count")?.textContent, "1");
+  dom.window.eval(statusBundle);
+  await eventually(() => reports.at(-1)?.statements, 1);
+
+  const carrier = dom.window.document.querySelector("[rdf-predicate]");
+  carrier.removeAttribute("rdf-subject");
+  carrier.removeAttribute("rdf-predicate");
+  await eventually(() => reports.at(-1)?.statements, 0);
+  assert.deepEqual(reports.map((report) => report.statements), [1, 0]);
   dom.window.close();
 });

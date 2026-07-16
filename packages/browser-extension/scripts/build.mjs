@@ -37,12 +37,20 @@ function manifestFor(target) {
   if (e2e) {
     manifest.host_permissions = ["http://127.0.0.1/*"];
     if (target !== "chrome") {
-      manifest.content_scripts = [{
-        js: ["content.js"],
-        matches: ["http://127.0.0.1/*"],
-        run_at: "document_idle",
-        world: "MAIN",
-      }];
+      manifest.content_scripts = [
+        {
+          js: ["content.js"],
+          matches: ["http://127.0.0.1/*"],
+          run_at: "document_idle",
+          world: "MAIN",
+        },
+        {
+          js: ["status.js"],
+          matches: ["http://127.0.0.1/*"],
+          run_at: "document_idle",
+          world: "ISOLATED",
+        },
+      ];
     }
   }
   return manifest;
@@ -67,14 +75,19 @@ async function bundle(entryPoint, outputName) {
 }
 
 await rm(distRoot, { force: true, recursive: true });
-const [background, content] = await Promise.all([
+const [background, content, status] = await Promise.all([
   bundle("src/background.js", "background.js"),
   bundle("src/content.js", "content.js"),
+  bundle("src/status.js", "status.js"),
 ]);
 const iconSource = resolve(repositoryRoot, "site/assets/ia2-mark-512.png");
 const icons = new Map(await Promise.all(iconSizes.map(async (size) => [
   size,
   await sharp(iconSource).resize(size, size).png().toBuffer(),
+])));
+const mutedIcons = new Map(await Promise.all(iconSizes.map(async (size) => [
+  size,
+  await sharp(iconSource).resize(size, size).grayscale().png().toBuffer(),
 ])));
 
 for (const target of targets) {
@@ -83,9 +96,11 @@ for (const target of targets) {
   await Promise.all([
     writeFile(resolve(targetRoot, "background.js"), background),
     writeFile(resolve(targetRoot, "content.js"), content),
+    writeFile(resolve(targetRoot, "status.js"), status),
     writeFile(resolve(targetRoot, "manifest.json"), `${JSON.stringify(manifestFor(target), null, 2)}\n`),
     copyFile(resolve(repositoryRoot, "LICENSE"), resolve(targetRoot, "LICENSE")),
     ...iconSizes.map((size) => writeFile(resolve(targetRoot, `icons/ia2-mark-${size}.png`), icons.get(size))),
+    ...iconSizes.map((size) => writeFile(resolve(targetRoot, `icons/ia2-mark-muted-${size}.png`), mutedIcons.get(size))),
   ]);
 }
 

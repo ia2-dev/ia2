@@ -42,6 +42,11 @@ const server = createServer(async (request, response) => {
     response.end(evidenceHtml());
     return;
   }
+  if (url.pathname === "/empty") {
+    response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+    response.end("<!doctype html><html><head><title>Empty document</title></head><body><p>No HTML/RDF here.</p></body></html>");
+    return;
+  }
   if (url.pathname === "/results" && request.method === "POST") {
     let body = "";
     for await (const chunk of request) body += chunk;

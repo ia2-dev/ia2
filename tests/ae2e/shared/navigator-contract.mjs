@@ -35,6 +35,7 @@ export async function runNavigatorContract({ expectedTag } = {}) {
   );
   if (expectedTag) assert(host.localName === expectedTag, `expected ${expectedTag}, got ${host.localName}`);
   const root = await eventually(() => host.shadowRoot, "Navigator shadow root did not attach");
+  const extensionOwned = host.hasAttribute("data-ia2-extension");
   const one = (selector) => root.querySelector(selector);
   const all = (selector) => Array.from(root.querySelectorAll(selector));
   const tab = (view) => {
@@ -60,6 +61,7 @@ export async function runNavigatorContract({ expectedTag } = {}) {
   await run("mounts an isolated, contextual navigator surface", async () => {
     assert(root instanceof ShadowRoot, "Navigator is not isolated in a shadow root");
     assert(one(".panel")?.dataset.open === "true", "Navigator did not open");
+    assert(one(".launcher")?.hidden === extensionOwned, "launcher visibility does not match the Navigator surface");
     assert(one(".launcher .count")?.textContent === "18", `expected 18 source statements, got ${one(".launcher .count")?.textContent}`);
     const labels = all('[role="tab"]').map((item) => item.textContent.trim());
     for (const label of ["Navigator", "Vocabulary (4)", "Discovery (1)", "Turtle", "JSON-LD", "Diagnostics (1)"]) {
@@ -224,7 +226,11 @@ export async function runNavigatorContract({ expectedTag } = {}) {
     host.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Escape" }));
     await delay(0);
     assert(panel.dataset.open === "false", "Escape did not close the Navigator");
-    assert(root.activeElement === one(".launcher"), "close did not return focus to the launcher");
+    if (extensionOwned) {
+      assert(root.activeElement === null, "close retained focus inside the hidden extension surface");
+    } else {
+      assert(root.activeElement === one(".launcher"), "close did not return focus to the launcher");
+    }
     host.open();
   });
 

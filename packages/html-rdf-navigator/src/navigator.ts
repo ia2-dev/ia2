@@ -1653,7 +1653,14 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.shadowRoot?.querySelector(".launcher")?.setAttribute("aria-expanded", "false");
     const panel = this.shadowRoot?.querySelector<HTMLElement>(".panel");
     if (panel) panel.dataset.open = "false";
-    queueMicrotask(() => this.shadowRoot?.querySelector<HTMLButtonElement>(".launcher")?.focus());
+    queueMicrotask(() => {
+      const launcher = this.shadowRoot?.querySelector<HTMLButtonElement>(".launcher");
+      if (launcher?.hidden) {
+        (this.shadowRoot?.activeElement as HTMLElement | null)?.blur();
+        return;
+      }
+      launcher?.focus();
+    });
   }
 
   toggle(focusTarget: "panel" | "tab" = "tab"): void {
@@ -2761,7 +2768,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (this.#view === "vocabulary" && !this.#documentVocabulary.count) this.#view = "navigator";
     this.shadowRoot.innerHTML = `
       <style>${CSS}</style>
-      <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel">
+      <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel"${this.hasAttribute("data-ia2-extension") ? " hidden" : ""}>
         <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="2.6" fill="currentColor"/><circle cx="18.5" cy="5" r="2.6" fill="currentColor"/><circle cx="18.5" cy="19" r="2.6" fill="currentColor"/><path d="M7.2 10.8 16 6.2M7.2 13.2 16 17.8" stroke="currentColor" stroke-width="1.8"/></svg></span>
         <span>RDF</span><span class="count">${result.quads.length}</span>
       </button>

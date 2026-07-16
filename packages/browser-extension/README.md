@@ -3,7 +3,8 @@
 This private workspace package adapts the existing IA² HTML/RDF Navigator for
 Chrome, Firefox, and Safari. Selecting the extension toolbar action injects one
 extension-owned Navigator into the current top-level HTML document and toggles
-its drawer.
+its drawer. The browser action is the extension's launcher, so the embedded
+in-page launcher remains hidden.
 
 ## Permission model
 
@@ -12,6 +13,14 @@ access to a page when a person explicitly selects its toolbar action. It does
 not request persistent host permissions, run on every page, add detached RDF,
 or route discovery retrieval through a privileged background process.
 The Firefox target explicitly declares that it collects and transmits no data.
+
+After the toolbar action inspects a document, the action icon becomes gray when
+the Navigator finds no HTML/RDF statements. When statements are present, the
+icon returns to the IA² colors and its native browser badge shows the statement
+count, capped at `999+`. The tooltip retains the exact count. This state follows
+live semantic DOM changes while the Navigator is mounted. Navigation resets the
+icon and badge because the extension does not inspect the next document until
+the person selects the action again.
 
 The action script runs in the page's main JavaScript world because the
 Navigator is a custom element. It uses no extension APIs there and carries no

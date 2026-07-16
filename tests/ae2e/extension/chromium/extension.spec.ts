@@ -5,6 +5,7 @@ async function runActionScript(serviceWorker: import("@playwright/test").Worker,
   expect(tabId).toBeTruthy();
   await serviceWorker.evaluate(async (id) => {
     await chrome.scripting.executeScript({ target: { tabId: id! }, files: ["content.js"], world: "MAIN" });
+    await chrome.scripting.executeScript({ target: { tabId: id! }, files: ["status.js"] });
   }, tabId);
 }
 
@@ -36,4 +37,29 @@ test("Chrome MV3 worker and scripting entry point own one host", async ({ contex
   await runActionScript(serviceWorker, page.url());
   await expect.poll(async () => page.locator("ia2-extension-navigator").evaluate((host: any) => host.shadowRoot.querySelector(".panel").dataset.open)).toBe("false");
   await expect.poll(() => page.locator("ia2-rdf-navigator").count()).toBe(0);
+});
+
+test("Chrome action mutes empty documents and colors HTML/RDF documents", async ({ context, serviceWorker }) => {
+  const page = await context.newPage();
+  await page.goto("http://127.0.0.1:4187/empty");
+  await runActionScript(serviceWorker, page.url());
+  const emptyTabId = await serviceWorker.evaluate(async (url) => (await chrome.tabs.query({})).find((tab) => tab.url === url)?.id, page.url());
+  await expect.poll(() => serviceWorker.evaluate((tabId) => chrome.action.getTitle({ tabId: tabId! }), emptyTabId)).toBe("No HTML/RDF found on this page");
+  await expect.poll(() => serviceWorker.evaluate((tabId) => chrome.action.getBadgeText({ tabId: tabId! }), emptyTabId)).toBe("");
+
+  await page.evaluate(() => {
+    const carrier = document.createElement("span");
+    carrier.setAttribute("rdf-subject", "#item");
+    carrier.setAttribute("rdf-predicate", "https://schema.org/name");
+    carrier.textContent = "Item";
+    document.body.append(carrier);
+  });
+  await expect.poll(() => serviceWorker.evaluate((tabId) => chrome.action.getBadgeText({ tabId: tabId! }), emptyTabId)).toBe("1");
+  await expect.poll(() => serviceWorker.evaluate((tabId) => chrome.action.getTitle({ tabId: tabId! }), emptyTabId)).toBe("Open IA² Navigator (1 RDF statement)");
+
+  await page.goto("http://127.0.0.1:4187/contract");
+  await runActionScript(serviceWorker, page.url());
+  const rdfTabId = await serviceWorker.evaluate(async (url) => (await chrome.tabs.query({})).find((tab) => tab.url === url)?.id, page.url());
+  await expect.poll(() => serviceWorker.evaluate((tabId) => chrome.action.getBadgeText({ tabId: tabId! }), rdfTabId)).toBe("18");
+  await expect.poll(() => serviceWorker.evaluate((tabId) => chrome.action.getTitle({ tabId: tabId! }), rdfTabId)).toBe("Open IA² Navigator (18 RDF statements)");
 });
