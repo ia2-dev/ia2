@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A live issue tracker that publishes its current work-item state as page-local RDF." rdf-subject="" rdf-predicate="http://purl.org/dc/terms/description">
+    <title rdf-subject="" rdf-predicate="http://purl.org/dc/terms/title">Issues · Current</title>
+    <link rel="canonical" href="https://ia2.dev/demos/live-workspace/issues/">
+    <link hidden href="https://schema.org/WebApplication" rdf-subject="" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+    <link rel="icon" href="/assets/ia2-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/demos/live-workspace/styles.css?v=0.3">
+    <script type="module" src="/packages/html-rdf-navigator/dist/html-rdf-navigator.js?v=0.3"></script>
+    <script type="module" src="/demos/live-workspace/app.js?v=0.3"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">Skip to issues</a>
+    <header class="topbar">
+      <a class="brand" href="/demos/live-workspace/" aria-label="Demo index"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Current</span></a>
+      <div class="workspace-label"><span class="workspace-dot" aria-hidden="true"></span> Product studio <span class="environment">Issues</span></div>
+      <div class="topbar-actions"><button class="icon-button" id="theme-button" type="button" aria-label="Use dark theme" title="Change theme"><span aria-hidden="true">◐</span></button><span class="avatar" aria-label="Signed in as Maya Chen">MC</span></div>
+    </header>
+    <div class="app-shell">
+      <nav class="rail" aria-label="Demo applications">
+        <a class="rail-link" href="/demos/live-workspace/"><span aria-hidden="true">⌂</span><span>Overview</span></a>
+        <a class="rail-link is-active" href="/demos/live-workspace/issues/" aria-current="page"><span aria-hidden="true">◎</span><span>Issues</span><b id="issue-nav-count">4</b></a>
+        <a class="rail-link" href="/demos/live-workspace/inbox/"><span aria-hidden="true">◇</span><span>Inbox</span></a>
+        <a class="rail-link" href="/demos/live-workspace/release-brief/"><span aria-hidden="true">◈</span><span>Briefing</span></a>
+        <div class="rail-spacer"></div>
+      </nav>
+      <main id="workspace" tabindex="-1">
+        <aside class="demo-intro" aria-labelledby="demo-intro-title">
+          <span class="demo-intro-label"><i aria-hidden="true"></i> Issue graph</span>
+          <p class="demo-intro-copy" id="demo-intro-title"><strong>Change the work, then inspect its graph.</strong> This document publishes only issue-tracker state. CUR-142 links to related correspondence in the separately published inbox.</p>
+          <button class="demo-intro-action" id="open-rdf-navigator" type="button">Open RDF Navigator <span aria-hidden="true">↗</span></button>
+        </aside>
+        <section class="view is-active" id="issues-view" aria-labelledby="issues-heading">
+          <header class="view-header">
+            <div><p class="eyebrow">Plan and ship</p><h1 id="issues-heading" tabindex="-1">Issues</h1></div>
+            <div class="header-actions">
+              <label class="search-field"><span class="sr-only">Search issues</span><span aria-hidden="true">⌕</span><input id="issue-search" type="search" placeholder="Search issues" autocomplete="off"></label>
+              <button class="primary-button" id="new-issue-button" type="button"><span aria-hidden="true">＋</span> New issue</button>
+            </div>
+          </header>
+          <form class="inline-form" id="issue-form" hidden>
+            <div class="form-heading"><div><p class="eyebrow">New work item</p><h2>Create issue</h2></div><button class="icon-button form-close" type="button" aria-label="Close issue form">×</button></div>
+            <div class="form-grid">
+              <label class="field field-wide"><span>Title</span><input name="title" required maxlength="90" placeholder="What needs attention?"></label>
+              <label class="field"><span>Assignee</span><input name="assignee" required maxlength="40" value="Maya Chen"></label>
+              <label class="field"><span>Status</span><select name="status"><option>Todo</option><option>In progress</option><option>Done</option></select></label>
+            </div>
+            <div class="form-actions"><button class="secondary-button form-cancel" type="button">Cancel</button><button class="primary-button" type="submit">Create issue</button></div>
+          </form>
+          <div class="view-toolbar">
+            <div class="filters" role="group" aria-label="Filter issues">
+              <button class="filter is-selected" type="button" data-filter="All" aria-pressed="true">All <span id="all-count">4</span></button>
+              <button class="filter" type="button" data-filter="Todo" aria-pressed="false">Todo <span id="todo-count">2</span></button>
+              <button class="filter" type="button" data-filter="In progress" aria-pressed="false">In progress <span id="progress-count">1</span></button>
+              <button class="filter" type="button" data-filter="Done" aria-pressed="false">Done <span id="done-count">1</span></button>
+            </div>
+            <p class="shortcut-hint"><kbd>N</kbd> new issue</p>
+          </div>
+          <div class="issue-table" role="table" aria-label="Issues">
+            <div class="table-head" role="row"><span role="columnheader">Issue</span><span role="columnheader">Status</span><span role="columnheader">Assignee</span><span role="columnheader"><span class="sr-only">Actions</span></span></div>
+            <div id="issue-list" role="rowgroup"></div>
+          </div>
+          <div class="empty-state" id="issue-empty" hidden><span aria-hidden="true">◎</span><h2>No issues here</h2><p>Try a different filter or create the first one.</p></div>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  </body>
+</html>

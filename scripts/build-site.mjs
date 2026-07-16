@@ -1,4 +1,4 @@
-import { copyFile, mkdir, rm } from "node:fs/promises";
+import { copyFile, cp, mkdir, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -15,9 +15,6 @@ const assets = [
   ["site/guide.js", "guide.js"],
   ["site/_redirects", "_redirects"],
   ["specs/html-rdf/index.html", "spec/html-rdf/index.html"],
-  ["demos/live-workspace/index.html", "demos/live-workspace/index.html"],
-  ["demos/live-workspace/app.js", "demos/live-workspace/app.js"],
-  ["demos/live-workspace/styles.css", "demos/live-workspace/styles.css"],
   [
     "packages/html-rdf-navigator/dist/html-rdf-navigator.js",
     "packages/html-rdf-navigator/dist/html-rdf-navigator.js",
@@ -36,4 +33,6 @@ for (const [source, destination] of assets) {
   await copyFile(join(root, source), target);
 }
 
-console.log(`Prepared ${assets.length} static assets in .site/`);
+await cp(join(root, "demos"), join(output, "demos"), { recursive: true });
+
+console.log(`Prepared ${assets.length} static assets and demos in .site/`);

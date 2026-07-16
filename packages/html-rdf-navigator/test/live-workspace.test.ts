@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { extractDataset } from "../src/extract.js";
 // @ts-expect-error Vitest supplies Vite's raw-fixture import during tests.
-import workspaceHtml from "../../../demos/live-workspace/index.html?raw";
+import briefingHtml from "../../../demos/live-workspace/release-brief/index.html?raw";
+// @ts-expect-error Vitest supplies Vite's raw-fixture import during tests.
+import issueHtml from "../../../demos/live-workspace/issues/index.html?raw";
+// @ts-expect-error Vitest supplies Vite's raw-fixture import during tests.
+import inboxHtml from "../../../demos/live-workspace/inbox/index.html?raw";
 
-const BASE = "https://ia2.dev/demos/live-workspace";
+const BASE = "https://ia2.dev/demos/live-workspace/release-brief/";
+const ISSUE = "https://ia2.dev/demos/live-workspace/issues/";
+const INBOX = "https://ia2.dev/demos/live-workspace/inbox/";
 const DECISION = "https://ontology.inferal.com/modules/decision/";
 const DCTERMS = "http://purl.org/dc/terms/";
 const PROV = "http://www.w3.org/ns/prov#";
@@ -12,8 +18,8 @@ const SHACL = "http://www.w3.org/ns/shacl#";
 
 describe("live workspace semantics", () => {
   it("connects the release, decision, evidence, claim, and contract", () => {
-    const page = new DOMParser().parseFromString(workspaceHtml, "text/html");
-    Object.defineProperty(page, "URL", { configurable: true, value: "http://127.0.0.1:8791/demos/live-workspace" });
+    const page = new DOMParser().parseFromString(briefingHtml, "text/html");
+    Object.defineProperty(page, "URL", { configurable: true, value: "http://127.0.0.1:8791/demos/live-workspace/release-brief/" });
 
     const result = extractDataset(page);
     const named = (fragment: string): string => `${BASE}#${fragment}`;
@@ -49,7 +55,12 @@ describe("live workspace semantics", () => {
     expect(hasNamed(
       named("decision-record-focus-return"),
       `${PROV}wasDerivedFrom`,
-      named("message-31"),
+      `${INBOX}#message-31`,
+    )).toBe(true);
+    expect(hasNamed(
+      named("decision-issue-focus-return"),
+      `${DCTERMS}isPartOf`,
+      `${ISSUE}#issue-142`,
     )).toBe(true);
     expect(hasNamed(
       named("decision-shape"),
@@ -72,5 +83,22 @@ describe("live workspace semantics", () => {
       { termType: "NamedNode", value: named("runtime-state") },
       { termType: "NamedNode", value: named("validation-contract") },
     ]));
+  });
+
+  it("keeps the original applications in separate canonical RDF spaces", () => {
+    const issuePage = new DOMParser().parseFromString(issueHtml, "text/html");
+    const inboxPage = new DOMParser().parseFromString(inboxHtml, "text/html");
+    Object.defineProperty(issuePage, "URL", { configurable: true, value: "http://127.0.0.1:8791/issues" });
+    Object.defineProperty(inboxPage, "URL", { configurable: true, value: "http://127.0.0.1:8791/inbox" });
+
+    const issueResult = extractDataset(issuePage);
+    const inboxResult = extractDataset(inboxPage);
+
+    expect(issueResult.diagnostics).toEqual([]);
+    expect(inboxResult.diagnostics).toEqual([]);
+    expect(issueResult.sourceDocumentIri).toBe(ISSUE);
+    expect(inboxResult.sourceDocumentIri).toBe(INBOX);
+    expect(issueResult.quads.some((quad) => quad.subject.value.startsWith(INBOX))).toBe(false);
+    expect(inboxResult.quads.some((quad) => quad.subject.value.startsWith(ISSUE))).toBe(false);
   });
 });

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A release decision that federates independently published work, correspondence, provenance, and a validation contract." rdf-subject="" rdf-predicate="http://purl.org/dc/terms/description">
+    <title rdf-subject="" rdf-predicate="http://purl.org/dc/terms/title">Accessibility release brief · Current</title>
+    <link rel="canonical" href="https://ia2.dev/demos/live-workspace/release-brief/">
+    <link hidden href="https://schema.org/WebApplication" rdf-subject="" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+    <link rel="icon" href="/assets/ia2-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/demos/live-workspace/styles.css?v=0.3">
+    <script type="module" src="/packages/html-rdf-navigator/dist/html-rdf-navigator.js?v=0.3"></script>
+    <script type="module" src="/demos/live-workspace/app.js?v=0.3"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">Skip to release brief</a>
+    <header class="topbar">
+      <a class="brand" href="/demos/live-workspace/" aria-label="Demo index"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Current</span></a>
+      <div class="workspace-label"><span class="workspace-dot" aria-hidden="true"></span> Product studio <span class="environment">Release brief</span></div>
+      <div class="topbar-actions"><button class="icon-button" id="theme-button" type="button" aria-label="Use dark theme" title="Change theme"><span aria-hidden="true">◐</span></button><span class="avatar" aria-label="Signed in as Maya Chen">MC</span></div>
+    </header>
+    <div class="app-shell">
+      <nav class="rail" aria-label="Demo applications">
+        <a class="rail-link" href="/demos/live-workspace/"><span aria-hidden="true">⌂</span><span>Overview</span></a>
+        <a class="rail-link" href="/demos/live-workspace/issues/"><span aria-hidden="true">◎</span><span>Issues</span></a>
+        <a class="rail-link" href="/demos/live-workspace/inbox/"><span aria-hidden="true">◇</span><span>Inbox</span></a>
+        <a class="rail-link is-active" href="/demos/live-workspace/release-brief/" aria-current="page"><span aria-hidden="true">◈</span><span>Briefing</span><b>1</b></a>
+        <div class="rail-spacer"></div>
+      </nav>
+      <main id="workspace" tabindex="-1">
+        <aside class="demo-intro" aria-labelledby="demo-intro-title">
+          <span class="demo-intro-label"><i aria-hidden="true"></i> Federated decision graph</span>
+          <p class="demo-intro-copy" id="demo-intro-title"><strong>Follow the evidence across documents.</strong> This page publishes a decision, provenance, and SHACL contract. Its work item and review message remain owned by their source applications.</p>
+          <button class="demo-intro-action" id="open-rdf-navigator" type="button">Open RDF Navigator <span aria-hidden="true">↗</span></button>
+        </aside>
+
+        <section class="view briefing-view" id="briefing-view" aria-labelledby="briefing-heading">
+          <header class="view-header briefing-header">
+            <div><p class="eyebrow">Connected operational context</p><h1 id="briefing-heading" tabindex="-1" rdf-subject="#release-accessibility" rdf-predicate="http://purl.org/dc/terms/title">Accessibility release brief</h1></div>
+            <data class="release-status" value="Ready for review" rdf-subject="#release-accessibility" rdf-predicate="https://current.example/vocab/releaseStatus" rdf-graph="#runtime-state"><i aria-hidden="true"></i> Ready for review</data>
+          </header>
+          <p class="briefing-lede">This document does not copy the issue tracker or inbox graph. It refers to their published resource identities, then contributes a decision, rationale, provenance trail, and validation contract of its own.</p>
+          <a hidden href="https://schema.org/Project" rdf-subject="#release-accessibility" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+          <a hidden href="#decision-record-focus-return" rdf-subject="#release-accessibility" rdf-predicate="http://purl.org/dc/terms/hasPart"></a>
+          <a hidden href="#release-assembly" rdf-subject="#release-accessibility" rdf-predicate="http://www.w3.org/ns/prov#wasGeneratedBy"></a>
+
+          <div class="briefing-layout">
+            <article class="decision-panel" aria-labelledby="decision-title">
+              <header class="panel-heading"><div><p class="panel-kicker">Decision record</p><h2 id="decision-title" rdf-subject="#decision-record-focus-return" rdf-predicate="http://purl.org/dc/terms/title">Where should focus return?</h2></div><span class="semantic-badge">Linked rationale</span></header>
+              <a hidden href="https://ontology.inferal.com/modules/decision/DecisionRecord" rdf-subject="#decision-record-focus-return" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+              <a hidden href="#decision-focus-return" rdf-subject="#decision-record-focus-return" rdf-predicate="https://ontology.inferal.com/modules/decision/recordsDecision"></a>
+              <a hidden href="#rationale-focus-return" rdf-subject="#decision-record-focus-return" rdf-predicate="https://ontology.inferal.com/modules/decision/hasRationale"></a>
+              <a hidden href="#maya-chen" rdf-subject="#decision-record-focus-return" rdf-predicate="http://www.w3.org/ns/prov#wasAttributedTo"></a>
+              <a hidden href="https://ontology.inferal.com/modules/decision/Decision" rdf-subject="#decision-focus-return" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+              <a hidden href="#deliberation-focus-return" rdf-subject="#decision-focus-return" rdf-predicate="https://ontology.inferal.com/modules/decision/resultedFromDeliberation"></a>
+              <a hidden href="https://ontology.inferal.com/modules/decision/Deliberation" rdf-subject="#deliberation-focus-return" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+              <a hidden href="#decision-issue-focus-return" rdf-subject="#deliberation-focus-return" rdf-predicate="https://ontology.inferal.com/modules/decision/addressesIssue"></a>
+              <a hidden href="https://ontology.inferal.com/modules/decision/Issue" rdf-subject="#decision-issue-focus-return" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+              <span hidden rdf-subject="#decision-issue-focus-return" rdf-predicate="http://purl.org/dc/terms/title">Where should focus return when the command menu closes?</span>
+              <a hidden href="https://ia2.dev/demos/live-workspace/issues/#issue-142" rdf-subject="#decision-issue-focus-return" rdf-predicate="http://purl.org/dc/terms/isPartOf"></a>
+
+              <fieldset class="decision-options">
+                <legend>Considered options</legend>
+                <button class="decision-option is-selected" id="option-return-to-invoker" type="button" data-option-id="option-return-to-invoker" aria-pressed="true"><span class="option-marker" aria-hidden="true"></span><span><strong rdf-subject="#option-return-to-invoker" rdf-predicate="http://purl.org/dc/terms/title">Return to the invoking control</strong><small>Predictable and easy to explain across input modes.</small></span></button>
+                <button class="decision-option" id="option-last-active" type="button" data-option-id="option-last-active" aria-pressed="false"><span class="option-marker" aria-hidden="true"></span><span><strong rdf-subject="#option-last-active" rdf-predicate="http://purl.org/dc/terms/title">Restore the last active element</strong><small>Flexible, but dependent on transient UI history.</small></span></button>
+                <button class="decision-option" id="option-no-focus" type="button" data-option-id="option-no-focus" aria-pressed="false"><span class="option-marker" aria-hidden="true"></span><span><strong rdf-subject="#option-no-focus" rdf-predicate="http://purl.org/dc/terms/title">Do not move focus automatically</strong><small>Minimal behavior, with a less predictable outcome.</small></span></button>
+              </fieldset>
+              <a hidden href="https://ontology.inferal.com/modules/decision/Option" rdf-subject="#option-return-to-invoker" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+              <a hidden href="https://ontology.inferal.com/modules/decision/Option" rdf-subject="#option-last-active" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+              <a hidden href="https://ontology.inferal.com/modules/decision/Option" rdf-subject="#option-no-focus" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+              <a hidden href="#option-return-to-invoker" rdf-subject="#deliberation-focus-return" rdf-predicate="https://ontology.inferal.com/modules/decision/considersOption"></a>
+              <a hidden href="#option-last-active" rdf-subject="#deliberation-focus-return" rdf-predicate="https://ontology.inferal.com/modules/decision/considersOption"></a>
+              <a hidden href="#option-no-focus" rdf-subject="#deliberation-focus-return" rdf-predicate="https://ontology.inferal.com/modules/decision/considersOption"></a>
+              <div class="selected-decision"><span>Selected</span><a id="selected-option-link" href="#option-return-to-invoker" rdf-subject="#decision-focus-return" rdf-predicate="https://ontology.inferal.com/modules/decision/selectedOption" rdf-graph="#runtime-state">Return to the invoking control</a></div>
+              <p class="decision-rationale" id="rationale-focus-return" rdf-predicate="http://purl.org/dc/terms/description">Keyboard and switch users need a stable place to continue after the command menu closes. The invoking control is observable, durable, and independent of incidental focus history.</p>
+              <footer class="decision-meta"><span>Decided by <strong rdf-subject="#maya-chen" rdf-predicate="https://schema.org/name">Maya Chen</strong></span><time datetime="2026-07-14" rdf-subject="#decision-record-focus-return" rdf-predicate="http://purl.org/dc/terms/date" rdf-datatype="http://www.w3.org/2001/XMLSchema#date">14 July 2026</time></footer>
+              <a hidden href="https://schema.org/Person" rdf-subject="#maya-chen" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+            </article>
+
+            <div class="briefing-side">
+              <section class="evidence-panel" aria-labelledby="evidence-title">
+                <header class="panel-heading compact"><div><p class="panel-kicker">Federated evidence</p><h2 id="evidence-title">Follow the source</h2></div></header>
+                <div class="evidence-list">
+                  <a class="evidence-row" href="https://ia2.dev/demos/live-workspace/issues/#issue-142" rdf-subject="#release-accessibility" rdf-predicate="http://purl.org/dc/terms/hasPart"><span class="evidence-kind">Work</span><span><strong>CUR-142</strong><small>Published by the issue tracker</small></span><span aria-hidden="true">↗</span></a>
+                  <a class="evidence-row" href="https://ia2.dev/demos/live-workspace/inbox/#message-31" rdf-subject="#decision-record-focus-return" rdf-predicate="http://www.w3.org/ns/prov#wasDerivedFrom"><span class="evidence-kind">Message</span><span><strong>Keyboard review notes</strong><small>Published by the inbox</small></span><span aria-hidden="true">↗</span></a>
+                  <a class="evidence-row" href="#audit-keyboard" rdf-subject="#decision-record-focus-return" rdf-predicate="http://www.w3.org/ns/prov#wasDerivedFrom"><span class="evidence-kind">Audit</span><span><strong id="audit-keyboard" rdf-predicate="http://purl.org/dc/terms/title">Keyboard interaction audit</strong><small>18 checks passed</small></span><span aria-hidden="true">↓</span></a>
+                </div>
+                <time hidden datetime="2026-07-14T16:20:00Z" rdf-subject="#audit-keyboard" rdf-predicate="http://www.w3.org/ns/prov#generatedAtTime" rdf-datatype="http://www.w3.org/2001/XMLSchema#dateTime"></time>
+                <a hidden href="#maya-chen" rdf-subject="#audit-keyboard" rdf-predicate="http://www.w3.org/ns/prov#wasAttributedTo"></a>
+              </section>
+              <section class="contract-panel" aria-labelledby="contract-title">
+                <header class="panel-heading compact"><div><p class="panel-kicker">Published SHACL contract</p><h2 id="contract-title" rdf-subject="#semantic-contract" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#validation-contract">What complete means</h2></div><span class="contract-state">2 shapes</span></header>
+                <p class="contract-copy">The page carries its validation contract as ordinary RDF. This demo publishes the shape; extraction does not execute it.</p>
+                <ul class="contract-rules"><li><span aria-hidden="true">✓</span><span rdf-subject-key="selected-option-property" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#validation-contract">Every decision must select exactly one option.</span></li><li><span aria-hidden="true">✓</span><span rdf-subject-key="rationale-property" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#validation-contract">Every decision record must include a rationale.</span></li></ul>
+                <a hidden href="#decision-shape" rdf-subject="#semantic-contract" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#validation-contract"></a>
+                <a hidden href="#decision-record-shape" rdf-subject="#semantic-contract" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#validation-contract"></a>
+                <a hidden href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#decision-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#validation-contract"></a>
+                <a hidden href="https://ontology.inferal.com/modules/decision/Decision" rdf-subject="#decision-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetClass" rdf-graph="#validation-contract"></a>
+                <span hidden rdf-subject="#decision-shape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-object-key="selected-option-property" rdf-graph="#validation-contract"></span>
+                <a hidden href="https://ontology.inferal.com/modules/decision/selectedOption" rdf-subject-key="selected-option-property" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#validation-contract"></a>
+                <data hidden value="1" rdf-subject-key="selected-option-property" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#validation-contract"></data>
+                <data hidden value="1" rdf-subject-key="selected-option-property" rdf-predicate="http://www.w3.org/ns/shacl#maxCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#validation-contract"></data>
+                <a hidden href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#decision-record-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#validation-contract"></a>
+                <a hidden href="https://ontology.inferal.com/modules/decision/DecisionRecord" rdf-subject="#decision-record-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetClass" rdf-graph="#validation-contract"></a>
+                <span hidden rdf-subject="#decision-record-shape" rdf-predicate="http://www.w3.org/ns/shacl#property" rdf-object-key="rationale-property" rdf-graph="#validation-contract"></span>
+                <a hidden href="https://ontology.inferal.com/modules/decision/hasRationale" rdf-subject-key="rationale-property" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#validation-contract"></a>
+                <data hidden value="1" rdf-subject-key="rationale-property" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#validation-contract"></data>
+              </section>
+            </div>
+          </div>
+
+          <div class="semantic-layers">
+            <article class="claim-panel" rdf-subject-key="selected-option-claim" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#reifies">
+              <template><a href="#option-return-to-invoker" rdf-subject="#decision-focus-return" rdf-predicate="https://ontology.inferal.com/modules/decision/selectedOption">Return to the invoking control</a></template>
+              <p class="panel-kicker">RDF 1.2 statement-level claim</p><h2>Keep a claim about the initial recommendation</h2>
+              <p rdf-subject-key="selected-option-claim" rdf-predicate="http://purl.org/dc/terms/description">The initial recommendation selected the invoking control. That reviewed statement remains addressable even if the live decision changes.</p>
+            </article>
+            <article class="provenance-panel">
+              <p class="panel-kicker">Provenance trail</p><h2 id="release-assembly" rdf-predicate="http://purl.org/dc/terms/title">Release brief assembly</h2>
+              <a hidden href="http://www.w3.org/ns/prov#Activity" rdf-subject="#release-assembly" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+              <a hidden href="https://ia2.dev/demos/live-workspace/issues/#issue-142" rdf-subject="#release-assembly" rdf-predicate="http://www.w3.org/ns/prov#used"></a>
+              <a hidden href="#decision-record-focus-return" rdf-subject="#release-assembly" rdf-predicate="http://www.w3.org/ns/prov#used"></a>
+              <a hidden href="#maya-chen" rdf-subject="#release-assembly" rdf-predicate="http://www.w3.org/ns/prov#wasAssociatedWith"></a>
+              <p>Generated from <a href="https://ia2.dev/demos/live-workspace/issues/#issue-142">one independently published work item</a> and <a href="#decision-record-focus-return">one local decision record</a>, associated with Maya Chen.</p>
+              <time datetime="2026-07-15T03:10:00Z" rdf-subject="#release-assembly" rdf-predicate="http://www.w3.org/ns/prov#endedAtTime" rdf-datatype="http://www.w3.org/2001/XMLSchema#dateTime">Updated 15 July 2026, 03:10 UTC</time>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  </body>
+</html>

@@ -6,6 +6,8 @@ const NS = {
 };
 
 const RUNTIME_GRAPH = "#runtime-state";
+const ISSUE_DOCUMENT = "https://ia2.dev/demos/live-workspace/issues/";
+const INBOX_DOCUMENT = "https://ia2.dev/demos/live-workspace/inbox/";
 
 const issues = [
   { id: 142, title: "Add keyboard navigation to command menu", status: "In progress", assignee: "Maya Chen", kind: "Accessibility" },
@@ -78,6 +80,7 @@ function renderIssues() {
     return `<article class="issue-row" id="issue-${issue.id}" role="row" data-issue-id="${issue.id}">
       <a hidden href="${NS.schema}Action" ${semanticAttrs(subject, `${NS.rdf}type`)}></a>
       <a hidden href="${subject}" ${semanticAttrs("", `${NS.current}hasIssue`)}></a>
+      ${issue.id === 142 ? `<a hidden href="${INBOX_DOCUMENT}#message-31" ${semanticAttrs(subject, "http://purl.org/dc/terms/relation")}></a>` : ""}
       <a hidden href="${NS.schema}Person" ${semanticAttrs(assignee, `${NS.rdf}type`)}></a>
       <div class="issue-summary" role="cell">
         <span class="issue-title" ${semanticAttrs(subject, `${NS.schema}name`)}>${escapeHtml(issue.title)}</span>
@@ -98,16 +101,17 @@ function renderIssues() {
 
 function updateCounts() {
   const issueCounts = Object.fromEntries(["Todo", "In progress", "Done"].map((status) => [status, issues.filter((issue) => issue.status === status).length]));
-  $("#issue-nav-count").textContent = issues.length;
-  $("#all-count").textContent = issues.length;
-  $("#todo-count").textContent = issueCounts.Todo;
-  $("#progress-count").textContent = issueCounts["In progress"];
-  $("#done-count").textContent = issueCounts.Done;
-  $("#mail-nav-count").textContent = messages.filter((message) => !message.read && !message.archived && !message.sent).length;
-  $("#unread-count").textContent = messages.filter((message) => !message.read && !message.archived && !message.sent).length;
-  $("#starred-count").textContent = messages.filter((message) => message.starred && !message.archived).length;
-  $("#archive-count").textContent = messages.filter((message) => message.archived).length;
-  $("#sent-count").textContent = messages.filter((message) => message.sent).length;
+  const setText = (selector, value) => { const element = $(selector); if (element) element.textContent = value; };
+  setText("#issue-nav-count", issues.length);
+  setText("#all-count", issues.length);
+  setText("#todo-count", issueCounts.Todo);
+  setText("#progress-count", issueCounts["In progress"]);
+  setText("#done-count", issueCounts.Done);
+  setText("#mail-nav-count", messages.filter((message) => !message.read && !message.archived && !message.sent).length);
+  setText("#unread-count", messages.filter((message) => !message.read && !message.archived && !message.sent).length);
+  setText("#starred-count", messages.filter((message) => message.starred && !message.archived).length);
+  setText("#archive-count", messages.filter((message) => message.archived).length);
+  setText("#sent-count", messages.filter((message) => message.sent).length);
 }
 
 function openIssueForm() {
@@ -160,6 +164,7 @@ function renderMail() {
     const sender = message.sent ? `To: ${message.to}` : message.from;
     return `<article class="mail-row${message.read ? "" : " is-unread"}" id="message-${message.id}" data-mail-id="${message.id}">
       <a hidden href="${NS.schema}Message" ${semanticAttrs(subject, `${NS.rdf}type`)}></a>
+      ${message.id === 31 ? `<a hidden href="${ISSUE_DOCUMENT}#issue-142" ${semanticAttrs(subject, `${NS.schema}about`)}></a>` : ""}
       <a hidden href="${senderSubject}" ${semanticAttrs(subject, `${NS.schema}sender`)}></a>
       <a hidden href="${recipientSubject}" ${semanticAttrs(subject, `${NS.schema}recipient`)}></a>
       <a hidden href="${NS.schema}Person" ${semanticAttrs(senderSubject, `${NS.rdf}type`)}></a>
@@ -229,104 +234,92 @@ function toggleArchive(message) {
   showToast(`${message.archived ? "Archived" : "Returned to inbox"}. RDF state updated.`);
 }
 
-function switchView(viewName) {
-  $$(".rail-link").forEach((button) => {
-    const active = button.dataset.view === viewName;
-    button.classList.toggle("is-active", active);
-    if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
+function closeCompose() { $("#compose-form").hidden = true; $("#compose-form").reset(); $("#compose-form [name=to]").value = "team@example.com"; }
+
+if (issueList) {
+  $("#new-issue-button").addEventListener("click", openIssueForm);
+  $("#issue-form .form-close").addEventListener("click", closeIssueForm);
+  $("#issue-form .form-cancel").addEventListener("click", closeIssueForm);
+  $("#issue-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    issues.unshift({ id: issueSequence++, title: String(data.get("title")).trim(), assignee: String(data.get("assignee")).trim(), status: String(data.get("status")), kind: "Product" });
+    activeIssueFilter = "All";
+    closeIssueForm();
+    renderIssues();
+    showToast("Issue created. New RDF statements detected.");
   });
-  $$(".view").forEach((view) => {
-    const active = view.id === `${viewName}-view`;
-    view.classList.toggle("is-active", active);
-    view.hidden = !active;
+  issueList.addEventListener("change", (event) => {
+    if (!event.target.matches(".status-select")) return;
+    const row = event.target.closest("[data-issue-id]");
+    const issue = issues.find((item) => item.id === Number(row.dataset.issueId));
+    issue.status = event.target.value;
+    event.target.dataset.state = slugStatus(issue.status);
+    event.target.closest("[rdf-predicate]").value = issue.status;
+    updateCounts();
+    showToast(`CUR-${issue.id} moved to ${issue.status}. RDF value updated.`);
   });
-  $(`#${viewName}-heading`).focus?.();
+  issueList.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-action]");
+    if (!button) return;
+    const row = button.closest("[data-issue-id]");
+    const index = issues.findIndex((item) => item.id === Number(row.dataset.issueId));
+    const issue = issues[index];
+    if (button.dataset.action === "edit") beginIssueEdit(row, issue);
+    if (button.dataset.action === "delete") {
+      issues.splice(index, 1);
+      renderIssues();
+      showToast(`CUR-${issue.id} deleted. RDF statements removed.`);
+    }
+  });
+  $$('[data-filter]').forEach((button) => button.addEventListener("click", () => {
+    activeIssueFilter = button.dataset.filter;
+    $$("[data-filter]").forEach((item) => { const selected = item === button; item.classList.toggle("is-selected", selected); item.setAttribute("aria-pressed", String(selected)); });
+    renderIssues();
+  }));
+  $("#issue-search").addEventListener("input", renderIssues);
+  renderIssues();
 }
 
-$("#new-issue-button").addEventListener("click", openIssueForm);
-$("#issue-form .form-close").addEventListener("click", closeIssueForm);
-$("#issue-form .form-cancel").addEventListener("click", closeIssueForm);
-$("#issue-form").addEventListener("submit", (event) => {
-  event.preventDefault();
-  const data = new FormData(event.currentTarget);
-  issues.unshift({ id: issueSequence++, title: String(data.get("title")).trim(), assignee: String(data.get("assignee")).trim(), status: String(data.get("status")), kind: "Product" });
-  activeIssueFilter = "All";
-  closeIssueForm();
-  renderIssues();
-  showToast("Issue created. New RDF statements detected.");
-});
+if (mailList) {
+  $("#compose-button").addEventListener("click", () => { $("#compose-form").hidden = false; $("#compose-form [name=subject]").focus(); });
+  $("#compose-form .form-close").addEventListener("click", closeCompose);
+  $("#compose-form .form-cancel").addEventListener("click", closeCompose);
+  $("#compose-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    messages.unshift({ id: mailSequence++, from: "Maya Chen", to: String(data.get("to")).trim(), subject: String(data.get("subject")).trim(), body: String(data.get("body")).trim(), time: "Now", received: new Date().toISOString(), read: true, starred: false, archived: false, sent: true });
+    closeCompose(); activeFolder = "sent"; openMessageId = null;
+    $$("[data-folder]").forEach((item) => { const selected = item.dataset.folder === activeFolder; item.classList.toggle("is-selected", selected); item.setAttribute("aria-pressed", String(selected)); });
+    renderMail(); showToast("Message sent. New RDF statements detected.");
+  });
+  mailList.addEventListener("click", (event) => {
+    const target = event.target.closest("[data-action]");
+    if (!target) return;
+    const message = messages.find((item) => item.id === Number(target.closest("[data-mail-id]").dataset.mailId));
+    if (target.dataset.action === "open") openMessage(message);
+    if (target.dataset.action === "star") toggleStar(message);
+    if (target.dataset.action === "archive") toggleArchive(message);
+  });
+  mailList.addEventListener("keydown", (event) => {
+    if ((event.key === "Enter" || event.key === " ") && event.target.matches('[data-action="open"]')) { event.preventDefault(); event.target.click(); }
+  });
+  $("#message-reader").addEventListener("click", (event) => {
+    const message = messages.find((item) => item.id === openMessageId);
+    if (event.target.closest(".reader-back")) { openMessageId = null; $("#message-reader").hidden = true; renderMail(); }
+    if (event.target.closest('[data-reader-action="star"]')) toggleStar(message);
+    if (event.target.closest('[data-reader-action="archive"]')) toggleArchive(message);
+  });
+  $$('[data-folder]').forEach((button) => button.addEventListener("click", () => {
+    activeFolder = button.dataset.folder; openMessageId = null;
+    $$("[data-folder]").forEach((item) => { const selected = item === button; item.classList.toggle("is-selected", selected); item.setAttribute("aria-pressed", String(selected)); });
+    $("#message-reader").hidden = true; renderMail();
+  }));
+  $("#mail-search").addEventListener("input", () => { openMessageId = null; renderMail(); });
+  renderMail();
+}
 
-issueList.addEventListener("change", (event) => {
-  if (!event.target.matches(".status-select")) return;
-  const row = event.target.closest("[data-issue-id]");
-  const issue = issues.find((item) => item.id === Number(row.dataset.issueId));
-  issue.status = event.target.value;
-  event.target.dataset.state = slugStatus(issue.status);
-  const carrier = event.target.closest("[rdf-predicate]");
-  carrier.value = issue.status;
-  updateCounts();
-  showToast(`CUR-${issue.id} moved to ${issue.status}. RDF value updated.`);
-});
-
-issueList.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-action]");
-  if (!button) return;
-  const row = button.closest("[data-issue-id]");
-  const index = issues.findIndex((item) => item.id === Number(row.dataset.issueId));
-  const issue = issues[index];
-  if (button.dataset.action === "edit") beginIssueEdit(row, issue);
-  if (button.dataset.action === "delete") {
-    issues.splice(index, 1);
-    renderIssues();
-    showToast(`CUR-${issue.id} deleted. RDF statements removed.`);
-  }
-});
-
-$$('[data-filter]').forEach((button) => button.addEventListener("click", () => {
-  activeIssueFilter = button.dataset.filter;
-  $$("[data-filter]").forEach((item) => { const selected = item === button; item.classList.toggle("is-selected", selected); item.setAttribute("aria-pressed", String(selected)); });
-  renderIssues();
-}));
-$("#issue-search").addEventListener("input", renderIssues);
-
-$("#compose-button").addEventListener("click", () => { $("#compose-form").hidden = false; $("#compose-form [name=subject]").focus(); });
-function closeCompose() { $("#compose-form").hidden = true; $("#compose-form").reset(); $("#compose-form [name=to]").value = "team@example.com"; }
-$("#compose-form .form-close").addEventListener("click", closeCompose);
-$("#compose-form .form-cancel").addEventListener("click", closeCompose);
-$("#compose-form").addEventListener("submit", (event) => {
-  event.preventDefault();
-  const data = new FormData(event.currentTarget);
-  messages.unshift({ id: mailSequence++, from: "Maya Chen", to: String(data.get("to")).trim(), subject: String(data.get("subject")).trim(), body: String(data.get("body")).trim(), time: "Now", received: new Date().toISOString(), read: true, starred: false, archived: false, sent: true });
-  closeCompose(); activeFolder = "sent"; openMessageId = null;
-  $$("[data-folder]").forEach((item) => { const selected = item.dataset.folder === activeFolder; item.classList.toggle("is-selected", selected); item.setAttribute("aria-pressed", String(selected)); });
-  renderMail(); showToast("Message sent. New RDF statements detected.");
-});
-
-mailList.addEventListener("click", (event) => {
-  const target = event.target.closest("[data-action]");
-  if (!target) return;
-  const message = messages.find((item) => item.id === Number(target.closest("[data-mail-id]").dataset.mailId));
-  if (target.dataset.action === "open") openMessage(message);
-  if (target.dataset.action === "star") toggleStar(message);
-  if (target.dataset.action === "archive") toggleArchive(message);
-});
-mailList.addEventListener("keydown", (event) => {
-  if ((event.key === "Enter" || event.key === " ") && event.target.matches('[data-action="open"]')) { event.preventDefault(); event.target.click(); }
-});
-$("#message-reader").addEventListener("click", (event) => {
-  const message = messages.find((item) => item.id === openMessageId);
-  if (event.target.closest(".reader-back")) { openMessageId = null; $("#message-reader").hidden = true; renderMail(); }
-  if (event.target.closest('[data-reader-action="star"]')) toggleStar(message);
-  if (event.target.closest('[data-reader-action="archive"]')) toggleArchive(message);
-});
-$$('[data-folder]').forEach((button) => button.addEventListener("click", () => {
-  activeFolder = button.dataset.folder; openMessageId = null;
-  $$("[data-folder]").forEach((item) => { const selected = item === button; item.classList.toggle("is-selected", selected); item.setAttribute("aria-pressed", String(selected)); });
-  $("#message-reader").hidden = true; renderMail();
-}));
-$("#mail-search").addEventListener("input", () => { openMessageId = null; renderMail(); });
-
-$("#briefing-view").addEventListener("click", (event) => {
+$("#briefing-view")?.addEventListener("click", (event) => {
   const option = event.target.closest(".decision-option");
   if (option) {
     const optionId = option.dataset.optionId;
@@ -343,58 +336,23 @@ $("#briefing-view").addEventListener("click", (event) => {
     return;
   }
 
-  const jump = event.target.closest("[data-jump-view]");
-  if (!jump) return;
-  event.preventDefault();
-
-  if (jump.dataset.jumpView === "issues") {
-    activeIssueFilter = "All";
-    $("#issue-search").value = "";
-    $$("[data-filter]").forEach((item) => {
-      const selected = item.dataset.filter === "All";
-      item.classList.toggle("is-selected", selected);
-      item.setAttribute("aria-pressed", String(selected));
-    });
-    renderIssues();
-    switchView("issues");
-    window.requestAnimationFrame(() => {
-      const resource = document.getElementById(jump.dataset.resourceId);
-      resource?.scrollIntoView({ block: "center" });
-      resource?.classList.add("is-emphasized");
-      window.setTimeout(() => resource?.classList.remove("is-emphasized"), 1800);
-    });
-  }
-
-  if (jump.dataset.jumpView === "mail") {
-    const message = messages.find((item) => item.id === Number(jump.dataset.messageId));
-    if (!message) return;
-    activeFolder = "inbox";
-    $$("[data-folder]").forEach((item) => {
-      const selected = item.dataset.folder === activeFolder;
-      item.classList.toggle("is-selected", selected);
-      item.setAttribute("aria-pressed", String(selected));
-    });
-    openMessage(message);
-    switchView("mail");
-  }
 });
 
-$$('.rail-link').forEach((button) => button.addEventListener("click", () => switchView(button.dataset.view)));
-$("#open-rdf-navigator").addEventListener("click", async () => {
+$("#open-rdf-navigator")?.addEventListener("click", async () => {
   await customElements.whenDefined("ia2-rdf-navigator");
   const navigator = document.querySelector("ia2-rdf-navigator")
     ?? document.body.appendChild(document.createElement("ia2-rdf-navigator"));
   navigator.open("tab");
 });
-$("#theme-button").addEventListener("click", () => {
+$("#theme-button")?.addEventListener("click", () => {
   const dark = document.documentElement.dataset.theme !== "dark";
   document.documentElement.dataset.theme = dark ? "dark" : "light";
   $("#theme-button").setAttribute("aria-label", dark ? "Use light theme" : "Use dark theme");
 });
 document.addEventListener("keydown", (event) => {
-  if (event.key.toLowerCase() === "n" && !event.metaKey && !event.ctrlKey && !event.altKey && !/input|textarea|select/i.test(document.activeElement.tagName) && !$("#issues-view").hidden) openIssueForm();
-  if (event.key === "Escape") { if (!$("#issue-form").hidden) closeIssueForm(); if (!$("#compose-form").hidden) closeCompose(); }
+  if (event.key.toLowerCase() === "n" && issueList && !event.metaKey && !event.ctrlKey && !event.altKey && !/input|textarea|select/i.test(document.activeElement.tagName)) openIssueForm();
+  if (event.key === "Escape") {
+    if ($("#issue-form") && !$("#issue-form").hidden) closeIssueForm();
+    if ($("#compose-form") && !$("#compose-form").hidden) closeCompose();
+  }
 });
-
-renderIssues();
-renderMail();

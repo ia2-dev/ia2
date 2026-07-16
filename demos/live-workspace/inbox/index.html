@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A live inbox that publishes messages and mailbox state as page-local RDF." rdf-subject="" rdf-predicate="http://purl.org/dc/terms/description">
+    <title rdf-subject="" rdf-predicate="http://purl.org/dc/terms/title">Inbox · Current</title>
+    <link rel="canonical" href="https://ia2.dev/demos/live-workspace/inbox/">
+    <link hidden href="https://schema.org/WebApplication" rdf-subject="" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+    <link rel="icon" href="/assets/ia2-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/demos/live-workspace/styles.css?v=0.3">
+    <script type="module" src="/packages/html-rdf-navigator/dist/html-rdf-navigator.js?v=0.3"></script>
+    <script type="module" src="/demos/live-workspace/app.js?v=0.3"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">Skip to inbox</a>
+    <header class="topbar">
+      <a class="brand" href="/demos/live-workspace/" aria-label="Demo index"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Current</span></a>
+      <div class="workspace-label"><span class="workspace-dot" aria-hidden="true"></span> Product studio <span class="environment">Inbox</span></div>
+      <div class="topbar-actions"><button class="icon-button" id="theme-button" type="button" aria-label="Use dark theme" title="Change theme"><span aria-hidden="true">◐</span></button><span class="avatar" aria-label="Signed in as Maya Chen">MC</span></div>
+    </header>
+    <div class="app-shell">
+      <nav class="rail" aria-label="Demo applications">
+        <a class="rail-link" href="/demos/live-workspace/"><span aria-hidden="true">⌂</span><span>Overview</span></a>
+        <a class="rail-link" href="/demos/live-workspace/issues/"><span aria-hidden="true">◎</span><span>Issues</span></a>
+        <a class="rail-link is-active" href="/demos/live-workspace/inbox/" aria-current="page"><span aria-hidden="true">◇</span><span>Inbox</span><b id="mail-nav-count">2</b></a>
+        <a class="rail-link" href="/demos/live-workspace/release-brief/"><span aria-hidden="true">◈</span><span>Briefing</span></a>
+        <div class="rail-spacer"></div>
+      </nav>
+      <main id="workspace" tabindex="-1">
+        <aside class="demo-intro" aria-labelledby="demo-intro-title">
+          <span class="demo-intro-label"><i aria-hidden="true"></i> Correspondence graph</span>
+          <p class="demo-intro-copy" id="demo-intro-title"><strong>Open, star, archive, or compose.</strong> This document publishes only inbox state. “Keyboard review notes” explicitly concerns CUR-142 in the issue tracker.</p>
+          <button class="demo-intro-action" id="open-rdf-navigator" type="button">Open RDF Navigator <span aria-hidden="true">↗</span></button>
+        </aside>
+        <section class="view is-active" id="mail-view" aria-labelledby="mail-heading">
+          <header class="view-header">
+            <div><p class="eyebrow">Team communication</p><h1 id="mail-heading" tabindex="-1">Inbox</h1></div>
+            <div class="header-actions"><label class="search-field"><span class="sr-only">Search inbox</span><span aria-hidden="true">⌕</span><input id="mail-search" type="search" placeholder="Search inbox" autocomplete="off"></label><button class="primary-button" id="compose-button" type="button"><span aria-hidden="true">＋</span> Compose</button></div>
+          </header>
+          <form class="inline-form compose-form" id="compose-form" hidden>
+            <div class="form-heading"><div><p class="eyebrow">New message</p><h2>Compose</h2></div><button class="icon-button form-close" type="button" aria-label="Close compose form">×</button></div>
+            <div class="form-grid"><label class="field"><span>To</span><input name="to" type="email" required value="team@example.com"></label><label class="field"><span>Subject</span><input name="subject" required maxlength="100" placeholder="Message subject"></label><label class="field field-wide"><span>Message</span><textarea name="body" required rows="4" maxlength="500" placeholder="Write a clear, useful note"></textarea></label></div>
+            <div class="form-actions"><button class="secondary-button form-cancel" type="button">Cancel</button><button class="primary-button" type="submit">Send message</button></div>
+          </form>
+          <div class="mail-layout">
+            <aside class="mail-folders" aria-label="Mail folders"><button class="folder is-selected" type="button" data-folder="inbox" aria-pressed="true"><span>Inbox</span><b id="unread-count">2</b></button><button class="folder" type="button" data-folder="starred" aria-pressed="false"><span>Starred</span><b id="starred-count">1</b></button><button class="folder" type="button" data-folder="archive" aria-pressed="false"><span>Archive</span><b id="archive-count">0</b></button><button class="folder" type="button" data-folder="sent" aria-pressed="false"><span>Sent</span><b id="sent-count">0</b></button></aside>
+            <div class="mail-content"><div class="mail-list" id="mail-list" aria-label="Messages"></div><article class="message-reader" id="message-reader" hidden aria-live="polite"></article><div class="empty-state" id="mail-empty" hidden><span aria-hidden="true">◇</span><h2>This folder is clear</h2><p>Messages will appear here when they arrive.</p></div></div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  </body>
+</html>
