@@ -11,7 +11,7 @@
     <link rel="apple-touch-icon" href="/assets/ia2-mark-512.png">
     <meta
       name="description"
-      content="IA² explores an open web where people, applications, and intelligent agents publish and exchange richly structured, interconnected information."
+      content="IA² develops an open information architecture for hybrid environments where people, applications, and intelligent agents share connected data, evidence, constraints, and interactions."
       rdf-subject="https://ia2.dev/"
       rdf-predicate="http://purl.org/dc/terms/description"
     >
@@ -37,7 +37,7 @@
       <nav aria-label="Primary navigation">
         <a href="/spec/html-rdf">HTML/RDF</a>
         <a href="/guide/html-rdf">Guide</a>
-        <a href="#horizon">Horizon</a>
+        <a href="#horizon">Architecture</a>
         <a href="#work">Current work</a>
         <a href="https://github.com/ia2-dev/ia2">GitHub</a>
       </nav>
@@ -56,20 +56,19 @@
               Information Architecture for Intelligent Agents
             </h1>
             <p class="hero-thesis">
-              The web should be legible to agents
-              <span>without becoming theirs.</span>
+              Connected information for
+              <span>people, applications, and agents.</span>
             </p>
             <p
               class="hero-intro"
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/abstract"
             >
-              That means more than making pages easy to parse. It means
-              preserving what makes the web powerful: independently published
-              resources, explicit structure, rich relationships, and links
-              that cross domains. IA² lets people, applications, and agents
-              exchange that meaning openly, while keeping it inspectable in
-              the same surface a person reads.
+              Work now moves among people, applications, and agents, through
+              documents, interfaces, workflows, and conversations. IA² connects
+              those surfaces with explicit identities, relationships, evidence,
+              constraints, and possible actions, so each participant gets the
+              form it needs without losing context.
             </p>
             <div class="hero-actions" aria-label="Start exploring">
               <a
@@ -77,7 +76,7 @@
                 href="/spec/html-rdf"
                 rdf-subject="#project"
                 rdf-predicate="http://purl.org/dc/terms/hasPart"
-              >Read the HTML/RDF model <span aria-hidden="true">↗</span></a>
+              >Explore HTML/RDF <span aria-hidden="true">↗</span></a>
               <a
                 class="action action-secondary"
                 href="/demos/live-workspace"
@@ -89,8 +88,8 @@
 
           <figure class="semantic-surface">
             <figcaption>
-              <span>A surface that explains itself</span>
-              <span class="live-mark"><i></i> Extractable</span>
+              <span>A human surface with a shared graph</span>
+              <span class="live-mark"><i></i> Connected</span>
             </figcaption>
             <pre aria-label="HTML carrying an explicit RDF statement"><code><span class="code-tag">&lt;article</span>
   <span class="code-attr">id</span>=<span class="code-value">"issue-42"</span>
@@ -105,70 +104,68 @@
           </figure>
         </div>
         <p class="hero-note">
-          HTML is the first proving ground. An open, interconnected information
-          commons is the larger horizon.
+          HTML is the first binding. The larger project is information
+          architecture for connected, multi-participant systems.
         </p>
       </section>
 
       <section class="premise" aria-labelledby="premise-title">
-        <p class="section-index">01 / Exchange</p>
+        <p class="section-index">01 / Hybrid information</p>
         <div class="premise-copy">
-          <h2 id="premise-title">Share meaning, not just text.</h2>
+          <h2 id="premise-title">Hybrid work needs hybrid information.</h2>
           <p>
-            Markdown gives agents a readable common denominator. But as an
-            interchange it usually turns entities, relationships, evidence,
-            constraints, and provenance back into prose for every receiver to
-            interpret again.
+            A decision may begin in a conversation, change a live interface,
+            cite a document, trigger an application, and be continued by an
+            agent. Treating each surface as isolated text breaks that chain.
           </p>
           <p>
-            IA² keeps the explanation and its information graph together. One
-            agent can publish a claim, plan, decision, result, or live state;
-            another can follow its exact identities, relationships, evidence,
-            and context across independently published surfaces while a person
-            inspects the same information.
+            IA² keeps presentation, operational state, and semantic structure
+            connected. Each participant can use the form it understands without
+            severing identity, evidence, constraints, or context.
           </p>
         </div>
       </section>
 
       <section id="horizon" class="horizon" aria-labelledby="horizon-title">
         <div class="section-heading">
-          <p class="section-index">02 / Architectural horizon</p>
-          <h2 id="horizon-title">A legibility layer for more than pages.</h2>
+          <p class="section-index">02 / Connected architecture</p>
+          <h2 id="horizon-title">A shared layer, not a new silo.</h2>
           <p>
-            Each layer answers a different question. Keeping them separate is
-            what makes the whole architecture composable.
+            Documents, interfaces, APIs, and agent tools contribute different
+            capabilities. These layers connect them without collapsing data,
+            presentation, and execution into one mechanism.
           </p>
         </div>
 
         <ol class="layers">
           <li>
             <span class="layer-number">01</span>
-            <h3>Surfaces and bindings</h3>
-            <p>Where does the information live, and how does it relate to what a person sees?</p>
-            <span class="layer-territory">HTML and live DOM today; more host-native bindings later.</span>
+            <h3>Surfaces and live state</h3>
+            <p>Where is information encountered, and what is changing now?</p>
+            <span class="layer-territory">Documents, interfaces, streams, and host-native bindings.</span>
           </li>
           <li>
             <span class="layer-number">02</span>
-            <h3>Semantic models</h3>
-            <p>What does the information mean?</p>
-            <span class="layer-territory">Full RDF 1.2, open vocabularies, profiles, and mappings.</span>
+            <h3>Identity and relationships</h3>
+            <p>What is this, and how does it connect across surfaces?</p>
+            <span class="layer-territory">RDF 1.2, open vocabularies, profiles, and mappings.</span>
           </li>
           <li>
             <span class="layer-number">03</span>
             <h3>Integrity and evidence</h3>
-            <p>Why should a consumer accept, qualify, or revisit it?</p>
+            <p>What supports it, and what must remain true?</p>
             <span class="layer-territory">SHACL, provenance, confidence, validation, and signatures.</span>
           </li>
           <li>
             <span class="layer-number">04</span>
-            <h3>Agency</h3>
-            <p>What could be done, under which conditions, and by whose authority?</p>
-            <span class="layer-territory">Inspectable affordances with execution kept separate.</span>
+            <h3>Interaction and authority</h3>
+            <p>What may happen next, under which conditions, and by whose authority?</p>
+            <span class="layer-territory">Inspectable affordances with controlled execution.</span>
           </li>
           <li>
             <span class="layer-number">05</span>
-            <h3>Navigation and exchange</h3>
-            <p>How does information move without losing identity or context?</p>
+            <h3>Continuity and exchange</h3>
+            <p>How does context survive across surfaces, sessions, and organizations?</p>
             <span class="layer-territory">Discovery, fragments, snapshots, queries, diffs, and subscriptions.</span>
           </li>
         </ol>
@@ -176,8 +173,8 @@
 
       <section id="work" class="work" aria-labelledby="work-title">
         <div class="section-heading work-heading">
-          <p class="section-index">03 / Inspect what exists</p>
-          <h2 id="work-title">The first vertical slice is already navigable.</h2>
+          <p class="section-index">03 / Working system</p>
+          <h2 id="work-title">Inspect it, change it, follow the graph.</h2>
         </div>
 
         <ul class="work-list">
@@ -238,7 +235,7 @@
                 <span
                   rdf-subject="https://ia2.dev/demos/live-workspace"
                   rdf-predicate="http://purl.org/dc/terms/description"
-                >An issue tracker and inbox whose RDF changes with the DOM.</span>
+                >Work, conversation, decisions, evidence, and constraints in one live graph.</span>
               </span>
               <span class="work-type">Interactive demo</span>
               <span class="work-arrow" aria-hidden="true">↗</span>
@@ -269,17 +266,17 @@
       </section>
 
       <section class="north-star" aria-labelledby="north-star-title">
-        <p class="section-index">04 / North star</p>
+        <p class="section-index">04 / Direction</p>
         <div>
           <h2 id="north-star-title">
-            Keep the web rich, linked, and open.
+            Connected intelligence needs connected information.
           </h2>
           <p>
-            The result is not one universal agent API. Independently published
-            surfaces can explain their own identities, relationships, evidence,
-            and constraints, then link outward on open terms. Agents can
-            participate in that commons without first translating it into a
-            platform-owned schema.
+            Agents will work alongside people and applications, moving among
+            interfaces, documents, tools, and organizations. IA² makes the
+            information connecting that work explicit, portable, inspectable,
+            and open, so no participant has to reconstruct the whole world from
+            prose or surrender it to one platform.
           </p>
           <a
             class="source-link"
