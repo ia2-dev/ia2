@@ -101,6 +101,100 @@ describe("Ia2RdfNavigator", () => {
     }
   });
 
+  it("shows a document vocabulary tree and correlates local definitions", () => {
+    const canonical = document.createElement("link");
+    canonical.rel = "canonical";
+    canonical.href = "https://example.com/vocabulary";
+    document.head.append(canonical);
+    document.body.innerHTML = [
+      '<section id="Entity"><a href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#Entity" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Class</a><span rdf-subject="#Entity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Entity</span></section>',
+      '<section id="Agent"><a href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#Agent" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Class</a><a href="#Entity" rdf-subject="#Agent" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">Entity</a><span rdf-subject="#Agent" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Agent</span></section>',
+      '<section id="knows"><a href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#knows" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Object property</a><span rdf-subject="#knows" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">knows</span></section>',
+    ].join("");
+    const agent = document.getElementById("Agent")!;
+    const cancel = vi.fn();
+    agent.scrollIntoView = vi.fn();
+    agent.animate = vi.fn(() => ({ cancel } as unknown as Animation));
+
+    const drawer = mountRdfNavigator();
+    const tabs = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ?? []);
+    expect(tabs.map((tab) => tab.textContent)).toEqual(["Navigator", "Vocabulary (3)", "Turtle", "JSON-LD"]);
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="vocabulary"]')?.click();
+
+    const sections = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLElement>(".ontology-section") ?? []);
+    expect(sections.map((section) => section.querySelector("h3")?.textContent)).toEqual(["Classes", "Properties"]);
+    expect(sections.map((section) => section.querySelector(".ontology-count")?.textContent)).toEqual(["2 defined", "1 defined"]);
+    const agentRow = drawer.shadowRoot?.querySelector<HTMLElement>('.ontology-term-row[data-term="https://example.com/vocabulary#Agent"]')!;
+    expect(agentRow.querySelector(".ontology-label")?.textContent).toBe("Agent");
+    expect(agentRow.closest(".ontology-children")).not.toBeNull();
+    expect(agentRow.querySelector<HTMLAnchorElement>(".term-link")?.classList.contains("local-term")).toBe(true);
+
+    agentRow.dispatchEvent(new Event("pointerenter"));
+    expect(agent.animate).toHaveBeenCalledOnce();
+    agentRow.dispatchEvent(new Event("pointerleave"));
+    expect(cancel).toHaveBeenCalledOnce();
+    agent.dispatchEvent(new Event("pointerenter"));
+    expect(agentRow.classList.contains("is-corresponding")).toBe(true);
+    agent.dispatchEvent(new Event("pointerleave"));
+    expect(agentRow.classList.contains("is-corresponding")).toBe(false);
+
+    agentRow.querySelector<HTMLButtonElement>(".ontology-locate-button")?.click();
+    expect(agent.scrollIntoView).toHaveBeenCalledOnce();
+    expect(agent.animate).toHaveBeenCalledTimes(2);
+  });
+
+  it("compacts tabs progressively without exposing a horizontal scroller", () => {
+    const originalClientWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientWidth");
+    const originalScrollWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "scrollWidth");
+    let availableWidth = 300;
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+      configurable: true,
+      get() {
+        if (this.classList.contains("tabs")) return availableWidth;
+        return originalClientWidth?.get?.call(this) ?? 0;
+      },
+    });
+    Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+      configurable: true,
+      get() {
+        if (this.classList.contains("tabs")) return [500, 380, 280, 120][Number(this.dataset.compact ?? 0)] ?? 500;
+        return originalScrollWidth?.get?.call(this) ?? 0;
+      },
+    });
+    try {
+      const canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      canonical.href = "https://example.com/vocabulary";
+      document.head.append(canonical);
+      document.body.innerHTML = [
+        '<a href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#Entity" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Class</a>',
+        '<a href="https://example.com/more" rdf-subject="" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#seeAlso">More</a>',
+      ].join("");
+      const drawer = mountRdfNavigator();
+      let tabs = drawer.shadowRoot?.querySelector<HTMLElement>(".tabs")!;
+      expect(tabs.dataset.compact).toBe("2");
+      expect(drawer.shadowRoot?.querySelector("style")?.textContent).toMatch(/\.tabs \{[^}]*overflow: hidden/);
+      expect(tabs.querySelector('[data-view="vocabulary"]')?.getAttribute("aria-label")).toBe("Vocabulary (1)");
+      expect(tabs.querySelector('[data-view="vocabulary"]')?.getAttribute("title")).toBe("Vocabulary, 1 definition");
+
+      availableWidth = 150;
+      drawer.refresh();
+      tabs = drawer.shadowRoot?.querySelector<HTMLElement>(".tabs")!;
+      expect(tabs.dataset.compact).toBe("3");
+      expect(tabs.querySelector<HTMLElement>(".tab-icon svg")).not.toBeNull();
+
+      availableWidth = 600;
+      drawer.refresh();
+      tabs = drawer.shadowRoot?.querySelector<HTMLElement>(".tabs")!;
+      expect(tabs.dataset.compact).toBe("0");
+    } finally {
+      if (originalClientWidth) Object.defineProperty(HTMLElement.prototype, "clientWidth", originalClientWidth);
+      else delete (HTMLElement.prototype as unknown as { clientWidth?: number }).clientWidth;
+      if (originalScrollWidth) Object.defineProperty(HTMLElement.prototype, "scrollWidth", originalScrollWidth);
+      else delete (HTMLElement.prototype as unknown as { scrollWidth?: number }).scrollWidth;
+    }
+  });
+
   it("distinguishes pointer and keyboard focus when opening the drawer", async () => {
     const drawer = mountRdfNavigator();
     drawer.shadowRoot?.querySelector<HTMLButtonElement>(".launcher")

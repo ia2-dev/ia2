@@ -18,6 +18,7 @@ export const PREFIXES: Readonly<Record<string, string>> = {
   xsd: "http://www.w3.org/2001/XMLSchema#",
   schema: "https://schema.org/",
   dcterms: "http://purl.org/dc/terms/",
+  dcat: "http://www.w3.org/ns/dcat#",
   skos: "http://www.w3.org/2004/02/skos/core#",
   prov: "http://www.w3.org/ns/prov#",
   sh: "http://www.w3.org/ns/shacl#",

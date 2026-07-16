@@ -3,6 +3,8 @@ export { detectDiscoveryCandidates, DISCOVERY_PREDICATES, mergeDiscoveryContribu
 export type { DiscoveryCandidate, DiscoveryContribution } from "./discovery.js";
 export { Ia2RdfNavigator } from "./navigator.js";
 export { serializeJsonLd, serializeTurtle, termToTurtle } from "./serialize.js";
+export { extractDocumentVocabulary } from "./vocabulary.js";
+export type { DocumentVocabulary, VocabularyDefinition, VocabularyKind } from "./vocabulary.js";
 export type * from "./model.js";
 
 import { Ia2RdfNavigator } from "./navigator.js";

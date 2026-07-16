@@ -39,6 +39,8 @@ For programmatic control, disable automatic mounting before import:
 
 - IA² Core 0.1 extraction from a `Document` or `DocumentFragment`
 - Navigator-first inspection with source correlation and vocabulary links
+- a conditional Vocabulary view for document-defined classes and properties,
+  including RDFS subclass and subproperty trees
 - live, case-insensitive filtering across terms, IRIs, graphs, and carriers
 - semantic typeahead from in-document labels, OWL/RDF kinds, domains, and ranges
 - namespace filters discovered from every named-node URL
@@ -63,6 +65,7 @@ For programmatic control, disable automatic mounting before import:
 import {
   Ia2RdfNavigator,
   detectDiscoveryCandidates,
+  extractDocumentVocabulary,
   extractDataset,
   mergeDiscoveryContributions,
   mountRdfNavigator,
@@ -77,6 +80,12 @@ retrieval, semantic source, and RDF base IRIs. A single valid HTML
 an explicit `base[href]`, the RDF base IRI. Quads retain their source `Element`,
 which powers document navigation. The mounted Navigator reflects the runtime
 DOM, including semantic changes made by the host application.
+
+`extractDocumentVocabulary(result)` identifies named classes and properties
+defined in the source dataset. The mounted component presents them in a
+Vocabulary tab only when definitions exist. Local terms correlate with their
+HTML definition carriers in both directions; external hierarchy parents remain
+linked context rather than being counted as local definitions.
 
 `detectDiscoveryCandidates(result)` normalizes recognized direct relationships
 and qualified DCAT relationships without performing network activity. The

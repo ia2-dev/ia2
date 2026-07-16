@@ -647,6 +647,7 @@ var PREFIXES = {
   xsd: "http://www.w3.org/2001/XMLSchema#",
   schema: "https://schema.org/",
   dcterms: "http://purl.org/dc/terms/",
+  dcat: "http://www.w3.org/ns/dcat#",
   skos: "http://www.w3.org/2004/02/skos/core#",
   prov: "http://www.w3.org/ns/prov#",
   sh: "http://www.w3.org/ns/shacl#",
@@ -783,6 +784,109 @@ function compactTerm(term) {
   return turtle.length > 76 ? `${turtle.slice(0, 73)}\u2026` : turtle;
 }
 
+// src/vocabulary.ts
+var RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+var RDF_PROPERTY = "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property";
+var RDFS_CLASS = "http://www.w3.org/2000/01/rdf-schema#Class";
+var RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
+var RDFS_SUBCLASS_OF = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+var RDFS_SUBPROPERTY_OF = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
+var SKOS_PREF_LABEL = "http://www.w3.org/2004/02/skos/core#prefLabel";
+var DCTERMS_TITLE = "http://purl.org/dc/terms/title";
+var CLASS_TYPES = /* @__PURE__ */ new Set([
+  RDFS_CLASS,
+  "http://www.w3.org/2002/07/owl#Class",
+  "http://www.w3.org/2002/07/owl#DeprecatedClass"
+]);
+var PROPERTY_TYPES = /* @__PURE__ */ new Set([
+  RDF_PROPERTY,
+  "http://www.w3.org/2002/07/owl#ObjectProperty",
+  "http://www.w3.org/2002/07/owl#DatatypeProperty",
+  "http://www.w3.org/2002/07/owl#AnnotationProperty",
+  "http://www.w3.org/2002/07/owl#FunctionalProperty",
+  "http://www.w3.org/2002/07/owl#InverseFunctionalProperty",
+  "http://www.w3.org/2002/07/owl#TransitiveProperty",
+  "http://www.w3.org/2002/07/owl#SymmetricProperty",
+  "http://www.w3.org/2002/07/owl#AsymmetricProperty",
+  "http://www.w3.org/2002/07/owl#ReflexiveProperty",
+  "http://www.w3.org/2002/07/owl#IrreflexiveProperty",
+  "http://www.w3.org/2002/07/owl#DeprecatedProperty",
+  "http://www.w3.org/2002/07/owl#OntologyProperty"
+]);
+var LABEL_PRIORITIES = /* @__PURE__ */ new Map([
+  [RDFS_LABEL, 0],
+  [SKOS_PREF_LABEL, 1],
+  [DCTERMS_TITLE, 2]
+]);
+function pushNamed2(values, term) {
+  if (!values.some((value) => value.value === term.value)) values.push(term);
+}
+function pushSource2(values, source) {
+  if (!values.includes(source)) values.push(source);
+}
+function pushKind(values, kind) {
+  if (!values.includes(kind)) values.push(kind);
+}
+function extractDocumentVocabulary(result) {
+  const builders = /* @__PURE__ */ new Map();
+  const builderFor = (term) => {
+    let builder = builders.get(term.value);
+    if (!builder) {
+      builder = {
+        classParents: [],
+        kinds: [],
+        labelPriority: Number.POSITIVE_INFINITY,
+        propertyParents: [],
+        sources: [],
+        term,
+        types: []
+      };
+      builders.set(term.value, builder);
+    }
+    return builder;
+  };
+  for (const quad of result.quads) {
+    if (quad.subject.termType !== "NamedNode") continue;
+    if (quad.predicate.value === RDF_TYPE && quad.object.termType === "NamedNode") {
+      const isClass = CLASS_TYPES.has(quad.object.value);
+      const isProperty = PROPERTY_TYPES.has(quad.object.value);
+      if (!isClass && !isProperty) continue;
+      const builder = builderFor(quad.subject);
+      if (isClass) pushKind(builder.kinds, "class");
+      if (isProperty) pushKind(builder.kinds, "property");
+      pushNamed2(builder.types, quad.object);
+      pushSource2(builder.sources, quad.source);
+      continue;
+    }
+    if (quad.predicate.value === RDFS_SUBCLASS_OF) {
+      const builder = builderFor(quad.subject);
+      pushKind(builder.kinds, "class");
+      if (quad.object.termType === "NamedNode") pushNamed2(builder.classParents, quad.object);
+      pushSource2(builder.sources, quad.source);
+      continue;
+    }
+    if (quad.predicate.value === RDFS_SUBPROPERTY_OF) {
+      const builder = builderFor(quad.subject);
+      pushKind(builder.kinds, "property");
+      if (quad.object.termType === "NamedNode") pushNamed2(builder.propertyParents, quad.object);
+      pushSource2(builder.sources, quad.source);
+    }
+  }
+  for (const quad of result.quads) {
+    if (quad.subject.termType !== "NamedNode" || quad.object.termType !== "Literal") continue;
+    const priority = LABEL_PRIORITIES.get(quad.predicate.value);
+    const builder = builders.get(quad.subject.value);
+    if (priority === void 0 || !builder || priority >= builder.labelPriority) continue;
+    builder.label = quad.object.value;
+    builder.labelPriority = priority;
+    pushSource2(builder.sources, quad.source);
+  }
+  const definitions = Array.from(builders.values()).map(({ labelPriority: _labelPriority, ...definition }) => definition).sort((left, right) => (left.label ?? left.term.value).localeCompare(right.label ?? right.term.value));
+  const classes = definitions.filter((definition) => definition.kinds.includes("class"));
+  const properties = definitions.filter((definition) => definition.kinds.includes("property"));
+  return { classes, count: definitions.length, definitions, properties };
+}
+
 // src/navigator.ts
 var CSS = String.raw`
   :host {
@@ -883,10 +987,18 @@ var CSS = String.raw`
   .resize-handle[data-resize="se"]::after { border-bottom: 2px solid color-mix(in oklch, var(--muted), transparent 24%); border-right: 2px solid color-mix(in oklch, var(--muted), transparent 24%); bottom: 4px; content: ""; height: 6px; position: absolute; right: 4px; width: 6px; }
   .icon-button { align-items: center; background: transparent; border: 0; border-radius: 7px; color: var(--muted); cursor: pointer; display: flex; height: 36px; justify-content: center; padding: 0; width: 36px; }
   .icon-button:hover { background: var(--layer); color: var(--ink); }
-  .tabs { align-items: end; align-self: stretch; display: flex; flex: 1 1 auto; gap: 3px; min-width: 0; overflow-x: auto; overflow-y: hidden; padding: 0; }
-  .tab { background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 650; margin-bottom: -1px; padding: 12px 10px 10px; white-space: nowrap; }
+  .tabs { align-items: end; align-self: stretch; display: flex; flex: 1 1 auto; gap: 3px; min-width: 0; overflow: hidden; padding: 0; }
+  .tab { align-items: center; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--muted); cursor: pointer; display: inline-flex; flex: 0 0 auto; font-size: 13px; font-weight: 650; gap: 0; justify-content: center; margin-bottom: -1px; min-width: 0; padding: 12px 10px 10px; white-space: nowrap; }
   .tab:focus-visible { border-radius: 5px 5px 2px 2px; outline: 2px solid color-mix(in oklch, var(--accent), transparent 25%); outline-offset: -4px; }
   .tab[aria-selected="true"] { border-bottom-color: var(--accent); color: var(--ink); }
+  .tab-icon { display: none; height: 18px; place-items: center; width: 18px; }
+  .tab-icon svg { fill: none; height: 18px; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.45; width: 18px; }
+  .tabs[data-compact="1"] .tab-count, .tabs[data-compact="2"] .tab-count { display: none; }
+  .tabs[data-compact="2"] .tab-label { font-size: 0; }
+  .tabs[data-compact="2"] .tab-label::after { content: attr(data-short); font-size: 13px; }
+  .tabs[data-compact="3"] .tab { min-height: 42px; padding-inline: 9px; }
+  .tabs[data-compact="3"] .tab-label, .tabs[data-compact="3"] .tab-count { display: none; }
+  .tabs[data-compact="3"] .tab-icon { display: grid; }
   .viewport { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 18px 22px 28px; }
   .notice { background: var(--accent-soft); border: 1px solid color-mix(in oklch, var(--accent), var(--paper) 68%); border-radius: 8px; color: color-mix(in oklch, var(--ink), var(--accent) 25%); font-size: 12px; margin: 0 0 14px; padding: 9px 11px; }
   .discovery-intro { color: var(--muted); font-size: 12px; margin: 0 0 16px; max-width: 66ch; }
@@ -908,6 +1020,25 @@ var CSS = String.raw`
   .discovery-action:hover { background: color-mix(in oklch, var(--accent), var(--ink) 12%); }
   .discovery-action[data-state="loaded"], .discovery-action[data-state="loading"] { background: transparent; border-color: var(--line); color: var(--muted); }
   .discovery-action[data-state="loaded"]:hover, .discovery-action[data-state="loading"]:hover { background: var(--layer); color: var(--ink); }
+  .ontology-intro { color: var(--muted); font-size: 12px; margin: 0 0 18px; max-width: 66ch; }
+  .ontology-section + .ontology-section { margin-top: 26px; }
+  .ontology-heading { align-items: baseline; border-bottom: 1px solid var(--line); display: flex; gap: 8px; margin: 0; padding: 0 2px 8px; }
+  .ontology-heading h3 { font-size: 13px; margin: 0; }
+  .ontology-count { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .ontology-tree, .ontology-children { list-style: none; margin: 0; padding: 0; }
+  .ontology-tree { padding-top: 5px; }
+  .ontology-children { border-left: 1px solid var(--line); margin-left: 13px; padding-left: 14px; }
+  .ontology-node { min-width: 0; }
+  .ontology-term-row { align-items: center; border-radius: 7px; display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr) auto; min-width: 0; padding: 7px 5px 7px 7px; }
+  .ontology-term-row:hover, .ontology-term-row:focus-within, .ontology-term-row.is-corresponding { background: color-mix(in oklch, var(--accent-soft), transparent 25%); }
+  .ontology-term-copy { min-width: 0; }
+  .ontology-term-copy code { display: block; font: 600 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+  .ontology-label { color: var(--ink); font-size: 11.5px; line-height: 1.35; margin-top: 2px; }
+  .ontology-meta { color: var(--muted); font-size: 10px; line-height: 1.35; margin-top: 2px; }
+  .ontology-context .ontology-term-copy code, .ontology-context .ontology-label { color: var(--muted); font-weight: 500; }
+  .ontology-actions { opacity: 0; pointer-events: none; }
+  .ontology-term-row:hover .ontology-actions, .ontology-term-row:focus-within .ontology-actions { opacity: 1; pointer-events: auto; }
+  .ontology-actions .locate-button { opacity: 1; }
   pre { background: var(--layer); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); font: 12.5px/1.65 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; min-height: 100%; overflow: auto; padding: 16px 17px; tab-size: 2; white-space: pre; }
   .tok.iri, .tok.name { color: oklch(49% 0.17 290); }
   .tok.iri { text-decoration-color: color-mix(in oklch, currentColor, transparent 55%); text-underline-offset: 3px; }
@@ -1032,6 +1163,7 @@ var CSS = String.raw`
   @media (hover: none) {
     .preview-actions { opacity: 1; pointer-events: auto; }
     .term-locate-button { opacity: 1; }
+    .ontology-actions { opacity: 1; pointer-events: auto; }
     .position-switch { background: var(--layer); border-color: var(--line); }
     .position-option { border-right-color: var(--line); opacity: 1; pointer-events: auto; visibility: visible; }
   }
@@ -1045,6 +1177,19 @@ var CSS = String.raw`
   }
   @media (prefers-reduced-motion: reduce) { .launcher, .panel { transition: none; } }
 `;
+var TAB_ICONS = {
+  navigator: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="3" cy="5" r=".8" fill="currentColor" stroke="none"/><circle cx="3" cy="9" r=".8" fill="currentColor" stroke="none"/><circle cx="3" cy="13" r=".8" fill="currentColor" stroke="none"/><path d="M6 5h9M6 9h9M6 13h9"/></svg>',
+  vocabulary: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="3.5" r="2"/><circle cx="4" cy="14" r="2"/><circle cx="14" cy="14" r="2"/><path d="M9 5.5v3M4 12V9h10v3"/></svg>',
+  discovery: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="9" r="6.5"/><path d="m11.7 6.3-1.5 3.9-3.9 1.5 1.5-3.9z"/></svg>',
+  turtle: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="m6.5 4.5-4 4.5 4 4.5M11.5 4.5l4 4.5-4 4.5"/></svg>',
+  json: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M7 3.5H5.5c-1 0-1.5.5-1.5 1.5v2c0 1-.5 1.5-1.5 2 1 .5 1.5 1 1.5 2v2c0 1 .5 1.5 1.5 1.5H7M11 3.5h1.5c1 0 1.5.5 1.5 1.5v2c0 1 .5 1.5 1.5 2-1 .5-1.5 1-1.5 2v2c0 1-.5 1.5-1.5 1.5H11"/></svg>',
+  diagnostics: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M8 3.2 2.3 13a1.2 1.2 0 0 0 1 1.8h11.4a1.2 1.2 0 0 0 1-1.8L10 3.2a1.15 1.15 0 0 0-2 0Z"/><path d="M9 6.8v3.4M9 13h.01"/></svg>'
+};
+function tabMarkup(view, selected, label, shortLabel, count, countNoun) {
+  const displayLabel = count === void 0 ? label : `${label} (${count})`;
+  const title = count === void 0 || !countNoun ? label : `${label}, ${count} ${countNoun}${count === 1 ? "" : "s"}`;
+  return `<button class="tab" role="tab" data-view="${view}" aria-selected="${selected}" aria-label="${displayLabel}" title="${title}"><span class="tab-icon" aria-hidden="true">${TAB_ICONS[view]}</span><span class="tab-label" data-short="${shortLabel}">${label}</span>${count === void 0 ? "" : `<span class="tab-count"> (${count})</span>`}</button>`;
+}
 var SESSION_STATE_KEY = "ia2:rdf-navigator:state:v1";
 var DISCOVERY_MAX_HTML_LENGTH = 2e6;
 var DISCOVERY_FETCH_TIMEOUT_MS = 1e4;
@@ -1352,6 +1497,16 @@ function locatableElementForTerm(document2, term, sourceDocumentIri = document2.
   const localUrl = localDocumentUrl(document2, term.value, sourceDocumentIri);
   return localUrl ? locatableElementForUrl(document2, localUrl) : null;
 }
+function definitionTarget(document2, definition, sourceDocumentIri) {
+  const termTarget = locatableElementForTerm(document2, definition.term, sourceDocumentIri);
+  if (termTarget) return termTarget;
+  for (const source of definition.sources) {
+    const identifiedContainer = source.closest("[id]");
+    if (identifiedContainer && isLocatableSource(identifiedContainer)) return identifiedContainer;
+    if (isLocatableSource(source)) return source;
+  }
+  return null;
+}
 function locateButton(document2, target, className, onLocate) {
   const button = document2.createElement("button");
   button.className = `row-action-button locate-button ${className}`;
@@ -1596,6 +1751,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
   #sourceResult = null;
   #discoveryCandidates = [];
   #discoveryLoads = /* @__PURE__ */ new Map();
+  #documentVocabulary = { classes: [], count: 0, definitions: [], properties: [] };
   #view = "navigator";
   #open = false;
   #status = "";
@@ -1611,7 +1767,9 @@ var Ia2RdfNavigator = class extends HTMLElement {
   #linkPreviewNavigationCleanup = null;
   #locateAnimation = null;
   #syncCleanup = null;
+  #vocabularyTreeCleanup = null;
   #vocabularyResizeObserver = null;
+  #tabResizeObserver = null;
   #observer = null;
   #refreshTimer = null;
   constructor() {
@@ -1636,15 +1794,39 @@ var Ia2RdfNavigator = class extends HTMLElement {
     this.#discoveryLoads.clear();
     this.#vocabularyResizeObserver?.disconnect();
     this.#vocabularyResizeObserver = null;
+    this.#tabResizeObserver?.disconnect();
+    this.#tabResizeObserver = null;
     if (this.#refreshTimer !== null) window.clearTimeout(this.#refreshTimer);
     this.#stopFloatingInteraction();
     this.#clearLinkPreview();
     this.#clearLocateEmphasis();
     this.#clearNavigatorSync();
+    this.#clearVocabularyTreeInteractions();
   }
   #clearNavigatorSync() {
     this.#syncCleanup?.();
     this.#syncCleanup = null;
+  }
+  #clearVocabularyTreeInteractions() {
+    this.#vocabularyTreeCleanup?.();
+    this.#vocabularyTreeCleanup = null;
+  }
+  #configureTabCompaction(tabs) {
+    this.#tabResizeObserver?.disconnect();
+    this.#tabResizeObserver = null;
+    const update = () => {
+      tabs.dataset.compact = "0";
+      if (tabs.clientWidth <= 0) return;
+      for (let level = 0; level <= 3; level += 1) {
+        tabs.dataset.compact = String(level);
+        if (tabs.scrollWidth <= tabs.clientWidth + 1) return;
+      }
+    };
+    update();
+    const ResizeObserverConstructor = this.ownerDocument.defaultView?.ResizeObserver;
+    if (!ResizeObserverConstructor) return;
+    this.#tabResizeObserver = new ResizeObserverConstructor(update);
+    this.#tabResizeObserver.observe(tabs);
   }
   #clearLinkPreview() {
     this.#linkPreviewAbortController?.abort();
@@ -2040,6 +2222,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     const focus = this.#captureFocus();
     this.#sourceResult = extractDataset(this.ownerDocument);
     this.#discoveryCandidates = detectDiscoveryCandidates(this.#sourceResult);
+    this.#documentVocabulary = extractDocumentVocabulary(this.#sourceResult);
     const candidateIds = new Set(this.#discoveryCandidates.map((candidate) => candidate.id));
     for (const [candidateId2, state] of this.#discoveryLoads) {
       if (candidateIds.has(candidateId2)) continue;
@@ -2817,6 +3000,160 @@ var Ia2RdfNavigator = class extends HTMLElement {
     }
     container.append(list);
   }
+  #configureVocabularyTreeInteractions(bindings) {
+    this.#clearVocabularyTreeInteractions();
+    const view = this.ownerDocument.defaultView;
+    if (!view || !bindings.length) return;
+    const cleanups = [];
+    const rowsByTarget = /* @__PURE__ */ new Map();
+    let activeAnimation = null;
+    const listen = (target, type, listener) => {
+      target.addEventListener(type, listener);
+      cleanups.push(() => target.removeEventListener(type, listener));
+    };
+    const emphasize = (target) => {
+      activeAnimation?.cancel();
+      if (view.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+      activeAnimation = target.animate?.(
+        [
+          { outline: "2px solid transparent", outlineOffset: "7px" },
+          { outline: "2px solid oklch(62% 0.18 294)", outlineOffset: "4px" }
+        ],
+        { direction: "alternate", duration: 520, easing: "cubic-bezier(.22,1,.36,1)", iterations: Infinity }
+      ) ?? null;
+    };
+    const clearEmphasis = () => {
+      activeAnimation?.cancel();
+      activeAnimation = null;
+    };
+    for (const binding of bindings) {
+      const matchingRows = rowsByTarget.get(binding.target) ?? [];
+      matchingRows.push(binding.item);
+      rowsByTarget.set(binding.target, matchingRows);
+      listen(binding.item, "pointerenter", () => emphasize(binding.target));
+      listen(binding.item, "pointerleave", clearEmphasis);
+    }
+    rowsByTarget.forEach((rows, target) => {
+      listen(target, "pointerenter", () => {
+        rows.forEach((row) => {
+          row.classList.add("is-corresponding");
+          row.scrollIntoView?.({ block: "nearest" });
+        });
+      });
+      listen(target, "pointerleave", () => rows.forEach((row) => row.classList.remove("is-corresponding")));
+    });
+    this.#vocabularyTreeCleanup = () => {
+      cleanups.forEach((cleanup) => cleanup());
+      clearEmphasis();
+    };
+  }
+  #renderVocabulary(container) {
+    const document2 = this.ownerDocument;
+    const sourceDocumentIri = this.#sourceResult?.sourceDocumentIri ?? document2.URL;
+    const bindings = [];
+    const intro = document2.createElement("p");
+    intro.className = "ontology-intro";
+    intro.textContent = "Classes and properties defined by this document. The trees follow RDFS hierarchy statements; muted parent terms provide external context.";
+    container.append(intro);
+    const renderGroup = (title, definitions, kind) => {
+      if (!definitions.length) return;
+      const section = document2.createElement("section");
+      section.className = "ontology-section";
+      section.setAttribute("aria-label", title);
+      const heading = document2.createElement("div");
+      heading.className = "ontology-heading";
+      const headingText = document2.createElement("h3");
+      headingText.textContent = title;
+      const count = document2.createElement("span");
+      count.className = "ontology-count";
+      count.textContent = `${definitions.length} defined`;
+      heading.append(headingText, count);
+      section.append(heading);
+      const byIri = new Map(definitions.map((definition) => [definition.term.value, definition]));
+      const children = /* @__PURE__ */ new Map();
+      const parentsFor = (definition) => kind === "class" ? definition.classParents : definition.propertyParents;
+      for (const definition of definitions) {
+        for (const parent of parentsFor(definition)) {
+          const entries = children.get(parent.value) ?? [];
+          if (!entries.some((entry) => entry.term.value === definition.term.value)) entries.push(definition);
+          children.set(parent.value, entries);
+        }
+      }
+      const sortDefinitions = (values) => [...values].sort((left, right) => (left.label ?? left.term.value).localeCompare(right.label ?? right.term.value));
+      children.forEach((values, parent) => children.set(parent, sortDefinitions(values)));
+      const presented = /* @__PURE__ */ new Set();
+      const onLocate = (target) => this.#locateElement(target);
+      const renderNode = (term, definition, path, cycle = false) => {
+        const item = document2.createElement("li");
+        item.className = "ontology-node";
+        const row = document2.createElement("div");
+        row.className = `ontology-term-row${definition ? "" : " ontology-context"}`;
+        row.dataset.term = term.value;
+        const copy = document2.createElement("div");
+        copy.className = "ontology-term-copy";
+        copy.append(termCode(document2, term, "", "", void 0, sourceDocumentIri));
+        if (definition?.label) {
+          const label = document2.createElement("div");
+          label.className = "ontology-label";
+          label.textContent = definition.label;
+          copy.append(label);
+        }
+        const metadata = document2.createElement("div");
+        metadata.className = "ontology-meta";
+        if (!definition) metadata.textContent = "External parent";
+        else if (cycle) metadata.textContent = "Cycle reference";
+        else if (definition.types.length) metadata.textContent = definition.types.map((type) => compactTerm(type)).join(" \xB7 ");
+        if (metadata.textContent) copy.append(metadata);
+        row.append(copy);
+        if (definition) {
+          presented.add(definition.term.value);
+          const target = definitionTarget(document2, definition, sourceDocumentIri);
+          if (target) {
+            const actions = document2.createElement("div");
+            actions.className = "ontology-actions";
+            actions.append(locateButton(document2, target, "ontology-locate-button", onLocate));
+            row.append(actions);
+            bindings.push({ item: row, target });
+          }
+        }
+        item.append(row);
+        if (cycle) return item;
+        const descendants = children.get(term.value) ?? [];
+        if (descendants.length) {
+          const subtree = document2.createElement("ul");
+          subtree.className = "ontology-children";
+          const nextPath = new Set(path);
+          nextPath.add(term.value);
+          for (const child of descendants) {
+            subtree.append(renderNode(child.term, child, nextPath, nextPath.has(child.term.value)));
+          }
+          item.append(subtree);
+        }
+        return item;
+      };
+      const tree = document2.createElement("ul");
+      tree.className = "ontology-tree";
+      const externalParents = /* @__PURE__ */ new Map();
+      for (const definition of definitions) {
+        for (const parent of parentsFor(definition)) {
+          if (!byIri.has(parent.value)) externalParents.set(parent.value, parent);
+        }
+      }
+      for (const parent of Array.from(externalParents.values()).sort((left, right) => left.value.localeCompare(right.value))) {
+        tree.append(renderNode(parent, null, /* @__PURE__ */ new Set()));
+      }
+      const roots = sortDefinitions(definitions.filter((definition) => parentsFor(definition).length === 0));
+      for (const root of roots) tree.append(renderNode(root.term, root, /* @__PURE__ */ new Set()));
+      for (const definition of definitions) {
+        if (!presented.has(definition.term.value)) tree.append(renderNode(definition.term, definition, /* @__PURE__ */ new Set()));
+      }
+      section.append(tree);
+      container.append(section);
+    };
+    renderGroup("Classes", this.#documentVocabulary.classes, "class");
+    renderGroup("Properties", this.#documentVocabulary.properties, "property");
+    this.#configureVocabularyTreeInteractions(bindings);
+  }
   #renderDiscovery(container) {
     const document2 = this.ownerDocument;
     const intro = document2.createElement("p");
@@ -2902,12 +3239,16 @@ var Ia2RdfNavigator = class extends HTMLElement {
     this.#clearLinkPreview();
     this.#clearLocateEmphasis();
     this.#clearNavigatorSync();
+    this.#clearVocabularyTreeInteractions();
     this.#vocabularyResizeObserver?.disconnect();
     this.#vocabularyResizeObserver = null;
+    this.#tabResizeObserver?.disconnect();
+    this.#tabResizeObserver = null;
     const result = this.#result;
     if (!result || !this.shadowRoot) return;
     if (this.#view === "diagnostics" && !result.diagnostics.length) this.#view = "navigator";
     if (this.#view === "discovery" && !this.#discoveryCandidates.length) this.#view = "navigator";
+    if (this.#view === "vocabulary" && !this.#documentVocabulary.count) this.#view = "navigator";
     this.shadowRoot.innerHTML = `
       <style>${CSS}</style>
       <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel">
@@ -2917,12 +3258,13 @@ var Ia2RdfNavigator = class extends HTMLElement {
       <aside class="panel" id="ia2-rdf-panel" data-open="${this.#open}" data-position="${this.#position}" aria-label="Document RDF" tabindex="-1">
         <header class="toolbar">
           <span class="drag-grip" aria-hidden="true" title="Drag floating navigator"><svg viewBox="0 0 8 18"><circle cx="2" cy="4" r="1.2"/><circle cx="6" cy="4" r="1.2"/><circle cx="2" cy="9" r="1.2"/><circle cx="6" cy="9" r="1.2"/><circle cx="2" cy="14" r="1.2"/><circle cx="6" cy="14" r="1.2"/></svg></span>
-          <div class="tabs" role="tablist" aria-label="RDF views">
-            <button class="tab" role="tab" data-view="navigator" aria-selected="${this.#view === "navigator"}">Navigator</button>
-            ${this.#discoveryCandidates.length ? `<button class="tab" role="tab" data-view="discovery" aria-selected="${this.#view === "discovery"}">Discovery (${this.#discoveryCandidates.length})</button>` : ""}
-            <button class="tab" role="tab" data-view="turtle" aria-selected="${this.#view === "turtle"}">Turtle</button>
-            <button class="tab" role="tab" data-view="json" aria-selected="${this.#view === "json"}">JSON-LD</button>
-            ${result.diagnostics.length ? `<button class="tab" role="tab" data-view="diagnostics" aria-selected="${this.#view === "diagnostics"}">Diagnostics (${result.diagnostics.length})</button>` : ""}
+          <div class="tabs" role="tablist" aria-label="RDF views" data-compact="0">
+            ${tabMarkup("navigator", this.#view === "navigator", "Navigator", "Nav")}
+            ${this.#documentVocabulary.count ? tabMarkup("vocabulary", this.#view === "vocabulary", "Vocabulary", "Vocab", this.#documentVocabulary.count, "definition") : ""}
+            ${this.#discoveryCandidates.length ? tabMarkup("discovery", this.#view === "discovery", "Discovery", "Discover", this.#discoveryCandidates.length, "candidate") : ""}
+            ${tabMarkup("turtle", this.#view === "turtle", "Turtle", "TTL")}
+            ${tabMarkup("json", this.#view === "json", "JSON-LD", "JSON")}
+            ${result.diagnostics.length ? tabMarkup("diagnostics", this.#view === "diagnostics", "Diagnostics", "Issues", result.diagnostics.length, "diagnostic") : ""}
           </div>
           <div class="header-actions">
             <div class="position-switch" role="radiogroup" aria-label="Drawer position">
@@ -2939,6 +3281,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
         <p class="sr-only" aria-live="polite">${this.#status}</p>
       </aside>`;
     const viewport = this.shadowRoot.querySelector(".viewport");
+    this.#configureTabCompaction(this.shadowRoot.querySelector(".tabs"));
     if (this.#view === "turtle") viewport.append(highlightedCode(serializeTurtle(result), "turtle", document));
     if (this.#view === "json") {
       if (containsTripleTerms(result)) {
@@ -2950,6 +3293,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
       viewport.append(highlightedCode(serializeJsonLd(result), "json", document));
     }
     if (this.#view === "navigator") this.#renderNavigator(viewport, result);
+    if (this.#view === "vocabulary") this.#renderVocabulary(viewport);
     if (this.#view === "discovery") this.#renderDiscovery(viewport);
     if (this.#view === "diagnostics") this.#renderDiagnostics(viewport, result.diagnostics);
     this.shadowRoot.querySelector(".launcher")?.addEventListener("click", (event) => this.toggle(event instanceof MouseEvent && event.detail !== 0 ? "panel" : "tab"));
@@ -3036,6 +3380,7 @@ export {
   Ia2RdfNavigator,
   detectDiscoveryCandidates,
   extractDataset,
+  extractDocumentVocabulary,
   mergeDiscoveryContributions,
   mountRdfNavigator,
   serializeJsonLd,
