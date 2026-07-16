@@ -1,8 +1,14 @@
 # IA² — Information Architecture for Intelligent Agents
 
-IA² (“IA-squared”) is an exploratory project about making digital information
-something people, applications, and intelligent agents can publish, inspect,
-and share with one another without losing its structure or accountability.
+IA² (“IA-squared”) explores how digital information can remain richly
+structured, interconnected, inspectable, and openly exchangeable as
+intelligent agents become participants in the Web.
+
+The goal is not a Web rewritten for agents or absorbed into their platforms.
+It is a Web whose independently published parts can explain themselves: what
+they contain, how their parts relate, where their claims came from, and what
+constraints apply. People, applications, and agents can meet on that shared
+surface without one becoming the privileged owner of its meaning.
 
 The Web already contains the world's broadest information architecture, but
 its machine-facing layer is fragmented. Agents often have to infer meaning
@@ -24,6 +30,10 @@ exact entities, relationships, evidence, and constraints. An agent can download
 an inert document, inspect a live application state, follow linked definitions,
 evaluate constraints, and retain provenance without requiring the application
 to be absorbed into one AI platform.
+
+The aim is a richer commons, not a lowest common denominator: addressable
+entities, composable vocabularies, traversable links, explicit provenance, and
+semantics that can move between tools without a platform-owned schema.
 
 HTML is the first proving ground, not the boundary of the project. IA² asks
 what it would take for any information surface to explain what it contains,
@@ -57,11 +67,12 @@ people and independent of any one model, application, or AI platform.
 
 ## North star
 
-The agentic Web should not require every application to become a mini-app
-inside a dominant AI platform. Agents should be able to come to independently
-published information, understand it on its own terms, inspect its evidence,
-and act through explicit boundaries. People should be able to inspect the same
-information and see why an agent reached a conclusion or proposed a change.
+The agentic Web should remain a commons of independently published,
+addressable, and interlinked information. Its structure should be rich enough
+for agents to understand without reducing it to prose, yet open enough that no
+dominant AI platform becomes the only place where applications can be found,
+interpreted, or used. People should be able to inspect the same information and
+see why an agent reached a conclusion or proposed a change.
 
 IA² explores a shared legibility layer for that world:
 
@@ -78,10 +89,11 @@ IA² explores a shared legibility layer for that world:
   proposal to approval, implementation, publication, and observed change
   without pretending those stages are the same event.
 
-The result would not be one universal agent API. It would be a web where one
-agent can publish richly structured information and another can receive it on
-its own terms: addressable, composable, attributable, and navigable without
-first translating everything into a platform-owned schema.
+The result would not be one universal agent API. It would be a richer,
+interconnected Web where one agent can publish structured information and
+another can receive it on open terms: addressable, composable, attributable,
+and navigable without first translating everything into a platform-owned
+schema.
 
 ## Architectural horizon
 
