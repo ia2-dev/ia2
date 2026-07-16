@@ -18,9 +18,11 @@ const VENDOR = "https://ia2.dev/demos/live-workspace/vendor-review/";
 const KNOWLEDGE = "https://ia2.dev/demos/live-workspace/knowledge-model/";
 const DECISION = "https://ontology.inferal.com/modules/decision/";
 const DCTERMS = "http://purl.org/dc/terms/";
+const ODRL = "http://www.w3.org/ns/odrl/2/";
 const PROV = "http://www.w3.org/ns/prov#";
 const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 const SHACL = "http://www.w3.org/ns/shacl#";
+const XSD = "http://www.w3.org/2001/XMLSchema#";
 
 describe("live workspace semantics", () => {
   it("connects the release, decision, evidence, claim, and contract", () => {
@@ -39,7 +41,6 @@ describe("live workspace semantics", () => {
         && (graph === undefined || (quad.graph?.termType === "NamedNode" && quad.graph.value === graph))
       ))
     );
-
     expect(result.diagnostics).toEqual([]);
     expect(result.sourceDocumentIri).toBe(BASE);
     expect(hasNamed(
@@ -123,6 +124,17 @@ describe("live workspace semantics", () => {
         && (graph === undefined || (quad.graph?.termType === "NamedNode" && quad.graph.value === graph))
       ))
     );
+    const hasLiteral = (subject: string, predicate: string, value: string, datatype: string, graph?: string): boolean => (
+      result.quads.some((quad) => (
+        quad.subject.termType === "NamedNode"
+        && quad.subject.value === subject
+        && quad.predicate.value === predicate
+        && quad.object.termType === "Literal"
+        && quad.object.value === value
+        && quad.object.datatype.value === datatype
+        && (graph === undefined || (quad.graph?.termType === "NamedNode" && quad.graph.value === graph))
+      ))
+    );
 
     expect(result.diagnostics).toEqual([]);
     expect(result.sourceDocumentIri).toBe(VENDOR);
@@ -142,12 +154,142 @@ describe("live workspace semantics", () => {
       named("option-conditional"),
       named("runtime-state"),
     )).toBe(true);
+    expect(hasLiteral(
+      named("review-northstar"),
+      "https://current.example/security/satisfiedRequirementCount",
+      "2",
+      `${XSD}integer`,
+    )).toBe(true);
+    expect(hasLiteral(
+      named("requirement-notification"),
+      "https://current.example/security/maximumIncidentNotificationDelay",
+      "PT24H",
+      `${XSD}dayTimeDuration`,
+    )).toBe(true);
+    expect(hasLiteral(
+      named("claim-notification"),
+      "https://current.example/security/maximumIncidentNotificationDelay",
+      "PT72H",
+      `${XSD}dayTimeDuration`,
+    )).toBe(true);
+    expect(hasNamed(
+      named("requirement-notification"),
+      "https://current.example/security/requirementStatus",
+      "https://current.example/security/status/gap",
+      named("runtime-state"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("dpa"),
+      `${DCTERMS}hasPart`,
+      named("dpa-section-8-2"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("dpa-section-8-2"),
+      `${RDF}type`,
+      "http://purl.org/spar/doco/Section",
+    )).toBe(true);
+    expect(hasNamed(
+      named("claim-notification"),
+      `${PROV}wasDerivedFrom`,
+      named("dpa-section-8-2"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("notification-gap"),
+      "https://current.example/security/evaluatesRequirement",
+      named("requirement-notification"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("notification-gap"),
+      "https://current.example/security/evaluatesClaim",
+      named("claim-notification"),
+    )).toBe(true);
+    expect(hasLiteral(
+      named("notification-gap"),
+      "https://current.example/security/delayDifference",
+      "PT48H",
+      `${XSD}dayTimeDuration`,
+    )).toBe(true);
+    expect(hasNamed(
+      named("decision-northstar"),
+      "https://current.example/security/approvalStatus",
+      "https://current.example/security/status/conditional-approval",
+      named("runtime-state"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("option-conditional"),
+      `${DCTERMS}requires`,
+      named("notification-amendment-condition"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("notification-amendment-condition"),
+      "https://current.example/security/resolves",
+      named("notification-gap"),
+    )).toBe(true);
+    expect(hasLiteral(
+      named("notification-amendment-condition"),
+      "https://current.example/security/maximumIncidentNotificationDelay",
+      "PT24H",
+      `${XSD}dayTimeDuration`,
+    )).toBe(true);
+    expect(hasNamed(
+      named("authority-policy"),
+      `${ODRL}permission`,
+      named("draft-amendment-permission"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("draft-amendment-permission"),
+      `${ODRL}assignee`,
+      named("review-agent"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("draft-amendment-permission"),
+      `${ODRL}action`,
+      `${ODRL}derive`,
+    )).toBe(true);
+    expect(hasNamed(
+      named("draft-amendment-permission"),
+      `${ODRL}target`,
+      named("dpa"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("authority-policy"),
+      `${ODRL}obligation`,
+      named("approve-vendor-duty"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("approve-vendor-duty"),
+      `${ODRL}assignee`,
+      named("maya-chen"),
+    )).toBe(true);
+    expect(hasNamed(
+      named("approve-vendor-duty"),
+      `${ODRL}action`,
+      "https://current.example/security/approveVendor",
+    )).toBe(true);
+    expect(hasNamed(
+      named("approve-vendor-duty"),
+      `${ODRL}target`,
+      named("northstar-platform"),
+    )).toBe(true);
     expect(hasNamed(
       named("requirement-shape"),
       `${SHACL}targetClass`,
       "https://current.example/security/Requirement",
       named("validation-contract"),
     )).toBe(true);
+    expect(hasNamed(
+      named("notification-duration-shape"),
+      `${SHACL}targetSubjectsOf`,
+      "https://current.example/security/maximumIncidentNotificationDelay",
+      named("validation-contract"),
+    )).toBe(true);
+    expect(result.quads.some((quad) => (
+      quad.predicate.value === `${SHACL}datatype`
+      && quad.object.termType === "NamedNode"
+      && quad.object.value === `${XSD}dayTimeDuration`
+      && quad.graph?.termType === "NamedNode"
+      && quad.graph.value === named("validation-contract")
+    ))).toBe(true);
     expect(result.graphs).toEqual(expect.arrayContaining([
       { termType: "NamedNode", value: named("runtime-state") },
       { termType: "NamedNode", value: named("validation-contract") },

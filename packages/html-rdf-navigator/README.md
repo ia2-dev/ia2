@@ -32,6 +32,9 @@ For programmatic control, disable automatic mounting before import:
 
   const navigator = mountRdfNavigator();
   navigator.open();
+
+  // Open on the left and reveal the statements carried by one page element.
+  navigator.revealSource(document.querySelector("#decision"), "left");
 </script>
 ```
 
@@ -44,7 +47,8 @@ For programmatic control, disable automatic mounting before import:
 - live, case-insensitive filtering across terms, IRIs, graphs, and carriers
 - semantic typeahead from in-document labels, OWL/RDF kinds, domains, and ranges
 - namespace filters discovered from every named-node URL
-- click-activated, movable linked-resource preview windows
+- independently closable linked-preview windows sized for definitions or
+  resources, with movable eight-direction resize controls
 - source-order display and semantic-DOM indentation
 - bidirectional page/Navigator scroll following and hover correspondence
 - contextual, syntax-highlighted shallow and full carrier HTML views

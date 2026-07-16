@@ -2,6 +2,7 @@ export { extractDataset } from "./extract.js";
 export { detectDiscoveryCandidates, DISCOVERY_PREDICATES, mergeDiscoveryContributions } from "./discovery.js";
 export type { DiscoveryCandidate, DiscoveryContribution } from "./discovery.js";
 export { Ia2RdfNavigator } from "./navigator.js";
+export type { DrawerPosition } from "./navigator.js";
 export { serializeJsonLd, serializeTurtle, termToTurtle } from "./serialize.js";
 export { extractDocumentVocabulary } from "./vocabulary.js";
 export type { DocumentVocabulary, VocabularyDefinition, VocabularyKind } from "./vocabulary.js";

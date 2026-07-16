@@ -54,6 +54,16 @@ describe("Ia2RdfNavigator", () => {
     expect(drawer.shadowRoot?.querySelector('[data-view="navigator"]')?.getAttribute("aria-selected")).toBe("true");
   });
 
+  it("compacts ODRL authority terms", () => {
+    document.body.innerHTML = '<a href="https://example.com/draft-permission" rdf-subject="https://example.com/policy" rdf-predicate="http://www.w3.org/ns/odrl/2/permission">Draft amendment</a>';
+    const drawer = mountRdfNavigator();
+    const predicate = drawer.shadowRoot?.querySelector<HTMLAnchorElement>('.navigator .predicate a[href="http://www.w3.org/ns/odrl/2/permission"]');
+    const vocabulary = drawer.shadowRoot?.querySelector<HTMLAnchorElement>('.vocabulary-link[href="http://www.w3.org/ns/odrl/2/"]');
+
+    expect(predicate?.textContent).toBe("odrl:permission");
+    expect(vocabulary?.previousElementSibling?.textContent).toContain("odrl");
+  });
+
   it("shows Discovery only when candidates exist and explicitly loads HTML/RDF contributions", async () => {
     const canonical = document.createElement("link");
     canonical.rel = "canonical";
@@ -227,6 +237,42 @@ describe("Ia2RdfNavigator", () => {
     expect(launcher?.getAttribute("aria-expanded")).toBe("false");
   });
 
+  it("opens on a requested side and reveals one carrier in the Navigator", async () => {
+    document.body.innerHTML = [
+      '<span id="alice" rdf-subject="https://example.com/alice" rdf-predicate="https://schema.org/name">Alice</span>',
+      '<span rdf-subject="https://example.com/bob" rdf-predicate="https://schema.org/name">Bob</span>',
+    ].join("");
+    const alice = document.querySelector("#alice")!;
+    const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+    const scrollIntoView = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", { configurable: true, value: scrollIntoView });
+    try {
+      const drawer = mountRdfNavigator();
+      expect(drawer.revealSource(alice, "left")).toBe(true);
+      await Promise.resolve();
+
+      const panel = drawer.shadowRoot?.querySelector<HTMLElement>(".panel");
+      const launcher = drawer.shadowRoot?.querySelector<HTMLElement>(".launcher");
+      const rows = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLElement>(".quad") ?? []);
+      const selectedRows = rows.filter((row) => row.classList.contains("is-corresponding"));
+      expect(panel?.dataset.open).toBe("true");
+      expect(panel?.dataset.position).toBe("left");
+      expect(launcher?.dataset.position).toBe("left");
+      expect(drawer.shadowRoot?.querySelector('.position-option[data-position="left"]')?.getAttribute("aria-checked")).toBe("true");
+      expect(selectedRows).toHaveLength(1);
+      expect(selectedRows[0]?.textContent).toContain("Alice");
+      expect(drawer.shadowRoot?.activeElement).toBe(selectedRows[0]);
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: "center" });
+      expect(drawer.revealSource(document.body, "left")).toBe(false);
+    } finally {
+      if (originalScrollIntoView) {
+        Object.defineProperty(HTMLElement.prototype, "scrollIntoView", { configurable: true, value: originalScrollIntoView });
+      } else {
+        delete (HTMLElement.prototype as unknown as { scrollIntoView?: typeof HTMLElement.prototype.scrollIntoView }).scrollIntoView;
+      }
+    }
+  });
+
   it("keeps resource links inert on hover", () => {
     vi.useFakeTimers();
     try {
@@ -270,18 +316,23 @@ describe("Ia2RdfNavigator", () => {
     expect(drawer.shadowRoot?.querySelector(".resource-preview")).toBeNull();
   });
 
-  it("opens plain link clicks in a movable, resizable, closable preview window", () => {
+  it("opens predicates in a movable, eight-way resizable definition window", () => {
     const drawer = mountRdfNavigator();
     const predicate = drawer.shadowRoot?.querySelector<HTMLAnchorElement>('.navigator .predicate a[href="https://schema.org/name"]')!;
     predicate.click();
     const preview = drawer.shadowRoot?.querySelector<HTMLElement>(".resource-preview")!;
     const frame = preview.querySelector<HTMLIFrameElement>(".resource-preview-frame")!;
     const bar = preview.querySelector<HTMLElement>(".resource-preview-bar")!;
-    const resize = preview.querySelector<HTMLElement>(".resource-preview-resize")!;
+    const resizeHandles = Array.from(preview.querySelectorAll<HTMLElement>(".resize-handle"));
+    const southeastResize = preview.querySelector<HTMLElement>('[data-resize="se"]')!;
+    const northwestResize = preview.querySelector<HTMLElement>('[data-resize="nw"]')!;
     const close = preview.querySelector<HTMLButtonElement>(".resource-preview-close")!;
     expect(preview.getAttribute("role")).toBe("dialog");
+    expect(preview.dataset.previewKind).toBe("definition");
+    expect(Number.parseFloat(preview.style.width)).toBe(620);
+    expect(Number.parseFloat(preview.style.height)).toBe(520);
     expect(frame.tabIndex).toBe(0);
-    expect(resize).not.toBeNull();
+    expect(resizeHandles.map((handle) => handle.dataset.resize)).toEqual(["n", "ne", "e", "se", "s", "sw", "w", "nw"]);
 
     preview.getBoundingClientRect = () => {
       const left = Number.parseFloat(preview.style.left);
@@ -300,15 +351,62 @@ describe("Ia2RdfNavigator", () => {
 
     const startWidth = Number.parseFloat(preview.style.width);
     const startHeight = Number.parseFloat(preview.style.height);
-    resize.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0, clientX: 300, clientY: 300 }));
+    southeastResize.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0, clientX: 300, clientY: 300 }));
     window.dispatchEvent(new MouseEvent("pointermove", { clientX: 340, clientY: 325 }));
     window.dispatchEvent(new MouseEvent("pointerup"));
     expect(Number.parseFloat(preview.style.width)).toBe(startWidth + 40);
     expect(Number.parseFloat(preview.style.height)).toBe(startHeight + 25);
 
+    const resizedLeft = Number.parseFloat(preview.style.left);
+    const resizedTop = Number.parseFloat(preview.style.top);
+    const resizedWidth = Number.parseFloat(preview.style.width);
+    const resizedHeight = Number.parseFloat(preview.style.height);
+    northwestResize.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0, clientX: 300, clientY: 300 }));
+    window.dispatchEvent(new MouseEvent("pointermove", { clientX: 320, clientY: 315 }));
+    window.dispatchEvent(new MouseEvent("pointerup"));
+    expect(Number.parseFloat(preview.style.left)).toBe(resizedLeft + 20);
+    expect(Number.parseFloat(preview.style.top)).toBe(resizedTop + 15);
+    expect(Number.parseFloat(preview.style.width)).toBe(resizedWidth - 20);
+    expect(Number.parseFloat(preview.style.height)).toBe(resizedHeight - 15);
+
     preview.dispatchEvent(new Event("pointerleave"));
     expect(drawer.shadowRoot?.querySelector(".resource-preview")).toBe(preview);
     close.click();
+    expect(drawer.shadowRoot?.querySelector(".resource-preview")).toBeNull();
+  });
+
+  it("opens non-predicate terms in a larger centered resource window", () => {
+    const drawer = mountRdfNavigator();
+    const subject = drawer.shadowRoot?.querySelector<HTMLAnchorElement>('.navigator .subject a[href="https://example.com/alice"]')!;
+    subject.click();
+    const preview = drawer.shadowRoot?.querySelector<HTMLElement>(".resource-preview")!;
+    const width = Number.parseFloat(preview.style.width);
+    const height = Number.parseFloat(preview.style.height);
+    expect(preview.dataset.previewKind).toBe("resource");
+    expect(width).toBeGreaterThan(620);
+    expect(height).toBeGreaterThan(520);
+    expect(Number.parseFloat(preview.style.left)).toBe(Math.round((window.innerWidth - width) / 2));
+    expect(Number.parseFloat(preview.style.top)).toBe(Math.round((window.innerHeight - height) / 2));
+  });
+
+  it("keeps multiple resource previews open and independently closable", () => {
+    const drawer = mountRdfNavigator();
+    const predicate = drawer.shadowRoot?.querySelector<HTMLAnchorElement>('.navigator .predicate a[href="https://schema.org/name"]')!;
+    predicate.click();
+    predicate.click();
+
+    const previews = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLElement>(".resource-preview") ?? []);
+    expect(previews).toHaveLength(2);
+    expect(Number.parseFloat(previews[1]!.style.left)).toBe(Number.parseFloat(previews[0]!.style.left) + 24);
+    expect(Number.parseFloat(previews[1]!.style.top)).toBe(Number.parseFloat(previews[0]!.style.top) + 24);
+    expect(Number.parseInt(previews[1]!.style.zIndex, 10)).toBeGreaterThan(Number.parseInt(previews[0]!.style.zIndex, 10));
+
+    previews[1]!.querySelector<HTMLButtonElement>(".resource-preview-close")?.click();
+    expect(drawer.shadowRoot?.querySelectorAll(".resource-preview")).toHaveLength(1);
+    expect(previews[0]!.isConnected).toBe(true);
+    expect(previews[1]!.isConnected).toBe(false);
+
+    previews[0]!.querySelector<HTMLButtonElement>(".resource-preview-close")?.click();
     expect(drawer.shadowRoot?.querySelector(".resource-preview")).toBeNull();
   });
 

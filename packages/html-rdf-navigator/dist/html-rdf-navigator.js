@@ -650,6 +650,7 @@ var PREFIXES = {
   dcat: "http://www.w3.org/ns/dcat#",
   skos: "http://www.w3.org/2004/02/skos/core#",
   prov: "http://www.w3.org/ns/prov#",
+  odrl: "http://www.w3.org/ns/odrl/2/",
   sh: "http://www.w3.org/ns/shacl#",
   c4o: "http://purl.org/spar/c4o/",
   cito: "http://purl.org/spar/cito/",
@@ -1106,15 +1107,14 @@ var CSS = String.raw`
   .term-link { color: inherit; text-decoration-color: color-mix(in oklch, currentColor, transparent 55%); text-underline-offset: 3px; }
   .term-link:hover { text-decoration-color: currentColor; }
   .term-link.local-term { text-decoration-style: dotted; }
-  .resource-preview { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 18px 64px oklch(20% 0.03 286 / 28%); display: grid; grid-template-rows: 32px minmax(0, 1fr); height: min(420px, calc(100vh - 24px)); overflow: hidden; position: fixed; width: min(520px, calc(100vw - 24px)); z-index: 20; }
+  .resource-preview { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 18px 64px oklch(20% 0.03 286 / 28%); display: grid; grid-template-rows: 32px minmax(0, 1fr); overflow: hidden; position: fixed; z-index: 20; }
   .resource-preview-bar { align-items: center; background: var(--layer); border-bottom: 1px solid var(--line); cursor: grab; display: flex; gap: 4px; min-width: 0; padding: 0 5px 0 10px; user-select: none; }
   .resource-preview.is-dragging .resource-preview-bar { cursor: grabbing; }
   .resource-preview-url { color: var(--muted); flex: 1 1 auto; font: 11px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .resource-preview-action { align-items: center; background: transparent; border: 0; border-radius: 5px; color: var(--muted); cursor: pointer; display: inline-flex; flex: 0 0 24px; font: inherit; font-size: 14px; height: 24px; justify-content: center; line-height: 1; padding: 0; text-decoration: none; }
+  .resource-preview-action { align-items: center; background: transparent; border: 0; border-radius: 5px; color: var(--muted); cursor: pointer; display: inline-flex; flex: 0 0 24px; font: inherit; font-size: 14px; height: 24px; justify-content: center; line-height: 1; padding: 0; position: relative; text-decoration: none; z-index: 13; }
   .resource-preview-action:hover { background: var(--accent-soft); color: var(--accent); }
   .resource-preview-frame { background: var(--paper); border: 0; display: block; height: 100%; width: 100%; }
-  .resource-preview-resize { bottom: 0; cursor: nwse-resize; height: 18px; position: absolute; right: 0; touch-action: none; width: 18px; z-index: 2; }
-  .resource-preview-resize::after { border-bottom: 2px solid color-mix(in oklch, var(--muted), transparent 20%); border-right: 2px solid color-mix(in oklch, var(--muted), transparent 20%); bottom: 4px; content: ""; height: 6px; position: absolute; right: 4px; width: 6px; }
+  .resource-preview-resize-handles { display: contents; }
   .term-locate-button { margin-left: 6px; opacity: 0; vertical-align: -3px; }
   .quad:hover .term-locate-button, .quad:focus-within .term-locate-button { opacity: 1; }
   .structure-marker { color: color-mix(in oklch, var(--muted), transparent 22%); font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; inset-inline-start: calc(4px + var(--rdf-indent) - 13px); position: absolute; top: 18px; }
@@ -1761,10 +1761,9 @@ var Ia2RdfNavigator = class extends HTMLElement {
   #position = "right";
   #floatingRect = null;
   #floatingInteractionCleanup = null;
-  #linkPreview = null;
-  #linkPreviewAbortController = null;
-  #linkPreviewInteractionCleanup = null;
-  #linkPreviewNavigationCleanup = null;
+  #linkPreviews = /* @__PURE__ */ new Map();
+  #activeLinkPreview = null;
+  #linkPreviewZIndex = 20;
   #locateAnimation = null;
   #syncCleanup = null;
   #vocabularyTreeCleanup = null;
@@ -1772,6 +1771,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
   #tabResizeObserver = null;
   #observer = null;
   #refreshTimer = null;
+  #navigatorRows = [];
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
@@ -1798,7 +1798,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     this.#tabResizeObserver = null;
     if (this.#refreshTimer !== null) window.clearTimeout(this.#refreshTimer);
     this.#stopFloatingInteraction();
-    this.#clearLinkPreview();
+    this.#clearLinkPreviews();
     this.#clearLocateEmphasis();
     this.#clearNavigatorSync();
     this.#clearVocabularyTreeInteractions();
@@ -1828,78 +1828,102 @@ var Ia2RdfNavigator = class extends HTMLElement {
     this.#tabResizeObserver = new ResizeObserverConstructor(update);
     this.#tabResizeObserver.observe(tabs);
   }
-  #clearLinkPreview() {
-    this.#linkPreviewAbortController?.abort();
-    this.#linkPreviewAbortController = null;
-    this.#stopLinkPreviewInteraction();
-    this.#linkPreviewNavigationCleanup?.();
-    this.#linkPreviewNavigationCleanup = null;
-    this.#linkPreview?.remove();
-    this.#linkPreview = null;
+  #activateLinkPreview(preview) {
+    if (!this.#linkPreviews.has(preview)) return;
+    this.#activeLinkPreview = preview;
+    preview.style.zIndex = String(++this.#linkPreviewZIndex);
   }
-  #stopLinkPreviewInteraction() {
-    this.#linkPreviewInteractionCleanup?.();
-    this.#linkPreviewInteractionCleanup = null;
+  #clearLinkPreview(preview) {
+    const state = this.#linkPreviews.get(preview);
+    if (!state) return;
+    state.abortController?.abort();
+    state.interactionCleanup?.();
+    state.navigationCleanup?.();
+    preview.remove();
+    this.#linkPreviews.delete(preview);
+    if (this.#activeLinkPreview !== preview) return;
+    const remaining = Array.from(this.#linkPreviews.keys()).at(-1) ?? null;
+    this.#activeLinkPreview = null;
+    if (remaining) this.#activateLinkPreview(remaining);
+  }
+  #clearLinkPreviews() {
+    for (const preview of Array.from(this.#linkPreviews.keys())) this.#clearLinkPreview(preview);
+    this.#activeLinkPreview = null;
+    this.#linkPreviewZIndex = 20;
+  }
+  #linkPreviewRect(preview) {
+    const rect = preview.getBoundingClientRect();
+    return {
+      height: Number.parseFloat(preview.style.height) || rect.height,
+      width: Number.parseFloat(preview.style.width) || rect.width,
+      x: Number.parseFloat(preview.style.left) || rect.left,
+      y: Number.parseFloat(preview.style.top) || rect.top
+    };
+  }
+  #applyLinkPreviewGeometry(preview, rect) {
+    const constrained = this.#constrainFloatingRect(rect);
+    preview.style.height = `${constrained.height}px`;
+    preview.style.left = `${constrained.x}px`;
+    preview.style.top = `${constrained.y}px`;
+    preview.style.width = `${constrained.width}px`;
   }
   #constrainLinkPreview(preview) {
-    const view = this.ownerDocument.defaultView;
-    if (!view) return;
-    const margin = 12;
-    const minWidth = Math.min(300, Math.max(1, view.innerWidth - margin * 2));
-    const minHeight = Math.min(220, Math.max(1, view.innerHeight - margin * 2));
-    const rect = preview.getBoundingClientRect();
-    const width = Math.min(Math.max(rect.width || Number.parseFloat(preview.style.width) || minWidth, minWidth), Math.max(1, view.innerWidth - margin * 2));
-    const height = Math.min(Math.max(rect.height || Number.parseFloat(preview.style.height) || minHeight, minHeight), Math.max(1, view.innerHeight - margin * 2));
-    const left = Math.min(Math.max(Number.parseFloat(preview.style.left) || rect.left, margin), Math.max(margin, view.innerWidth - margin - width));
-    const top = Math.min(Math.max(Number.parseFloat(preview.style.top) || rect.top, margin), Math.max(margin, view.innerHeight - margin - height));
-    preview.style.height = `${height}px`;
-    preview.style.left = `${left}px`;
-    preview.style.top = `${top}px`;
-    preview.style.width = `${width}px`;
+    this.#applyLinkPreviewGeometry(preview, this.#linkPreviewRect(preview));
   }
-  #startLinkPreviewInteraction(event, preview, resize = false) {
+  #startLinkPreviewInteraction(event, preview, resize) {
     if (event.button !== 0) return;
     const view = this.ownerDocument.defaultView;
-    if (!view) return;
+    const state = this.#linkPreviews.get(preview);
+    if (!view || !state) return;
     event.preventDefault();
-    this.#stopLinkPreviewInteraction();
+    this.#activateLinkPreview(preview);
+    state.interactionCleanup?.();
+    state.interactionCleanup = null;
     this.#constrainLinkPreview(preview);
-    const start = {
-      height: Number.parseFloat(preview.style.height),
-      left: Number.parseFloat(preview.style.left),
-      top: Number.parseFloat(preview.style.top),
-      width: Number.parseFloat(preview.style.width),
-      x: event.clientX,
-      y: event.clientY
-    };
+    const startRect = this.#linkPreviewRect(preview);
+    const startX = event.clientX;
+    const startY = event.clientY;
     preview.classList.add(resize ? "is-resizing" : "is-dragging");
     const update = (moveEvent) => {
-      const deltaX = moveEvent.clientX - start.x;
-      const deltaY = moveEvent.clientY - start.y;
-      if (resize) {
-        preview.style.width = `${Math.max(300, start.width + deltaX)}px`;
-        preview.style.height = `${Math.max(220, start.height + deltaY)}px`;
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+      const limits = this.#floatingLimits();
+      const next = { ...startRect };
+      if (!resize) {
+        next.x = startRect.x + deltaX;
+        next.y = startRect.y + deltaY;
       } else {
-        preview.style.left = `${start.left + deltaX}px`;
-        preview.style.top = `${start.top + deltaY}px`;
+        if (resize.includes("e")) next.width = Math.min(Math.max(startRect.width + deltaX, limits.minWidth), limits.width - limits.margin - startRect.x);
+        if (resize.includes("s")) next.height = Math.min(Math.max(startRect.height + deltaY, limits.minHeight), limits.height - limits.margin - startRect.y);
+        if (resize.includes("w")) {
+          next.x = Math.min(Math.max(startRect.x + deltaX, limits.margin), startRect.x + startRect.width - limits.minWidth);
+          next.width = startRect.x + startRect.width - next.x;
+        }
+        if (resize.includes("n")) {
+          next.y = Math.min(Math.max(startRect.y + deltaY, limits.margin), startRect.y + startRect.height - limits.minHeight);
+          next.height = startRect.y + startRect.height - next.y;
+        }
       }
-      this.#constrainLinkPreview(preview);
+      this.#applyLinkPreviewGeometry(preview, next);
     };
     const stop = () => {
       view.removeEventListener("pointermove", update);
       view.removeEventListener("pointerup", stop);
       view.removeEventListener("pointercancel", stop);
       preview.classList.remove("is-dragging", "is-resizing");
-      if (this.#linkPreviewInteractionCleanup === stop) this.#linkPreviewInteractionCleanup = null;
+      if (state.interactionCleanup === stop) state.interactionCleanup = null;
     };
     view.addEventListener("pointermove", update);
     view.addEventListener("pointerup", stop);
     view.addEventListener("pointercancel", stop);
-    this.#linkPreviewInteractionCleanup = stop;
+    state.interactionCleanup = stop;
   }
-  #loadLinkPreviewFrame(frame, href) {
+  #loadLinkPreviewFrame(preview, frame, href) {
     const view = this.ownerDocument.defaultView;
-    if (!view) return;
+    const state = this.#linkPreviews.get(preview);
+    if (!view || !state) return;
+    state.abortController?.abort();
+    state.abortController = null;
     const previewUrl = resourcePreviewUrl(href);
     const fetchFirst = resourcePreviewFetchFirst(previewUrl);
     const documentKey = resourcePreviewDocumentKey(previewUrl);
@@ -1922,9 +1946,8 @@ var Ia2RdfNavigator = class extends HTMLElement {
       if (fetchFirst) frame.srcdoc = resourcePreviewStatusDocument("Preview unavailable. Use the open button above.");
       return;
     }
-    this.#linkPreviewAbortController?.abort();
     const controller = new view.AbortController();
-    this.#linkPreviewAbortController = controller;
+    state.abortController = controller;
     const attempts = fetchFirst ? RESOURCE_PREVIEW_FETCH_ATTEMPTS : 1;
     const fetchDocument = async () => {
       let error;
@@ -1959,7 +1982,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
         frame.srcdoc = resourcePreviewStatusDocument("Preview unavailable. Use the open button above.");
       }
     }).finally(() => {
-      if (this.#linkPreviewAbortController === controller) this.#linkPreviewAbortController = null;
+      if (state.abortController === controller) state.abortController = null;
     });
   }
   #showLinkPreview(anchor, x, y) {
@@ -1968,16 +1991,29 @@ var Ia2RdfNavigator = class extends HTMLElement {
     const document2 = this.ownerDocument;
     const preview = document2.createElement("section");
     preview.className = "resource-preview";
+    const previewKind = anchor.closest(".predicate") ? "definition" : "resource";
+    preview.dataset.previewKind = previewKind;
     preview.setAttribute("role", "dialog");
-    preview.setAttribute("aria-label", `Preview of ${anchor.href}`);
-    const width = Math.max(1, Math.min(520, view.innerWidth - 24));
-    const height = Math.max(1, Math.min(420, view.innerHeight - 24));
-    const maxLeft = Math.max(12, view.innerWidth - width - 12);
-    const maxTop = Math.max(12, view.innerHeight - height - 12);
-    preview.style.left = `${Math.min(Math.max(12, x - 24), maxLeft)}px`;
-    preview.style.top = `${Math.min(Math.max(12, y - 40), maxTop)}px`;
-    preview.style.width = `${width}px`;
-    preview.style.height = `${height}px`;
+    preview.setAttribute("aria-label", `${previewKind === "definition" ? "Definition" : "Resource"} preview of ${anchor.href}`);
+    const { height: viewportHeight, margin, width: viewportWidth } = this.#floatingLimits();
+    const availableWidth = Math.max(1, viewportWidth - margin * 2);
+    const availableHeight = Math.max(1, viewportHeight - margin * 2);
+    const preferredWidth = previewKind === "definition" ? 620 : Math.max(760, Math.round(viewportWidth * 0.72));
+    const preferredHeight = previewKind === "definition" ? 520 : Math.min(760, Math.max(560, Math.round(viewportHeight * 0.82)));
+    const width = Math.min(preferredWidth, availableWidth);
+    const height = Math.min(preferredHeight, availableHeight);
+    const cascade = this.#linkPreviews.size % 6 * 24;
+    const initialRect = this.#constrainFloatingRect({
+      height,
+      width,
+      x: previewKind === "definition" ? x - 24 : Math.round((viewportWidth - width) / 2),
+      y: previewKind === "definition" ? y - 40 : Math.round((viewportHeight - height) / 2)
+    });
+    this.#applyLinkPreviewGeometry(preview, {
+      ...initialRect,
+      x: initialRect.x + cascade,
+      y: initialRect.y + cascade
+    });
     const bar = document2.createElement("header");
     bar.className = "resource-preview-bar";
     const url = document2.createElement("span");
@@ -1999,7 +2035,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     close.setAttribute("aria-label", "Close resource preview");
     close.title = close.getAttribute("aria-label");
     close.textContent = "\xD7";
-    close.addEventListener("click", () => this.#clearLinkPreview());
+    close.addEventListener("click", () => this.#clearLinkPreview(preview));
     bar.append(close);
     bar.addEventListener("pointerdown", (event) => {
       const target = event.target instanceof Element ? event.target : null;
@@ -2008,35 +2044,43 @@ var Ia2RdfNavigator = class extends HTMLElement {
     });
     const frame = document2.createElement("iframe");
     frame.className = "resource-preview-frame";
-    frame.title = `Preview of ${anchor.href}`;
+    frame.title = `${previewKind === "definition" ? "Definition" : "Resource"} preview of ${anchor.href}`;
     frame.setAttribute("sandbox", resourcePreviewFetchFirst(resourcePreviewUrl(anchor.href)) ? RESOURCE_PREVIEW_FETCHED_SANDBOX : RESOURCE_PREVIEW_DIRECT_SANDBOX);
     frame.referrerPolicy = "no-referrer";
     frame.tabIndex = 0;
     preview.append(bar, frame);
-    const resize = document2.createElement("span");
-    resize.className = "resource-preview-resize";
-    resize.setAttribute("aria-hidden", "true");
-    resize.addEventListener("pointerdown", (event) => this.#startLinkPreviewInteraction(event, preview, true));
-    preview.append(resize);
+    const resizeHandles = document2.createElement("div");
+    resizeHandles.className = "resource-preview-resize-handles";
+    resizeHandles.setAttribute("aria-hidden", "true");
+    for (const direction of ["n", "ne", "e", "se", "s", "sw", "w", "nw"]) {
+      const handle = document2.createElement("span");
+      handle.className = "resize-handle";
+      handle.dataset.resize = direction;
+      handle.addEventListener("pointerdown", (event) => this.#startLinkPreviewInteraction(event, preview, direction));
+      resizeHandles.append(handle);
+    }
+    preview.append(resizeHandles);
     this.shadowRoot.append(preview);
-    this.#linkPreview = preview;
+    const state = { abortController: null, interactionCleanup: null, navigationCleanup: null };
+    this.#linkPreviews.set(preview, state);
+    preview.addEventListener("pointerdown", () => this.#activateLinkPreview(preview), { capture: true });
+    this.#activateLinkPreview(preview);
     const handlePreviewNavigation = (event) => {
       const data = event.data;
       if (event.source !== frame.contentWindow || data?.type !== "ia2-rdf-preview-navigate" || typeof data.href !== "string" || !isWebIri(data.href)) return;
       url.textContent = data.href;
       url.title = data.href;
       open.href = data.href;
-      this.#loadLinkPreviewFrame(frame, data.href);
+      this.#loadLinkPreviewFrame(preview, frame, data.href);
     };
     view.addEventListener("message", handlePreviewNavigation);
-    this.#linkPreviewNavigationCleanup = () => view.removeEventListener("message", handlePreviewNavigation);
-    this.#loadLinkPreviewFrame(frame, anchor.href);
+    state.navigationCleanup = () => view.removeEventListener("message", handlePreviewNavigation);
+    this.#loadLinkPreviewFrame(preview, frame, anchor.href);
   }
   #openLinkPreview(anchor, event) {
     const rect = anchor.getBoundingClientRect();
     const x = event.clientX || rect.left + Math.min(rect.width / 2, 24);
     const y = event.clientY || rect.top + Math.min(rect.height / 2, 12);
-    this.#clearLinkPreview();
     this.#showLinkPreview(anchor, x, y);
   }
   #resourceAnchorForTarget(target) {
@@ -2121,7 +2165,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
   #panelFocusables() {
     const panel = this.shadowRoot?.querySelector(".panel");
     if (!panel) return [];
-    const scopes = this.#linkPreview ? [panel, this.#linkPreview] : [panel];
+    const scopes = [panel, ...this.#linkPreviews.keys()];
     return scopes.flatMap((scope) => Array.from(scope.querySelectorAll("a[href], button, input, select, textarea, [tabindex]"))).filter((element) => element.tabIndex >= 0 && !element.hasAttribute("disabled") && !element.closest("[hidden]") && element.getAttribute("aria-hidden") !== "true");
   }
   #observeDocument() {
@@ -2246,7 +2290,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
   close() {
     this.#open = false;
     this.#stopFloatingInteraction();
-    this.#clearLinkPreview();
+    this.#clearLinkPreviews();
     this.#clearLocateEmphasis();
     this.shadowRoot?.querySelector(".launcher")?.setAttribute("aria-expanded", "false");
     const panel = this.shadowRoot?.querySelector(".panel");
@@ -2256,6 +2300,36 @@ var Ia2RdfNavigator = class extends HTMLElement {
   toggle(focusTarget = "tab") {
     if (this.#open) this.close();
     else this.open(focusTarget);
+  }
+  /** Open the Navigator at the statement carriers produced by one document element. */
+  revealSource(source, position = "left") {
+    const represented = this.#sourceResult?.quads.some((quad) => quad.source === source) ?? false;
+    if (!represented || source.ownerDocument !== this.ownerDocument) return false;
+    this.#position = position;
+    this.#view = "navigator";
+    this.#navigatorQuery = "";
+    this.#disabledNamespaces.clear();
+    this.#syncMode = "off";
+    this.#render();
+    this.#persistSessionState();
+    this.open("panel");
+    queueMicrotask(() => {
+      const matchingRows = this.#navigatorRows.filter(({ quad }) => quad.source === source);
+      const primary = matchingRows[0]?.item;
+      if (!primary) return;
+      this.#navigatorRows.forEach(({ item }) => item.classList.remove("is-corresponding"));
+      matchingRows.forEach(({ item }) => {
+        item.hidden = false;
+        item.classList.add("is-corresponding");
+      });
+      primary.tabIndex = -1;
+      primary.scrollIntoView?.({ block: "center" });
+      primary.focus({ preventScroll: true });
+      this.#status = `Showing statements carried by ${elementLabel(source)}`;
+      const status = this.shadowRoot?.querySelector(".sr-only");
+      if (status) status.textContent = this.#status;
+    });
+    return true;
   }
   #floatingLimits() {
     const view = this.ownerDocument.defaultView;
@@ -2359,7 +2433,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     this.#floatingInteractionCleanup = stop;
   }
   #onWindowResize = () => {
-    if (this.#linkPreview) this.#constrainLinkPreview(this.#linkPreview);
+    for (const preview of this.#linkPreviews.keys()) this.#constrainLinkPreview(preview);
     if (this.#position !== "floating") return;
     const panel = this.shadowRoot?.querySelector(".panel");
     if (panel) {
@@ -2372,8 +2446,8 @@ var Ia2RdfNavigator = class extends HTMLElement {
     if (!this.#open) return;
     if (event.key === "Escape") {
       event.preventDefault();
-      if (this.#linkPreview) {
-        this.#clearLinkPreview();
+      if (this.#activeLinkPreview) {
+        this.#clearLinkPreview(this.#activeLinkPreview);
         return;
       }
       this.close();
@@ -2752,9 +2826,9 @@ var Ia2RdfNavigator = class extends HTMLElement {
       const terms = document.createElement("div");
       terms.className = "quad-terms";
       const onLocate = (target) => this.#locateElement(target);
-      const subject = termCode(document, quad.subject, "", "", onLocate, result.sourceDocumentIri);
+      const subject = termCode(document, quad.subject, "", "subject", onLocate, result.sourceDocumentIri);
       const predicate = termCode(document, quad.predicate, "   ", "predicate", onLocate, result.sourceDocumentIri);
-      const object = termCode(document, quad.object, "   ", "", onLocate, result.sourceDocumentIri);
+      const object = termCode(document, quad.object, "   ", "object", onLocate, result.sourceDocumentIri);
       terms.append(subject, predicate, object);
       if (quad.graph) {
         const graph = document.createElement("div");
@@ -2808,6 +2882,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
       rows.push({ item, namespaces: new Set(namespacesInQuad(quad).map((entry) => entry.namespace)), quad, searchText: quadSearchText(quad) });
     });
     container.append(list);
+    this.#navigatorRows = rows;
     const noMatches = document.createElement("p");
     noMatches.className = "empty filter-empty";
     noMatches.textContent = "No statements match the active filters.";
@@ -3236,7 +3311,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
   }
   #render() {
     this.#stopFloatingInteraction();
-    this.#clearLinkPreview();
+    this.#clearLinkPreviews();
     this.#clearLocateEmphasis();
     this.#clearNavigatorSync();
     this.#clearVocabularyTreeInteractions();
@@ -3244,6 +3319,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     this.#vocabularyResizeObserver = null;
     this.#tabResizeObserver?.disconnect();
     this.#tabResizeObserver = null;
+    this.#navigatorRows = [];
     const result = this.#result;
     if (!result || !this.shadowRoot) return;
     if (this.#view === "diagnostics" && !result.diagnostics.length) this.#view = "navigator";

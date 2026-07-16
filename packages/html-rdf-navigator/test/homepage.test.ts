@@ -4,6 +4,9 @@ import { extractDataset } from "../src/extract.js";
 import homepageHtml from "../../../site/index.html?raw";
 
 const DCTERMS = "http://purl.org/dc/terms/";
+const DECISION = "https://ontology.inferal.com/modules/decision/";
+const ODRL = "http://www.w3.org/ns/odrl/2/";
+const PROV = "http://www.w3.org/ns/prov#";
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const SCHEMA = "https://schema.org/";
 
@@ -22,6 +25,32 @@ describe("IA² homepage semantics", () => {
       expect(switcher.querySelector(".spec-switcher__current")?.getAttribute("href")).toBe("/spec/html-rdf");
       expect(switcher.querySelector('.spec-switcher__option[aria-current="true"]')?.getAttribute("href")).toBe("/spec/html-rdf");
       expect(switcher.querySelector('a[href="/spec/discovery-enrichment"]')).not.toBeNull();
+    }
+    expect(page.querySelector('script[src^="/home.js?"]')).not.toBeNull();
+    const hero = page.querySelector(".hero");
+    expect(hero?.querySelector<HTMLAnchorElement>('.hero-actions a[href="/demos/live-workspace/"]')?.textContent?.trim()).toBe("Live demo ↗");
+    expect(hero?.textContent).not.toContain("Working now:");
+    expect(hero?.textContent).not.toContain("Agent reading");
+    expect(hero?.textContent).not.toContain("Authority preserved");
+    expect(hero?.textContent).not.toContain("Select a relationship to inspect");
+    expect(hero?.querySelector("figcaption, .proof-footer, .hero-note")).toBeNull();
+    const proofTargets = Array.from(page.querySelectorAll<HTMLAnchorElement>(".agent-proof a[data-rdf-target]"));
+    expect(proofTargets).toHaveLength(7);
+    for (const trigger of proofTargets) {
+      const selector = trigger.dataset.rdfTarget;
+      expect(selector).toBeTruthy();
+      const target = page.querySelector(selector!);
+      expect(target).toBe(trigger);
+      expect(target?.hasAttribute("rdf-predicate")).toBe(true);
+    }
+    const caseTargets = Array.from(page.querySelectorAll<HTMLAnchorElement>(".decision-path a[data-rdf-target]"));
+    expect(caseTargets).toHaveLength(5);
+    for (const trigger of caseTargets) {
+      const selector = trigger.dataset.rdfTarget;
+      expect(selector).toBeTruthy();
+      const target = page.querySelector(selector!);
+      expect(target).toBe(trigger);
+      expect(target?.hasAttribute("rdf-predicate")).toBe(true);
     }
     const has = (
       subject: string,
@@ -47,6 +76,14 @@ describe("IA² homepage semantics", () => {
       "Literal",
       "Information Architecture for Intelligent Agents",
     )).toBe(true);
+    const reviewBase = "https://ia2.dev/demos/live-workspace/vendor-review/#";
+    expect(has(`${reviewBase}review-northstar`, `${SCHEMA}about`, "NamedNode", `${reviewBase}northstar-platform`)).toBe(true);
+    expect(has(`${reviewBase}decision-northstar`, `${DECISION}selectedOption`, "NamedNode", `${reviewBase}option-conditional`)).toBe(true);
+    expect(has(`${reviewBase}review-northstar`, `${DCTERMS}conformsTo`, "NamedNode", `${reviewBase}security-policy`)).toBe(true);
+    expect(has(`${reviewBase}claim-notification`, `${PROV}wasDerivedFrom`, "NamedNode", `${reviewBase}dpa`)).toBe(true);
+    expect(has(`${reviewBase}approval-record`, `${DECISION}hasRationale`, "NamedNode", `${reviewBase}approval-rationale`)).toBe(true);
+    expect(has(`${reviewBase}authority-policy`, `${ODRL}permission`, "NamedNode", `${reviewBase}draft-amendment-permission`)).toBe(true);
+    expect(has(`${reviewBase}authority-policy`, `${ODRL}obligation`, "NamedNode", `${reviewBase}approve-vendor-duty`)).toBe(true);
 
     const architecturalReferences = [
       "https://www.w3.org/TR/activitystreams-vocabulary/",
@@ -73,6 +110,7 @@ describe("IA² homepage semantics", () => {
       "https://ia2.dev/spec/discovery-enrichment",
       "https://ia2.dev/guide/html-rdf",
       "https://ia2.dev/demos/live-workspace",
+      "https://ia2.dev/demos/live-workspace/vendor-review/",
       "https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator",
     ];
     for (const artifact of artifacts) {
