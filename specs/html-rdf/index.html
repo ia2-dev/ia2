@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>IA² HTML/RDF — Core Model 0.1</title>
     <link rel="canonical" href="https://ia2.dev/spec/html-rdf">
+    <style class="remove">
+      html:not([data-respec-ready]) body {
+        opacity: 0;
+      }
+    </style>
 
     <!-- The metadata below is simultaneously ordinary HTML metadata and IA² RDF. -->
     <meta
@@ -85,6 +90,31 @@
       class="remove"
       async
     ></script>
+    <script class="remove">
+      (function () {
+        var started = Date.now();
+
+        function reveal() {
+          document.documentElement.setAttribute("data-respec-ready", "true");
+        }
+
+        function waitForReSpec() {
+          if (document.respec && document.respec.ready) {
+            document.respec.ready.then(reveal, reveal);
+            return;
+          }
+
+          if (Date.now() - started > 30000) {
+            reveal();
+            return;
+          }
+
+          setTimeout(waitForReSpec, 50);
+        }
+
+        waitForReSpec();
+      })();
+    </script>
     <script
       type="module"
       src="../../packages/html-rdf-navigator/dist/html-rdf-navigator.js"
