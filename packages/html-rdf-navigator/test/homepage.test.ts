@@ -38,6 +38,18 @@ describe("IA² homepage semantics", () => {
       "Information Architecture for Intelligent Agents",
     )).toBe(true);
 
+    const architecturalReferences = [
+      "https://ontology.inferal.com/modules/confidence/",
+      "https://ontology.inferal.com/modules/scoped-statements/",
+      "https://ontology.inferal.com/modules/decision/",
+      "https://ontology.inferal.com/modules/conversation/",
+      "https://ontology.inferal.com/modules/data-usage-processing-lineage/",
+      "https://ontology.inferal.com/modules/artifact-evolution/",
+    ];
+    for (const reference of architecturalReferences) {
+      expect(has("https://ia2.dev/", `${DCTERMS}references`, "NamedNode", reference)).toBe(true);
+    }
+
     const artifacts = [
       "https://ia2.dev/spec/html-rdf",
       "https://ia2.dev/guide/html-rdf",

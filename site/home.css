@@ -400,6 +400,18 @@ footer {
   font-size: 0.86rem;
 }
 
+.layer-territory a {
+  color: inherit;
+  text-decoration-color: color-mix(in oklch, var(--violet) 32%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.layer-territory a:hover {
+  color: var(--violet);
+  text-decoration-color: currentColor;
+}
+
 .work {
   padding-bottom: clamp(7rem, 13vw, 13rem);
   padding-top: clamp(7rem, 13vw, 13rem);
