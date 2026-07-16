@@ -111,24 +111,27 @@ a:focus-visible {
 }
 
 .project-name {
-  font-size: clamp(0.78rem, 1vw, 0.92rem);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  margin: 0 0 clamp(2.5rem, 6vw, 5.5rem);
-  max-width: 24rem;
-}
-
-.hero h1 {
-  font-size: clamp(3.65rem, 7.7vw, 8.25rem);
-  font-weight: 760;
-  letter-spacing: -0.07em;
-  line-height: 0.88;
-  margin: 0;
-  max-width: 11ch;
+  font-size: clamp(2.25rem, 4.1vw, 4.9rem);
+  font-weight: 780;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  margin: 0 0 clamp(2.75rem, 5vw, 4.75rem);
+  max-width: 22ch;
   text-wrap: balance;
 }
 
-.hero h1 span {
+.hero-thesis {
+  color: oklch(92% 0.025 294 / 88%);
+  font-size: clamp(2.9rem, 4.7vw, 5.5rem);
+  font-weight: 680;
+  letter-spacing: -0.06em;
+  line-height: 0.92;
+  margin: 0;
+  max-width: 21ch;
+  text-wrap: balance;
+}
+
+.hero-thesis span {
   color: var(--violet-ink);
   display: block;
 }
@@ -580,8 +583,12 @@ footer > div {
     display: none;
   }
 
-  .hero h1 {
-    font-size: clamp(3.3rem, 17vw, 5rem);
+  .project-name {
+    font-size: clamp(2.25rem, 10vw, 3.4rem);
+  }
+
+  .hero-thesis {
+    font-size: clamp(2.5rem, 10vw, 3.6rem);
   }
 
   .action {
