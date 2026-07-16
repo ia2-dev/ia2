@@ -788,6 +788,11 @@ footer > div {
     align-items: start;
   }
 
+  .hero-copy {
+    position: relative;
+    z-index: 1;
+  }
+
   .agent-proof {
     max-width: 42rem;
   }
