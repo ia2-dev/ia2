@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img">
+  <title>IA squared</title>
+  <rect width="512" height="512" fill="#6842c2"/>
+  <text
+    x="256"
+    y="326"
+    fill="#fbf9ff"
+    font-family="Avenir Next, Avenir, Segoe UI, sans-serif"
+    font-size="210"
+    font-weight="750"
+    letter-spacing="-2"
+    text-anchor="middle"
+  >IA²</text>
+</svg>
