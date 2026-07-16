@@ -16,6 +16,13 @@ describe("IA² homepage semantics", () => {
     expect(page.querySelector('a[href="#architecture"]')?.textContent).toBe("Architecture");
     expect(page.querySelector("#architecture")).not.toBeNull();
     expect(page.querySelector("#horizon")).toBeNull();
+    const specSwitchers = Array.from(page.querySelectorAll("[data-spec-switcher]"));
+    expect(specSwitchers).toHaveLength(3);
+    for (const switcher of specSwitchers) {
+      expect(switcher.querySelector(".spec-switcher__current")?.getAttribute("href")).toBe("/spec/html-rdf");
+      expect(switcher.querySelector('.spec-switcher__option[aria-current="true"]')?.getAttribute("href")).toBe("/spec/html-rdf");
+      expect(switcher.querySelector('a[href="/spec/discovery-enrichment"]')).not.toBeNull();
+    }
     const has = (
       subject: string,
       predicate: string,
@@ -63,6 +70,7 @@ describe("IA² homepage semantics", () => {
 
     const artifacts = [
       "https://ia2.dev/spec/html-rdf",
+      "https://ia2.dev/spec/discovery-enrichment",
       "https://ia2.dev/guide/html-rdf",
       "https://ia2.dev/demos/live-workspace",
       "https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator",

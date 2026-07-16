@@ -1,0 +1,1515 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IA² Discovery and Enrichment 0.1</title>
+    <link rel="icon" href="/assets/ia2-mark.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/assets/ia2-mark-512.png">
+    <link rel="canonical" href="https://ia2.dev/spec/discovery-enrichment">
+    <style class="remove">
+      html:not([data-respec-ready]) body {
+        opacity: 0;
+      }
+    </style>
+
+    <meta
+      name="description"
+      content="A supplemental RDF profile for advertising, qualifying, retrieving, and presenting additional knowledge without implicit merging, trust, or execution."
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/description"
+    >
+    <meta
+      content="IA² Discovery and Enrichment 0.1"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/title"
+    >
+    <meta
+      content="2026-07-16"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/created"
+      rdf-datatype="http://www.w3.org/2001/XMLSchema#date"
+    >
+    <meta
+      content="2026-07-16"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/modified"
+      rdf-datatype="http://www.w3.org/2001/XMLSchema#date"
+    >
+    <meta
+      content="0.1"
+      rdf-subject=""
+      rdf-predicate="http://www.w3.org/2002/07/owl#versionInfo"
+    >
+    <link
+      href="https://schema.org/TechArticle"
+      rdf-subject=""
+      rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    >
+    <link
+      href="http://www.w3.org/2002/07/owl#Ontology"
+      rdf-subject=""
+      rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    >
+    <link
+      href="http://www.w3.org/ns/dcat#Resource"
+      rdf-subject=""
+      rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    >
+    <link
+      href="#yurii-rashkovskii"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/creator"
+    >
+    <link
+      href="https://ia2.dev/spec/html-rdf"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/relation"
+    >
+    <meta
+      rdf-subject=""
+      rdf-predicate="http://www.w3.org/ns/dcat#qualifiedRelation"
+      rdf-object-key="core-model-discovery"
+    >
+    <link
+      href="http://www.w3.org/ns/dcat#Relationship"
+      rdf-subject-key="core-model-discovery"
+      rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    >
+    <link
+      href="https://ia2.dev/spec/html-rdf"
+      rdf-subject-key="core-model-discovery"
+      rdf-predicate="http://purl.org/dc/terms/relation"
+    >
+    <link
+      href="#Definition"
+      rdf-subject-key="core-model-discovery"
+      rdf-predicate="http://www.w3.org/ns/dcat#hadRole"
+    >
+    <link
+      href="https://www.w3.org/TR/rdf12-concepts/"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/references"
+    >
+    <link
+      href="https://www.w3.org/TR/rdf-schema/"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/references"
+    >
+    <link
+      href="https://www.w3.org/TR/vocab-dcat-3/"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/references"
+    >
+    <link
+      href="https://www.rfc-editor.org/rfc/rfc8288"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/references"
+    >
+    <link
+      href="https://www.w3.org/TR/annotation-model/"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/references"
+    >
+    <link
+      href="https://www.w3.org/TR/prov-o/"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/references"
+    >
+    <link
+      href="https://www.w3.org/TR/skos-reference/"
+      rdf-subject=""
+      rdf-predicate="http://purl.org/dc/terms/references"
+    >
+
+    <script class="remove">
+      var respecConfig = {
+        specStatus: "unofficial",
+        shortName: "ia2-discovery-enrichment",
+        subtitle: "Supplemental profile for linked knowledge",
+        publishDate: "2026-07-16",
+        editors: [{ name: "Yurii Rashkovskii" }],
+        lint: {
+          "no-unused-dfns": false
+        }
+      };
+    </script>
+    <script
+      src="https://www.w3.org/Tools/respec/respec-w3c"
+      class="remove"
+      async
+    ></script>
+    <script class="remove">
+      (function () {
+        var started = Date.now();
+
+        function reveal() {
+          document.documentElement.setAttribute("data-respec-ready", "true");
+        }
+
+        function waitForReSpec() {
+          if (document.respec && document.respec.ready) {
+            document.respec.ready.then(reveal, reveal);
+            return;
+          }
+
+          if (Date.now() - started > 30000) {
+            reveal();
+            return;
+          }
+
+          setTimeout(waitForReSpec, 50);
+        }
+
+        waitForReSpec();
+      })();
+    </script>
+    <script
+      type="module"
+      src="../../packages/html-rdf-navigator/dist/html-rdf-navigator.js"
+    ></script>
+
+    <style>
+      .profile-principle {
+        background: #f7f4ff;
+        border: 1px solid #d9d0ef;
+        border-radius: 0.45rem;
+        padding: 1rem 1.15rem;
+      }
+      .profile-principle strong {
+        display: block;
+        margin-bottom: 0.35rem;
+      }
+      .relation-table td:first-child {
+        white-space: nowrap;
+      }
+      .processing-summary {
+        counter-reset: processing;
+        list-style: none;
+        padding-left: 0;
+      }
+      .processing-summary li {
+        counter-increment: processing;
+        display: grid;
+        gap: 0.75rem;
+        grid-template-columns: 2rem minmax(0, 1fr);
+        margin: 0.75rem 0;
+      }
+      .processing-summary li::before {
+        color: #5b3e9e;
+        content: counter(processing, decimal-leading-zero);
+        font-weight: 700;
+      }
+      .vocabulary-tree,
+      .vocabulary-tree ul {
+        list-style: none;
+      }
+      .vocabulary-tree {
+        padding-left: 0;
+      }
+      .vocabulary-tree ul {
+        border-left: 1px solid #d9d0ef;
+        margin: 0.35rem 0 0.65rem 0.55rem;
+        padding-left: 1.15rem;
+      }
+      .vocabulary-tree li {
+        margin: 0.35rem 0;
+      }
+      .vocab-term {
+        border-top: 1px solid #d9d0ef;
+        padding: 1rem 0 0.8rem;
+      }
+      .vocab-term h4 {
+        margin: 0 0 0.25rem;
+      }
+      .term-kind {
+        color: #5b3e9e;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        margin: 0 0 0.55rem;
+        text-transform: uppercase;
+      }
+      @media (max-width: 640px) {
+        .relation-table td:first-child {
+          white-space: normal;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section id="sotd">
+      <p>
+        This is an exploratory supplemental profile. It complements the
+        <a href="https://ia2.dev/spec/html-rdf">HTML/RDF Core Model</a>, but
+        its RDF relationships and consumer guidance can also be used by other
+        RDF-bearing formats. It defines no new HTML attributes. This version
+        also publishes a compact RDF vocabulary for discovery records,
+        retrieved contributions, enrichment views, processing activities,
+        relationship roles, and lifecycle states.
+      </p>
+      <p>
+        The document is itself an HTML/RDF document. The optional RDF
+        Navigator exposes the dataset extracted from its current DOM.
+      </p>
+    </section>
+
+    <section id="abstract">
+      <h2>Abstract</h2>
+      <p>
+        RDF makes it easy to state that another resource is related. It does
+        not, by itself, tell an application whether that resource should be
+        offered to a person, retrieved as additional information, or kept
+        separate as evidence, provenance, validation material, an alternative,
+        or a definition.
+      </p>
+      <p>
+        This profile defines a conservative discovery model for those cases.
+        Publishers use established RDF relationships, beginning with
+        <code>rdfs:seeAlso</code>, and may qualify a relationship with the DCAT
+        relationship and role pattern. Consumers turn recognized relationships
+        into explicit enrichment candidates. Discovery never implies retrieval;
+        retrieval never implies assertion, merging, trust, validation, or
+        execution.
+      </p>
+      <p>
+        It also defines a standard vocabulary whose namespace is
+        <code>https://ia2.dev/spec/discovery-enrichment#</code>. The vocabulary
+        makes consumer-side discovery state and enrichment provenance portable
+        without turning a descriptive relationship into an instruction.
+      </p>
+    </section>
+
+    <section id="introduction">
+      <h2>Introduction</h2>
+      <p>
+        A useful knowledge surface rarely contains everything worth knowing.
+        A report may have supporting evidence, a claim may have provenance, a
+        dataset may have a validation shape, and a concept may be defined by an
+        ontology maintained elsewhere. RDF can identify all of those
+        relationships. The remaining architectural question is how a consumer
+        should turn them into understandable, controllable opportunities to
+        obtain more knowledge.
+      </p>
+      <p>
+        This specification calls that process <em>discovery and
+        enrichment</em>. Discovery is the recognition that a source dataset
+        relates a context resource to a potentially useful target. Enrichment
+        is the optional, policy-governed act of retrieving and presenting a
+        target's contribution while preserving where it came from. Neither
+        process changes what the source asserted.
+      </p>
+
+      <section id="relationship-to-core">
+        <h3>Relationship to HTML/RDF Core</h3>
+        <p>
+          The <a
+            href="https://ia2.dev/spec/html-rdf"
+            rdf-subject=""
+            rdf-predicate="http://www.w3.org/2000/01/rdf-schema#seeAlso"
+          >HTML/RDF Core Model</a>
+          answers: “What RDF dataset does this HTML document express?” This
+          profile begins after that dataset exists and answers: “What
+          additional knowledge does it make discoverable, why might that
+          knowledge be useful, and how can a consumer handle it without
+          silently changing the source?”
+        </p>
+        <p>
+          No Discovery and Enrichment syntax is added to HTML. Publishers use
+          ordinary RDF predicates and the HTML/RDF attributes already defined
+          by Core. The same relationships can therefore participate when RDF
+          arrives through Turtle, JSON-LD, an RDF API, or another
+          RDF-supporting host format. HTML/RDF is the first integration surface,
+          not a boundary around the model.
+        </p>
+        <aside class="note" title="This specification demonstrates discovery">
+          The visible Core Model link above is also this document's
+          <code>rdfs:seeAlso</code> discovery relationship. Open the optional
+          HTML/RDF Navigator to see a <strong>Discovery</strong> tab, then choose
+          <strong>Load</strong> to retrieve the Core document deliberately. The
+          Navigator adds its extracted statements to the other views as a
+          separate named graph, so the additional knowledge remains visibly
+          distinct from this specification's assertions.
+        </aside>
+      </section>
+
+      <section id="motivating-scenario">
+        <h3>Motivating scenario</h3>
+        <p>
+          Consider an agent reading a published assessment. The assessment
+          links to a vocabulary definition, a validation report, and the
+          evidence behind one of its claims. The agent can extract those
+          relationships without running script. It can explain what each
+          target is for, ask a person or policy whether it should be retrieved,
+          and display the selected material as additional layers. The agent
+          does not treat those layers as statements made by the assessment,
+          and a failed or untrusted target does not damage the assessment's own
+          dataset.
+        </p>
+        <p>
+          This separation supports both interactive applications and autonomous
+          agents: the former can expose intelligible “more to see” affordances,
+          while the latter can follow explicit policy without confusing a link
+          with an instruction or an external graph with local truth.
+        </p>
+      </section>
+    </section>
+
+    <section id="competency-questions">
+      <h2>Competency questions</h2>
+      <p>
+        The following questions define the practical capability expected of
+        this profile. They are also useful as review criteria for publishers,
+        consumers, and future revisions.
+      </p>
+
+      <section id="publishing-questions">
+        <h3>Publishing and description</h3>
+        <ol>
+          <li>Can a resource advertise additional knowledge without commanding a consumer to retrieve it?</li>
+          <li>Can a publisher state why a target is relevant, using a precise relationship where one already exists?</li>
+          <li>Can a generic “see also” relationship be qualified with a purpose or role without inventing host-language syntax?</li>
+          <li>Can one context resource expose several independent targets whose order has no implied significance?</li>
+          <li>Can a visible HTML link serve people and carry the same discovery relationship for RDF consumers?</li>
+          <li>Can qualified relationship metadata be expressed without asserting unintended RDF about its HTML carrier?</li>
+        </ol>
+      </section>
+
+      <section id="consumer-questions">
+        <h3>Consumer behavior</h3>
+        <ol>
+          <li>Can a consumer identify the context, target, relationship, optional roles, source, graph, and DOM carrier of a candidate?</li>
+          <li>Can it explain what a target is for before retrieving it?</li>
+          <li>Can a person or explicit application policy decide which candidates may be retrieved?</li>
+          <li>Can the same target discovered through several relationships be fetched once while its distinct relationships remain inspectable?</li>
+          <li>Can a retrieval fail, be unsupported, or be blocked without invalidating the source dataset or other candidates?</li>
+          <li>Can retrieved statements remain distinguishable by source and graph when shown alongside local statements?</li>
+          <li>Can an interface explain whether a contribution is available, loading, loaded, rejected, or stale?</li>
+          <li>Can a consumer update the candidate set when a live semantic DOM changes without treating prior retrievals as new source assertions?</li>
+        </ol>
+      </section>
+
+      <section id="boundary-questions">
+        <h3>Semantic and trust boundaries</h3>
+        <ol>
+          <li>Does discovery remain distinct from retrieval, parsing, assertion, graph merging, validation, trust, and execution?</li>
+          <li>Can provenance be retained well enough to explain why a contribution appeared and where every displayed statement came from?</li>
+          <li>Can credentials, cross-origin access, redirects, representation size, and parser risk remain governed by ordinary security policy rather than RDF-link semantics?</li>
+        </ol>
+      </section>
+    </section>
+
+    <section id="scope">
+      <h2>Scope</h2>
+      <p>This profile addresses:</p>
+      <ul>
+        <li>advertising one or more resources that may add useful knowledge;</li>
+        <li>describing the role of an additional resource when a direct RDF predicate is not precise enough;</li>
+        <li>serializing portable consumer records for candidates, contributions, views, activities, roles, and lifecycle states;</li>
+        <li>presenting enrichment choices to people and applications;</li>
+        <li>retrieving RDF-bearing representations under an explicit consumer policy;</li>
+        <li>preserving source and graph boundaries after retrieval; and</li>
+        <li>re-evaluating discovery when a live source changes.</li>
+      </ul>
+      <p>This profile does not define:</p>
+      <ul>
+        <li>a crawler, search engine, or universal link registry;</li>
+        <li>an automatic graph-union or conflict-resolution algorithm;</li>
+        <li>a trust, authorization, signature, or credential model;</li>
+        <li>execution semantics for linked resources; or</li>
+        <li>a general qualification mechanism for every possible RDF subject.</li>
+      </ul>
+    </section>
+
+    <section id="terminology">
+      <h2>Terminology</h2>
+      <dl>
+        <dt><dfn>source dataset</dfn></dt>
+        <dd>The RDF dataset in which a discovery relationship was observed.</dd>
+
+        <dt><dfn>context resource</dfn></dt>
+        <dd>The subject of a direct discovery relationship, or the resource carrying a qualified DCAT relationship.</dd>
+
+        <dt><dfn>target resource</dfn></dt>
+        <dd>The resource identified as potentially providing additional information.</dd>
+
+        <dt><a href="#EnrichmentCandidate"><dfn>enrichment candidate</dfn></a></dt>
+        <dd>A consumer-side record containing a context resource, target resource, relationship, optional roles, source identity, and presentation metadata.</dd>
+
+        <dt><a href="#RetrievedContribution"><dfn>retrieved contribution</dfn></a></dt>
+        <dd>An RDF graph or dataset obtained by following an enrichment candidate.</dd>
+
+        <dt><a href="#EnrichmentView"><dfn>enrichment view</dfn></a></dt>
+        <dd>A presentation that lets a user inspect a source dataset together with one or more retrieved contributions while preserving their boundaries.</dd>
+      </dl>
+
+      <p class="profile-principle">
+        <strong>Core boundary</strong>
+        An enrichment candidate is an application affordance derived from RDF.
+        It is not an instruction embedded in the graph.
+      </p>
+    </section>
+
+    <section id="principles">
+      <h2>Design principles</h2>
+      <ol>
+        <li><strong>Use precise relationships first.</strong> A known predicate is preferable to a generic relation plus an explanatory label.</li>
+        <li><strong>Keep links descriptive.</strong> A relationship does not grant authority to fetch, disclose credentials, combine claims, or execute content.</li>
+        <li><strong>Preserve provenance.</strong> Retrieved information remains attributable to the source from which it was obtained.</li>
+        <li><strong>Keep choice visible.</strong> A person or policy can decide which candidates to follow and which contributions to display.</li>
+        <li><strong>Remain vocabulary-neutral.</strong> Domain vocabularies may define useful discovery relationships without changes to this profile.</li>
+      </ol>
+    </section>
+
+    <section id="vocabulary">
+      <h2>Discovery and Enrichment vocabulary</h2>
+      <p>
+        The vocabulary namespace is
+        <code>https://ia2.dev/spec/discovery-enrichment#</code>, abbreviated
+        <code>de:</code> in this specification. Its terms describe records
+        maintained by a consumer. They do not alter the source dataset and do
+        not grant permission to retrieve, merge, trust, validate, or execute a
+        target.
+      </p>
+      <p>
+        This section is both the human-readable vocabulary reference and its
+        RDF publication. Every class, property, hierarchy edge, domain, range,
+        role, and status below is asserted by the HTML/RDF attributes on the
+        corresponding definition.
+      </p>
+
+      <section id="class-hierarchy">
+        <h3>Class hierarchy</h3>
+        <ul class="vocabulary-tree">
+          <li><code>prov:Entity</code>
+            <ul>
+              <li><code>de:EnrichmentArtifact</code>
+                <ul>
+                  <li><code>de:EnrichmentCandidate</code></li>
+                  <li><code>de:RetrievedContribution</code></li>
+                  <li><code>de:EnrichmentView</code>, also a <code>prov:Collection</code></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><code>prov:Activity</code>
+            <ul>
+              <li><code>de:EnrichmentActivity</code>
+                <ul>
+                  <li><code>de:DiscoveryActivity</code></li>
+                  <li><code>de:SelectionActivity</code></li>
+                  <li><code>de:RetrievalActivity</code></li>
+                  <li><code>de:InterpretationActivity</code></li>
+                  <li><code>de:PresentationActivity</code></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><code>dcat:Role</code>
+            <ul><li><code>de:EnrichmentRole</code></li></ul>
+          </li>
+          <li><code>skos:Concept</code>
+            <ul><li><code>de:EnrichmentStatus</code></li></ul>
+          </li>
+        </ul>
+
+        <div class="vocab-term" id="EnrichmentArtifact">
+          <p class="term-kind">Class · <code>de:EnrichmentArtifact</code></p>
+          <h4 rdf-subject="#EnrichmentArtifact" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Enrichment artifact</h4>
+          <p rdf-subject="#EnrichmentArtifact" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">A consumer-maintained entity created or retained during discovery and enrichment processing.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#EnrichmentArtifact" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="http://www.w3.org/ns/prov#Entity" rdf-subject="#EnrichmentArtifact" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#EnrichmentArtifact" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="EnrichmentCandidate">
+          <p class="term-kind">Class · <code>de:EnrichmentCandidate</code></p>
+          <h4 rdf-subject="#EnrichmentCandidate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Enrichment candidate</h4>
+          <p rdf-subject="#EnrichmentCandidate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">A consumer-side record of a discovered context-target relationship and the information needed to explain and process it.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#EnrichmentCandidate" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentArtifact" rdf-subject="#EnrichmentCandidate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#EnrichmentCandidate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="RetrievedContribution">
+          <p class="term-kind">Class · <code>de:RetrievedContribution</code></p>
+          <h4 rdf-subject="#RetrievedContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Retrieved contribution</h4>
+          <p rdf-subject="#RetrievedContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">An RDF graph or dataset interpreted from a representation retrieved by following an enrichment candidate.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#RetrievedContribution" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentArtifact" rdf-subject="#RetrievedContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#RetrievedContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="EnrichmentView">
+          <p class="term-kind">Class · <code>de:EnrichmentView</code></p>
+          <h4 rdf-subject="#EnrichmentView" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Enrichment view</h4>
+          <p rdf-subject="#EnrichmentView" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">A consumer presentation or presentation state that brings candidates and retrieved contributions together while preserving their source boundaries.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#EnrichmentView" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentArtifact" rdf-subject="#EnrichmentView" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+          <link hidden href="http://www.w3.org/ns/prov#Collection" rdf-subject="#EnrichmentView" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#EnrichmentView" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="EnrichmentActivity">
+          <p class="term-kind">Class · <code>de:EnrichmentActivity</code></p>
+          <h4 rdf-subject="#EnrichmentActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Enrichment activity</h4>
+          <p rdf-subject="#EnrichmentActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">An activity performed by a consumer during discovery, selection, retrieval, interpretation, or presentation.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#EnrichmentActivity" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="http://www.w3.org/ns/prov#Activity" rdf-subject="#EnrichmentActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#EnrichmentActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="DiscoveryActivity">
+          <p class="term-kind">Class · <code>de:DiscoveryActivity</code></p>
+          <h4 rdf-subject="#DiscoveryActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Discovery activity</h4>
+          <p rdf-subject="#DiscoveryActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">An activity that recognizes discovery relationships in a source dataset and generates enrichment candidates.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#DiscoveryActivity" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentActivity" rdf-subject="#DiscoveryActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#DiscoveryActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="RetrievalActivity">
+          <p class="term-kind">Class · <code>de:RetrievalActivity</code></p>
+          <h4 rdf-subject="#RetrievalActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Retrieval activity</h4>
+          <p rdf-subject="#RetrievalActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">An authorized network or local acquisition activity that obtains a representation for an enrichment candidate.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#RetrievalActivity" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentActivity" rdf-subject="#RetrievalActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#RetrievalActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="SelectionActivity">
+          <p class="term-kind">Class · <code>de:SelectionActivity</code></p>
+          <h4 rdf-subject="#SelectionActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Selection activity</h4>
+          <p rdf-subject="#SelectionActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">An activity in which a user or explicit application policy selects a candidate for retrieval or presentation.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#SelectionActivity" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentActivity" rdf-subject="#SelectionActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#SelectionActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="InterpretationActivity">
+          <p class="term-kind">Class · <code>de:InterpretationActivity</code></p>
+          <h4 rdf-subject="#InterpretationActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Interpretation activity</h4>
+          <p rdf-subject="#InterpretationActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">An activity that parses or extracts a retrieved representation into a retrieved contribution.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#InterpretationActivity" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentActivity" rdf-subject="#InterpretationActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#InterpretationActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="PresentationActivity">
+          <p class="term-kind">Class · <code>de:PresentationActivity</code></p>
+          <h4 rdf-subject="#PresentationActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Presentation activity</h4>
+          <p rdf-subject="#PresentationActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">An activity that generates or updates an enrichment view from candidates, source data, and retrieved contributions.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#PresentationActivity" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentActivity" rdf-subject="#PresentationActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#PresentationActivity" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="EnrichmentRole">
+          <p class="term-kind">Class · <code>de:EnrichmentRole</code></p>
+          <h4 rdf-subject="#EnrichmentRole" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Enrichment role</h4>
+          <p rdf-subject="#EnrichmentRole" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">A controlled concept describing what a target may contribute in relation to its context resource.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#EnrichmentRole" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="http://www.w3.org/ns/dcat#Role" rdf-subject="#EnrichmentRole" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#EnrichmentRole" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="EnrichmentStatus">
+          <p class="term-kind">Class · <code>de:EnrichmentStatus</code></p>
+          <h4 rdf-subject="#EnrichmentStatus" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Enrichment status</h4>
+          <p rdf-subject="#EnrichmentStatus" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">A controlled concept describing the consumer-observed lifecycle state of an enrichment artifact.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#Class" rdf-subject="#EnrichmentStatus" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="http://www.w3.org/2004/02/skos/core#Concept" rdf-subject="#EnrichmentStatus" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#EnrichmentStatus" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+      </section>
+
+      <section id="vocabulary-properties">
+        <h3>Properties</h3>
+        <p>
+          These properties form a normalized consumer record. Applications MAY
+          also retain richer host-specific and protocol-specific metadata.
+          Domains and ranges are RDF entailments, not validation constraints.
+        </p>
+
+        <div class="vocab-term" id="contextResource">
+          <p class="term-kind">Object property · <code>de:contextResource</code></p>
+          <h4 rdf-subject="#contextResource" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">context resource</h4>
+          <p rdf-subject="#contextResource" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Identifies the resource about which additional knowledge was discovered.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#contextResource" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentCandidate" rdf-subject="#contextResource" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="http://www.w3.org/2000/01/rdf-schema#Resource" rdf-subject="#contextResource" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#contextResource" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="targetResource">
+          <p class="term-kind">Object property · <code>de:targetResource</code></p>
+          <h4 rdf-subject="#targetResource" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">target resource</h4>
+          <p rdf-subject="#targetResource" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Identifies the resource offered as a potential source of additional knowledge.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#targetResource" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentCandidate" rdf-subject="#targetResource" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="http://www.w3.org/2000/01/rdf-schema#Resource" rdf-subject="#targetResource" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="http://purl.org/dc/terms/relation" rdf-subject="#targetResource" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subPropertyOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#targetResource" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="discoveryPredicate">
+          <p class="term-kind">Object property · <code>de:discoveryPredicate</code></p>
+          <h4 rdf-subject="#discoveryPredicate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">discovery predicate</h4>
+          <p rdf-subject="#discoveryPredicate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Identifies the RDF predicate whose direct relationship exposed the candidate.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#discoveryPredicate" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentCandidate" rdf-subject="#discoveryPredicate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property" rdf-subject="#discoveryPredicate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#discoveryPredicate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="qualifiedRelationship">
+          <p class="term-kind">Object property · <code>de:qualifiedRelationship</code></p>
+          <h4 rdf-subject="#qualifiedRelationship" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">qualified relationship</h4>
+          <p rdf-subject="#qualifiedRelationship" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Identifies the source relationship node from which qualification metadata was obtained.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#qualifiedRelationship" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentCandidate" rdf-subject="#qualifiedRelationship" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="http://www.w3.org/ns/dcat#Relationship" rdf-subject="#qualifiedRelationship" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#qualifiedRelationship" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="enrichmentRole">
+          <p class="term-kind">Object property · <code>de:enrichmentRole</code></p>
+          <h4 rdf-subject="#enrichmentRole" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">enrichment role</h4>
+          <p rdf-subject="#enrichmentRole" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Identifies a purpose that explains what the target may contribute to the context resource.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#enrichmentRole" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentCandidate" rdf-subject="#enrichmentRole" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="#EnrichmentRole" rdf-subject="#enrichmentRole" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#enrichmentRole" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="discoveredIn">
+          <p class="term-kind">Object property · <code>de:discoveredIn</code></p>
+          <h4 rdf-subject="#discoveredIn" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">discovered in</h4>
+          <p rdf-subject="#discoveredIn" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Identifies the source document or dataset from which the candidate was derived.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#discoveredIn" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentCandidate" rdf-subject="#discoveredIn" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="http://www.w3.org/ns/prov#Entity" rdf-subject="#discoveredIn" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="http://www.w3.org/ns/prov#wasDerivedFrom" rdf-subject="#discoveredIn" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subPropertyOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#discoveredIn" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="sourceGraph">
+          <p class="term-kind">Object property · <code>de:sourceGraph</code></p>
+          <h4 rdf-subject="#sourceGraph" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">source graph</h4>
+          <p rdf-subject="#sourceGraph" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Identifies the named graph in which the discovery relationship was observed.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#sourceGraph" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentCandidate" rdf-subject="#sourceGraph" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="http://www.w3.org/2000/01/rdf-schema#Resource" rdf-subject="#sourceGraph" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#sourceGraph" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="carrier">
+          <p class="term-kind">Object property · <code>de:carrier</code></p>
+          <h4 rdf-subject="#carrier" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">carrier</h4>
+          <p rdf-subject="#carrier" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Identifies a host-format node or resource that carried the discovery relationship, such as an addressable HTML element.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#carrier" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentCandidate" rdf-subject="#carrier" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="http://www.w3.org/2000/01/rdf-schema#Resource" rdf-subject="#carrier" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#carrier" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="hasContribution">
+          <p class="term-kind">Object property · <code>de:hasContribution</code></p>
+          <h4 rdf-subject="#hasContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">has contribution</h4>
+          <p rdf-subject="#hasContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Associates a candidate with a contribution obtained by following it.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#hasContribution" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentCandidate" rdf-subject="#hasContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="#RetrievedContribution" rdf-subject="#hasContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#hasContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="retrievedFrom">
+          <p class="term-kind">Object property · <code>de:retrievedFrom</code></p>
+          <h4 rdf-subject="#retrievedFrom" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">retrieved from</h4>
+          <p rdf-subject="#retrievedFrom" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Identifies the retrieval target from which a contribution was obtained, after recording redirects separately when relevant.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#retrievedFrom" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#RetrievedContribution" rdf-subject="#retrievedFrom" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="http://www.w3.org/2000/01/rdf-schema#Resource" rdf-subject="#retrievedFrom" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#retrievedFrom" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="interpretedFrom">
+          <p class="term-kind">Object property · <code>de:interpretedFrom</code></p>
+          <h4 rdf-subject="#interpretedFrom" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">interpreted from</h4>
+          <p rdf-subject="#interpretedFrom" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Identifies the retrieved representation from which a contribution was parsed or extracted.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#interpretedFrom" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#RetrievedContribution" rdf-subject="#interpretedFrom" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="http://www.w3.org/ns/prov#Entity" rdf-subject="#interpretedFrom" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="http://www.w3.org/ns/prov#wasDerivedFrom" rdf-subject="#interpretedFrom" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subPropertyOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#interpretedFrom" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="presentsCandidate">
+          <p class="term-kind">Object property · <code>de:presentsCandidate</code></p>
+          <h4 rdf-subject="#presentsCandidate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">presents candidate</h4>
+          <p rdf-subject="#presentsCandidate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Identifies an enrichment candidate made inspectable in an enrichment view.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#presentsCandidate" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentView" rdf-subject="#presentsCandidate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="#EnrichmentCandidate" rdf-subject="#presentsCandidate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="http://www.w3.org/ns/prov#hadMember" rdf-subject="#presentsCandidate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subPropertyOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#presentsCandidate" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="includesContribution">
+          <p class="term-kind">Object property · <code>de:includesContribution</code></p>
+          <h4 rdf-subject="#includesContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">includes contribution</h4>
+          <p rdf-subject="#includesContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Identifies a retrieved contribution presented as part of an enrichment view.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#includesContribution" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentView" rdf-subject="#includesContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="#RetrievedContribution" rdf-subject="#includesContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="http://www.w3.org/ns/prov#hadMember" rdf-subject="#includesContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#subPropertyOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#includesContribution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="enrichmentStatus">
+          <p class="term-kind">Object property · <code>de:enrichmentStatus</code></p>
+          <h4 rdf-subject="#enrichmentStatus" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">enrichment status</h4>
+          <p rdf-subject="#enrichmentStatus" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#comment">Identifies the current consumer-observed lifecycle state of an enrichment artifact.</p>
+          <link hidden href="http://www.w3.org/2002/07/owl#ObjectProperty" rdf-subject="#enrichmentStatus" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentArtifact" rdf-subject="#enrichmentStatus" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#domain">
+          <link hidden href="#EnrichmentStatus" rdf-subject="#enrichmentStatus" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#range">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#enrichmentStatus" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+      </section>
+
+      <section id="role-vocabulary">
+        <h3>Enrichment roles</h3>
+        <p>
+          Enrichment roles answer “what may this target contribute?” They are
+          instances of <code>de:EnrichmentRole</code>, and therefore of
+          <code>dcat:Role</code> and <code>skos:Concept</code>. The hierarchy is
+          extensible. A precise RDF predicate remains preferable when it fully
+          expresses the relationship; a role supplies purpose, not replacement
+          semantics.
+        </p>
+        <ul class="vocabulary-tree">
+          <li><code>de:Evidence</code>
+            <ul><li><code>de:SupportingEvidence</code></li><li><code>de:OpposingEvidence</code></li></ul>
+          </li>
+          <li><code>de:Interpretation</code>
+            <ul><li><code>de:Definition</code></li><li><code>de:Example</code></li><li><code>de:BackgroundContext</code></li></ul>
+          </li>
+          <li><code>de:Assessment</code>
+            <ul><li><code>de:ValidationReport</code></li><li><code>de:ConstraintSet</code></li></ul>
+          </li>
+          <li><code>de:Provenance</code>
+            <ul><li><code>de:SourceProvenance</code></li></ul>
+          </li>
+          <li><code>de:Evolution</code>
+            <ul><li><code>de:Update</code></li><li><code>de:Alternative</code></li><li><code>de:ChangeHistory</code></li></ul>
+          </li>
+        </ul>
+
+        <div class="vocab-term" id="EnrichmentRoleScheme">
+          <p class="term-kind">Concept scheme · <code>de:EnrichmentRoleScheme</code></p>
+          <h4 rdf-subject="#EnrichmentRoleScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">Discovery and Enrichment roles</h4>
+          <p rdf-subject="#EnrichmentRoleScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">The controlled scheme of standard purposes for additional knowledge.</p>
+          <link hidden href="http://www.w3.org/2004/02/skos/core#ConceptScheme" rdf-subject="#EnrichmentRoleScheme" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#Evidence" rdf-subject="#EnrichmentRoleScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+          <link hidden href="#Interpretation" rdf-subject="#EnrichmentRoleScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+          <link hidden href="#Assessment" rdf-subject="#EnrichmentRoleScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+          <link hidden href="#Provenance" rdf-subject="#EnrichmentRoleScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+          <link hidden href="#Evolution" rdf-subject="#EnrichmentRoleScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#EnrichmentRoleScheme" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Evidence">
+          <p class="term-kind">Top role · <code>de:Evidence</code></p>
+          <h4 rdf-subject="#Evidence" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">evidence</h4>
+          <p rdf-subject="#Evidence" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material relevant to evaluating the support for or against a claim, conclusion, or decision.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#Evidence" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#Evidence" rdf-predicate="http://www.w3.org/2004/02/skos/core#topConceptOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Evidence" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="SupportingEvidence">
+          <p class="term-kind">Role · <code>de:SupportingEvidence</code></p>
+          <h4 rdf-subject="#SupportingEvidence" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">supporting evidence</h4>
+          <p rdf-subject="#SupportingEvidence" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Evidence offered in support of the context resource or a claim it contains.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#SupportingEvidence" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#SupportingEvidence" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme">
+          <link hidden href="#Evidence" rdf-subject="#SupportingEvidence" rdf-predicate="http://www.w3.org/2004/02/skos/core#broader">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#SupportingEvidence" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="OpposingEvidence">
+          <p class="term-kind">Role · <code>de:OpposingEvidence</code></p>
+          <h4 rdf-subject="#OpposingEvidence" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">opposing evidence</h4>
+          <p rdf-subject="#OpposingEvidence" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Evidence offered against, or materially challenging, the context resource or a claim it contains.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#OpposingEvidence" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#OpposingEvidence" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme">
+          <link hidden href="#Evidence" rdf-subject="#OpposingEvidence" rdf-predicate="http://www.w3.org/2004/02/skos/core#broader">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#OpposingEvidence" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Interpretation">
+          <p class="term-kind">Top role · <code>de:Interpretation</code></p>
+          <h4 rdf-subject="#Interpretation" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">interpretation</h4>
+          <p rdf-subject="#Interpretation" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material that helps a consumer understand the meaning, use, or context of a resource.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#Interpretation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#Interpretation" rdf-predicate="http://www.w3.org/2004/02/skos/core#topConceptOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Interpretation" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Definition">
+          <p class="term-kind">Role · <code>de:Definition</code></p>
+          <h4 rdf-subject="#Definition" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">definition</h4>
+          <p rdf-subject="#Definition" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material that defines a term, identifier, model, or other resource used by the context.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#Definition" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#Definition" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme">
+          <link hidden href="#Interpretation" rdf-subject="#Definition" rdf-predicate="http://www.w3.org/2004/02/skos/core#broader">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Definition" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Example">
+          <p class="term-kind">Role · <code>de:Example</code></p>
+          <h4 rdf-subject="#Example" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">example</h4>
+          <p rdf-subject="#Example" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material that illustrates the application or interpretation of the context resource.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#Example" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#Example" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme">
+          <link hidden href="#Interpretation" rdf-subject="#Example" rdf-predicate="http://www.w3.org/2004/02/skos/core#broader">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Example" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="BackgroundContext">
+          <p class="term-kind">Role · <code>de:BackgroundContext</code></p>
+          <h4 rdf-subject="#BackgroundContext" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">background context</h4>
+          <p rdf-subject="#BackgroundContext" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material that supplies relevant surrounding information without defining or evaluating the context resource.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#BackgroundContext" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#BackgroundContext" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme">
+          <link hidden href="#Interpretation" rdf-subject="#BackgroundContext" rdf-predicate="http://www.w3.org/2004/02/skos/core#broader">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#BackgroundContext" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Assessment">
+          <p class="term-kind">Top role · <code>de:Assessment</code></p>
+          <h4 rdf-subject="#Assessment" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">assessment</h4>
+          <p rdf-subject="#Assessment" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material used to evaluate conformance, quality, compatibility, or another condition of the context resource.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#Assessment" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#Assessment" rdf-predicate="http://www.w3.org/2004/02/skos/core#topConceptOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Assessment" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="ValidationReport">
+          <p class="term-kind">Role · <code>de:ValidationReport</code></p>
+          <h4 rdf-subject="#ValidationReport" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">validation report</h4>
+          <p rdf-subject="#ValidationReport" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material reporting the result of evaluating data or an artifact against declared constraints.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#ValidationReport" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#ValidationReport" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme">
+          <link hidden href="#Assessment" rdf-subject="#ValidationReport" rdf-predicate="http://www.w3.org/2004/02/skos/core#broader">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#ValidationReport" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="ConstraintSet">
+          <p class="term-kind">Role · <code>de:ConstraintSet</code></p>
+          <h4 rdf-subject="#ConstraintSet" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">constraint set</h4>
+          <p rdf-subject="#ConstraintSet" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material declaring conditions against which the context resource may be assessed.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#ConstraintSet" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#ConstraintSet" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme">
+          <link hidden href="#Assessment" rdf-subject="#ConstraintSet" rdf-predicate="http://www.w3.org/2004/02/skos/core#broader">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#ConstraintSet" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Provenance">
+          <p class="term-kind">Top role · <code>de:Provenance</code></p>
+          <h4 rdf-subject="#Provenance" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">provenance</h4>
+          <p rdf-subject="#Provenance" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material describing origins, responsibility, derivation, custody, or processing history.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#Provenance" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#Provenance" rdf-predicate="http://www.w3.org/2004/02/skos/core#topConceptOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Provenance" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="SourceProvenance">
+          <p class="term-kind">Role · <code>de:SourceProvenance</code></p>
+          <h4 rdf-subject="#SourceProvenance" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">source provenance</h4>
+          <p rdf-subject="#SourceProvenance" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material specifically describing the origin or derivation of the context resource or its claims.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#SourceProvenance" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#SourceProvenance" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme">
+          <link hidden href="#Provenance" rdf-subject="#SourceProvenance" rdf-predicate="http://www.w3.org/2004/02/skos/core#broader">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#SourceProvenance" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Evolution">
+          <p class="term-kind">Top role · <code>de:Evolution</code></p>
+          <h4 rdf-subject="#Evolution" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">evolution</h4>
+          <p rdf-subject="#Evolution" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material that places the context resource within change, version, replacement, or alternative histories.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#Evolution" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#Evolution" rdf-predicate="http://www.w3.org/2004/02/skos/core#topConceptOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Evolution" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Update">
+          <p class="term-kind">Role · <code>de:Update</code></p>
+          <h4 rdf-subject="#Update" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">update</h4>
+          <p rdf-subject="#Update" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material representing a newer state, revision, or successor relevant to the context resource.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#Update" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#Update" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme">
+          <link hidden href="#Evolution" rdf-subject="#Update" rdf-predicate="http://www.w3.org/2004/02/skos/core#broader">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Update" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Alternative">
+          <p class="term-kind">Role · <code>de:Alternative</code></p>
+          <h4 rdf-subject="#Alternative" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">alternative</h4>
+          <p rdf-subject="#Alternative" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material representing another version, expression, approach, or choice rather than a successor.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#Alternative" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#Alternative" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme">
+          <link hidden href="#Evolution" rdf-subject="#Alternative" rdf-predicate="http://www.w3.org/2004/02/skos/core#broader">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Alternative" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="ChangeHistory">
+          <p class="term-kind">Role · <code>de:ChangeHistory</code></p>
+          <h4 rdf-subject="#ChangeHistory" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">change history</h4>
+          <p rdf-subject="#ChangeHistory" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Material describing changes, versions, or transitions involving the context resource.</p>
+          <link hidden href="#EnrichmentRole" rdf-subject="#ChangeHistory" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentRoleScheme" rdf-subject="#ChangeHistory" rdf-predicate="http://www.w3.org/2004/02/skos/core#inScheme">
+          <link hidden href="#Evolution" rdf-subject="#ChangeHistory" rdf-predicate="http://www.w3.org/2004/02/skos/core#broader">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#ChangeHistory" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+      </section>
+
+      <section id="status-vocabulary">
+        <h3>Lifecycle states</h3>
+        <p>
+          Lifecycle states describe consumer observations, not facts asserted
+          by the publisher. They form a deliberately small flat scheme; an
+          application can retain more detailed protocol or error state beside
+          them.
+        </p>
+        <p>
+          <code>de:Available</code>, <code>de:Selected</code>,
+          <code>de:Retrieving</code>, <code>de:Retrieved</code>,
+          <code>de:Unsupported</code>, <code>de:Failed</code>,
+          <code>de:Blocked</code>, and <code>de:Stale</code> are the standard
+          lifecycle values.
+        </p>
+
+        <div class="vocab-term" id="EnrichmentStatusScheme">
+          <p class="term-kind">Concept scheme · <code>de:EnrichmentStatusScheme</code></p>
+          <h4 rdf-subject="#EnrichmentStatusScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">Discovery and Enrichment lifecycle states</h4>
+          <p rdf-subject="#EnrichmentStatusScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">The controlled scheme of interoperable consumer-observed enrichment states.</p>
+          <link hidden href="http://www.w3.org/2004/02/skos/core#ConceptScheme" rdf-subject="#EnrichmentStatusScheme" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#Available" rdf-subject="#EnrichmentStatusScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+          <link hidden href="#Selected" rdf-subject="#EnrichmentStatusScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+          <link hidden href="#Retrieving" rdf-subject="#EnrichmentStatusScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+          <link hidden href="#Retrieved" rdf-subject="#EnrichmentStatusScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+          <link hidden href="#Unsupported" rdf-subject="#EnrichmentStatusScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+          <link hidden href="#Failed" rdf-subject="#EnrichmentStatusScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+          <link hidden href="#Blocked" rdf-subject="#EnrichmentStatusScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+          <link hidden href="#Stale" rdf-subject="#EnrichmentStatusScheme" rdf-predicate="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#EnrichmentStatusScheme" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Available">
+          <p class="term-kind">Status · <code>de:Available</code></p>
+          <h4 rdf-subject="#Available" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">available</h4>
+          <p rdf-subject="#Available" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">The candidate has been discovered and is available for selection.</p>
+          <link hidden href="#EnrichmentStatus" rdf-subject="#Available" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentStatusScheme" rdf-subject="#Available" rdf-predicate="http://www.w3.org/2004/02/skos/core#topConceptOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Available" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Selected">
+          <p class="term-kind">Status · <code>de:Selected</code></p>
+          <h4 rdf-subject="#Selected" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">selected</h4>
+          <p rdf-subject="#Selected" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">A user or application policy has selected the candidate for retrieval or presentation.</p>
+          <link hidden href="#EnrichmentStatus" rdf-subject="#Selected" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentStatusScheme" rdf-subject="#Selected" rdf-predicate="http://www.w3.org/2004/02/skos/core#topConceptOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Selected" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Retrieving">
+          <p class="term-kind">Status · <code>de:Retrieving</code></p>
+          <h4 rdf-subject="#Retrieving" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">retrieving</h4>
+          <p rdf-subject="#Retrieving" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">An authorized attempt to acquire and interpret the target is in progress.</p>
+          <link hidden href="#EnrichmentStatus" rdf-subject="#Retrieving" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentStatusScheme" rdf-subject="#Retrieving" rdf-predicate="http://www.w3.org/2004/02/skos/core#topConceptOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Retrieving" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Retrieved">
+          <p class="term-kind">Status · <code>de:Retrieved</code></p>
+          <h4 rdf-subject="#Retrieved" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">retrieved</h4>
+          <p rdf-subject="#Retrieved" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">A supported contribution has been obtained and retained with its source boundary.</p>
+          <link hidden href="#EnrichmentStatus" rdf-subject="#Retrieved" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentStatusScheme" rdf-subject="#Retrieved" rdf-predicate="http://www.w3.org/2004/02/skos/core#topConceptOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Retrieved" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Unsupported">
+          <p class="term-kind">Status · <code>de:Unsupported</code></p>
+          <h4 rdf-subject="#Unsupported" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">unsupported</h4>
+          <p rdf-subject="#Unsupported" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">The target was reached or identified, but no supported RDF-bearing representation could be interpreted.</p>
+          <link hidden href="#EnrichmentStatus" rdf-subject="#Unsupported" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentStatusScheme" rdf-subject="#Unsupported" rdf-predicate="http://www.w3.org/2004/02/skos/core#topConceptOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Unsupported" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Failed">
+          <p class="term-kind">Status · <code>de:Failed</code></p>
+          <h4 rdf-subject="#Failed" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">failed</h4>
+          <p rdf-subject="#Failed" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Retrieval or interpretation ended unsuccessfully for a reason other than an explicit policy block.</p>
+          <link hidden href="#EnrichmentStatus" rdf-subject="#Failed" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentStatusScheme" rdf-subject="#Failed" rdf-predicate="http://www.w3.org/2004/02/skos/core#topConceptOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Failed" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Blocked">
+          <p class="term-kind">Status · <code>de:Blocked</code></p>
+          <h4 rdf-subject="#Blocked" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">blocked</h4>
+          <p rdf-subject="#Blocked" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">Retrieval or presentation was prevented by an explicit security, privacy, authorization, or application policy.</p>
+          <link hidden href="#EnrichmentStatus" rdf-subject="#Blocked" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentStatusScheme" rdf-subject="#Blocked" rdf-predicate="http://www.w3.org/2004/02/skos/core#topConceptOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Blocked" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+
+        <div class="vocab-term" id="Stale">
+          <p class="term-kind">Status · <code>de:Stale</code></p>
+          <h4 rdf-subject="#Stale" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel">stale</h4>
+          <p rdf-subject="#Stale" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition">The artifact remains retained, but its candidate disappeared or its source or retrieved representation has since changed.</p>
+          <link hidden href="#EnrichmentStatus" rdf-subject="#Stale" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+          <link hidden href="#EnrichmentStatusScheme" rdf-subject="#Stale" rdf-predicate="http://www.w3.org/2004/02/skos/core#topConceptOf">
+          <link hidden href="https://ia2.dev/spec/discovery-enrichment" rdf-subject="#Stale" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        </div>
+      </section>
+
+      <section id="vocabulary-boundary">
+        <h3>Vocabulary boundary</h3>
+        <p>
+          The vocabulary deliberately reuses PROV for generation, use,
+          derivation, attribution, and time; DCAT and SKOS for role concepts;
+          DCTERMS for titles, formats, and general relationships; and host or
+          protocol vocabularies for representation and network details. It does
+          not redefine those terms.
+        </p>
+        <p>
+          RDFS and OWL domains and ranges support inference. They do not impose
+          cardinality, closed-world validation, or retrieval requirements. A
+          future profile may publish SHACL shapes for interoperable record
+          validation without changing these class and property semantics.
+        </p>
+      </section>
+    </section>
+
+    <section id="direct-relationships">
+      <h2>Direct discovery relationships</h2>
+
+      <section id="see-also">
+        <h3>Baseline discovery with <code>rdfs:seeAlso</code></h3>
+        <p>
+          A publisher SHOULD use <code>rdfs:seeAlso</code> when the target may
+          provide additional information and no more precise relationship is
+          intended. A consumer implementing this profile MUST recognize
+          <code>rdfs:seeAlso</code> as a discovery relationship.
+        </p>
+        <pre class="example" title="A baseline discovery relationship"><code class="language-turtle">&lt;#claim-42&gt;
+    rdfs:seeAlso &lt;https://example.com/claims/42/evidence&gt; .</code></pre>
+        <p>
+          More than one <code>rdfs:seeAlso</code> value represents independent
+          candidates. Their RDF order is not significant.
+        </p>
+      </section>
+
+      <section id="precise-relations">
+        <h3>Prefer precise relationships</h3>
+        <p>
+          When an established predicate states the intended relationship, a
+          publisher SHOULD use it directly. The following table is guidance,
+          not a closed registry.
+        </p>
+        <table class="relation-table">
+          <thead>
+            <tr><th>Intent</th><th>Candidate relationship</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Additional information</td><td><code>rdfs:seeAlso</code></td></tr>
+            <tr><td>Defines the context resource</td><td><code>rdfs:isDefinedBy</code></td></tr>
+            <tr><td>Required for coherence</td><td><code>dcterms:requires</code></td></tr>
+            <tr><td>Source or derivation</td><td><code>dcterms:source</code>, <code>prov:wasDerivedFrom</code>, or a more precise PROV property</td></tr>
+            <tr><td>Version or replacement</td><td>DCTERMS, DCAT, or PROV version relationships</td></tr>
+            <tr><td>Dataset subset or access</td><td>VoID or DCAT dataset relationships</td></tr>
+            <tr><td>Formal ontology import</td><td><code>owl:imports</code>, only when its ontology semantics are intended</td></tr>
+          </tbody>
+        </table>
+        <p>
+          A consumer MAY recognize additional predicates according to its
+          application domain. Recognition makes a target discoverable; it does
+          not change the semantics of the predicate.
+        </p>
+      </section>
+    </section>
+
+    <section id="qualified-relationships">
+      <h2>Qualified purpose with DCAT</h2>
+      <p>
+        For a document, dataset, cataloged artifact, or other legitimate
+        <code>dcat:Resource</code>, a publisher MAY use
+        <code>dcat:qualifiedRelation</code>, <code>dcat:Relationship</code>,
+        <code>dcterms:relation</code>, and <code>dcat:hadRole</code> to answer
+        the question “what is this target for?”
+      </p>
+      <pre class="example" title="A qualified relationship"><code class="language-turtle">&lt;https://example.com/report&gt;
+    a dcat:Resource ;
+    rdfs:seeAlso &lt;https://example.com/report/evidence&gt; ;
+    dcat:qualifiedRelation [
+        a dcat:Relationship ;
+        dcterms:relation &lt;https://example.com/report/evidence&gt; ;
+        dcat:hadRole &lt;http://www.iana.org/assignments/relation/describedby&gt;
+    ] .</code></pre>
+      <p>
+        A role MUST be identified by an IRI. Publishers SHOULD reuse a suitable
+        role from an established controlled vocabulary, including the
+        <a href="#role-vocabulary">standard Discovery and Enrichment roles</a>
+        and the IANA Link Relations registry. A domain-specific role MAY be
+        defined as a <code>dcat:Role</code> and <code>skos:Concept</code> when no
+        existing role is accurate.
+      </p>
+      <pre class="example" title="A standard enrichment role"><code class="language-turtle">&lt;https://example.com/report&gt;
+    dcat:qualifiedRelation [
+        a dcat:Relationship ;
+        dcterms:relation &lt;https://example.com/report/evidence&gt; ;
+        dcat:hadRole de:SupportingEvidence
+    ] .</code></pre>
+
+      <aside class="note" title="DCAT domain commitment">
+        <p>
+          <code>dcat:qualifiedRelation</code> has domain
+          <code>dcat:Resource</code> and is a subproperty of
+          <code>prov:qualifiedInfluence</code>. Publishers MUST NOT use it for an
+          arbitrary subject unless those class commitments are accurate. This
+          version deliberately does not mint a domain-free IA² replacement.
+        </p>
+      </aside>
+
+      <p>
+        A direct discovery triple and its qualified relationship MAY coexist.
+        The direct triple supports simple consumers; the relationship node adds
+        role and other metadata for qualified consumers. They do not cause two
+        retrievals of the same target.
+      </p>
+    </section>
+
+    <section id="html-rdf-authoring">
+      <h2>HTML/RDF authoring</h2>
+      <p>
+        HTML/RDF requires no supplemental syntax for discovery. A visible
+        anchor can carry a complete relationship while retaining its ordinary
+        browser behavior.
+      </p>
+      <pre class="example" title="A visible HTML/RDF discovery link"><code class="language-html">&lt;article id="claim-42"&gt;
+  &lt;p&gt;The release meets the accessibility contract.&lt;/p&gt;
+  &lt;a
+    href="/claims/42/evidence"
+    rdf-subject="#claim-42"
+    rdf-predicate="http://www.w3.org/2000/01/rdf-schema#seeAlso"
+  &gt;Inspect supporting evidence&lt;/a&gt;
+&lt;/article&gt;</code></pre>
+
+      <p>
+        The DCAT relationship node can be expressed with extraction-local keys.
+        The keys join the statements; DOM nesting does not establish RDF scope.
+      </p>
+      <pre class="example" title="A qualified HTML/RDF discovery link"><code class="language-html">&lt;a
+  href="/report/evidence"
+  rdf-subject="#report"
+  rdf-predicate="http://www.w3.org/2000/01/rdf-schema#seeAlso"
+&gt;Evidence and provenance&lt;/a&gt;
+
+&lt;meta
+  rdf-subject="#report"
+  rdf-predicate="http://www.w3.org/ns/dcat#qualifiedRelation"
+  rdf-object-key="report-evidence-relation"
+&gt;
+&lt;link
+  href="http://www.w3.org/ns/dcat#Relationship"
+  rdf-subject-key="report-evidence-relation"
+  rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+&gt;
+&lt;link
+  href="/report/evidence"
+  rdf-subject-key="report-evidence-relation"
+  rdf-predicate="http://purl.org/dc/terms/relation"
+&gt;
+&lt;link
+  href="https://ia2.dev/spec/discovery-enrichment#SupportingEvidence"
+  rdf-subject-key="report-evidence-relation"
+  rdf-predicate="http://www.w3.org/ns/dcat#hadRole"
+&gt;</code></pre>
+      <p>
+        Metadata-only carriers MAY be hidden. The primary discovery link SHOULD
+        remain visible when it is also useful to a person.
+      </p>
+    </section>
+
+    <section id="candidate-model">
+      <h2>Enrichment candidate model</h2>
+      <p>A consumer creates one candidate record for each recognized context-target relationship. The record SHOULD retain:</p>
+      <ul>
+        <li>the context resource in <code>de:contextResource</code>;</li>
+        <li>the target in <code>de:targetResource</code>;</li>
+        <li>the direct <code>de:discoveryPredicate</code> or <code>de:qualifiedRelationship</code> that exposed it;</li>
+        <li>zero or more <code>de:enrichmentRole</code> IRIs;</li>
+        <li>the source document or RDF source identity in <code>de:discoveredIn</code>;</li>
+        <li>the <code>de:sourceGraph</code>, when the relationship occurs in a named graph;</li>
+        <li>a human-readable label or description when available; and</li>
+        <li>the <code>de:carrier</code> when extraction from a live host document provides an addressable carrier.</li>
+      </ul>
+      <p>
+        Candidate records are consumer state. Creating one MUST NOT add an RDF
+        assertion to the source dataset.
+      </p>
+      <pre class="example" title="A normalized candidate record"><code class="language-turtle">@prefix de: &lt;https://ia2.dev/spec/discovery-enrichment#&gt; .
+@prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt; .
+
+_:candidate
+    a de:EnrichmentCandidate ;
+    de:contextResource &lt;https://example.com/report#claim-42&gt; ;
+    de:targetResource &lt;https://example.com/report/evidence&gt; ;
+    de:discoveryPredicate rdfs:seeAlso ;
+    de:enrichmentRole de:SupportingEvidence ;
+    de:discoveredIn &lt;https://example.com/report&gt; ;
+    de:enrichmentStatus de:Available .</code></pre>
+      <p>
+        The candidate above is an assertion made by the consumer about its own
+        observation. It does not assert that the report retrieved, accepted, or
+        endorsed the evidence target.
+      </p>
+    </section>
+
+    <section id="processing">
+      <h2>Consumer processing</h2>
+      <p>A conforming consumer processes discovery in distinct phases:</p>
+      <ol class="processing-summary">
+        <li><span><strong>Extract.</strong> Obtain the source RDF dataset according to its host format. HTML/RDF extraction remains local and non-executing.</span></li>
+        <li><span><strong>Discover.</strong> Find recognized direct and qualified relationships and create enrichment candidates.</span></li>
+        <li><span><strong>Present or select.</strong> Expose candidates to a user or apply an explicit application policy.</span></li>
+        <li><span><strong>Retrieve.</strong> Dereference only selected targets, under ordinary network, credential, privacy, and content-negotiation rules.</span></li>
+        <li><span><strong>Interpret.</strong> Parse a supported RDF representation or extract RDF from a supported host representation.</span></li>
+        <li><span><strong>Retain boundaries.</strong> Store the retrieved contribution with its retrieval identity, source identity, and graph boundaries intact.</span></li>
+        <li><span><strong>Display.</strong> Offer an enrichment view without silently rewriting the original dataset.</span></li>
+      </ol>
+      <pre class="example" title="Provenance across enrichment phases"><code class="language-turtle">@prefix de: &lt;https://ia2.dev/spec/discovery-enrichment#&gt; .
+@prefix prov: &lt;http://www.w3.org/ns/prov#&gt; .
+
+_:discovery
+    a de:DiscoveryActivity ;
+    prov:used &lt;https://example.com/report&gt; ;
+    prov:generated _:candidate .
+
+_:selection
+    a de:SelectionActivity ;
+    prov:used _:candidate .
+
+_:retrieval
+    a de:RetrievalActivity ;
+    prov:used _:candidate ;
+    prov:generated _:representation .
+
+_:interpretation
+    a de:InterpretationActivity ;
+    prov:used _:representation ;
+    prov:generated _:contribution .
+
+_:contribution
+    a de:RetrievedContribution ;
+    de:retrievedFrom &lt;https://example.com/report/evidence&gt; ;
+    de:interpretedFrom _:representation ;
+    de:enrichmentStatus de:Retrieved .
+
+_:view
+    a de:EnrichmentView ;
+    de:presentsCandidate _:candidate ;
+    de:includesContribution _:contribution .</code></pre>
+
+      <section id="no-implicit-retrieval">
+        <h3>No implicit retrieval</h3>
+        <p>
+          Merely observing a discovery relationship MUST NOT cause a consumer
+          to dereference its target. A consumer MAY retrieve automatically only
+          when an explicit user or application policy authorizes that class of
+          retrieval.
+        </p>
+      </section>
+
+      <section id="retrieval">
+        <h3>Retrieval and representation handling</h3>
+        <p>
+          A consumer MAY request an RDF serialization or an RDF-bearing HTML
+          representation through normal HTTP content negotiation. Redirects,
+          authentication challenges, cache controls, and failures are handled
+          as network behavior, not RDF semantics.
+        </p>
+        <p>
+          Processing a retrieved HTML representation MUST NOT require script
+          execution. An in-application consumer MAY separately observe a live
+          DOM that an application has already changed, but that is a distinct
+          acquisition mode.
+        </p>
+      </section>
+
+      <section id="failure">
+        <h3>Failure is local</h3>
+        <p>
+          A failed, unsupported, or rejected target MUST NOT invalidate the
+          source dataset or unrelated candidates. The consumer SHOULD expose a
+          target-specific status without replacing the relationship with an
+          error assertion in the source graph.
+        </p>
+      </section>
+    </section>
+
+    <section id="boundaries">
+      <h2>Source, graph, and trust boundaries</h2>
+      <p>
+        A retrieved contribution MUST remain distinguishable from the source
+        dataset. A consumer MAY maintain separate datasets, a provenance-aware
+        store, or another representation that preserves the same distinction.
+      </p>
+      <p>A consumer MUST NOT, solely because a target was followed:</p>
+      <ul>
+        <li>treat its triples as assertions made by the source document;</li>
+        <li>place its default graph into the source default graph;</li>
+        <li>discard or rename its named graphs without recording the transformation;</li>
+        <li>treat its claims as trusted, validated, current, or mutually consistent;</li>
+        <li>execute scripts, rules, queries, functions, actions, or instructions it describes; or</li>
+        <li>send ambient credentials to another origin without an applicable authorization policy.</li>
+      </ul>
+      <p>
+        An enrichment view MAY display a union or comparison, but it MUST make
+        the contributing sources available for inspection. Visual combination
+        is not semantic assertion.
+      </p>
+    </section>
+
+    <section id="presentation">
+      <h2>Presentation guidance</h2>
+      <p>
+        A user interface SHOULD explain both the target and why it was offered.
+        It SHOULD prefer, in order:
+      </p>
+      <ol>
+        <li>a title or label explicitly attached to the qualified relationship;</li>
+        <li>a human-readable label for its role;</li>
+        <li>the visible HTML link text associated with the relationship;</li>
+        <li>metadata already known about the target; and</li>
+        <li>the target IRI as a final fallback.</li>
+      </ol>
+      <p>
+        A consumer SHOULD distinguish “available,” “loading,” “loaded,”
+        “unsupported,” “failed,” and “blocked by policy” states without relying
+        on color alone. It SHOULD let users remove a retrieved contribution
+        without modifying the source RDF.
+      </p>
+    </section>
+
+    <section id="live-sources">
+      <h2>Live sources</h2>
+      <p>
+        When an application changes a semantic DOM, a consumer MAY repeat local
+        extraction and update its candidate set. Candidates no longer present
+        in the latest snapshot SHOULD be marked unavailable or removed according
+        to the interface policy.
+      </p>
+      <p>
+        A previously retrieved contribution does not become part of the new
+        source snapshot merely because it remains visible in an enrichment
+        view. Runtime observation, retrieval history, and source assertions
+        remain distinct.
+      </p>
+      <p>
+        When an enrichment view is persisted as provenance-bearing RDF, a
+        materially changed view SHOULD be represented as a new
+        <code>de:EnrichmentView</code> or as a revision related with PROV. A
+        runtime interface may reuse the same DOM or application object while
+        maintaining that distinction in its persisted record.
+      </p>
+    </section>
+
+    <section id="security-privacy">
+      <h2>Security and privacy</h2>
+      <p>
+        Discovery targets are untrusted network input. They can reveal user
+        interest, trigger cross-origin requests, redirect to unexpected hosts,
+        return very large representations, or attempt to exploit parsers and
+        renderers.
+      </p>
+      <p>A consumer SHOULD:</p>
+      <ul>
+        <li>apply URL, origin, content-size, timeout, and redirect limits;</li>
+        <li>avoid speculative retrieval of sensitive targets;</li>
+        <li>isolate parsing and rendering of untrusted representations;</li>
+        <li>avoid sending cookies, authorization headers, or client certificates across origins by default;</li>
+        <li>make automatic retrieval policies visible and reversible; and</li>
+        <li>retain enough provenance to explain where displayed statements came from.</li>
+      </ul>
+    </section>
+
+    <section id="conformance"></section>
+
+    <section id="conformance-classes">
+      <h2>Conformance classes</h2>
+
+      <section id="publisher-conformance">
+        <h3>Conforming publisher</h3>
+        <p>A conforming publisher:</p>
+        <ul>
+          <li>uses RDF relationships according to their published semantics;</li>
+          <li>uses <code>rdfs:seeAlso</code> for generic additional information;</li>
+          <li>uses the DCAT qualified-relation pattern only when its domain commitments are accurate;</li>
+          <li>identifies roles with IRIs and uses standard <code>de:</code> roles when their definitions are accurate; and</li>
+          <li>does not represent retrieval, trust, or execution as an automatic consequence of discovery.</li>
+        </ul>
+      </section>
+
+      <section id="consumer-conformance">
+        <h3>Conforming consumer</h3>
+        <p>A conforming consumer:</p>
+        <ul>
+          <li>recognizes <code>rdfs:seeAlso</code> candidates;</li>
+          <li>keeps discovery, selection, retrieval, interpretation, and display as distinct phases;</li>
+          <li>does not retrieve without an explicit user or application policy;</li>
+          <li>preserves the boundary and provenance of retrieved contributions;</li>
+          <li>does not silently assert, trust, merge, validate, or execute retrieved content; and</li>
+          <li>reports failure at the candidate level.</li>
+        </ul>
+      </section>
+
+      <section id="record-conformance">
+        <h3>Conforming enrichment record</h3>
+        <p>
+          An RDF graph or dataset claiming to be a conforming enrichment record:
+        </p>
+        <ul>
+          <li>uses the classes, properties, roles, and statuses in this vocabulary according to their definitions;</li>
+          <li>represents candidates and contributions as consumer assertions outside the publisher's source graph;</li>
+          <li>identifies the context and target of each serialized candidate;</li>
+          <li>retains discovery source and graph identity when available;</li>
+          <li>uses PROV properties to relate activities, representations, candidates, contributions, and views when detailed processing provenance is serialized; and</li>
+          <li>does not use class membership or lifecycle status as evidence of authorization, trust, validation, or endorsement.</li>
+        </ul>
+      </section>
+    </section>
+
+    <section id="open-questions" class="appendix">
+      <h2>Open questions</h2>
+      <ul>
+        <li>Does a future version need a domain-free qualified relationship for arbitrary RDF subjects?</li>
+        <li>Which role vocabularies should a general consumer recognize without configuration?</li>
+        <li>Should a future version publish normative SHACL shapes for portable candidate, contribution, and view records?</li>
+        <li>How should portable enrichment bundles preserve datasets whose named graph identifiers collide?</li>
+        <li>Which subscription or change-feed relationships belong in a later discovery profile?</li>
+      </ul>
+    </section>
+
+    <div hidden aria-hidden="true">
+      <span id="yurii-rashkovskii" rdf-predicate="https://schema.org/name">Yurii Rashkovskii</span>
+      <a href="https://schema.org/Person" rdf-subject="#yurii-rashkovskii" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Person</a>
+    </div>
+  </body>
+</html>

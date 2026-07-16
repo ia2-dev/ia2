@@ -56,7 +56,11 @@ future directions. Do not describe an experiment as an established standard.
 
 - `specs/html-rdf/index.html`: single-file ReSpec source and self-describing
   IA² HTML/RDF specification. Keep it as one authored HTML file for now.
+- `specs/discovery-enrichment/index.html`: supplemental ReSpec profile for
+  advertising, qualifying, retrieving, and presenting additional RDF sources.
 - `site/index.html` and `site/home.css`: public project homepage.
+- `site/spec-selector.css` and `site/spec-selector.js`: progressively enhanced
+  specification selector shared by public navigation and calls to action.
 - `site/guide/index.html`: HTML/RDF authoring guide.
 - `packages/html-rdf-navigator/`: dependency-free web component, extractor,
   serializers, TypeScript sources, and tests for `@ia2/html-rdf-navigator`.

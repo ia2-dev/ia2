@@ -54,6 +54,53 @@ describe("Ia2RdfNavigator", () => {
     expect(drawer.shadowRoot?.querySelector('[data-view="navigator"]')?.getAttribute("aria-selected")).toBe("true");
   });
 
+  it("shows Discovery only when candidates exist and explicitly loads HTML/RDF contributions", async () => {
+    const canonical = document.createElement("link");
+    canonical.rel = "canonical";
+    canonical.href = "https://example.com/report";
+    document.head.append(canonical);
+    document.body.innerHTML = '<a href="https://example.com/evidence" rdf-subject="#claim" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#seeAlso">Evidence</a>';
+    const originalFetch = window.fetch;
+    const fetchMock = vi.fn().mockResolvedValue({
+      headers: { get: (name: string) => name.toLowerCase() === "content-type" ? "text/html; charset=utf-8" : null },
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve(`<!doctype html><html rdf-version="1.2"><head><link rel="canonical" href="https://example.com/evidence"></head><body><span id="fact" rdf-predicate="https://schema.org/name">Evidence set</span></body></html>`),
+      url: "http://localhost:3000/evidence",
+    } as unknown as Response);
+    Object.defineProperty(window, "fetch", { configurable: true, value: fetchMock });
+    try {
+      const drawer = mountRdfNavigator();
+      const tabs = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ?? []);
+      expect(tabs.map((tab) => tab.textContent)).toEqual(["Navigator", "Discovery (1)", "Turtle", "JSON-LD"]);
+
+      drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="discovery"]')?.click();
+      const target = drawer.shadowRoot?.querySelector<HTMLAnchorElement>('.discovery-target');
+      expect(target?.href).toBe("https://example.com/evidence");
+      expect(target?.target).toBe("_blank");
+      drawer.shadowRoot?.querySelector<HTMLButtonElement>('.discovery-action')?.click();
+
+      await vi.waitFor(() => {
+        expect(drawer.shadowRoot?.querySelector('.discovery-status')?.textContent).toBe("1 statement loaded");
+      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        "http://localhost:3000/evidence",
+        expect.objectContaining({ credentials: "omit", redirect: "follow", referrerPolicy: "no-referrer" }),
+      );
+      expect(drawer.shadowRoot?.querySelector('.launcher .count')?.textContent).toBe("2");
+
+      drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="turtle"]')?.click();
+      expect(drawer.shadowRoot?.querySelector("pre")?.textContent).toContain("<https://example.com/evidence> {");
+      expect(drawer.shadowRoot?.querySelector("pre")?.textContent).toContain('schema:name "Evidence set"');
+
+      drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="discovery"]')?.click();
+      drawer.shadowRoot?.querySelector<HTMLButtonElement>('.discovery-action')?.click();
+      expect(drawer.shadowRoot?.querySelector('.launcher .count')?.textContent).toBe("1");
+    } finally {
+      Object.defineProperty(window, "fetch", { configurable: true, value: originalFetch });
+    }
+  });
+
   it("distinguishes pointer and keyboard focus when opening the drawer", async () => {
     const drawer = mountRdfNavigator();
     drawer.shadowRoot?.querySelector<HTMLButtonElement>(".launcher")

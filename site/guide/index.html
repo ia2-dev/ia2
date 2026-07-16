@@ -14,7 +14,9 @@
     >
     <link rel="canonical" href="https://ia2.dev/guide/html-rdf">
     <link rel="stylesheet" href="/home.css">
+    <link rel="stylesheet" href="/spec-selector.css">
     <link rel="stylesheet" href="/guide.css">
+    <script type="module" src="/spec-selector.js"></script>
     <script type="module" src="/guide.js"></script>
     <script
       type="module"
@@ -27,7 +29,16 @@
     <header class="site-header guide-site-header">
       <a class="wordmark" href="/" aria-label="IA squared home">IA²</a>
       <nav aria-label="Primary navigation">
-        <a href="/spec/html-rdf">HTML/RDF</a>
+        <div class="spec-switcher spec-switcher--nav" data-spec-switcher data-align="end">
+          <a class="spec-switcher__current" href="/spec/html-rdf">HTML/RDF</a>
+          <button class="spec-switcher__toggle" type="button" aria-expanded="false" aria-haspopup="menu" aria-label="Choose a specification">
+            <svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.25 6 6.5l5-5.25" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+          <div class="spec-switcher__menu" role="menu" aria-label="Specifications">
+            <a class="spec-switcher__option" role="menuitem" aria-current="true" href="/spec/html-rdf"><strong>HTML/RDF Core Model</strong><small>RDF 1.2 in an HTML document</small></a>
+            <a class="spec-switcher__option" role="menuitem" href="/spec/discovery-enrichment"><strong>Discovery and Enrichment</strong><small>Purposeful links to additional knowledge</small></a>
+          </div>
+        </div>
         <a href="/guide/html-rdf" aria-current="page">Guide</a>
         <a href="/#architecture">Architecture</a>
         <a href="/#work">Current work</a>
@@ -515,7 +526,16 @@ _:location &lt;https://schema.org/name&gt; "Lab 3" .</code></div>
       <p>Information Architecture for Intelligent Agents</p>
       <div>
         <a href="/guide/html-rdf">Guide</a>
-        <a href="/spec/html-rdf">Specification</a>
+        <div class="spec-switcher spec-switcher--footer" data-spec-switcher data-placement="top" data-align="end">
+          <a class="spec-switcher__current" href="/spec/html-rdf">HTML/RDF</a>
+          <button class="spec-switcher__toggle" type="button" aria-expanded="false" aria-haspopup="menu" aria-label="Choose a specification">
+            <svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.25 6 6.5l5-5.25" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+          <div class="spec-switcher__menu" role="menu" aria-label="Specifications">
+            <a class="spec-switcher__option" role="menuitem" aria-current="true" href="/spec/html-rdf"><strong>HTML/RDF Core Model</strong><small>RDF 1.2 in an HTML document</small></a>
+            <a class="spec-switcher__option" role="menuitem" href="/spec/discovery-enrichment"><strong>Discovery and Enrichment</strong><small>Purposeful links to additional knowledge</small></a>
+          </div>
+        </div>
         <a href="/demos/live-workspace">Demo</a>
         <a href="https://github.com/ia2-dev/ia2">Source</a>
       </div>

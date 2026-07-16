@@ -8,6 +8,8 @@ const output = join(root, ".site");
 const assets = [
   ["site/index.html", "index.html"],
   ["site/home.css", "home.css"],
+  ["site/spec-selector.css", "spec-selector.css"],
+  ["site/spec-selector.js", "spec-selector.js"],
   ["site/assets/ia2-mark.svg", "assets/ia2-mark.svg"],
   ["site/assets/ia2-mark-512.png", "assets/ia2-mark-512.png"],
   ["site/guide/index.html", "guide/html-rdf/index.html"],
@@ -15,6 +17,7 @@ const assets = [
   ["site/guide.js", "guide.js"],
   ["site/_redirects", "_redirects"],
   ["specs/html-rdf/index.html", "spec/html-rdf/index.html"],
+  ["specs/discovery-enrichment/index.html", "spec/discovery-enrichment/index.html"],
   [
     "packages/html-rdf-navigator/dist/html-rdf-navigator.js",
     "packages/html-rdf-navigator/dist/html-rdf-navigator.js",

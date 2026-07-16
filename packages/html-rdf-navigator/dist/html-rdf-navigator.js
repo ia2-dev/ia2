@@ -373,6 +373,134 @@ function extractDataset(root = document) {
   };
 }
 
+// src/discovery.ts
+var RDFS_SEE_ALSO = "http://www.w3.org/2000/01/rdf-schema#seeAlso";
+var RDFS_IS_DEFINED_BY = "http://www.w3.org/2000/01/rdf-schema#isDefinedBy";
+var DCTERMS_REQUIRES = "http://purl.org/dc/terms/requires";
+var DCTERMS_SOURCE = "http://purl.org/dc/terms/source";
+var PROV_WAS_DERIVED_FROM = "http://www.w3.org/ns/prov#wasDerivedFrom";
+var OWL_IMPORTS = "http://www.w3.org/2002/07/owl#imports";
+var DCAT_QUALIFIED_RELATION = "http://www.w3.org/ns/dcat#qualifiedRelation";
+var DCTERMS_RELATION = "http://purl.org/dc/terms/relation";
+var DCAT_HAD_ROLE = "http://www.w3.org/ns/dcat#hadRole";
+var DISCOVERY_PREDICATES = /* @__PURE__ */ new Set([
+  RDFS_SEE_ALSO,
+  RDFS_IS_DEFINED_BY,
+  DCTERMS_REQUIRES,
+  DCTERMS_SOURCE,
+  PROV_WAS_DERIVED_FROM,
+  OWL_IMPORTS
+]);
+function termKey(term) {
+  if (!term) return "default";
+  return `${term.termType}:${term.value}`;
+}
+function sameTerm(left, right) {
+  return termKey(left) === termKey(right);
+}
+function documentIri(value) {
+  try {
+    const url = new URL(value);
+    url.hash = "";
+    return url.href;
+  } catch {
+    return value.replace(/#.*$/s, "");
+  }
+}
+function candidateId(key) {
+  let hash = 2166136261;
+  for (let index = 0; index < key.length; index += 1) {
+    hash ^= key.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `discovery-${(hash >>> 0).toString(36)}`;
+}
+function pushNamed(values, term) {
+  if (!values.some((value) => value.value === term.value)) values.push(term);
+}
+function pushSubject(values, term) {
+  if (!values.some((value) => termKey(value) === termKey(term))) values.push(term);
+}
+function pushSource(values, source) {
+  if (!values.includes(source)) values.push(source);
+}
+function detectDiscoveryCandidates(result) {
+  const candidates = /* @__PURE__ */ new Map();
+  const sourceDocument = documentIri(result.sourceDocumentIri);
+  const candidateFor = (context, target, graph) => {
+    if (documentIri(target.value) === sourceDocument) return null;
+    const key = `${termKey(context)}|${termKey(graph)}|${target.value}`;
+    let candidate = candidates.get(key);
+    if (!candidate) {
+      candidate = {
+        context,
+        graph,
+        id: candidateId(key),
+        predicates: [],
+        qualifiedRelationships: [],
+        roles: [],
+        sources: [],
+        target
+      };
+      candidates.set(key, candidate);
+    }
+    return candidate;
+  };
+  for (const quad of result.quads) {
+    if (!DISCOVERY_PREDICATES.has(quad.predicate.value) || quad.object.termType !== "NamedNode") continue;
+    const candidate = candidateFor(quad.subject, quad.object, quad.graph);
+    if (!candidate) continue;
+    pushNamed(candidate.predicates, quad.predicate);
+    pushSource(candidate.sources, quad.source);
+  }
+  for (const relationQuad of result.quads) {
+    if (relationQuad.predicate.value !== DCAT_QUALIFIED_RELATION) continue;
+    if (relationQuad.object.termType !== "NamedNode" && relationQuad.object.termType !== "BlankNode") continue;
+    const relationship = relationQuad.object;
+    const details = result.quads.filter((quad) => sameTerm(quad.subject, relationship) && sameTerm(quad.graph, relationQuad.graph));
+    const targets = details.filter((quad) => quad.predicate.value === DCTERMS_RELATION && quad.object.termType === "NamedNode");
+    const roles = details.filter((quad) => quad.predicate.value === DCAT_HAD_ROLE && quad.object.termType === "NamedNode");
+    for (const targetQuad of targets) {
+      if (targetQuad.object.termType !== "NamedNode") continue;
+      const candidate = candidateFor(relationQuad.subject, targetQuad.object, relationQuad.graph);
+      if (!candidate) continue;
+      pushSubject(candidate.qualifiedRelationships, relationship);
+      pushSource(candidate.sources, relationQuad.source);
+      pushSource(candidate.sources, targetQuad.source);
+      for (const roleQuad of roles) {
+        if (roleQuad.object.termType !== "NamedNode") continue;
+        pushNamed(candidate.roles, roleQuad.object);
+        pushSource(candidate.sources, roleQuad.source);
+      }
+    }
+  }
+  return Array.from(candidates.values()).sort((left, right) => left.target.value.localeCompare(right.target.value));
+}
+function mergeDiscoveryContributions(source, contributions) {
+  const quads = [...source.quads];
+  const graphs = new Map(source.graphs.map((graph) => [termKey(graph), graph]));
+  const diagnostics = [...source.diagnostics];
+  for (const contribution of contributions) {
+    const contributionGraph = namedNode(contribution.result.sourceDocumentIri);
+    for (const quad of contribution.result.quads) {
+      const graph = quad.graph ?? contributionGraph;
+      quads.push({ ...quad, graph });
+      graphs.set(termKey(graph), graph);
+    }
+    for (const graph of contribution.result.graphs) graphs.set(termKey(graph), graph);
+    diagnostics.push(...contribution.result.diagnostics.map((diagnostic) => ({
+      ...diagnostic,
+      message: `Contribution ${contribution.result.sourceDocumentIri}: ${diagnostic.message}`
+    })));
+  }
+  return {
+    ...source,
+    diagnostics,
+    graphs: Array.from(graphs.values()),
+    quads
+  };
+}
+
 // src/highlight.ts
 var TURTLE_TOKENS = /(<https?:\/\/[^>]+>)|("(?:\\.|[^"\\])*"(?:@[A-Za-z0-9-]+(?:--(?:ltr|rtl))?|\^\^(?:<[^>]+>|[A-Za-z][\w-]*:[\w.-]+))?)|(^|\s)(@[a-z]+|[A-Za-z][\w-]*:[\w.-]+)|(_:[A-Za-z][\w-]*)|(#[^\n]*)/gim;
 var JSON_TOKENS = /("(?:\\.|[^"\\])*")\s*(?=:)|("(?:\\.|[^"\\])*")|\b(true|false|null)\b|\b(-?\d+(?:\.\d+)?)\b/g;
@@ -527,7 +655,8 @@ var PREFIXES = {
   deo: "http://purl.org/spar/deo/",
   doco: "http://purl.org/spar/doco/",
   pattern: "http://www.essepuntato.it/2008/12/pattern#",
-  decision: "https://ontology.inferal.com/modules/decision/"
+  decision: "https://ontology.inferal.com/modules/decision/",
+  de: "https://ia2.dev/spec/discovery-enrichment#"
 };
 function escaped(value) {
   return value.replace(/\\/g, "\\\\").replace(/\"/g, '\\"').replace(/\r/g, "\\r").replace(/\n/g, "\\n").replace(/\t/g, "\\t");
@@ -760,6 +889,25 @@ var CSS = String.raw`
   .tab[aria-selected="true"] { border-bottom-color: var(--accent); color: var(--ink); }
   .viewport { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 18px 22px 28px; }
   .notice { background: var(--accent-soft); border: 1px solid color-mix(in oklch, var(--accent), var(--paper) 68%); border-radius: 8px; color: color-mix(in oklch, var(--ink), var(--accent) 25%); font-size: 12px; margin: 0 0 14px; padding: 9px 11px; }
+  .discovery-intro { color: var(--muted); font-size: 12px; margin: 0 0 16px; max-width: 66ch; }
+  .discovery-list { list-style: none; margin: 0; padding: 0; }
+  .discovery-item { border-bottom: 1px solid var(--line); display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr) auto; padding: 15px 0; }
+  .discovery-item:first-child { border-top: 1px solid var(--line); }
+  .discovery-copy { min-width: 0; }
+  .discovery-target { color: var(--accent); display: block; font: 650 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; text-decoration-color: color-mix(in oklch, currentColor, transparent 55%); text-underline-offset: 3px; }
+  .discovery-target:hover { text-decoration-color: currentColor; }
+  .discovery-context { color: var(--muted); font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 4px 0 0; overflow-wrap: anywhere; }
+  .discovery-meta { align-items: center; display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .discovery-chip { background: var(--layer); border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 10.5px; line-height: 1.2; max-width: 100%; overflow: hidden; padding: 4px 7px; text-overflow: ellipsis; white-space: nowrap; }
+  .discovery-chip.role { background: var(--accent-soft); border-color: color-mix(in oklch, var(--accent), var(--paper) 72%); color: color-mix(in oklch, var(--accent), var(--ink) 20%); }
+  .discovery-state { align-items: flex-end; display: flex; flex-direction: column; gap: 7px; justify-content: center; min-width: 112px; }
+  .discovery-status { color: var(--muted); font-size: 10.5px; max-width: 24ch; text-align: right; }
+  .discovery-status[data-state="loaded"] { color: oklch(45% 0.12 145); }
+  .discovery-status[data-state="error"] { color: var(--warning); }
+  .discovery-action { background: var(--accent); border: 1px solid var(--accent); border-radius: 7px; color: var(--paper); cursor: pointer; font-size: 12px; font-weight: 700; min-height: 34px; padding: 6px 11px; }
+  .discovery-action:hover { background: color-mix(in oklch, var(--accent), var(--ink) 12%); }
+  .discovery-action[data-state="loaded"], .discovery-action[data-state="loading"] { background: transparent; border-color: var(--line); color: var(--muted); }
+  .discovery-action[data-state="loaded"]:hover, .discovery-action[data-state="loading"]:hover { background: var(--layer); color: var(--ink); }
   pre { background: var(--layer); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); font: 12.5px/1.65 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; min-height: 100%; overflow: auto; padding: 16px 17px; tab-size: 2; white-space: pre; }
   .tok.iri, .tok.name { color: oklch(49% 0.17 290); }
   .tok.iri { text-decoration-color: color-mix(in oklch, currentColor, transparent 55%); text-underline-offset: 3px; }
@@ -877,6 +1025,9 @@ var CSS = String.raw`
     .sync-control { grid-column: 2; justify-self: end; }
     .quad { grid-template-columns: minmax(0, 1fr); }
     .quad-actions { justify-content: flex-start; max-width: none; }
+    .discovery-item { grid-template-columns: minmax(0, 1fr); }
+    .discovery-state { align-items: flex-start; min-width: 0; }
+    .discovery-status { text-align: left; }
   }
   @media (hover: none) {
     .preview-actions { opacity: 1; pointer-events: auto; }
@@ -895,6 +1046,9 @@ var CSS = String.raw`
   @media (prefers-reduced-motion: reduce) { .launcher, .panel { transition: none; } }
 `;
 var SESSION_STATE_KEY = "ia2:rdf-navigator:state:v1";
+var DISCOVERY_MAX_HTML_LENGTH = 2e6;
+var DISCOVERY_FETCH_TIMEOUT_MS = 1e4;
+var DISCOVERY_ACCEPT = "text/html, application/xhtml+xml;q=0.95";
 var RESOURCE_PREVIEW_MAX_HTML_LENGTH = 2e6;
 var RESOURCE_PREVIEW_CACHE_LIMIT = 4;
 var RESOURCE_PREVIEW_FETCH_ATTEMPTS = 2;
@@ -1413,8 +1567,35 @@ function mutationAffectsExtraction(record) {
     return node.matches(RDF_ELEMENT_SELECTOR) || node.querySelector(RDF_ELEMENT_SELECTOR) !== null;
   });
 }
+function retrievalIriForCandidate(targetIri, source) {
+  const target = new URL(targetIri);
+  const canonicalSource = new URL(source.sourceDocumentIri);
+  const retrievalSource = new URL(source.retrievalDocumentIri);
+  if (target.origin !== canonicalSource.origin || canonicalSource.origin === retrievalSource.origin) return target.href;
+  return new URL(`${target.pathname}${target.search}${target.hash}`, retrievalSource.origin).href;
+}
+function prepareRetrievedDocument(document2, retrievalIri) {
+  try {
+    Object.defineProperty(document2, "URL", { configurable: true, value: retrievalIri });
+  } catch {
+  }
+  const base = document2.head?.querySelector("base[href]");
+  if (base) base.href = new URL(base.getAttribute("href") ?? "", retrievalIri).href;
+  document2.head?.querySelectorAll('link[rel~="canonical"][href]').forEach((link) => {
+    link.href = new URL(link.getAttribute("href") ?? "", retrievalIri).href;
+  });
+}
+function discoveryErrorMessage(error) {
+  if (error instanceof DOMException && error.name === "AbortError") return "Retrieval timed out.";
+  if (error instanceof TypeError) return "Retrieval was blocked by CORS or network policy.";
+  if (error instanceof Error) return error.message;
+  return "The contribution could not be loaded.";
+}
 var Ia2RdfNavigator = class extends HTMLElement {
   #result = null;
+  #sourceResult = null;
+  #discoveryCandidates = [];
+  #discoveryLoads = /* @__PURE__ */ new Map();
   #view = "navigator";
   #open = false;
   #status = "";
@@ -1451,6 +1632,8 @@ var Ia2RdfNavigator = class extends HTMLElement {
     this.ownerDocument.defaultView?.removeEventListener("resize", this.#onWindowResize);
     this.#observer?.disconnect();
     this.#observer = null;
+    for (const state of this.#discoveryLoads.values()) state.controller?.abort();
+    this.#discoveryLoads.clear();
     this.#vocabularyResizeObserver?.disconnect();
     this.#vocabularyResizeObserver = null;
     if (this.#refreshTimer !== null) window.clearTimeout(this.#refreshTimer);
@@ -1722,6 +1905,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     if (active.classList.contains("vocabulary-toggle") && active.dataset.namespace) return { kind: "namespace", key: active.dataset.namespace };
     if (active.classList.contains("sync-option") && active.dataset.syncMode) return { kind: "sync", key: active.dataset.syncMode };
     if (active.classList.contains("position-option") && active.dataset.position) return { kind: "position", key: active.dataset.position };
+    if (active.classList.contains("discovery-action") && active.dataset.candidateId) return { kind: "discovery-action", key: active.dataset.candidateId };
     if (active.classList.contains("tab") && active.dataset.view) return { kind: "tab", key: active.dataset.view };
     if (active.classList.contains("launcher")) return { kind: "launcher" };
     if (active.classList.contains("refresh")) return { kind: "refresh" };
@@ -1739,6 +1923,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     }
     if (snapshot.kind === "sync") target = Array.from(this.shadowRoot.querySelectorAll(".sync-option")).find((button) => button.dataset.syncMode === snapshot.key) ?? null;
     if (snapshot.kind === "position") target = Array.from(this.shadowRoot.querySelectorAll(".position-option")).find((button) => button.dataset.position === snapshot.key) ?? null;
+    if (snapshot.kind === "discovery-action") target = Array.from(this.shadowRoot.querySelectorAll(".discovery-action")).find((button) => button.dataset.candidateId === snapshot.key) ?? null;
     if (snapshot.kind === "tab") target = Array.from(this.shadowRoot.querySelectorAll(".tab")).find((button) => button.dataset.view === snapshot.key) ?? null;
     if (snapshot.kind === "launcher") target = this.shadowRoot.querySelector(".launcher");
     if (snapshot.kind === "refresh") target = this.shadowRoot.querySelector(".refresh");
@@ -1774,10 +1959,94 @@ var Ia2RdfNavigator = class extends HTMLElement {
       subtree: true
     });
   }
+  #rebuildResult() {
+    if (!this.#sourceResult) return;
+    const contributions = Array.from(this.#discoveryLoads.values()).flatMap((state) => state.status === "loaded" && state.contribution ? [state.contribution] : []);
+    this.#result = mergeDiscoveryContributions(this.#sourceResult, contributions);
+  }
+  #renderDiscoveryState(candidateId2) {
+    this.#rebuildResult();
+    this.#render();
+    queueMicrotask(() => {
+      Array.from(this.shadowRoot?.querySelectorAll(".discovery-action") ?? []).find((button) => button.dataset.candidateId === candidateId2)?.focus({ preventScroll: true });
+    });
+  }
+  #removeDiscoveryContribution(candidateId2) {
+    this.#discoveryLoads.get(candidateId2)?.controller?.abort();
+    this.#discoveryLoads.delete(candidateId2);
+    this.#renderDiscoveryState(candidateId2);
+  }
+  async #loadDiscoveryContribution(candidate) {
+    const source = this.#sourceResult;
+    const view = this.ownerDocument.defaultView;
+    if (!source || !view) return;
+    const existing = this.#discoveryLoads.get(candidate.id);
+    if (existing?.status === "loading" || existing?.status === "loaded") {
+      this.#removeDiscoveryContribution(candidate.id);
+      return;
+    }
+    const controller = new AbortController();
+    this.#discoveryLoads.set(candidate.id, { controller, status: "loading" });
+    this.#renderDiscoveryState(candidate.id);
+    const timeout = view.setTimeout(() => controller.abort(), DISCOVERY_FETCH_TIMEOUT_MS);
+    try {
+      const retrievalIri = retrievalIriForCandidate(candidate.target.value, source);
+      const protocol = new URL(retrievalIri).protocol;
+      if (protocol !== "http:" && protocol !== "https:") throw new Error(`Unsupported retrieval protocol: ${protocol}`);
+      const response = await view.fetch(retrievalIri, {
+        credentials: "omit",
+        headers: { Accept: DISCOVERY_ACCEPT },
+        redirect: "follow",
+        referrerPolicy: "no-referrer",
+        signal: controller.signal
+      });
+      if (!response.ok) throw new Error(`Retrieval failed with HTTP ${response.status}.`);
+      const declaredLength = Number.parseInt(response.headers.get("content-length") ?? "", 10);
+      if (Number.isFinite(declaredLength) && declaredLength > DISCOVERY_MAX_HTML_LENGTH) {
+        throw new Error("The representation is larger than the 2 MB enrichment limit.");
+      }
+      const mediaType = (response.headers.get("content-type") ?? "").split(";", 1)[0].trim().toLowerCase();
+      const text = await response.text();
+      if (text.length > DISCOVERY_MAX_HTML_LENGTH) throw new Error("The representation is larger than the 2 MB enrichment limit.");
+      const looksLikeHtml = /<!doctype\s+html|<html[\s>]/i.test(text);
+      if (mediaType && mediaType !== "text/html" && mediaType !== "application/xhtml+xml") {
+        throw new Error(`Unsupported enrichment representation: ${mediaType}. This preview currently extracts HTML/RDF.`);
+      }
+      if (!mediaType && !looksLikeHtml) throw new Error("The target did not return an identifiable HTML representation.");
+      const retrievedDocument = new view.DOMParser().parseFromString(text, "text/html");
+      const finalRetrievalIri = response.url || retrievalIri;
+      prepareRetrievedDocument(retrievedDocument, finalRetrievalIri);
+      const contributionResult = extractDataset(retrievedDocument);
+      if (!contributionResult.quads.length && !contributionResult.graphs.length) {
+        throw new Error("The retrieved HTML contained no extractable RDF.");
+      }
+      const current = this.#discoveryLoads.get(candidate.id);
+      if (current?.controller !== controller) return;
+      this.#discoveryLoads.set(candidate.id, {
+        contribution: { candidateId: candidate.id, result: contributionResult, retrievalIri: finalRetrievalIri },
+        status: "loaded"
+      });
+    } catch (error) {
+      const current = this.#discoveryLoads.get(candidate.id);
+      if (current?.controller !== controller) return;
+      this.#discoveryLoads.set(candidate.id, { message: discoveryErrorMessage(error), status: "error" });
+    } finally {
+      view.clearTimeout(timeout);
+    }
+    this.#renderDiscoveryState(candidate.id);
+  }
   /** Re-extract the current owner document and redraw every view. */
   refresh() {
     const focus = this.#captureFocus();
-    this.#result = extractDataset(this.ownerDocument);
+    this.#sourceResult = extractDataset(this.ownerDocument);
+    this.#discoveryCandidates = detectDiscoveryCandidates(this.#sourceResult);
+    const candidateIds = new Set(this.#discoveryCandidates.map((candidate) => candidate.id));
+    for (const [candidateId2, state] of this.#discoveryLoads) {
+      if (candidateIds.has(candidateId2)) continue;
+      state.controller?.abort();
+      this.#discoveryLoads.delete(candidateId2);
+    }
+    this.#rebuildResult();
     this.#render();
     if (focus) queueMicrotask(() => this.#restoreFocus(focus));
   }
@@ -2548,6 +2817,86 @@ var Ia2RdfNavigator = class extends HTMLElement {
     }
     container.append(list);
   }
+  #renderDiscovery(container) {
+    const document2 = this.ownerDocument;
+    const intro = document2.createElement("p");
+    intro.className = "discovery-intro";
+    intro.textContent = "Additional knowledge advertised by this document. Loading is explicit, sends no credentials or referrer, does not run scripts, and keeps the retrieved contribution in a separate named graph.";
+    container.append(intro);
+    const list = document2.createElement("ul");
+    list.className = "discovery-list";
+    for (const candidate of this.#discoveryCandidates) {
+      const state = this.#discoveryLoads.get(candidate.id);
+      const stateName = state?.status ?? "available";
+      const item = document2.createElement("li");
+      item.className = "discovery-item";
+      item.dataset.candidateId = candidate.id;
+      const copy = document2.createElement("div");
+      copy.className = "discovery-copy";
+      const target = document2.createElement("a");
+      target.className = "discovery-target";
+      target.href = candidate.target.value;
+      target.target = "_blank";
+      target.rel = "noopener noreferrer";
+      target.textContent = candidate.target.value;
+      target.title = `Open ${candidate.target.value} in a new tab`;
+      const context = document2.createElement("p");
+      context.className = "discovery-context";
+      context.textContent = `About ${compactTerm(candidate.context)}`;
+      copy.append(target, context);
+      const metadata = document2.createElement("div");
+      metadata.className = "discovery-meta";
+      for (const predicate of candidate.predicates) {
+        const chip = document2.createElement("span");
+        chip.className = "discovery-chip";
+        chip.textContent = compactTerm(predicate);
+        chip.title = predicate.value;
+        metadata.append(chip);
+      }
+      for (const role of candidate.roles) {
+        const chip = document2.createElement("span");
+        chip.className = "discovery-chip role";
+        chip.textContent = compactTerm(role);
+        chip.title = role.value;
+        metadata.append(chip);
+      }
+      if (candidate.graph) {
+        const chip = document2.createElement("span");
+        chip.className = "discovery-chip";
+        chip.textContent = `graph ${compactTerm(candidate.graph)}`;
+        metadata.append(chip);
+      }
+      if (metadata.childElementCount) copy.append(metadata);
+      const controls = document2.createElement("div");
+      controls.className = "discovery-state";
+      const status = document2.createElement("span");
+      status.className = "discovery-status";
+      status.dataset.state = stateName;
+      if (!state) status.textContent = "Available";
+      if (state?.status === "loading") status.textContent = "Retrieving HTML/RDF\u2026";
+      if (state?.status === "error") status.textContent = state.message ?? "Retrieval failed.";
+      if (state?.status === "loaded") {
+        const count = state.contribution?.result.quads.length ?? 0;
+        status.textContent = `${count} statement${count === 1 ? "" : "s"} loaded`;
+      }
+      const action = document2.createElement("button");
+      action.className = "discovery-action";
+      action.type = "button";
+      action.dataset.candidateId = candidate.id;
+      action.dataset.state = stateName;
+      if (!state) action.textContent = "Load";
+      if (state?.status === "loading") action.textContent = "Cancel";
+      if (state?.status === "error") action.textContent = "Retry";
+      if (state?.status === "loaded") action.textContent = "Remove";
+      action.setAttribute("aria-describedby", `${candidate.id}-status`);
+      status.id = `${candidate.id}-status`;
+      action.addEventListener("click", () => void this.#loadDiscoveryContribution(candidate));
+      controls.append(status, action);
+      item.append(copy, controls);
+      list.append(item);
+    }
+    container.append(list);
+  }
   #render() {
     this.#stopFloatingInteraction();
     this.#clearLinkPreview();
@@ -2558,6 +2907,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     const result = this.#result;
     if (!result || !this.shadowRoot) return;
     if (this.#view === "diagnostics" && !result.diagnostics.length) this.#view = "navigator";
+    if (this.#view === "discovery" && !this.#discoveryCandidates.length) this.#view = "navigator";
     this.shadowRoot.innerHTML = `
       <style>${CSS}</style>
       <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel">
@@ -2569,6 +2919,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
           <span class="drag-grip" aria-hidden="true" title="Drag floating navigator"><svg viewBox="0 0 8 18"><circle cx="2" cy="4" r="1.2"/><circle cx="6" cy="4" r="1.2"/><circle cx="2" cy="9" r="1.2"/><circle cx="6" cy="9" r="1.2"/><circle cx="2" cy="14" r="1.2"/><circle cx="6" cy="14" r="1.2"/></svg></span>
           <div class="tabs" role="tablist" aria-label="RDF views">
             <button class="tab" role="tab" data-view="navigator" aria-selected="${this.#view === "navigator"}">Navigator</button>
+            ${this.#discoveryCandidates.length ? `<button class="tab" role="tab" data-view="discovery" aria-selected="${this.#view === "discovery"}">Discovery (${this.#discoveryCandidates.length})</button>` : ""}
             <button class="tab" role="tab" data-view="turtle" aria-selected="${this.#view === "turtle"}">Turtle</button>
             <button class="tab" role="tab" data-view="json" aria-selected="${this.#view === "json"}">JSON-LD</button>
             ${result.diagnostics.length ? `<button class="tab" role="tab" data-view="diagnostics" aria-selected="${this.#view === "diagnostics"}">Diagnostics (${result.diagnostics.length})</button>` : ""}
@@ -2599,6 +2950,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
       viewport.append(highlightedCode(serializeJsonLd(result), "json", document));
     }
     if (this.#view === "navigator") this.#renderNavigator(viewport, result);
+    if (this.#view === "discovery") this.#renderDiscovery(viewport);
     if (this.#view === "diagnostics") this.#renderDiagnostics(viewport, result.diagnostics);
     this.shadowRoot.querySelector(".launcher")?.addEventListener("click", (event) => this.toggle(event instanceof MouseEvent && event.detail !== 0 ? "panel" : "tab"));
     this.shadowRoot.querySelector(".close")?.addEventListener("click", () => this.close());
@@ -2680,8 +3032,11 @@ if (typeof window !== "undefined" && typeof document !== "undefined") {
   else autoMount();
 }
 export {
+  DISCOVERY_PREDICATES,
   Ia2RdfNavigator,
+  detectDiscoveryCandidates,
   extractDataset,
+  mergeDiscoveryContributions,
   mountRdfNavigator,
   serializeJsonLd,
   serializeTurtle,

@@ -1,3 +1,6 @@
 /specs/html-rdf          /spec/html-rdf 301
 /specs/html-rdf/         /spec/html-rdf 301
+/specs/discovery-enrichment          /spec/discovery-enrichment 301
+/specs/discovery-enrichment/         /spec/discovery-enrichment 301
 /specs/html-rdf/*        /spec/html-rdf/:splat 301
+/specs/discovery-enrichment/*        /spec/discovery-enrichment/:splat 301

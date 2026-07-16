@@ -17,6 +17,8 @@
     >
     <link rel="canonical" href="https://ia2.dev/">
     <link rel="stylesheet" href="/home.css">
+    <link rel="stylesheet" href="/spec-selector.css">
+    <script type="module" src="/spec-selector.js"></script>
     <script
       type="module"
       src="/packages/html-rdf-navigator/dist/html-rdf-navigator.js"
@@ -35,7 +37,16 @@
         rdf-predicate="http://purl.org/dc/terms/alternative"
       >IA²</span></a>
       <nav aria-label="Primary navigation">
-        <a href="/spec/html-rdf">HTML/RDF</a>
+        <div class="spec-switcher spec-switcher--nav" data-spec-switcher data-align="end">
+          <a class="spec-switcher__current" href="/spec/html-rdf">HTML/RDF</a>
+          <button class="spec-switcher__toggle" type="button" aria-expanded="false" aria-haspopup="menu" aria-label="Choose a specification">
+            <svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.25 6 6.5l5-5.25" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+          <div class="spec-switcher__menu" role="menu" aria-label="Specifications">
+            <a class="spec-switcher__option" role="menuitem" aria-current="true" href="/spec/html-rdf"><strong>HTML/RDF Core Model</strong><small>RDF 1.2 in an HTML document</small></a>
+            <a class="spec-switcher__option" role="menuitem" href="/spec/discovery-enrichment"><strong>Discovery and Enrichment</strong><small>Purposeful links to additional knowledge</small></a>
+          </div>
+        </div>
         <a href="/guide/html-rdf">Guide</a>
         <a href="#architecture">Architecture</a>
         <a href="#work">Current work</a>
@@ -71,12 +82,21 @@
               form it needs without losing context.
             </p>
             <div class="hero-actions" aria-label="Start exploring">
-              <a
-                class="action action-primary"
-                href="/spec/html-rdf"
-                rdf-subject="#project"
-                rdf-predicate="http://purl.org/dc/terms/hasPart"
-              >Explore HTML/RDF <span aria-hidden="true">↗</span></a>
+              <div class="spec-switcher spec-switcher--cta" data-spec-switcher>
+                <a
+                  class="spec-switcher__current"
+                  href="/spec/html-rdf"
+                  rdf-subject="#project"
+                  rdf-predicate="http://purl.org/dc/terms/hasPart"
+                >Explore HTML/RDF <span aria-hidden="true">↗</span></a>
+                <button class="spec-switcher__toggle" type="button" aria-expanded="false" aria-haspopup="menu" aria-label="Choose a specification">
+                  <svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.25 6 6.5l5-5.25" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+                </button>
+                <div class="spec-switcher__menu" role="menu" aria-label="Specifications">
+                  <a class="spec-switcher__option" role="menuitem" aria-current="true" href="/spec/html-rdf"><strong>HTML/RDF Core Model</strong><small>RDF 1.2 in an HTML document</small></a>
+                  <a class="spec-switcher__option" role="menuitem" href="/spec/discovery-enrichment"><strong>Discovery and Enrichment</strong><small>Purposeful links to additional knowledge</small></a>
+                </div>
+              </div>
               <a
                 class="action action-secondary"
                 href="/demos/live-workspace"
@@ -271,11 +291,32 @@
           </li>
           <li>
             <a
-              href="/guide/html-rdf"
+              href="/spec/discovery-enrichment"
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
               <span class="work-number">02</span>
+              <span class="work-copy">
+                <strong
+                  rdf-subject="https://ia2.dev/spec/discovery-enrichment"
+                  rdf-predicate="http://purl.org/dc/terms/title"
+                >Discovery and Enrichment</strong>
+                <span
+                  rdf-subject="https://ia2.dev/spec/discovery-enrichment"
+                  rdf-predicate="http://purl.org/dc/terms/description"
+                >Purposeful discovery plus a portable vocabulary for candidates, contributions, views, roles, and lifecycle state.</span>
+              </span>
+              <span class="work-type">Specification</span>
+              <span class="work-arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href="/guide/html-rdf"
+              rdf-subject="#project"
+              rdf-predicate="http://purl.org/dc/terms/hasPart"
+            >
+              <span class="work-number">03</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://ia2.dev/guide/html-rdf"
@@ -296,7 +337,7 @@
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
-              <span class="work-number">03</span>
+              <span class="work-number">04</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://ia2.dev/demos/live-workspace"
@@ -317,7 +358,7 @@
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
-              <span class="work-number">04</span>
+              <span class="work-number">05</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator"
@@ -365,7 +406,16 @@
       <p>Information Architecture for Intelligent Agents</p>
       <div>
         <a href="/guide/html-rdf">Guide</a>
-        <a href="/spec/html-rdf">HTML/RDF</a>
+        <div class="spec-switcher spec-switcher--footer" data-spec-switcher data-placement="top" data-align="end">
+          <a class="spec-switcher__current" href="/spec/html-rdf">HTML/RDF</a>
+          <button class="spec-switcher__toggle" type="button" aria-expanded="false" aria-haspopup="menu" aria-label="Choose a specification">
+            <svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.25 6 6.5l5-5.25" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+          <div class="spec-switcher__menu" role="menu" aria-label="Specifications">
+            <a class="spec-switcher__option" role="menuitem" aria-current="true" href="/spec/html-rdf"><strong>HTML/RDF Core Model</strong><small>RDF 1.2 in an HTML document</small></a>
+            <a class="spec-switcher__option" role="menuitem" href="/spec/discovery-enrichment"><strong>Discovery and Enrichment</strong><small>Purposeful links to additional knowledge</small></a>
+          </div>
+        </div>
         <a href="/demos/live-workspace">Demo</a>
         <a href="https://github.com/ia2-dev/ia2">Source</a>
       </div>

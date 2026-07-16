@@ -1,4 +1,4 @@
-# IA² RDF Navigator
+# IA² HTML/RDF Navigator
 
 `@ia2/html-rdf-navigator` is a zero-framework Web Component and TypeScript library
 for inspecting the RDF dataset expressed by an IA² HTML document. It extracts
@@ -47,6 +47,9 @@ For programmatic control, disable automatic mounting before import:
 - bidirectional page/Navigator scroll following and hover correspondence
 - contextual, syntax-highlighted shallow and full carrier HTML views
 - in-document navigation for local RDF terms
+- conditional discovery of related knowledge through established RDF
+  relationships and qualified DCAT roles
+- deliberate, credential-free HTML/RDF loading into separate named graphs
 - Turtle/TriG and JSON-LD serialization
 - live-DOM refresh through a debounced `MutationObserver`
 - independent diagnostics that do not abort valid statements
@@ -59,7 +62,9 @@ For programmatic control, disable automatic mounting before import:
 ```ts
 import {
   Ia2RdfNavigator,
+  detectDiscoveryCandidates,
   extractDataset,
+  mergeDiscoveryContributions,
   mountRdfNavigator,
   serializeJsonLd,
   serializeTurtle,
@@ -73,6 +78,14 @@ an explicit `base[href]`, the RDF base IRI. Quads retain their source `Element`,
 which powers document navigation. The mounted Navigator reflects the runtime
 DOM, including semantic changes made by the host application.
 
+`detectDiscoveryCandidates(result)` normalizes recognized direct relationships
+and qualified DCAT relationships without performing network activity. The
+mounted component reveals a Discovery tab only when candidates exist. A person
+may load an HTML/RDF target explicitly; the retrieved document is parsed
+without script execution and its default graph is presented as a named graph
+identified by the target document's canonical IRI. Contributions remain
+removable and never alter the source extraction.
+
 ## Development
 
 ```sh
@@ -85,9 +98,11 @@ npm pack --dry-run
 
 The published package contains the browser-ready ESM bundle, TypeScript
 declarations, README, and license. It has no runtime dependencies and does not
-execute RDF, SHACL, or remote contexts. Resource
-previews intentionally perform network activity only after explicit plain-link
-activation. Hovering a link never opens or fetches a preview. Direct preview
+execute RDF, SHACL, remote contexts, or retrieved scripts. Discovery retrieval
+and resource previews perform network activity only after explicit activation.
+Discovery fetches omit credentials and referrer information; cross-origin
+targets must permit browser access through CORS. Hovering a link never opens or
+fetches a preview. Direct preview
 documents may execute scripts,
 submit forms, and open user-initiated links in their own origin; browser
 same-origin policy still isolates them from the host document. When a site

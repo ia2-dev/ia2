@@ -1,4 +1,6 @@
 export { extractDataset } from "./extract.js";
+export { detectDiscoveryCandidates, DISCOVERY_PREDICATES, mergeDiscoveryContributions } from "./discovery.js";
+export type { DiscoveryCandidate, DiscoveryContribution } from "./discovery.js";
 export { Ia2RdfNavigator } from "./navigator.js";
 export { serializeJsonLd, serializeTurtle, termToTurtle } from "./serialize.js";
 export type * from "./model.js";

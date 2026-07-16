@@ -65,6 +65,8 @@ a:focus-visible {
   display: flex;
   justify-content: space-between;
   padding: 1.25rem clamp(1.25rem, 4vw, 4rem);
+  position: relative;
+  z-index: 40;
 }
 
 .wordmark,
@@ -76,6 +78,7 @@ a:focus-visible {
 }
 
 .site-header nav {
+  align-items: center;
   display: flex;
   font-size: 0.86rem;
   font-weight: 650;
@@ -88,6 +91,11 @@ a:focus-visible {
 
 .site-header nav a:hover {
   text-decoration: underline;
+}
+
+.site-header nav .spec-switcher__option:hover,
+.site-header nav .spec-switcher__option:focus-visible {
+  text-decoration: none;
 }
 
 .hero {
@@ -538,6 +546,7 @@ footer p {
 }
 
 footer > div {
+  align-items: center;
   display: flex;
   font-size: 0.76rem;
   font-weight: 700;

@@ -151,6 +151,11 @@ and inspected while the document is inert or changing at runtime.
   HTML attribute binding for complete RDF 1.2 datasets. The file is both the
   authored ReSpec source and an IA² document; there is no generated Markdown or
   template layer.
+- [`specs/discovery-enrichment/index.html`](specs/discovery-enrichment/index.html):
+  a supplemental profile for advertising, qualifying, retrieving, and
+  presenting additional RDF sources. It publishes a self-described vocabulary
+  for candidates, contributions, views, processing activities, roles, and
+  lifecycle states without implicit merging, trust, or execution.
 
 ### Guides
 
@@ -220,6 +225,7 @@ Then open:
 
 - <http://localhost:8000/site/guide/>
 - <http://localhost:8000/specs/html-rdf/>
+- <http://localhost:8000/specs/discovery-enrichment/>
 - <http://localhost:8000/demos/live-workspace/>
 
 The npm scope must be controlled before publishing `@ia2/html-rdf-navigator`.
@@ -247,7 +253,8 @@ Cloudflare Builds runs `npm run build`, then `npx wrangler deploy`, for
 production deployments from the `main` branch. The Worker serves the IA²
 project homepage at `ia2.dev`; the HTML/RDF specification is published at its
 canonical path, `/spec/html-rdf`, and the practical guide at
-`/guide/html-rdf`.
+`/guide/html-rdf`. The Discovery and Enrichment supplemental profile is
+published at `/spec/discovery-enrichment`.
 
 ## Status
 

@@ -27,6 +27,7 @@ export const PREFIXES: Readonly<Record<string, string>> = {
   doco: "http://purl.org/spar/doco/",
   pattern: "http://www.essepuntato.it/2008/12/pattern#",
   decision: "https://ontology.inferal.com/modules/decision/",
+  de: "https://ia2.dev/spec/discovery-enrichment#",
 };
 
 function escaped(value: string): string {
