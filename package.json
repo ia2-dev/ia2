@@ -4,10 +4,20 @@
   "private": true,
   "description": "Information Architecture for Intelligent Agents",
   "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "build": "npm --prefix packages/html-rdf-navigator run build",
+    "build": "npm run build:navigator && npm run build:site",
+    "build:navigator": "npm --prefix packages/html-rdf-navigator run build",
+    "build:site": "node scripts/build-site.mjs",
     "check": "npm --prefix packages/html-rdf-navigator run check",
+    "dev": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
     "test": "npm --prefix packages/html-rdf-navigator test",
     "serve": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "wrangler": "^4.111.0"
   }
 }

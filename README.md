@@ -153,10 +153,10 @@ vertical slices, not by declaring an all-encompassing framework in advance.
 
 ## Development
 
-Install and verify the package:
+Install the workspace and verify the package:
 
 ```sh
-npm install --prefix packages/html-rdf-navigator
+npm install
 npm test
 npm run check
 npm run build
@@ -174,6 +174,29 @@ Then open:
 - <http://localhost:8000/demos/live-workspace/>
 
 The npm scope must be controlled before publishing `@ia2/html-rdf-navigator`.
+
+## Deployment
+
+The project is deployed as an assets-only Cloudflare Worker. `wrangler.jsonc`
+is the deployment source of truth, and `npm run build` assembles only the
+public specification, demo, and navigator bundle into the generated `.site/`
+directory.
+
+Preview the Worker locally:
+
+```sh
+npm run dev
+```
+
+Deploy it manually:
+
+```sh
+npm run deploy
+```
+
+Cloudflare Builds uses `npm run deploy` for production deployments from the
+`main` branch. The Worker serves `ia2.dev`; its root redirects to the canonical
+HTML/RDF specification at `/spec/html-rdf`.
 
 ## Status
 

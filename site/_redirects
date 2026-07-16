@@ -1,0 +1,4 @@
+/                         /spec/html-rdf 302
+/specs/html-rdf          /spec/html-rdf 301
+/specs/html-rdf/         /spec/html-rdf 301
+/specs/html-rdf/*        /spec/html-rdf/:splat 301
