@@ -306,6 +306,12 @@ $$('[data-folder]').forEach((button) => button.addEventListener("click", () => {
 $("#mail-search").addEventListener("input", () => { openMessageId = null; renderMail(); });
 
 $$('.rail-link').forEach((button) => button.addEventListener("click", () => switchView(button.dataset.view)));
+$("#open-rdf-navigator").addEventListener("click", async () => {
+  await customElements.whenDefined("ia2-rdf-navigator");
+  const navigator = document.querySelector("ia2-rdf-navigator")
+    ?? document.body.appendChild(document.createElement("ia2-rdf-navigator"));
+  navigator.open("tab");
+});
 $("#theme-button").addEventListener("click", () => {
   const dark = document.documentElement.dataset.theme !== "dark";
   document.documentElement.dataset.theme = dark ? "dark" : "light";

@@ -41,13 +41,21 @@
           <span aria-hidden="true">◇</span><span>Inbox</span><b id="mail-nav-count">3</b>
         </button>
         <div class="rail-spacer"></div>
-        <div class="semantic-note">
-          <span class="pulse" aria-hidden="true"></span>
-          <p><strong>Live semantics</strong>Every change updates the document RDF.</p>
-        </div>
       </nav>
 
       <main id="workspace" tabindex="-1">
+        <aside class="demo-intro" aria-labelledby="demo-intro-title">
+          <span class="demo-intro-label"><i aria-hidden="true"></i> IA² live DOM demo</span>
+          <p class="demo-intro-copy" id="demo-intro-title">
+            <strong>Try the interface, then inspect its graph.</strong>
+            This issue tracker and inbox publishes its current state as RDF in
+            the live DOM. Change a status, create an issue, or open a message.
+          </p>
+          <button class="demo-intro-action" id="open-rdf-navigator" type="button">
+            Open RDF Navigator <span aria-hidden="true">↗</span>
+          </button>
+        </aside>
+
         <section class="view is-active" id="issues-view" aria-labelledby="issues-heading">
           <header class="view-header">
             <div>
