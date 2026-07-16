@@ -3,7 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>IA² | Information Architecture for Intelligent Agents</title>
+    <title
+      rdf-subject="https://ia2.dev/"
+      rdf-predicate="http://purl.org/dc/terms/title"
+    >IA² | Information Architecture for Intelligent Agents</title>
     <link rel="icon" href="/assets/ia2-mark.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/assets/ia2-mark-512.png">
     <meta
@@ -27,9 +30,10 @@
         class="wordmark"
         href="/"
         aria-label="IA squared home"
-        rdf-subject="https://ia2.dev/"
-        rdf-predicate="https://schema.org/name"
-      >IA²</a>
+      ><span
+        rdf-subject="#project"
+        rdf-predicate="http://purl.org/dc/terms/alternative"
+      >IA²</span></a>
       <nav aria-label="Primary navigation">
         <a href="/spec/html-rdf">HTML/RDF</a>
         <a href="/guide/html-rdf">Guide</a>
@@ -40,10 +44,15 @@
     </header>
 
     <main id="main">
-      <section class="hero" aria-labelledby="project-title">
+      <section id="project" class="hero" aria-labelledby="project-title">
         <div class="hero-grid">
           <div class="hero-copy">
-            <h1 id="project-title" class="project-name">
+            <h1
+              id="project-title"
+              class="project-name"
+              rdf-subject="#project"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >
               Information Architecture for Intelligent Agents
             </h1>
             <p class="hero-thesis">
@@ -52,8 +61,8 @@
             </p>
             <p
               class="hero-intro"
-              rdf-subject="https://ia2.dev/"
-              rdf-predicate="https://schema.org/abstract"
+              rdf-subject="#project"
+              rdf-predicate="http://purl.org/dc/terms/abstract"
             >
               That means more than making pages easy to parse. It means
               preserving what makes the web powerful: independently published
@@ -66,13 +75,13 @@
               <a
                 class="action action-primary"
                 href="/spec/html-rdf"
-                rdf-subject="https://ia2.dev/"
+                rdf-subject="#project"
                 rdf-predicate="http://purl.org/dc/terms/hasPart"
               >Read the HTML/RDF model <span aria-hidden="true">↗</span></a>
               <a
                 class="action action-secondary"
                 href="/demos/live-workspace"
-                rdf-subject="https://ia2.dev/"
+                rdf-subject="#project"
                 rdf-predicate="http://purl.org/dc/terms/hasPart"
               >Try the live demo</a>
             </div>
@@ -173,11 +182,21 @@
 
         <ul class="work-list">
           <li>
-            <a href="/spec/html-rdf">
+            <a
+              href="/spec/html-rdf"
+              rdf-subject="#project"
+              rdf-predicate="http://purl.org/dc/terms/hasPart"
+            >
               <span class="work-number">01</span>
               <span class="work-copy">
-                <strong>HTML/RDF core model</strong>
-                <span>An attribute binding for complete RDF 1.2 datasets.</span>
+                <strong
+                  rdf-subject="https://ia2.dev/spec/html-rdf"
+                  rdf-predicate="http://purl.org/dc/terms/title"
+                >HTML/RDF core model</strong>
+                <span
+                  rdf-subject="https://ia2.dev/spec/html-rdf"
+                  rdf-predicate="http://purl.org/dc/terms/description"
+                >An attribute binding for complete RDF 1.2 datasets.</span>
               </span>
               <span class="work-type">Specification</span>
               <span class="work-arrow" aria-hidden="true">↗</span>
@@ -186,35 +205,61 @@
           <li>
             <a
               href="/guide/html-rdf"
-              rdf-subject="https://ia2.dev/"
+              rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
               <span class="work-number">02</span>
               <span class="work-copy">
-                <strong>Using IA² in HTML</strong>
-                <span>An example-driven authoring guide from first statement to live DOM.</span>
+                <strong
+                  rdf-subject="https://ia2.dev/guide/html-rdf"
+                  rdf-predicate="http://purl.org/dc/terms/title"
+                >Using IA² in HTML</strong>
+                <span
+                  rdf-subject="https://ia2.dev/guide/html-rdf"
+                  rdf-predicate="http://purl.org/dc/terms/description"
+                >An example-driven authoring guide from first statement to live DOM.</span>
               </span>
               <span class="work-type">Guide</span>
               <span class="work-arrow" aria-hidden="true">↗</span>
             </a>
           </li>
           <li>
-            <a href="/demos/live-workspace">
+            <a
+              href="/demos/live-workspace"
+              rdf-subject="#project"
+              rdf-predicate="http://purl.org/dc/terms/hasPart"
+            >
               <span class="work-number">03</span>
               <span class="work-copy">
-                <strong>Live semantic workspace</strong>
-                <span>An issue tracker and inbox whose RDF changes with the DOM.</span>
+                <strong
+                  rdf-subject="https://ia2.dev/demos/live-workspace"
+                  rdf-predicate="http://purl.org/dc/terms/title"
+                >Live semantic workspace</strong>
+                <span
+                  rdf-subject="https://ia2.dev/demos/live-workspace"
+                  rdf-predicate="http://purl.org/dc/terms/description"
+                >An issue tracker and inbox whose RDF changes with the DOM.</span>
               </span>
               <span class="work-type">Interactive demo</span>
               <span class="work-arrow" aria-hidden="true">↗</span>
             </a>
           </li>
           <li>
-            <a href="https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator">
+            <a
+              href="https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator"
+              rdf-subject="#project"
+              rdf-predicate="http://purl.org/dc/terms/hasPart"
+            >
               <span class="work-number">04</span>
               <span class="work-copy">
-                <strong>HTML RDF Navigator</strong>
-                <span>Extraction, navigation, and serialization tied back to DOM carriers.</span>
+                <strong
+                  rdf-subject="https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator"
+                  rdf-predicate="http://purl.org/dc/terms/title"
+                >HTML RDF Navigator</strong>
+                <span
+                  rdf-subject="https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator"
+                  rdf-predicate="http://purl.org/dc/terms/description"
+                >Extraction, navigation, and serialization tied back to DOM carriers.</span>
               </span>
               <span class="work-type">TypeScript package</span>
               <span class="work-arrow" aria-hidden="true">↗</span>
@@ -236,7 +281,12 @@
             participate in that commons without first translating it into a
             platform-owned schema.
           </p>
-          <a class="source-link" href="https://github.com/ia2-dev/ia2">
+          <a
+            class="source-link"
+            href="https://github.com/ia2-dev/ia2"
+            rdf-subject="https://ia2.dev/"
+            rdf-predicate="http://purl.org/dc/terms/source"
+          >
             Follow the work on GitHub <span aria-hidden="true">↗</span>
           </a>
         </div>
@@ -260,5 +310,11 @@
       rdf-subject="https://ia2.dev/"
       rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
     >Website</a>
+    <a
+      hidden
+      href="#project"
+      rdf-subject="https://ia2.dev/"
+      rdf-predicate="https://schema.org/mainEntity"
+    >IA² project</a>
   </body>
 </html>
