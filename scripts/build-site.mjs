@@ -6,6 +6,8 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const output = join(root, ".site");
 
 const assets = [
+  ["site/index.html", "index.html"],
+  ["site/home.css", "home.css"],
   ["site/_redirects", "_redirects"],
   ["specs/html-rdf/index.html", "spec/html-rdf/index.html"],
   ["demos/live-workspace/index.html", "demos/live-workspace/index.html"],

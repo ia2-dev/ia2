@@ -195,8 +195,8 @@ npm run deploy
 ```
 
 Cloudflare Builds uses `npm run deploy` for production deployments from the
-`main` branch. The Worker serves `ia2.dev`; its root redirects to the canonical
-HTML/RDF specification at `/spec/html-rdf`.
+`main` branch. The Worker serves the IA² project homepage at `ia2.dev`; the
+HTML/RDF specification is published at its canonical path, `/spec/html-rdf`.
 
 ## Status
 

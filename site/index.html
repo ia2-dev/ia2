@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IA² | Information Architecture for Intelligent Agents</title>
+    <meta
+      name="description"
+      content="IA² explores an open information architecture that makes documents and applications legible to people and intelligent agents."
+      rdf-subject="https://ia2.dev/"
+      rdf-predicate="http://purl.org/dc/terms/description"
+    >
+    <link rel="canonical" href="https://ia2.dev/">
+    <link rel="stylesheet" href="/home.css">
+    <script
+      type="module"
+      src="/packages/html-rdf-navigator/dist/html-rdf-navigator.js"
+    ></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to the project</a>
+
+    <header class="site-header">
+      <a
+        class="wordmark"
+        href="/"
+        aria-label="IA squared home"
+        rdf-subject="https://ia2.dev/"
+        rdf-predicate="https://schema.org/name"
+      >IA²</a>
+      <nav aria-label="Primary navigation">
+        <a href="#horizon">Horizon</a>
+        <a href="#work">Current work</a>
+        <a href="https://github.com/ia2-dev/ia2">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="project-name">Information Architecture for Intelligent Agents</p>
+            <h1 id="hero-title">
+              The web should be legible to agents
+              <span>without becoming theirs.</span>
+            </h1>
+            <p
+              class="hero-intro"
+              rdf-subject="https://ia2.dev/"
+              rdf-predicate="https://schema.org/abstract"
+            >
+              IA² explores how documents and applications can publish explicit
+              meaning where people already see and use information. Agents can
+              inspect it, validate it, and follow it without hidden semantic
+              payloads or platform-specific integrations.
+            </p>
+            <div class="hero-actions" aria-label="Start exploring">
+              <a
+                class="action action-primary"
+                href="/spec/html-rdf"
+                rdf-subject="https://ia2.dev/"
+                rdf-predicate="http://purl.org/dc/terms/hasPart"
+              >Read the HTML/RDF model <span aria-hidden="true">↗</span></a>
+              <a
+                class="action action-secondary"
+                href="/demos/live-workspace"
+                rdf-subject="https://ia2.dev/"
+                rdf-predicate="http://purl.org/dc/terms/hasPart"
+              >Open the live workspace</a>
+            </div>
+          </div>
+
+          <figure class="semantic-surface">
+            <figcaption>
+              <span>A surface that explains itself</span>
+              <span class="live-mark"><i></i> Extractable</span>
+            </figcaption>
+            <pre aria-label="HTML carrying an explicit RDF statement"><code><span class="code-tag">&lt;article</span>
+  <span class="code-attr">id</span>=<span class="code-value">"issue-42"</span>
+  <span class="code-attr">rdf-subject</span>=<span class="code-value">"#issue-42"</span>
+  <span class="code-attr">rdf-predicate</span>=<span class="code-value">"schema:name"</span>
+<span class="code-tag">&gt;</span>
+  Make meaning visible
+<span class="code-tag">&lt;/article&gt;</span></code></pre>
+            <div class="extraction" aria-label="Extracted RDF statement">
+              <span class="extraction-label">yields</span>
+              <code>&lt;#issue-42&gt; schema:name "Make meaning visible" .</code>
+            </div>
+          </figure>
+        </div>
+        <p class="hero-note">
+          HTML is the first proving ground, not the boundary of the project.
+        </p>
+      </section>
+
+      <section class="premise" aria-labelledby="premise-title">
+        <p class="section-index">01 / Premise</p>
+        <div class="premise-copy">
+          <h2 id="premise-title">One information surface.</h2>
+          <p>
+            The web already contains our broadest information architecture,
+            but its machine-facing layer is fragmented. Meaning is inferred
+            from presentation, isolated behind APIs, or shipped in payloads
+            detached from the content a person sees.
+          </p>
+          <p>
+            IA² keeps presentation and machine-readable meaning directly
+            correlated. An inert document can be downloaded and inspected. A
+            live application can expose its current semantic state. Both can
+            remain independent of the agent that reads them.
+          </p>
+        </div>
+      </section>
+
+      <section id="horizon" class="horizon" aria-labelledby="horizon-title">
+        <div class="section-heading">
+          <p class="section-index">02 / Architectural horizon</p>
+          <h2 id="horizon-title">A legibility layer for more than pages.</h2>
+          <p>
+            Each layer answers a different question. Keeping them separate is
+            what makes the whole architecture composable.
+          </p>
+        </div>
+
+        <ol class="layers">
+          <li>
+            <span class="layer-number">01</span>
+            <h3>Surfaces and bindings</h3>
+            <p>Where does the information live, and how does it relate to what a person sees?</p>
+            <span class="layer-territory">HTML and live DOM today; more host-native bindings later.</span>
+          </li>
+          <li>
+            <span class="layer-number">02</span>
+            <h3>Semantic models</h3>
+            <p>What does the information mean?</p>
+            <span class="layer-territory">Full RDF 1.2, open vocabularies, profiles, and mappings.</span>
+          </li>
+          <li>
+            <span class="layer-number">03</span>
+            <h3>Integrity and evidence</h3>
+            <p>Why should a consumer accept, qualify, or revisit it?</p>
+            <span class="layer-territory">SHACL, provenance, confidence, validation, and signatures.</span>
+          </li>
+          <li>
+            <span class="layer-number">04</span>
+            <h3>Agency</h3>
+            <p>What could be done, under which conditions, and by whose authority?</p>
+            <span class="layer-territory">Inspectable affordances with execution kept separate.</span>
+          </li>
+          <li>
+            <span class="layer-number">05</span>
+            <h3>Navigation and exchange</h3>
+            <p>How does information move without losing identity or context?</p>
+            <span class="layer-territory">Discovery, fragments, snapshots, queries, diffs, and subscriptions.</span>
+          </li>
+        </ol>
+      </section>
+
+      <section id="work" class="work" aria-labelledby="work-title">
+        <div class="section-heading work-heading">
+          <p class="section-index">03 / Inspect what exists</p>
+          <h2 id="work-title">The first vertical slice is already navigable.</h2>
+        </div>
+
+        <ul class="work-list">
+          <li>
+            <a href="/spec/html-rdf">
+              <span class="work-number">01</span>
+              <span class="work-copy">
+                <strong>HTML/RDF core model</strong>
+                <span>An attribute binding for complete RDF 1.2 datasets.</span>
+              </span>
+              <span class="work-type">Specification</span>
+              <span class="work-arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a href="/demos/live-workspace">
+              <span class="work-number">02</span>
+              <span class="work-copy">
+                <strong>Live semantic workspace</strong>
+                <span>An issue tracker and inbox whose RDF changes with the DOM.</span>
+              </span>
+              <span class="work-type">Interactive demo</span>
+              <span class="work-arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator">
+              <span class="work-number">03</span>
+              <span class="work-copy">
+                <strong>HTML RDF Navigator</strong>
+                <span>Extraction, navigation, and serialization tied back to DOM carriers.</span>
+              </span>
+              <span class="work-type">TypeScript package</span>
+              <span class="work-arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <section class="north-star" aria-labelledby="north-star-title">
+        <p class="section-index">04 / North star</p>
+        <div>
+          <h2 id="north-star-title">
+            Agents should be able to come to independently published
+            information and understand it on its own terms.
+          </h2>
+          <p>
+            The result is not one universal agent API. It is a web of
+            addressable, composable information that many agents and
+            applications can navigate without translating everything into a
+            platform-owned schema.
+          </p>
+          <a class="source-link" href="https://github.com/ia2-dev/ia2">
+            Follow the work on GitHub <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <a class="footer-mark" href="/">IA²</a>
+      <p>Information Architecture for Intelligent Agents</p>
+      <div>
+        <a href="/spec/html-rdf">Specification</a>
+        <a href="/demos/live-workspace">Demo</a>
+        <a href="https://github.com/ia2-dev/ia2">Source</a>
+      </div>
+    </footer>
+
+    <a
+      hidden
+      href="https://schema.org/WebSite"
+      rdf-subject="https://ia2.dev/"
+      rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    >Website</a>
+  </body>
+</html>
