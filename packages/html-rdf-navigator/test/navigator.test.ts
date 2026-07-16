@@ -352,11 +352,19 @@ describe("Ia2RdfNavigator", () => {
 
     const startingLeft = Number.parseFloat(panel.style.left);
     const startingTop = Number.parseFloat(panel.style.top);
-    panel.querySelector<HTMLElement>(".drag-grip")!.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0, clientX: 100, clientY: 100 }));
+    panel.querySelector<HTMLElement>(".tabs")!.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0, clientX: 100, clientY: 100 }));
     window.dispatchEvent(new MouseEvent("pointermove", { clientX: 130, clientY: 120 }));
     window.dispatchEvent(new MouseEvent("pointerup"));
     expect(Number.parseFloat(panel.style.left)).toBe(startingLeft + 30);
     expect(Number.parseFloat(panel.style.top)).toBe(startingTop + 20);
+
+    const draggedLeft = Number.parseFloat(panel.style.left);
+    const draggedTop = Number.parseFloat(panel.style.top);
+    panel.querySelector<HTMLElement>(".tab")!.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0, clientX: 100, clientY: 100 }));
+    window.dispatchEvent(new MouseEvent("pointermove", { clientX: 150, clientY: 150 }));
+    window.dispatchEvent(new MouseEvent("pointerup"));
+    expect(Number.parseFloat(panel.style.left)).toBe(draggedLeft);
+    expect(Number.parseFloat(panel.style.top)).toBe(draggedTop);
 
     const draggedWidth = Number.parseFloat(panel.style.width);
     const draggedHeight = Number.parseFloat(panel.style.height);

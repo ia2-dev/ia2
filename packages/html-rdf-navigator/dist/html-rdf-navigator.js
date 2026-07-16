@@ -720,10 +720,11 @@ var CSS = String.raw`
   .panel[data-open="true"] { transform: translateX(0); visibility: visible; }
   .panel[data-position="floating"][data-open="true"] { opacity: 1; transform: translateY(0) scale(1); }
   .toolbar { align-items: center; border-bottom: 1px solid var(--line); display: flex; gap: 8px; min-width: 0; padding: 0 8px 0 12px; }
-  .drag-grip { color: var(--muted); display: none; flex: 0 0 18px; height: 36px; place-items: center; touch-action: none; user-select: none; }
+  .drag-grip { color: var(--muted); display: none; flex: 0 0 30px; height: 36px; place-items: center; touch-action: none; user-select: none; }
   .panel[data-position="floating"] .drag-grip { cursor: grab; display: grid; }
-  .panel[data-position="floating"].is-dragging .drag-grip { cursor: grabbing; }
-  .drag-grip svg { fill: currentColor; height: 18px; opacity: .58; width: 10px; }
+  .panel[data-position="floating"] .tabs { cursor: grab; }
+  .panel[data-position="floating"].is-dragging .drag-grip, .panel[data-position="floating"].is-dragging .tabs { cursor: grabbing; }
+  .drag-grip svg { fill: currentColor; height: 18px; opacity: .68; width: 10px; }
   .header-actions { align-items: center; display: flex; flex: 0 0 auto; gap: 4px; }
   .position-switch { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 7px; display: inline-flex; flex: 0 0 198px; overflow: hidden; transition: background 140ms ease, border-color 140ms ease; width: 198px; }
   .position-switch:hover, .position-switch:focus-within { background: var(--layer); border-color: var(--line); }
@@ -2565,7 +2566,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
       </button>
       <aside class="panel" id="ia2-rdf-panel" data-open="${this.#open}" data-position="${this.#position}" aria-label="Document RDF" tabindex="-1">
         <header class="toolbar">
-          <span class="drag-grip" aria-hidden="true"><svg viewBox="0 0 8 18"><circle cx="2" cy="4" r="1.2"/><circle cx="6" cy="4" r="1.2"/><circle cx="2" cy="9" r="1.2"/><circle cx="6" cy="9" r="1.2"/><circle cx="2" cy="14" r="1.2"/><circle cx="6" cy="14" r="1.2"/></svg></span>
+          <span class="drag-grip" aria-hidden="true" title="Drag floating navigator"><svg viewBox="0 0 8 18"><circle cx="2" cy="4" r="1.2"/><circle cx="6" cy="4" r="1.2"/><circle cx="2" cy="9" r="1.2"/><circle cx="6" cy="9" r="1.2"/><circle cx="2" cy="14" r="1.2"/><circle cx="6" cy="14" r="1.2"/></svg></span>
           <div class="tabs" role="tablist" aria-label="RDF views">
             <button class="tab" role="tab" data-view="navigator" aria-selected="${this.#view === "navigator"}">Navigator</button>
             <button class="tab" role="tab" data-view="turtle" aria-selected="${this.#view === "turtle"}">Turtle</button>
@@ -2625,9 +2626,10 @@ var Ia2RdfNavigator = class extends HTMLElement {
     if (panel) {
       if (this.#position === "floating") this.#applyFloatingGeometry(panel);
       const toolbar = panel.querySelector(".toolbar");
+      const tabs = toolbar?.querySelector(".tabs");
       toolbar?.addEventListener("pointerdown", (event) => {
         const target = event.target instanceof Element ? event.target : null;
-        if (target !== toolbar && !target?.closest(".drag-grip")) return;
+        if (target !== toolbar && target !== tabs && !target?.closest(".drag-grip")) return;
         this.#startFloatingInteraction(event, panel);
       });
       panel.querySelectorAll(".resize-handle").forEach((handle) => {
