@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { extractDataset } from "../src/extract.js";
 // @ts-expect-error Vitest supplies Vite's raw-fixture import during tests.
 import homepageHtml from "../../../site/index.html?raw";
+// @ts-expect-error Vitest supplies Vite's raw-fixture import during tests.
+import privacyHtml from "../../../site/privacy/index.html?raw";
 
 const DCTERMS = "http://purl.org/dc/terms/";
 const DECISION = "https://ontology.inferal.com/modules/decision/";
@@ -135,5 +137,19 @@ describe("IA² homepage semantics", () => {
     }
 
     expect(result.quads.some((quad) => quad.predicate.value === `${SCHEMA}name`)).toBe(false);
+  });
+
+  it("links to the extension privacy disclosure from the public homepage", () => {
+    const homepage = new DOMParser().parseFromString(homepageHtml, "text/html");
+    const privacy = new DOMParser().parseFromString(privacyHtml, "text/html");
+
+    expect(homepage.querySelector('footer a[href="/privacy/"]')?.textContent).toBe("Privacy");
+    expect(privacy.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://ia2.dev/privacy/");
+    expect(privacy.querySelector("#collection")?.parentElement?.textContent).toMatch(
+      /do not collect or receive the page\s+content/,
+    );
+    expect(privacy.querySelector("#limited-use")?.parentElement?.textContent).toContain(
+      "Chrome Web Store User Data Policy",
+    );
   });
 });

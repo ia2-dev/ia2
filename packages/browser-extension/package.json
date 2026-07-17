@@ -8,9 +8,10 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "build:e2e": "node scripts/build.mjs --e2e",
-    "check": "node --check src/auto.js && node --check src/background.js && node --check src/content.js && node --check src/mount.js && node --check src/status.js && node --check scripts/build.mjs && node --check scripts/package.mjs && node --check scripts/package-safari.mjs",
+    "check": "node --check src/auto.js && node --check src/background.js && node --check src/content.js && node --check src/mount.js && node --check src/status.js && node --check scripts/build.mjs && node --check scripts/package.mjs && node --check scripts/package-safari.mjs && node --check scripts/store-assets.mjs",
     "package": "npm run build && node scripts/package.mjs",
     "package:safari": "npm run build && node scripts/package-safari.mjs",
+    "store:assets": "npm run build:e2e && node scripts/store-assets.mjs",
     "test": "npm run build && node --test"
   },
   "devDependencies": {

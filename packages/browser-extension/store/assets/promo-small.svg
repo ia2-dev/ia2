@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="280" viewBox="0 0 440 280">
+  <rect width="440" height="280" fill="#6842c2"/>
+  <g fill="#faf8ff" font-family="Avenir Next, Avenir, Segoe UI, sans-serif">
+    <text x="28" y="48" font-size="25" font-weight="800" letter-spacing="-1.5">IA²</text>
+    <text x="28" y="104" font-size="34" font-weight="700" letter-spacing="-1.6">Navigator</text>
+    <text x="28" y="134" font-size="15" font-weight="600" fill="#e6ddfa">Meaning, visible in the page.</text>
+  </g>
+  <g transform="translate(28 168)">
+    <rect width="384" height="84" fill="#39276b"/>
+    <g font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10">
+      <text x="16" y="24" fill="#c9baf1">&lt;span rdf-predicate="schema:name"&gt;</text>
+      <text x="16" y="42" fill="#faf8ff">  Northstar review</text>
+      <text x="16" y="60" fill="#c9baf1">&lt;/span&gt;</text>
+    </g>
+    <path d="M238 22h26v40h-26" fill="none" stroke="#b9ec65" stroke-width="2"/>
+    <circle cx="238" cy="22" r="4" fill="#b9ec65"/>
+    <circle cx="238" cy="62" r="4" fill="#b9ec65"/>
+    <g font-family="Avenir Next, Avenir, Segoe UI, sans-serif">
+      <text x="282" y="31" fill="#c9baf1" font-size="10" font-weight="700">EXTRACTED</text>
+      <text x="282" y="51" fill="#faf8ff" font-size="14" font-weight="700">Northstar review</text>
+    </g>
+  </g>
+</svg>

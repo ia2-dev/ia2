@@ -9,6 +9,8 @@ const assets = [
   ["site/index.html", "index.html"],
   ["site/home.css", "home.css"],
   ["site/home.js", "home.js"],
+  ["site/privacy.css", "privacy.css"],
+  ["site/privacy/index.html", "privacy/index.html"],
   ["site/spec-selector.css", "spec-selector.css"],
   ["site/spec-selector.js", "spec-selector.js"],
   ["site/assets/ia2-mark.svg", "assets/ia2-mark.svg"],

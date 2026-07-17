@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IA² Navigator privacy</title>
+    <meta
+      name="description"
+      content="How IA² Navigator processes website content, stores interface preferences, and retrieves linked resources."
+    >
+    <link rel="icon" href="/assets/ia2-mark.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/assets/ia2-mark-512.png">
+    <link rel="canonical" href="https://ia2.dev/privacy/">
+    <link rel="stylesheet" href="/privacy.css?v=0.1">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to the privacy policy</a>
+
+    <header class="site-header">
+      <a class="wordmark" href="/" aria-label="IA squared home">IA²</a>
+      <nav aria-label="Primary navigation">
+        <a href="/guide/html-rdf">Guide</a>
+        <a href="/demos/live-workspace/">Demo</a>
+        <a href="https://github.com/ia2-dev/ia2">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <header class="policy-heading">
+        <p class="policy-product">IA² Navigator browser extension</p>
+        <h1>Privacy, in plain terms.</h1>
+        <p class="policy-summary">
+          IA² Navigator inspects supported pages on your device. It does not
+          send page content, browsing history, or usage analytics to IA² or
+          Inferal.
+        </p>
+        <p class="policy-date">Last updated 17 July 2026</p>
+      </header>
+
+      <article class="policy">
+        <section aria-labelledby="scope">
+          <h2 id="scope">What the extension processes</h2>
+          <div>
+            <p>
+              IA² Navigator reads the top-level content and URL of the current
+              page to extract HTML/RDF statements and present their graphs,
+              terms, and source carriers. On a HARE resource envelope, it also
+              reads the manifest and its embedded representations so it can
+              verify and present the declared files.
+            </p>
+            <p>
+              The extension checks eligible pages locally for a HARE
+              declaration so that it can open the file view automatically. On
+              other pages, the full Navigator opens only when you select its
+              toolbar action.
+            </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="collection">
+          <h2 id="collection">What we collect</h2>
+          <div>
+            <p>
+              Inferal and the IA² project do not collect or receive the page
+              content, URLs, RDF statements, HARE resources, browsing history,
+              searches, or interaction data processed by the extension. The
+              extension has no analytics, advertising, account system, or
+              developer-operated data service.
+            </p>
+            <p>
+              Processing occurs in the page and extension contexts in your
+              browser. Parsed statements, verified HARE resources, and fetched
+              previews remain in memory and are discarded when their page
+              context ends.
+            </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="storage">
+          <h2 id="storage">Local storage</h2>
+          <div>
+            <p>
+              The Navigator stores only its drawer position, size, and docking
+              preference in the current website's browser session storage. It
+              does not store extracted page content. Your browser clears this
+              session state according to its normal session-storage behavior.
+            </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="network">
+          <h2 id="network">Requests you initiate</h2>
+          <div>
+            <p>
+              When you choose to retrieve a linked RDF source or open a remote
+              definition preview, the extension requests that resource
+              directly from its published address. Retrieval requests made by
+              the Navigator omit browser credentials and the referring page.
+              Some definition previews can load the destination in a sandboxed
+              browser frame.
+            </p>
+            <p>
+              The destination service can receive ordinary request information,
+              such as your IP address and the requested URL, and is governed by
+              its own privacy policy. The request is not routed through IA² or
+              Inferal, and the response is not sent to us.
+            </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="sharing">
+          <h2 id="sharing">Sharing and human access</h2>
+          <div>
+            <p>
+              We do not sell, share, or use extension data for advertising,
+              profiling, credit decisions, or any purpose unrelated to the
+              extension's visible inspection and file-browsing features. No
+              person at IA² or Inferal can read content processed locally by
+              the extension because that content is not sent to us.
+            </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="limited-use">
+          <h2 id="limited-use">Chrome Web Store Limited Use</h2>
+          <div>
+            <p>
+              IA² Navigator's use of information received from Chrome APIs
+              complies with the Chrome Web Store User Data Policy, including
+              the Limited Use requirements. The extension uses access to page
+              content only to provide its disclosed, user-facing purpose.
+            </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="changes">
+          <h2 id="changes">Changes and contact</h2>
+          <div>
+            <p>
+              If a release changes how the extension handles data, this page
+              and the Chrome Web Store disclosures will be updated before that
+              release is published.
+            </p>
+            <p>
+              Questions and privacy requests can be filed in the
+              <a href="https://github.com/ia2-dev/ia2/issues">IA² issue tracker</a>.
+              IA² Navigator is open source, and its implementation is available
+              in the <a href="https://github.com/ia2-dev/ia2/tree/main/packages/browser-extension">browser extension package</a>.
+            </p>
+          </div>
+        </section>
+      </article>
+    </main>
+
+    <footer>
+      <a class="footer-mark" href="/">IA²</a>
+      <p>Information Architecture for Intelligent Agents</p>
+      <div>
+        <a href="/guide/html-rdf">Guide</a>
+        <a href="/demos/live-workspace/">Demo</a>
+        <a href="https://github.com/ia2-dev/ia2">Source</a>
+        <a href="/privacy/" aria-current="page">Privacy</a>
+      </div>
+    </footer>
+  </body>
+</html>

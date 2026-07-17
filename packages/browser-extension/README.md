@@ -73,6 +73,12 @@ npm --prefix packages/browser-extension run package
 Firefox signing through addons.mozilla.org and Chrome Web Store publication are
 separate release operations.
 
+After the repository production build, `npm --prefix packages/browser-extension
+run store:assets` uses the loopback-only AE2E target to capture the current 1280
+by 800 Chrome Web Store screenshots and render the 440 by 280 promotional tile
+in `store/assets`. The screenshots use the production bundles; only their local
+fixture access differs from the uploaded manifest.
+
 `npm run test:ae2e` at the repository root reuses one Navigator contract across
 embedded Chromium, Firefox, and WebKit and the three corresponding extension
 engines. Its separate `dist-e2e` build grants only the local fixture origin.
