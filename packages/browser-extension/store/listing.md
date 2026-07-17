@@ -52,7 +52,7 @@ HARE proposals. These proposals are not established standards.
 ## URLs
 
 * Homepage: https://ia2.dev/
-* Support: https://github.com/ia2-dev/ia2/issues
+* Support: https://ia2.dev/support/
 * Privacy policy: https://ia2.dev/privacy/
 * Source: https://github.com/ia2-dev/ia2/tree/main/packages/browser-extension
 

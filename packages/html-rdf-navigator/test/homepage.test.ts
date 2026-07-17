@@ -144,6 +144,7 @@ describe("IA² homepage semantics", () => {
     const privacy = new DOMParser().parseFromString(privacyHtml, "text/html");
 
     expect(homepage.querySelector('footer a[href="/privacy/"]')?.textContent).toBe("Privacy");
+    expect(homepage.querySelector('footer a[href="/support/"]')?.textContent).toBe("Support");
     expect(privacy.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://ia2.dev/privacy/");
     expect(privacy.querySelector("#collection")?.parentElement?.textContent).toMatch(
       /do not collect or receive the page\s+content/,
