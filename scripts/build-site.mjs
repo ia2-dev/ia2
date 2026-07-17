@@ -7,6 +7,7 @@ const output = join(root, ".site");
 
 const assets = [
   ["site/index.html", "index.html"],
+  ["site/llms.txt", "llms.txt"],
   ["site/home.css", "home.css"],
   ["site/home.js", "home.js"],
   ["site/privacy.css", "privacy.css"],

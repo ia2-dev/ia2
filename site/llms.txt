@@ -1,0 +1,46 @@
+# IA²: Information Architecture for Intelligent Agents
+
+> IA² is an experimental open project exploring how people, applications, and
+> agents can share richly structured, inspectable information without giving one
+> platform ownership of its meaning.
+
+IA² treats HTML as its first proving ground, not its boundary. The current work
+lets ordinary HTML documents and live DOMs carry complete RDF 1.2 datasets whose
+statements remain correlated with their visible HTML carriers. It also explores
+HARE, the HTML Agent Resource Envelope, as a declarative, browser-openable
+container for related resources and their manifest.
+
+Treat the specifications as exploratory proposals and editor's drafts, not
+established standards. Distinguish normative requirements in a specification
+from behavior implemented by the reference packages, scenarios demonstrated by
+examples, and future directions described by the project. IA² keeps meaning,
+validation, evidence, authority, and execution as separate concerns; a
+machine-readable description of an action does not grant permission to perform
+it.
+
+## Specifications
+
+- [HTML/RDF Core Model](https://ia2.dev/spec/html-rdf): Exploratory HTML attribute binding for locally extractable, complete RDF 1.2 datasets, including named graphs, blank nodes, triple terms, reification, language direction, datatypes, SHACL, and SHACL-AF.
+- [Discovery and Enrichment](https://ia2.dev/spec/discovery-enrichment): Supplemental profile for advertising, qualifying, retrieving, and presenting additional RDF sources without implicit merging, trust, or execution.
+- [HTML Agent Resource Envelope (HARE)](https://ia2.dev/spec/resource-envelope): HARE 0.1 proposal for self-contained HTML/RDF resource envelopes with a declarative manifest, inert carriers, integrity metadata, and optional progressive enhancement.
+
+## Guides and implementations
+
+- [Using IA² in HTML](https://ia2.dev/guide/html-rdf): Example-driven authoring guide covering complete statements, named graphs, RDF 1.2 triple terms, and live DOM extraction.
+- [HTML/RDF Navigator source](https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator): Dependency-free TypeScript extractor, serializers, and web component that correlate RDF statements with their DOM carriers.
+- [HARE Viewer source](https://github.com/ia2-dev/ia2/tree/main/packages/hare-viewer): Optional file-browser UI, manifest parser, integrity verification, and inert preview support for HARE envelopes.
+- [Browser extension source](https://github.com/ia2-dev/ia2/tree/main/packages/browser-extension): Chrome, Firefox, and Safari adapter for the HTML/RDF Navigator and automatic HARE enhancement.
+
+## Examples
+
+- [Live semantic workspace](https://ia2.dev/demos/live-workspace): Interactive applications whose semantic DOM changes with visible application state.
+- [Atlas decision handoff](https://ia2.dev/spec/resource-envelope/examples/decision-handoff.html): Declarative HARE example for a decision brief and exact resource bytes.
+- [Northstar vendor review](https://ia2.dev/spec/resource-envelope/examples/vendor-review.html): Self-viewing HARE example with a manifest, integrity metadata, and related resources.
+- [Riverside inspection evidence](https://ia2.dev/spec/resource-envelope/examples/inspection-evidence.html): Bare HARE file-browser example for an evidence pack.
+- [Orion release handoff](https://ia2.dev/spec/resource-envelope/examples/release-handoff.html): Authored HARE document with linked, verified passive resources.
+
+## Project
+
+- [IA² homepage](https://ia2.dev/): Project purpose, architectural horizon, and current working system.
+- [Source repository](https://github.com/ia2-dev/ia2): Specifications, packages, demos, tests, and contributor documentation.
+- [Project overview](https://github.com/ia2-dev/ia2/blob/main/README.md): Detailed motivation, design stance, current work, and exploration program.
