@@ -231,8 +231,8 @@ Then open:
 - <http://localhost:8000/specs/discovery-enrichment/>
 - <http://localhost:8000/demos/live-workspace/>
 
-Releases of `@ia2-dev/html-rdf-navigator` are published from GitHub Actions
-through npm trusted publishing.
+Releases of `@ia2-dev/html-rdf-navigator` and `@ia2-dev/hare-viewer` are
+published from GitHub Actions through npm trusted publishing.
 
 ## Deployment
 

@@ -1,6 +1,6 @@
 {
   "name": "@ia2-dev/hare-viewer",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "description": "An optional file browser and verified resource viewer for IA² HARE documents.",
   "author": "Yurii Rashkovskii",
   "homepage": "https://ia2.dev/spec/resource-envelope",

@@ -1,0 +1,70 @@
+name: Publish HARE Viewer
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - packages/hare-viewer/package.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish-hare-viewer
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Test and publish
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/hare-viewer
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Update npm
+        run: npm install --global npm@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Type-check
+        run: npm run check
+
+      - name: Build
+        run: npm run build
+
+      - name: Check release version
+        id: release
+        shell: bash
+        run: |
+          version="$(node --print "require('./package.json').version")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          if npm view "@ia2-dev/hare-viewer@$version" version >/dev/null 2>&1; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "Version $version is already published."
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "Version $version will be published."
+          fi
+
+      - name: Publish to npm
+        if: steps.release.outputs.publish == 'true'
+        run: npm publish --access public
