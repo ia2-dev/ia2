@@ -1,5 +1,6 @@
 const STATUS_OBSERVER = Symbol.for("ia2.navigator.extension.status-observer");
 const EXTENSION_TAG = "ia2-extension-navigator";
+const PAGE_TAG = "ia2-rdf-navigator";
 const EXTENSION_HARE_TAG = "ia2-extension-hare-viewer";
 const PAGE_HARE_TAG = "ia2-hare-viewer";
 const extensionApi = globalThis.browser ?? globalThis.chrome;
@@ -8,7 +9,7 @@ let lastFiles = null;
 
 async function findNavigator() {
   for (let attempt = 0; attempt < 100; attempt += 1) {
-    const navigator = document.querySelector(EXTENSION_TAG);
+    const navigator = document.querySelector(PAGE_TAG) ?? document.querySelector(EXTENSION_TAG);
     if (navigator?.shadowRoot?.querySelector(".launcher .count")) return navigator;
     await new Promise((resolve) => setTimeout(resolve, 20));
   }

@@ -1,4 +1,5 @@
 export const EXTENSION_TAG = "ia2-extension-navigator";
+export const PAGE_TAG = "ia2-rdf-navigator";
 export const EXTENSION_HARE_TAG = "ia2-extension-hare-viewer";
 export const PAGE_HARE_TAG = "ia2-hare-viewer";
 
@@ -25,7 +26,9 @@ export function declaresHareEnvelope() {
 
 export async function ensureNavigator() {
   const { Ia2RdfNavigator } = await import("../../html-rdf-navigator/src/index.ts");
-  let navigator = document.querySelector(EXTENSION_TAG);
+  // A page-provided Navigator is the canonical instance when one is present.
+  // Reusing it keeps the extension toolbar and the page launcher synchronized.
+  let navigator = document.querySelector(PAGE_TAG) ?? document.querySelector(EXTENSION_TAG);
   if (!navigator) {
     if (!customElements.get(EXTENSION_TAG)) {
       customElements.define(EXTENSION_TAG, class Ia2ExtensionNavigator extends Ia2RdfNavigator {});

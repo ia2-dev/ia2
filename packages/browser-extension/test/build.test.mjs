@@ -96,6 +96,48 @@ test("content bundle mounts and toggles an extension-owned Navigator", async () 
   dom.window.close();
 });
 
+test("content bundle reuses a page-provided Navigator", async () => {
+  const [bundle, statusBundle] = await Promise.all([
+    readFile(resolve(packageRoot, "dist/chrome/content.js"), "utf8"),
+    readFile(resolve(packageRoot, "dist/chrome/status.js"), "utf8"),
+  ]);
+  const dom = new JSDOM(`<!doctype html><html><head>
+    <link rel="canonical" href="https://example.test/page">
+    </head><body>
+    <span rdf-subject="#item" rdf-predicate="https://schema.org/name">Item</span>
+    <ia2-rdf-navigator></ia2-rdf-navigator>
+    </body></html>`, {
+    pretendToBeVisual: true,
+    runScripts: "outside-only",
+    url: "https://example.test/page",
+  });
+  const reports = [];
+  dom.window.chrome = {
+    runtime: {
+      sendMessage(message) {
+        reports.push(message);
+        return Promise.resolve();
+      },
+    },
+  };
+
+  dom.window.eval(bundle);
+  await eventually(() => dom.window.document.querySelector("ia2-rdf-navigator")?.shadowRoot?.querySelector(".panel")?.dataset.open, "true");
+  const navigator = dom.window.document.querySelector("ia2-rdf-navigator");
+  assert.ok(navigator);
+  assert.equal(navigator.hasAttribute("data-ia2-extension"), false);
+  assert.equal(navigator.shadowRoot.querySelector(".launcher").hidden, false);
+  assert.equal(dom.window.document.querySelector("ia2-extension-navigator"), null);
+  dom.window.eval(statusBundle);
+  await eventually(() => reports.at(-1)?.statements, 1);
+
+  dom.window.eval(bundle);
+  await eventually(() => navigator.shadowRoot.querySelector(".panel")?.dataset.open, "false");
+  assert.equal(dom.window.document.querySelectorAll("ia2-rdf-navigator").length, 1);
+  assert.equal(dom.window.document.querySelector("ia2-extension-navigator"), null);
+  dom.window.close();
+});
+
 test("automatic bundle adds tabs to an authored declarative HARE envelope", async () => {
   const [autoBundle, statusBundle, envelopeHtml] = await Promise.all([
     readFile(resolve(packageRoot, "dist/chrome/auto.js"), "utf8"),
