@@ -41,16 +41,19 @@ const CSS = String.raw`
     bottom: var(--ia2-rdf-launcher-bottom, 20px);
     box-shadow: 0 8px 28px oklch(20% 0.03 286 / 22%);
     color: var(--paper);
-    cursor: pointer;
+    cursor: grab;
     display: flex;
     gap: 9px;
     min-height: 44px;
     padding: 9px 13px 9px 11px;
     position: fixed;
     right: 20px;
+    touch-action: none;
     transition: transform 180ms cubic-bezier(.22,1,.36,1), background 180ms ease;
+    user-select: none;
   }
   .launcher:hover { background: color-mix(in oklch, var(--ink), var(--accent) 22%); transform: translateY(-2px); }
+  .launcher.is-dragging { cursor: grabbing; transform: none; }
   .launcher[data-position^="left"] { left: 20px; right: auto; }
   .launcher:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid color-mix(in oklch, var(--accent), transparent 35%); outline-offset: 3px; }
   .mark { display: grid; height: 22px; place-items: center; width: 22px; }
@@ -341,6 +344,11 @@ interface FloatingRect {
   y: number;
 }
 
+interface LauncherPosition {
+  x: number;
+  y: number;
+}
+
 interface LinkPreviewState {
   abortController: AbortController | null;
   interactionCleanup: (() => void) | null;
@@ -349,6 +357,7 @@ interface LinkPreviewState {
 
 interface PersistedNavigatorState {
   floatingRect: FloatingRect | null;
+  launcherPosition: LauncherPosition | null;
   position: DrawerPosition;
 }
 
@@ -360,6 +369,8 @@ interface FocusSnapshot {
 }
 
 const SESSION_STATE_KEY = "ia2:rdf-navigator:state:v1";
+const LAUNCHER_DRAG_THRESHOLD = 4;
+const LAUNCHER_EDGE_SNAP_DISTANCE = 28;
 const DISCOVERY_MAX_HTML_LENGTH = 2_000_000;
 const DISCOVERY_FETCH_TIMEOUT_MS = 10_000;
 const DISCOVERY_ACCEPT = "text/html, application/xhtml+xml;q=0.95";
@@ -441,6 +452,13 @@ function isFloatingRect(value: unknown): value is FloatingRect {
     && typeof rect.width === "number" && Number.isFinite(rect.width) && rect.width > 0
     && typeof rect.x === "number" && Number.isFinite(rect.x)
     && typeof rect.y === "number" && Number.isFinite(rect.y);
+}
+
+function isLauncherPosition(value: unknown): value is LauncherPosition {
+  if (!value || typeof value !== "object") return false;
+  const position = value as Partial<Record<keyof LauncherPosition, unknown>>;
+  return typeof position.x === "number" && Number.isFinite(position.x)
+    && typeof position.y === "number" && Number.isFinite(position.y);
 }
 
 interface NavigatorRow {
@@ -1072,6 +1090,9 @@ export class Ia2RdfNavigator extends HTMLElement {
   #position: DrawerPosition = "right";
   #floatingRect: FloatingRect | null = null;
   #floatingInteractionCleanup: (() => void) | null = null;
+  #launcherPosition: LauncherPosition | null = null;
+  #launcherInteractionCleanup: (() => void) | null = null;
+  #suppressLauncherClick = false;
   #linkPreviews = new Map<HTMLElement, LinkPreviewState>();
   #activeLinkPreview: HTMLElement | null = null;
   #linkPreviewZIndex = 20;
@@ -1112,6 +1133,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.#tabResizeObserver = null;
     if (this.#refreshTimer !== null) window.clearTimeout(this.#refreshTimer);
     this.#stopFloatingInteraction();
+    this.#stopLauncherInteraction();
     this.#clearLinkPreviews();
     this.#clearLocateEmphasis();
     this.#clearNavigatorSync();
@@ -1442,6 +1464,7 @@ export class Ia2RdfNavigator extends HTMLElement {
       const state = JSON.parse(serialized) as Partial<PersistedNavigatorState>;
       if (isDrawerPosition(state.position)) this.#position = state.position;
       if (isFloatingRect(state.floatingRect)) this.#floatingRect = this.#constrainFloatingRect(state.floatingRect);
+      if (isLauncherPosition(state.launcherPosition)) this.#launcherPosition = state.launcherPosition;
     } catch {
       // Storage may be unavailable for opaque or restricted document origins.
     }
@@ -1451,6 +1474,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     try {
       const state: PersistedNavigatorState = {
         floatingRect: this.#floatingRect,
+        launcherPosition: this.#launcherPosition,
         position: this.#position,
       };
       this.ownerDocument.defaultView?.sessionStorage.setItem(SESSION_STATE_KEY, JSON.stringify(state));
@@ -1757,6 +1781,101 @@ export class Ia2RdfNavigator extends HTMLElement {
     panel.style.width = "";
   }
 
+  #launcherLimits(launcher: HTMLElement): { margin: number; maxX: number; maxY: number } {
+    const view = this.ownerDocument.defaultView;
+    const viewportWidth = Math.max(view?.innerWidth ?? 1024, 1);
+    const viewportHeight = Math.max(view?.innerHeight ?? 768, 1);
+    const margin = viewportWidth <= 760 ? 14 : 20;
+    const rect = launcher.getBoundingClientRect();
+    const width = rect.width || launcher.offsetWidth;
+    const height = rect.height || launcher.offsetHeight || 44;
+    return {
+      margin,
+      maxX: Math.max(margin, viewportWidth - margin - width),
+      maxY: Math.max(margin, viewportHeight - margin - height),
+    };
+  }
+
+  #constrainLauncherPosition(launcher: HTMLElement, position: LauncherPosition): LauncherPosition {
+    const { margin, maxX, maxY } = this.#launcherLimits(launcher);
+    return {
+      x: Math.min(Math.max(position.x, margin), maxX),
+      y: Math.min(Math.max(position.y, margin), maxY),
+    };
+  }
+
+  #snapLauncherPosition(launcher: HTMLElement, position: LauncherPosition): LauncherPosition {
+    const { margin, maxX, maxY } = this.#launcherLimits(launcher);
+    const snapped = this.#constrainLauncherPosition(launcher, position);
+    if (snapped.x - margin <= LAUNCHER_EDGE_SNAP_DISTANCE) snapped.x = margin;
+    if (maxX - snapped.x <= LAUNCHER_EDGE_SNAP_DISTANCE) snapped.x = maxX;
+    if (snapped.y - margin <= LAUNCHER_EDGE_SNAP_DISTANCE) snapped.y = margin;
+    if (maxY - snapped.y <= LAUNCHER_EDGE_SNAP_DISTANCE) snapped.y = maxY;
+    return snapped;
+  }
+
+  #applyLauncherGeometry(launcher: HTMLElement): void {
+    if (!this.#launcherPosition) return;
+    this.#launcherPosition = this.#constrainLauncherPosition(launcher, this.#launcherPosition);
+    launcher.style.bottom = "auto";
+    launcher.style.left = `${this.#launcherPosition.x}px`;
+    launcher.style.right = "auto";
+    launcher.style.top = `${this.#launcherPosition.y}px`;
+  }
+
+  #stopLauncherInteraction(): void {
+    this.#launcherInteractionCleanup?.();
+    this.#launcherInteractionCleanup = null;
+  }
+
+  #startLauncherInteraction(event: PointerEvent, launcher: HTMLElement): void {
+    if (event.button !== 0) return;
+    const view = this.ownerDocument.defaultView;
+    if (!view) return;
+    this.#stopLauncherInteraction();
+    const rect = launcher.getBoundingClientRect();
+    const startPosition = { x: rect.left, y: rect.top };
+    const startX = event.clientX;
+    const startY = event.clientY;
+    let dragged = false;
+
+    const update = (moveEvent: PointerEvent): void => {
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+      if (!dragged && Math.hypot(deltaX, deltaY) < LAUNCHER_DRAG_THRESHOLD) return;
+      if (!dragged) {
+        dragged = true;
+        event.preventDefault();
+        launcher.classList.add("is-dragging");
+      }
+      this.#launcherPosition = this.#constrainLauncherPosition(launcher, {
+        x: startPosition.x + deltaX,
+        y: startPosition.y + deltaY,
+      });
+      this.#applyLauncherGeometry(launcher);
+    };
+    const stop = (): void => {
+      view.removeEventListener("pointermove", update);
+      view.removeEventListener("pointerup", stop);
+      view.removeEventListener("pointercancel", stop);
+      launcher.classList.remove("is-dragging");
+      if (dragged && this.#launcherPosition) {
+        this.#launcherPosition = this.#snapLauncherPosition(launcher, this.#launcherPosition);
+        this.#applyLauncherGeometry(launcher);
+        this.#persistSessionState();
+        this.#suppressLauncherClick = true;
+        view.setTimeout(() => {
+          this.#suppressLauncherClick = false;
+        }, 0);
+      }
+      if (this.#launcherInteractionCleanup === stop) this.#launcherInteractionCleanup = null;
+    };
+    view.addEventListener("pointermove", update);
+    view.addEventListener("pointerup", stop);
+    view.addEventListener("pointercancel", stop);
+    this.#launcherInteractionCleanup = stop;
+  }
+
   #stopFloatingInteraction(): void {
     this.#floatingInteractionCleanup?.();
     this.#floatingInteractionCleanup = null;
@@ -1813,6 +1932,11 @@ export class Ia2RdfNavigator extends HTMLElement {
 
   #onWindowResize = (): void => {
     for (const preview of this.#linkPreviews.keys()) this.#constrainLinkPreview(preview);
+    const launcher = this.shadowRoot?.querySelector<HTMLElement>(".launcher");
+    if (launcher && this.#launcherPosition) {
+      this.#applyLauncherGeometry(launcher);
+      this.#persistSessionState();
+    }
     if (this.#position !== "floating") return;
     const panel = this.shadowRoot?.querySelector<HTMLElement>(".panel");
     if (panel) {
@@ -2753,6 +2877,7 @@ export class Ia2RdfNavigator extends HTMLElement {
 
   #render(): void {
     this.#stopFloatingInteraction();
+    this.#stopLauncherInteraction();
     this.#clearLinkPreviews();
     this.#clearLocateEmphasis();
     this.#clearNavigatorSync();
@@ -2769,7 +2894,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (this.#view === "vocabulary" && !this.#documentVocabulary.count) this.#view = "navigator";
     this.shadowRoot.innerHTML = `
       <style>${CSS}</style>
-      <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel"${this.hasAttribute("data-ia2-extension") ? " hidden" : ""}>
+      <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel" title="Open RDF Navigator. Drag to move."${this.hasAttribute("data-ia2-extension") ? " hidden" : ""}>
         <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="2.6" fill="currentColor"/><circle cx="18.5" cy="5" r="2.6" fill="currentColor"/><circle cx="18.5" cy="19" r="2.6" fill="currentColor"/><path d="M7.2 10.8 16 6.2M7.2 13.2 16 17.8" stroke="currentColor" stroke-width="1.8"/></svg></span>
         <span>RDF</span><span class="count">${result.quads.length}</span>
       </button>
@@ -2818,7 +2943,19 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (this.#view === "discovery") this.#renderDiscovery(viewport);
     if (this.#view === "diagnostics") this.#renderDiagnostics(viewport, result.diagnostics);
 
-    this.shadowRoot.querySelector(".launcher")?.addEventListener("click", (event) => this.toggle(event instanceof MouseEvent && event.detail !== 0 ? "panel" : "tab"));
+    const launcher = this.shadowRoot.querySelector<HTMLElement>(".launcher");
+    if (launcher) {
+      this.#applyLauncherGeometry(launcher);
+      launcher.addEventListener("pointerdown", (event) => this.#startLauncherInteraction(event, launcher));
+      launcher.addEventListener("click", (event) => {
+        if (this.#suppressLauncherClick) {
+          event.preventDefault();
+          this.#suppressLauncherClick = false;
+          return;
+        }
+        this.toggle(event instanceof MouseEvent && event.detail !== 0 ? "panel" : "tab");
+      });
+    }
     this.shadowRoot.querySelector(".close")?.addEventListener("click", () => this.close());
     this.shadowRoot.querySelector(".refresh")?.addEventListener("click", () => this.refresh());
     const positionSwitch = this.shadowRoot.querySelector<HTMLElement>(".position-switch");
@@ -2832,7 +2969,10 @@ export class Ia2RdfNavigator extends HTMLElement {
         if (position === "floating") this.#applyFloatingGeometry(panel);
         else this.#clearFloatingGeometry(panel);
       }
-      if (launcher) launcher.dataset.position = this.#position;
+      if (launcher) {
+        launcher.dataset.position = this.#position;
+        this.#applyLauncherGeometry(launcher);
+      }
       for (const option of positionOptions) {
         const selected = option.dataset.position === this.#position;
         option.setAttribute("aria-checked", String(selected));

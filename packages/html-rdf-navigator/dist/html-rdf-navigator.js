@@ -915,16 +915,19 @@ var CSS = String.raw`
     bottom: var(--ia2-rdf-launcher-bottom, 20px);
     box-shadow: 0 8px 28px oklch(20% 0.03 286 / 22%);
     color: var(--paper);
-    cursor: pointer;
+    cursor: grab;
     display: flex;
     gap: 9px;
     min-height: 44px;
     padding: 9px 13px 9px 11px;
     position: fixed;
     right: 20px;
+    touch-action: none;
     transition: transform 180ms cubic-bezier(.22,1,.36,1), background 180ms ease;
+    user-select: none;
   }
   .launcher:hover { background: color-mix(in oklch, var(--ink), var(--accent) 22%); transform: translateY(-2px); }
+  .launcher.is-dragging { cursor: grabbing; transform: none; }
   .launcher[data-position^="left"] { left: 20px; right: auto; }
   .launcher:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid color-mix(in oklch, var(--accent), transparent 35%); outline-offset: 3px; }
   .mark { display: grid; height: 22px; place-items: center; width: 22px; }
@@ -1191,6 +1194,8 @@ function tabMarkup(view, selected, label, shortLabel, count, countNoun) {
   return `<button class="tab" role="tab" data-view="${view}" aria-selected="${selected}" aria-label="${displayLabel}" title="${title}"><span class="tab-icon" aria-hidden="true">${TAB_ICONS[view]}</span><span class="tab-label" data-short="${shortLabel}">${label}</span>${count === void 0 ? "" : `<span class="tab-count"> (${count})</span>`}</button>`;
 }
 var SESSION_STATE_KEY = "ia2:rdf-navigator:state:v1";
+var LAUNCHER_DRAG_THRESHOLD = 4;
+var LAUNCHER_EDGE_SNAP_DISTANCE = 28;
 var DISCOVERY_MAX_HTML_LENGTH = 2e6;
 var DISCOVERY_FETCH_TIMEOUT_MS = 1e4;
 var DISCOVERY_ACCEPT = "text/html, application/xhtml+xml;q=0.95";
@@ -1264,6 +1269,11 @@ function isFloatingRect(value) {
   if (!value || typeof value !== "object") return false;
   const rect = value;
   return typeof rect.height === "number" && Number.isFinite(rect.height) && rect.height > 0 && typeof rect.width === "number" && Number.isFinite(rect.width) && rect.width > 0 && typeof rect.x === "number" && Number.isFinite(rect.x) && typeof rect.y === "number" && Number.isFinite(rect.y);
+}
+function isLauncherPosition(value) {
+  if (!value || typeof value !== "object") return false;
+  const position = value;
+  return typeof position.x === "number" && Number.isFinite(position.x) && typeof position.y === "number" && Number.isFinite(position.y);
 }
 var RDF_TYPE_IRI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 var RDFS_LABEL_IRI = "http://www.w3.org/2000/01/rdf-schema#label";
@@ -1761,6 +1771,9 @@ var Ia2RdfNavigator = class extends HTMLElement {
   #position = "right";
   #floatingRect = null;
   #floatingInteractionCleanup = null;
+  #launcherPosition = null;
+  #launcherInteractionCleanup = null;
+  #suppressLauncherClick = false;
   #linkPreviews = /* @__PURE__ */ new Map();
   #activeLinkPreview = null;
   #linkPreviewZIndex = 20;
@@ -1798,6 +1811,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     this.#tabResizeObserver = null;
     if (this.#refreshTimer !== null) window.clearTimeout(this.#refreshTimer);
     this.#stopFloatingInteraction();
+    this.#stopLauncherInteraction();
     this.#clearLinkPreviews();
     this.#clearLocateEmphasis();
     this.#clearNavigatorSync();
@@ -2109,6 +2123,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
       const state = JSON.parse(serialized);
       if (isDrawerPosition(state.position)) this.#position = state.position;
       if (isFloatingRect(state.floatingRect)) this.#floatingRect = this.#constrainFloatingRect(state.floatingRect);
+      if (isLauncherPosition(state.launcherPosition)) this.#launcherPosition = state.launcherPosition;
     } catch {
     }
   }
@@ -2116,6 +2131,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     try {
       const state = {
         floatingRect: this.#floatingRect,
+        launcherPosition: this.#launcherPosition,
         position: this.#position
       };
       this.ownerDocument.defaultView?.sessionStorage.setItem(SESSION_STATE_KEY, JSON.stringify(state));
@@ -2389,6 +2405,94 @@ var Ia2RdfNavigator = class extends HTMLElement {
     panel.style.top = "";
     panel.style.width = "";
   }
+  #launcherLimits(launcher) {
+    const view = this.ownerDocument.defaultView;
+    const viewportWidth = Math.max(view?.innerWidth ?? 1024, 1);
+    const viewportHeight = Math.max(view?.innerHeight ?? 768, 1);
+    const margin = viewportWidth <= 760 ? 14 : 20;
+    const rect = launcher.getBoundingClientRect();
+    const width = rect.width || launcher.offsetWidth;
+    const height = rect.height || launcher.offsetHeight || 44;
+    return {
+      margin,
+      maxX: Math.max(margin, viewportWidth - margin - width),
+      maxY: Math.max(margin, viewportHeight - margin - height)
+    };
+  }
+  #constrainLauncherPosition(launcher, position) {
+    const { margin, maxX, maxY } = this.#launcherLimits(launcher);
+    return {
+      x: Math.min(Math.max(position.x, margin), maxX),
+      y: Math.min(Math.max(position.y, margin), maxY)
+    };
+  }
+  #snapLauncherPosition(launcher, position) {
+    const { margin, maxX, maxY } = this.#launcherLimits(launcher);
+    const snapped = this.#constrainLauncherPosition(launcher, position);
+    if (snapped.x - margin <= LAUNCHER_EDGE_SNAP_DISTANCE) snapped.x = margin;
+    if (maxX - snapped.x <= LAUNCHER_EDGE_SNAP_DISTANCE) snapped.x = maxX;
+    if (snapped.y - margin <= LAUNCHER_EDGE_SNAP_DISTANCE) snapped.y = margin;
+    if (maxY - snapped.y <= LAUNCHER_EDGE_SNAP_DISTANCE) snapped.y = maxY;
+    return snapped;
+  }
+  #applyLauncherGeometry(launcher) {
+    if (!this.#launcherPosition) return;
+    this.#launcherPosition = this.#constrainLauncherPosition(launcher, this.#launcherPosition);
+    launcher.style.bottom = "auto";
+    launcher.style.left = `${this.#launcherPosition.x}px`;
+    launcher.style.right = "auto";
+    launcher.style.top = `${this.#launcherPosition.y}px`;
+  }
+  #stopLauncherInteraction() {
+    this.#launcherInteractionCleanup?.();
+    this.#launcherInteractionCleanup = null;
+  }
+  #startLauncherInteraction(event, launcher) {
+    if (event.button !== 0) return;
+    const view = this.ownerDocument.defaultView;
+    if (!view) return;
+    this.#stopLauncherInteraction();
+    const rect = launcher.getBoundingClientRect();
+    const startPosition = { x: rect.left, y: rect.top };
+    const startX = event.clientX;
+    const startY = event.clientY;
+    let dragged = false;
+    const update = (moveEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+      if (!dragged && Math.hypot(deltaX, deltaY) < LAUNCHER_DRAG_THRESHOLD) return;
+      if (!dragged) {
+        dragged = true;
+        event.preventDefault();
+        launcher.classList.add("is-dragging");
+      }
+      this.#launcherPosition = this.#constrainLauncherPosition(launcher, {
+        x: startPosition.x + deltaX,
+        y: startPosition.y + deltaY
+      });
+      this.#applyLauncherGeometry(launcher);
+    };
+    const stop = () => {
+      view.removeEventListener("pointermove", update);
+      view.removeEventListener("pointerup", stop);
+      view.removeEventListener("pointercancel", stop);
+      launcher.classList.remove("is-dragging");
+      if (dragged && this.#launcherPosition) {
+        this.#launcherPosition = this.#snapLauncherPosition(launcher, this.#launcherPosition);
+        this.#applyLauncherGeometry(launcher);
+        this.#persistSessionState();
+        this.#suppressLauncherClick = true;
+        view.setTimeout(() => {
+          this.#suppressLauncherClick = false;
+        }, 0);
+      }
+      if (this.#launcherInteractionCleanup === stop) this.#launcherInteractionCleanup = null;
+    };
+    view.addEventListener("pointermove", update);
+    view.addEventListener("pointerup", stop);
+    view.addEventListener("pointercancel", stop);
+    this.#launcherInteractionCleanup = stop;
+  }
   #stopFloatingInteraction() {
     this.#floatingInteractionCleanup?.();
     this.#floatingInteractionCleanup = null;
@@ -2442,6 +2546,11 @@ var Ia2RdfNavigator = class extends HTMLElement {
   }
   #onWindowResize = () => {
     for (const preview of this.#linkPreviews.keys()) this.#constrainLinkPreview(preview);
+    const launcher = this.shadowRoot?.querySelector(".launcher");
+    if (launcher && this.#launcherPosition) {
+      this.#applyLauncherGeometry(launcher);
+      this.#persistSessionState();
+    }
     if (this.#position !== "floating") return;
     const panel = this.shadowRoot?.querySelector(".panel");
     if (panel) {
@@ -3319,6 +3428,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
   }
   #render() {
     this.#stopFloatingInteraction();
+    this.#stopLauncherInteraction();
     this.#clearLinkPreviews();
     this.#clearLocateEmphasis();
     this.#clearNavigatorSync();
@@ -3335,7 +3445,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     if (this.#view === "vocabulary" && !this.#documentVocabulary.count) this.#view = "navigator";
     this.shadowRoot.innerHTML = `
       <style>${CSS}</style>
-      <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel"${this.hasAttribute("data-ia2-extension") ? " hidden" : ""}>
+      <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel" title="Open RDF Navigator. Drag to move."${this.hasAttribute("data-ia2-extension") ? " hidden" : ""}>
         <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="2.6" fill="currentColor"/><circle cx="18.5" cy="5" r="2.6" fill="currentColor"/><circle cx="18.5" cy="19" r="2.6" fill="currentColor"/><path d="M7.2 10.8 16 6.2M7.2 13.2 16 17.8" stroke="currentColor" stroke-width="1.8"/></svg></span>
         <span>RDF</span><span class="count">${result.quads.length}</span>
       </button>
@@ -3382,7 +3492,19 @@ var Ia2RdfNavigator = class extends HTMLElement {
     if (this.#view === "vocabulary") this.#renderVocabulary(viewport);
     if (this.#view === "discovery") this.#renderDiscovery(viewport);
     if (this.#view === "diagnostics") this.#renderDiagnostics(viewport, result.diagnostics);
-    this.shadowRoot.querySelector(".launcher")?.addEventListener("click", (event) => this.toggle(event instanceof MouseEvent && event.detail !== 0 ? "panel" : "tab"));
+    const launcher = this.shadowRoot.querySelector(".launcher");
+    if (launcher) {
+      this.#applyLauncherGeometry(launcher);
+      launcher.addEventListener("pointerdown", (event) => this.#startLauncherInteraction(event, launcher));
+      launcher.addEventListener("click", (event) => {
+        if (this.#suppressLauncherClick) {
+          event.preventDefault();
+          this.#suppressLauncherClick = false;
+          return;
+        }
+        this.toggle(event instanceof MouseEvent && event.detail !== 0 ? "panel" : "tab");
+      });
+    }
     this.shadowRoot.querySelector(".close")?.addEventListener("click", () => this.close());
     this.shadowRoot.querySelector(".refresh")?.addEventListener("click", () => this.refresh());
     const positionSwitch = this.shadowRoot.querySelector(".position-switch");
@@ -3390,13 +3512,16 @@ var Ia2RdfNavigator = class extends HTMLElement {
     const panel = this.shadowRoot.querySelector(".panel");
     const applyPosition = (position, focus = false) => {
       this.#position = position;
-      const launcher = this.shadowRoot?.querySelector(".launcher");
+      const launcher2 = this.shadowRoot?.querySelector(".launcher");
       if (panel) {
         panel.dataset.position = this.#position;
         if (position === "floating") this.#applyFloatingGeometry(panel);
         else this.#clearFloatingGeometry(panel);
       }
-      if (launcher) launcher.dataset.position = this.#position;
+      if (launcher2) {
+        launcher2.dataset.position = this.#position;
+        this.#applyLauncherGeometry(launcher2);
+      }
       for (const option of positionOptions) {
         const selected = option.dataset.position === this.#position;
         option.setAttribute("aria-checked", String(selected));

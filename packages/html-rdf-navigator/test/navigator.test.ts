@@ -248,6 +248,59 @@ describe("Ia2RdfNavigator", () => {
     expect(launcher?.getAttribute("aria-expanded")).toBe("false");
   });
 
+  it("moves the RDF launcher freely, snaps near viewport edges, and preserves its position", async () => {
+    const drawer = mountRdfNavigator();
+    const launcher = drawer.shadowRoot?.querySelector<HTMLElement>(".launcher")!;
+    launcher.getBoundingClientRect = () => {
+      const left = Number.parseFloat(launcher.style.left) || 920;
+      const top = Number.parseFloat(launcher.style.top) || 700;
+      const width = 84;
+      const height = 44;
+      return { bottom: top + height, height, left, right: left + width, top, width, x: left, y: top, toJSON: () => ({}) } as DOMRect;
+    };
+
+    launcher.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0, clientX: 940, clientY: 720 }));
+    window.dispatchEvent(new MouseEvent("pointermove", { clientX: 540, clientY: 420 }));
+    window.dispatchEvent(new MouseEvent("pointerup"));
+    launcher.click();
+
+    expect(Number.parseFloat(launcher.style.left)).toBe(520);
+    expect(Number.parseFloat(launcher.style.top)).toBe(400);
+    expect(drawer.shadowRoot?.querySelector<HTMLElement>(".panel")?.dataset.open).toBe("false");
+
+    launcher.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0, clientX: 540, clientY: 420 }));
+    window.dispatchEvent(new MouseEvent("pointermove", { clientX: 30, clientY: 420 }));
+    window.dispatchEvent(new MouseEvent("pointerup"));
+    expect(Number.parseFloat(launcher.style.left)).toBe(20);
+    expect(Number.parseFloat(launcher.style.top)).toBe(400);
+
+    launcher.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0, clientX: 40, clientY: 420 }));
+    window.dispatchEvent(new MouseEvent("pointermove", { clientX: 930, clientY: 730 }));
+    window.dispatchEvent(new MouseEvent("pointerup"));
+    expect(Number.parseFloat(launcher.style.left)).toBe(920);
+    expect(Number.parseFloat(launcher.style.top)).toBe(704);
+
+    launcher.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0, clientX: 940, clientY: 724 }));
+    window.dispatchEvent(new MouseEvent("pointermove", { clientX: 940, clientY: 40 }));
+    window.dispatchEvent(new MouseEvent("pointerup"));
+    expect(Number.parseFloat(launcher.style.left)).toBe(920);
+    expect(Number.parseFloat(launcher.style.top)).toBe(20);
+
+    const stored = JSON.parse(sessionStorage.getItem(SESSION_STATE_KEY)!) as {
+      launcherPosition: { x: number; y: number };
+    };
+    expect(stored.launcherPosition).toEqual({ x: 920, y: 20 });
+
+    drawer.refresh();
+    const restoredLauncher = drawer.shadowRoot?.querySelector<HTMLElement>(".launcher")!;
+    expect(Number.parseFloat(restoredLauncher.style.left)).toBe(920);
+    expect(Number.parseFloat(restoredLauncher.style.top)).toBe(20);
+
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    restoredLauncher.click();
+    expect(drawer.shadowRoot?.querySelector<HTMLElement>(".panel")?.dataset.open).toBe("true");
+  });
+
   it("opens on a requested side and reveals one carrier in the Navigator", async () => {
     document.body.innerHTML = [
       '<span id="alice" rdf-subject="https://example.com/alice" rdf-predicate="https://schema.org/name">Alice</span>',
