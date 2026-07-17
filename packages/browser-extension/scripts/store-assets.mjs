@@ -72,6 +72,7 @@ try {
     channel: "chromium",
     deviceScaleFactor: 1,
     headless: true,
+    reducedMotion: "reduce",
     viewport: { height: 800, width: 1280 },
   });
   let [serviceWorker] = context.serviceWorkers();
@@ -97,6 +98,7 @@ try {
 
   await sharp(resolve(assetsRoot, "promo-small.svg"))
     .resize(440, 280)
+    .flatten({ background: "#6842c2" })
     .png()
     .toFile(resolve(assetsRoot, "promo-small.png"));
 } finally {
