@@ -101,6 +101,7 @@
             <li><a href="#graphs">Graphs and triple terms</a></li>
             <li><a href="#live-dom">Live DOM</a></li>
             <li><a href="#hare">HARE bundles</a></li>
+            <li><a href="#agent-skills">Agent skills</a></li>
             <li><a href="#checklist">Authoring checklist</a></li>
             <li><a href="#next">Where next</a></li>
           </ol>
@@ -760,8 +761,118 @@ _:location &lt;https://schema.org/name&gt; "Lab 3" .</code></div>
             </ul>
           </section>
 
+          <section id="agent-skills" class="guide-section" aria-labelledby="agent-skills-title">
+            <p class="guide-section-number">09 / Agent installation</p>
+            <h2
+              id="agent-skills-title"
+              rdf-subject="#agent-skills"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Give an agent the model, not a pasted prompt.</h2>
+            <p class="section-lede">
+              The IA² repository packages HTML/RDF and HARE as two portable
+              Agent Skills. Each skill keeps its working instructions in
+              <code>SKILL.md</code>, then loads detailed references or the HARE
+              byte-commitment helper only when the task needs them.
+            </p>
+
+            <dl class="definition-rows">
+              <div>
+                <dt><code>ia2-html-rdf</code></dt>
+                <dd>Author, extract, and review locally complete RDF 1.2 statements in HTML.</dd>
+              </div>
+              <div>
+                <dt><code>ia2-hare</code></dt>
+                <dd>Create and verify HARE manifests, representations, byte commitments, routing, and viewer security.</dd>
+              </div>
+              <div>
+                <dt><code>plugins/ia2</code></dt>
+                <dd>The distributable package, with thin Codex and Claude Code manifests around the same skill folders.</dd>
+              </div>
+            </dl>
+
+            <h3>Get the portable source</h3>
+            <p>
+              Clone the repository once. The directories under
+              <code>plugins/ia2/skills/</code> are the cross-client source of
+              truth.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>Shell</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>git clone --depth 1 https://github.com/ia2-dev/ia2.git
+cd ia2</code></pre>
+            </figure>
+
+            <div class="example-pair">
+              <figure class="code-sample compact">
+                <figcaption><span>Codex / project skills</span><button type="button" data-copy>Copy</button></figcaption>
+                <pre><code>mkdir -p .agents/skills
+cp -R plugins/ia2/skills/ia2-html-rdf .agents/skills/
+cp -R plugins/ia2/skills/ia2-hare .agents/skills/</code></pre>
+                <div class="rdf-result">
+                  <span>Invoke</span>
+                  <code>$ia2-html-rdf
+$ia2-hare</code>
+                </div>
+              </figure>
+
+              <figure class="code-sample compact">
+                <figcaption><span>Claude Code / development plugin</span><button type="button" data-copy>Copy</button></figcaption>
+                <pre><code>claude --plugin-dir ./plugins/ia2</code></pre>
+                <div class="rdf-result">
+                  <span>Invoke</span>
+                  <code>/ia2:ia2-html-rdf
+/ia2:ia2-hare</code>
+                </div>
+              </figure>
+            </div>
+
+            <h3>Install at the scope you mean</h3>
+            <p>
+              The Codex example installs repository-scoped skills. Copy the
+              same two directories to <code>~/.agents/skills/</code> when they
+              should be available to Codex across repositories. For persistent
+              Claude Code project skills, copy them to
+              <code>.claude/skills/</code>; use
+              <code>~/.claude/skills/</code> for personal scope. Skills copied
+              directly into Claude Code use <code>/ia2-html-rdf</code> and
+              <code>/ia2-hare</code> without the plugin namespace.
+            </p>
+
+            <p>
+              Other Agent Skills compatible clients can install either skill
+              directory in their supported skills location. The portable
+              contract is the folder containing <code>SKILL.md</code>, its
+              references, and optional scripts. The
+              <code>agents/openai.yaml</code> files add Codex interface metadata
+              but do not change the instructions.
+            </p>
+
+            <div class="guide-note">
+              <p>
+                <strong>Deploy the wrapper, maintain the core.</strong> The
+                package includes both <code>.codex-plugin/plugin.json</code> and
+                <code>.claude-plugin/plugin.json</code> for marketplace or team
+                distribution. Keep edits in the shared skill folders so every
+                host receives the same IA² and HARE behavior.
+              </p>
+            </div>
+
+            <ul class="guide-next-list" aria-label="Agent skill source">
+              <li>
+                <a
+                  href="https://github.com/ia2-dev/ia2/tree/main/plugins/ia2"
+                  rdf-subject="#agent-skills"
+                  rdf-predicate="http://purl.org/dc/terms/references"
+                >
+                  <span><strong>Inspect the IA² plugin source</strong><small>Skill instructions, references, byte helper, and host manifests.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+
           <section id="checklist" class="guide-section" aria-labelledby="checklist-title">
-            <p class="guide-section-number">09 / Before publishing</p>
+            <p class="guide-section-number">10 / Before publishing</p>
             <h2
               id="checklist-title"
               rdf-subject="#checklist"
@@ -791,7 +902,7 @@ _:location &lt;https://schema.org/name&gt; "Lab 3" .</code></div>
           </section>
 
           <section id="next" class="guide-section" aria-labelledby="next-title">
-            <p class="guide-section-number">10 / Where next</p>
+            <p class="guide-section-number">11 / Where next</p>
             <h2
               id="next-title"
               rdf-subject="#next"

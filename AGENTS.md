@@ -131,6 +131,9 @@ future directions. Do not describe an experiment as an established standard.
 - `packages/hare-viewer/`: dependency-free optional file-browser UI, parser,
   integrity verification, TypeScript sources, generated distribution, and
   tests for `@ia2-dev/hare-viewer`.
+- `plugins/ia2/`: portable Agent Skills for IA² HTML/RDF and HARE, packaged
+  with Codex and Claude Code plugin manifests. Keep the skill folders as the
+  cross-client source of truth and host-specific metadata as thin adapters.
 - `packages/browser-extension/`: Chrome, Firefox, and Safari adapter. It
   automatically enhances HARE documents while keeping the toolbar action
   dedicated to the general HTML/RDF Navigator.

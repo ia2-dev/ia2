@@ -156,6 +156,9 @@ and inspected while the document is inert or changing at runtime.
   presenting additional RDF sources. It publishes a self-described vocabulary
   for candidates, contributions, views, processing activities, roles, and
   lifecycle states without implicit merging, trust, or execution.
+- [`specs/resource-envelope/index.html`](specs/resource-envelope/index.html):
+  the exploratory HARE 0.1 proposal for a declarative, self-contained HTML
+  resource envelope with a canonical HTML/RDF manifest.
 
 ### Guides
 
@@ -168,9 +171,41 @@ and inspected while the document is inert or changing at runtime.
 - [`@ia2-dev/html-rdf-navigator`](packages/html-rdf-navigator/) — a dependency-free browser
   component and TypeScript library for extracting, navigating, and serializing
   the RDF expressed by an IA² HTML document.
+- [`@ia2-dev/hare-viewer`](packages/hare-viewer/) provides an optional file
+  browser, integrity verifier, virtual-URL router, and inert preview surface for
+  HARE envelopes.
 - [`packages/browser-extension`](packages/browser-extension/): a least-permission
   WebExtension adapter that opens the Navigator on demand in Chrome, Firefox,
   and Safari.
+
+### Agent skills
+
+[`plugins/ia2`](plugins/ia2/) packages two portable
+[Agent Skills](https://agentskills.io):
+
+- `ia2-html-rdf` for authoring, extraction, and semantic review of the IA²
+  HTML/RDF Core 0.1 proposal; and
+- `ia2-hare` for creating and verifying HARE 0.1 manifests, carriers, logical
+  paths, byte commitments, viewers, and security boundaries.
+
+The package contains both `.codex-plugin/plugin.json` and
+`.claude-plugin/plugin.json`. Claude Code can load the development checkout
+directly:
+
+```sh
+claude --plugin-dir ./plugins/ia2
+```
+
+Codex can consume the same package from a plugin marketplace. For direct
+repository or user installation without a marketplace, copy or link the two
+directories under `plugins/ia2/skills/` into the host's Agent Skills directory:
+
+- `.agents/skills/` or `~/.agents/skills/` for Codex;
+- `.claude/skills/` or `~/.claude/skills/` for Claude Code; or
+- any Agent Skills compatible directory for another client.
+
+The skill folders are the portable source of truth. Host manifests and
+`agents/openai.yaml` add product metadata without changing their instructions.
 
 ### Demos
 

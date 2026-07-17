@@ -1,0 +1,4 @@
+interface:
+  display_name: "IA² HTML/RDF"
+  short_description: "Author and review IA² semantic HTML"
+  default_prompt: "Use $ia2-html-rdf to add locally complete RDF 1.2 statements to this HTML document."

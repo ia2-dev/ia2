@@ -189,6 +189,7 @@ describe("IA² HTML Agent Resource Envelope specification", () => {
 
     expect(result.diagnostics).toEqual([]);
     expect(page.querySelector('#guide-toc-list a[href="#hare"]')).not.toBeNull();
+    expect(page.querySelector('#guide-toc-list a[href="#agent-skills"]')).not.toBeNull();
     expect(page.querySelector("#hare-title")?.textContent).toContain("resources");
     expect(page.querySelector('#hare a[href="/spec/resource-envelope"]')).not.toBeNull();
     expect(page.querySelector('#hare a[href="/spec/resource-envelope/examples/decision-handoff.html"]')).not.toBeNull();
@@ -196,6 +197,13 @@ describe("IA² HTML Agent Resource Envelope specification", () => {
     expect(page.querySelector('#hare a[href="/spec/resource-envelope/examples/inspection-evidence.html"]')).not.toBeNull();
     expect(page.querySelector('#hare a[href="/spec/resource-envelope/examples/release-handoff.html"]')).not.toBeNull();
     expect(page.querySelector("#hare")?.textContent).toContain("@ia2-dev/hare-viewer");
+    expect(page.querySelector("#agent-skills")?.textContent).toContain("ia2-html-rdf");
+    expect(page.querySelector("#agent-skills")?.textContent).toContain("ia2-hare");
+    expect(page.querySelector("#agent-skills")?.textContent).toContain("claude --plugin-dir ./plugins/ia2");
+    expect(matching(result, `${result.sourceDocumentIri}#agent-skills`, `${DCTERMS}references`).some((quad) => (
+      quad.object.termType === "NamedNode"
+      && quad.object.value === "https://github.com/ia2-dev/ia2/tree/main/plugins/ia2"
+    ))).toBe(true);
     expect(matching(result, result.sourceDocumentIri, "http://purl.org/dc/terms/references").some((quad) => (
       quad.object.termType === "NamedNode" && quad.object.value === SPEC
     ))).toBe(true);

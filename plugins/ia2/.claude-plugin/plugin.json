@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ia2",
+  "displayName": "IA²",
+  "version": "0.1.0",
+  "description": "Portable skills for IA² HTML/RDF and HARE authoring, review, and verification.",
+  "author": {
+    "name": "IA² contributors",
+    "url": "https://ia2.dev/"
+  },
+  "homepage": "https://ia2.dev/",
+  "repository": "https://github.com/ia2-dev/ia2",
+  "license": "MIT",
+  "keywords": [
+    "ia2",
+    "rdf",
+    "semantic-html",
+    "hare",
+    "agent-skills"
+  ]
+}

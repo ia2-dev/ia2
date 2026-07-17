@@ -1,0 +1,4 @@
+interface:
+  display_name: "IA² HARE"
+  short_description: "Build and verify HARE resource envelopes"
+  default_prompt: "Use $ia2-hare to build a declarative HARE envelope for these resources."

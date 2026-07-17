@@ -1,0 +1,38 @@
+{
+  "name": "ia2",
+  "version": "0.1.0",
+  "description": "Portable skills for IA² HTML/RDF and HARE authoring, review, and verification.",
+  "author": {
+    "name": "IA² contributors",
+    "url": "https://ia2.dev/"
+  },
+  "homepage": "https://ia2.dev/",
+  "repository": "https://github.com/ia2-dev/ia2",
+  "license": "MIT",
+  "keywords": [
+    "ia2",
+    "rdf",
+    "semantic-html",
+    "hare",
+    "agent-skills"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "IA²",
+    "shortDescription": "Author semantic HTML and HARE envelopes.",
+    "longDescription": "Author, inspect, and verify IA² HTML/RDF documents and declarative HARE resource envelopes.",
+    "developerName": "IA² contributors",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://ia2.dev/",
+    "defaultPrompt": [
+      "Add IA² HTML/RDF to this page.",
+      "Build a declarative HARE envelope.",
+      "Audit this HARE envelope for conformance."
+    ],
+    "brandColor": "#294C60"
+  }
+}
