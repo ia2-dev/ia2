@@ -338,6 +338,16 @@ export async function fetchRdfSource(input, fetcher = fetch, options = {}) {
   throw new Error("The source redirected too many times.");
 }
 
+function rendererSourceFetcher(requestUrl, env, externalFetcher) {
+  return (input, init) => {
+    const sourceUrl = new URL(input);
+    if (sourceUrl.origin === requestUrl.origin) {
+      return env.ASSETS.fetch(new Request(sourceUrl, init));
+    }
+    return externalFetcher(sourceUrl.href, init);
+  };
+}
+
 export async function handleRequest(request, env, fetcher = fetch) {
   const requestUrl = new URL(request.url);
   const renderer = rendererRequest(requestUrl);
@@ -348,7 +358,11 @@ export async function handleRequest(request, env, fetcher = fetch) {
     ? rendererFormResponse("", "", allowLocalhost)
     : missingUrlResponse();
   try {
-    const fetched = await fetchRdfSource(sourceUrl, fetcher, { allowLocalhost });
+    const fetched = await fetchRdfSource(
+      sourceUrl,
+      rendererSourceFetcher(requestUrl, env, fetcher),
+      { allowLocalhost },
+    );
     const parsed = parseRdfHtml(fetched.source, {
       baseIRI: fetched.sourceUrl,
       contentType: fetched.contentType,

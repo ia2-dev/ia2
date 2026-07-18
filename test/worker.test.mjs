@@ -50,6 +50,25 @@ test("renders a single document with broad precedence in a frameless sandbox", a
   assert.equal(response.headers.get("x-content-type-options"), "nosniff");
 });
 
+test("reads same-origin RDF sources from the static-assets binding", async () => {
+  let assetUrl = "";
+  const response = await handleRequest(
+    new Request("https://ia2.dev/render/https://ia2.dev/spec/rdf-html/examples/welcome.ttl"),
+    {
+      ASSETS: {
+        fetch(request) {
+          assetUrl = request.url;
+          return new Response(turtle, { headers: { "content-type": "text/turtle" } });
+        },
+      },
+    },
+    async () => { throw new Error("same-origin sources must not use the external fetcher"); },
+  );
+  assert.equal(response.status, 200);
+  assert.equal(assetUrl, "https://ia2.dev/spec/rdf-html/examples/welcome.ttl");
+  assert.match(await response.text(), /Worker document/);
+});
+
 test("serves the selected document directly inside the sandbox", async () => {
   const response = await handleRequest(
     new Request("https://ia2.dev/render/document/0/https://example.org/document.ttl"),
