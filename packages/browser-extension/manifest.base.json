@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "IA² Navigator",
   "version": "0.1.0",
-  "description": "Inspect HTML/RDF datasets and browse verified files in HARE resource envelopes.",
+  "description": "Inspect HTML/RDF, render RDF/HTML Turtle and TriG documents, and browse verified files in HARE envelopes.",
   "permissions": [
     "activeTab",
     "scripting"
@@ -25,6 +25,22 @@
       "matches": [
         "<all_urls>"
       ],
+      "run_at": "document_idle",
+      "world": "ISOLATED"
+    },
+    {
+      "js": [
+        "collector.js"
+      ],
+      "matches": [
+        "https://ia2.dev/*",
+        "https://www.ia2.dev/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "all_frames": true,
+      "match_about_blank": true,
+      "match_origin_as_fallback": true,
       "run_at": "document_idle",
       "world": "ISOLATED"
     }

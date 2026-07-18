@@ -1,0 +1,32 @@
+@prefix ex: <https://example.test/conditional/> .
+@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .
+
+ex:a-without-href a rdfhtml:A ;
+    rdfhtml:title "No link" ;
+    ex:mustNotClassifyAs rdfhtml:InteractiveContent .
+
+ex:audio-without-controls a rdfhtml:Audio ;
+    rdfhtml:src "clip.mp3" ;
+    ex:mustNotClassifyAs rdfhtml:InteractiveContent, rdfhtml:PalpableContent .
+
+ex:video-without-controls a rdfhtml:Video ;
+    ex:mustNotClassifyAs rdfhtml:InteractiveContent .
+
+ex:img-without-map a rdfhtml:Img ;
+    rdfhtml:alt "Map" ;
+    ex:mustNotClassifyAs rdfhtml:InteractiveContent .
+
+ex:meta-without-itemprop a rdfhtml:Meta ;
+    rdfhtml:name "description" ;
+    ex:mustNotClassifyAs rdfhtml:FlowContent, rdfhtml:PhrasingContent .
+
+ex:menu-without-li a rdfhtml:Menu ;
+    rdfhtml:hasChild [ a rdfhtml:Text ; rdfhtml:data "empty" ] ;
+    ex:mustNotClassifyAs rdfhtml:PalpableContent .
+
+ex:ol-without-li a rdfhtml:Ol ;
+    ex:mustNotClassifyAs rdfhtml:PalpableContent .
+
+ex:ul-without-li a rdfhtml:Ul ;
+    rdfhtml:hasChild [ a rdfhtml:Div ] ;
+    ex:mustNotClassifyAs rdfhtml:PalpableContent .

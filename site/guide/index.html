@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Using IA² HTML/RDF</title>
+    <title>Using IA² HTML/RDF and RDF/HTML</title>
     <link rel="icon" href="/assets/ia2-mark.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/assets/ia2-mark-512.png">
     <meta
       name="description"
-      content="A practical, example-driven guide to publishing RDF 1.2 directly in an HTML document with IA² attributes."
+      content="A practical guide to publishing RDF in HTML and rendering HTML documents described in RDF."
       rdf-subject=""
       rdf-predicate="http://purl.org/dc/terms/description"
     >
@@ -36,6 +36,7 @@
           </button>
           <div class="spec-switcher__menu" role="menu" aria-label="Specifications">
             <a class="spec-switcher__option" role="menuitem" aria-current="true" href="/spec/html-rdf"><strong>HTML/RDF Core Model</strong><small>RDF 1.2 in an HTML document</small></a>
+            <a class="spec-switcher__option" role="menuitem" href="/spec/rdf-html"><strong>RDF/HTML</strong><small>HTML documents described in RDF</small></a>
             <a class="spec-switcher__option" role="menuitem" href="/spec/discovery-enrichment"><strong>Discovery and Enrichment</strong><small>Purposeful links to additional knowledge</small></a>
             <a class="spec-switcher__option" role="menuitem" href="/spec/resource-envelope"><strong>HTML Agent Resource Envelope</strong><small>HARE: Single-file HTML/RDF bundles for agents</small></a>
           </div>
@@ -56,7 +57,7 @@
               id="guide-title"
               rdf-subject=""
               rdf-predicate="http://purl.org/dc/terms/title"
-            >Use IA² in HTML</h1>
+            >Use IA² with HTML</h1>
             <p
               class="guide-lede"
               rdf-subject=""
@@ -65,7 +66,9 @@
               Publish identities, relationships, provenance, and constraints
               in the same HTML a person reads. No JSON-LD payload, remote
               context, inherited parser state, or script execution is needed
-              to extract the graph.
+              to extract the graph. In the complementary direction, RDF/HTML
+              describes a parsed DOM in Turtle or TriG and derives an inert,
+              inspectable HTML document.
             </p>
           </div>
 
@@ -73,6 +76,7 @@
             <li><span>01</span><strong>One element</strong> carries one complete statement.</li>
             <li><span>02</span><strong>Native HTML</strong> carries literal and IRI objects.</li>
             <li><span>03</span><strong>Local extraction</strong> yields a complete RDF 1.2 dataset.</li>
+            <li><span>04</span><strong>Reverse rendering</strong> derives HTML while preserving unused RDF.</li>
           </ol>
         </div>
 
@@ -100,6 +104,7 @@
             <li><a href="#literals">Literal metadata</a></li>
             <li><a href="#graphs">Graphs and triple terms</a></li>
             <li><a href="#live-dom">Live DOM</a></li>
+            <li><a href="#rdf-html">RDF/HTML rendering</a></li>
             <li><a href="#hare">HARE bundles</a></li>
             <li><a href="#agent-skills">Agent skills</a></li>
             <li><a href="#checklist">Authoring checklist</a></li>
@@ -451,8 +456,280 @@ _:location &lt;https://schema.org/name&gt; "Lab 3" .</code></div>
             </ul>
           </section>
 
+          <section id="rdf-html" class="guide-section" aria-labelledby="rdf-html-title">
+            <p class="guide-section-number">08 / HTML from RDF</p>
+            <h2
+              id="rdf-html-title"
+              rdf-subject="#rdf-html"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Describe the document as a graph, then render it.</h2>
+            <p class="section-lede">
+              RDF/HTML is the complementary direction to HTML/RDF. Turtle or
+              TriG describes parsed document nodes, element classes, attributes,
+              text, and enough child-order constraints to derive a sibling
+              sequence. A renderer derives faithful ordinary HTML and can also
+              publish RDF statements not used structurally inside an augmented
+              HTML/RDF result.
+            </p>
+
+            <h3>Why describe HTML in RDF?</h3>
+            <p>
+              HTML is an excellent finished document format, but its tree is
+              often the end of a pipeline. RDF/HTML is useful when the document
+              should remain a view of a larger graph. Giving document nodes RDF
+              identity lets the same dataset describe what a node renders,
+              what domain resource it concerns, where it came from, and how it
+              relates to evidence or decisions outside the page.
+            </p>
+            <ul class="behavior-list">
+              <li><strong>Graph-native views:</strong> derive a human-readable document from RDF without reducing the source graph to template variables or an opaque HTML string.</li>
+              <li><strong>Independent composition:</strong> let separate graphs or tools contribute named nodes, annotations, and ordering constraints before one document is materialized.</li>
+              <li><strong>Meaning survives rendering:</strong> consume the structural statements needed to build the DOM, then carry the remaining domain and provenance statements into the result as HTML/RDF.</li>
+            </ul>
+            <div class="guide-note">
+              <p>
+                <strong>It is not a replacement for ordinary HTML authoring.</strong>
+                Use HTML directly when the page is the primary artifact and no
+                graph-native composition, node identity, or preserved RDF
+                context is needed.
+              </p>
+            </div>
+
+            <dl class="definition-rows">
+              <div>
+                <dt>HTML/RDF</dt>
+                <dd>Start with an HTML host and extract its RDF 1.2 dataset.</dd>
+              </div>
+              <div>
+                <dt>RDF/HTML</dt>
+                <dd>Start with an RDF 1.2 dataset and derive one or more HTML documents.</dd>
+              </div>
+              <div>
+                <dt>Fidelity</dt>
+                <dd>The graph describes the parsed DOM, including explicit text and comment nodes, not the original source bytes.</dd>
+              </div>
+              <div>
+                <dt>Safety</dt>
+                <dd>The public renderer and extension use inert previews. Description never grants execution.</dd>
+              </div>
+            </dl>
+
+            <h3>Declare the vocabulary snapshot</h3>
+            <p>
+              Every renderable document identifies the dated vocabulary it was
+              authored against. The renderer recognizes supported snapshots
+              locally; it does not fetch the vocabulary during rendering.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>Turtle</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>@prefix dcterms: &lt;http://purl.org/dc/terms/&gt; .
+
+doc:page
+  a rdfhtml:Document ;
+  rdfhtml:base &lt;https://example.com/page/&gt; ;
+  dcterms:conformsTo &lt;https://ia2.dev/spec/rdf-html/vocabulary/rdf-html-2026-07-18.ttl&gt; .</code></pre>
+            </figure>
+            <p>
+              A dataset may contain partial RDF/HTML descriptions assembled by
+              several sources. Materialization begins only when the selected
+              document has one complete, unambiguous tree. The renderer reports
+              incomplete membership or ordering instead of inventing missing
+              structure.
+            </p>
+
+            <h3>Write known attributes directly</h3>
+            <p>
+              Each indexed HTML attribute has a generated RDF property. Use
+              that property directly and preserve the exact DOM value as a
+              string. Present boolean attributes use the empty string.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>Turtle</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>@prefix rdfhtml: &lt;https://ia2.dev/spec/rdf-html#&gt; .
+
+doc:save
+  a rdfhtml:Button ;
+  rdfhtml:id "save-draft" ;
+  rdfhtml:accessKey "S" ;
+  rdfhtml:disabled "" .</code></pre>
+            </figure>
+            <p>
+              Use an expanded <code>rdfhtml:Attribute</code> occurrence for an
+              unknown or extension attribute, or when the occurrence itself
+              needs identity, provenance, or annotations. Known attributes can
+              also use the expanded form with
+              <code>rdfhtml:attributeDefinition</code>, but the direct property
+              is the ordinary authoring form.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>Extension attribute</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>doc:save rdfhtml:attribute [
+  a rdfhtml:Attribute ;
+  rdfhtml:attributeName "data-review-state" ;
+  rdfhtml:attributeValue "pending"
+] .</code></pre>
+            </figure>
+
+            <h3>Use a collection for a complete child sequence</h3>
+            <p>
+              <code>rdfhtml:children</code> is the compact default when one
+              description owns a parent's complete sequence. Its RDF Collection
+              states membership and immediate order together. Anonymous
+              <code>[]</code> nodes remain convenient for children that need no
+              identity outside that description, and converters emit this form.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>Turtle</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>doc:body rdfhtml:children (
+  [ a rdfhtml:H1 ; rdfhtml:children (
+    [ a rdfhtml:Text ; rdfhtml:data "Welcome" ]
+  ) ]
+  [ a rdfhtml:P ; rdfhtml:children (
+    [ a rdfhtml:Text ; rdfhtml:data "Hello world!" ]
+  ) ]
+) .</code></pre>
+            </figure>
+
+            <h3>Use flat relations for independent contributions</h3>
+            <p>
+              A collection is intentionally complete and changing its middle
+              means changing the shared RDF list spine. Use named children,
+              <code>rdfhtml:hasChild</code>, and <code>ord:</code> relations when
+              different graphs or tools contribute nodes independently, when a
+              child is annotated elsewhere, or when only relative order is
+              meaningful. One <code>rdfhtml:hasChild</code> assertion anchors a
+              connected ordering chain; normalization derives the other child
+              memberships. The vocabulary supplies the ordering types, so
+              authors do not repeat them.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>Independently extensible Turtle</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>@prefix ord: &lt;https://ontology.inferal.com/modules/ordering/&gt; .
+
+doc:body rdfhtml:hasChild doc:heading .
+
+doc:heading
+  a rdfhtml:H1 ;
+  ord:precedes doc:status .
+
+doc:status
+  a rdfhtml:P ;
+  ord:precedes doc:actions .
+
+doc:actions
+  a rdfhtml:Nav .</code></pre>
+            </figure>
+            <p>
+              Use <code>ord:immediatelyPrecedes</code> only when adjacency is
+              part of the assertion. If the important fact is merely that one
+              child comes before another, <code>ord:precedes</code>, or inverse
+              <code>ord:follows</code>, is usually more accurate and remains
+              valid if another contributor inserts a child between them. A
+              renderable parent must still have enough combined constraints to
+              yield one sequence; the renderer does not invent a tie-break.
+              The inverse forms <code>rdfhtml:childOf</code> and
+              <code>ord:follows</code> are equivalent when that direction reads
+              more naturally.
+            </p>
+
+            <div class="guide-note">
+              <p>
+                <strong>Keep mixed content explicit.</strong> Do not use an
+                aggregate <code>textContent</code> value. Represent text as
+                <code>rdfhtml:Text</code> nodes and order those nodes beside
+                elements, so <code>Hello &lt;em&gt;world&lt;/em&gt;!</code> remains
+                three distinct children.
+              </p>
+            </div>
+
+            <h3>Convert an existing HTML document</h3>
+            <p>
+              The package can walk a parsed HTML DOM and emit the same compact
+              RDF/HTML structure. It preserves document type, elements,
+              attributes, text, comments, and template contents. The result
+              describes the parsed DOM, so it does not preserve source
+              whitespace choices or other byte-level formatting.
+            </p>
+            <figure class="code-sample compact">
+              <figcaption><span>Command line</span><button type="button" data-copy>Copy</button></figcaption>
+              <pre><code>npx @ia2-dev/rdf-html describe page.html \
+  --output page.ttl \
+  --document-iri https://example.com/page#document \
+  --base https://example.com/page/</code></pre>
+            </figure>
+            <p>
+              The same command accepts an HTTP or HTTPS URL. In the other
+              direction, <code>npx @ia2-dev/rdf-html render page.ttl</code>
+              writes the faithful described HTML to standard output. Add
+              <code>--publication</code> to retain unconsumed RDF in an HTML/RDF
+              island. Use
+              <code>--document</code> for one document in a multi-document
+              Turtle or TriG source, or <code>--workspace</code> for the inert
+              selector workspace.
+            </p>
+            <div class="guide-note">
+              <p>
+                <strong>Renderability is not complete HTML validation.</strong>
+                Generated categories, attribute applicability, and value syntax
+                are inspectable metadata. RDF/HTML validates that one DOM can be
+                derived; a separate reviewed profile or HTML validator checks
+                whether that DOM follows all WHATWG authoring rules.
+              </p>
+            </div>
+
+            <h3>Open a public Turtle or TriG document</h3>
+            <p>
+              The URL renderer fetches at most 2 MiB from a public HTTP or HTTPS
+              location, blocks private-network destinations and unsafe
+              redirects, then renders a single declared document without
+              visible renderer chrome. When a source describes several
+              documents, a compact selector remains outside the sandboxed
+              document frame. The IA² browser extension applies the package's
+              inert workspace renderer to browser-opened <code>.ttl</code> and
+              <code>.trig</code> documents.
+            </p>
+            <ul class="guide-next-list" aria-label="RDF/HTML working artifacts">
+              <li>
+                <a href="/spec/rdf-html">
+                  <span><strong>Read the RDF/HTML proposal</strong><small>Vocabulary snapshot, ordering profiles, processing, and RDF preservation.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+              <li>
+                <a href="/render">
+                  <span><strong>Render a public RDF/HTML URL</strong><small>Open one sandboxed document directly, or choose among several.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+              <li>
+                <a href="/spec/rdf-html/examples/independent-contributions.trig">
+                  <span><strong>Inspect independent contributions</strong><small>Named graphs contribute children without mutating a shared RDF list, while broad precedence avoids claiming adjacency.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+              <li>
+                <a href="/render/https://ia2.dev/spec/rdf-html/examples/independent-contributions.trig">
+                  <span><strong>Render the relative-order example</strong><small>See the independent child descriptions normalize into one concrete HTML document.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+              <li>
+                <a href="/render/https://ia2.dev/spec/rdf-html/examples/multi-audience.trig">
+                  <span><strong>Try multi-document selection</strong><small>One TriG dataset offers a public update and an operations handoff over shared domain RDF.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/ia2-dev/ia2/tree/main/packages/rdf-html">
+                  <span><strong>Use <code>@ia2-dev/rdf-html</code></strong><small>Parse, validate, render, and preserve RDF in TypeScript or a Worker.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+
           <section id="hare" class="guide-section" aria-labelledby="hare-title">
-            <p class="guide-section-number">08 / Portable resource bundles</p>
+            <p class="guide-section-number">09 / Portable resource bundles</p>
             <h2
               id="hare-title"
               rdf-subject="#hare"
@@ -762,7 +1039,7 @@ _:location &lt;https://schema.org/name&gt; "Lab 3" .</code></div>
           </section>
 
           <section id="agent-skills" class="guide-section" aria-labelledby="agent-skills-title">
-            <p class="guide-section-number">09 / Agent installation</p>
+            <p class="guide-section-number">10 / Agent installation</p>
             <h2
               id="agent-skills-title"
               rdf-subject="#agent-skills"
@@ -872,7 +1149,7 @@ $ia2-hare</code>
           </section>
 
           <section id="checklist" class="guide-section" aria-labelledby="checklist-title">
-            <p class="guide-section-number">10 / Before publishing</p>
+            <p class="guide-section-number">11 / Before publishing</p>
             <h2
               id="checklist-title"
               rdf-subject="#checklist"
@@ -902,7 +1179,7 @@ $ia2-hare</code>
           </section>
 
           <section id="next" class="guide-section" aria-labelledby="next-title">
-            <p class="guide-section-number">11 / Where next</p>
+            <p class="guide-section-number">12 / Where next</p>
             <h2
               id="next-title"
               rdf-subject="#next"
@@ -913,6 +1190,12 @@ $ia2-hare</code>
               <li>
                 <a href="/spec/html-rdf">
                   <span><strong>Read the HTML/RDF model</strong><small>Exact processing, conformance, RDF 1.2, SHACL, and recovery.</small></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+              <li>
+                <a href="/spec/rdf-html">
+                  <span><strong>Render HTML from RDF</strong><small>Describe DOM structure in Turtle or TriG and preserve the remaining graph as HTML/RDF.</small></span>
                   <span aria-hidden="true">↗</span>
                 </a>
               </li>
@@ -956,6 +1239,7 @@ $ia2-hare</code>
           </button>
           <div class="spec-switcher__menu" role="menu" aria-label="Specifications">
             <a class="spec-switcher__option" role="menuitem" aria-current="true" href="/spec/html-rdf"><strong>HTML/RDF Core Model</strong><small>RDF 1.2 in an HTML document</small></a>
+            <a class="spec-switcher__option" role="menuitem" href="/spec/rdf-html"><strong>RDF/HTML</strong><small>HTML documents described in RDF</small></a>
             <a class="spec-switcher__option" role="menuitem" href="/spec/discovery-enrichment"><strong>Discovery and Enrichment</strong><small>Purposeful links to additional knowledge</small></a>
             <a class="spec-switcher__option" role="menuitem" href="/spec/resource-envelope"><strong>HTML Agent Resource Envelope</strong><small>HARE: Single-file HTML/RDF bundles for agents</small></a>
           </div>

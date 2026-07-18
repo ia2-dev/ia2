@@ -59,6 +59,43 @@ describe("live workspace semantics", () => {
     expect(page.querySelector(`a[href="/spec/resource-envelope/examples/release-handoff.html"]`)).not.toBeNull();
   });
 
+  it("lists every RDF/HTML example with plain and renderer links", () => {
+    const page = new DOMParser().parseFromString(directoryHtml, "text/html");
+    Object.defineProperty(page, "URL", { configurable: true, value: "http://127.0.0.1:8791/demos/live-workspace/" });
+    const expected = [
+      "/spec/rdf-html/examples/welcome.ttl",
+      "/spec/rdf-html/examples/accessibility-check.ttl",
+      "/spec/rdf-html/examples/conference-agenda.ttl",
+      "/spec/rdf-html/examples/field-observations.ttl",
+      "/spec/rdf-html/examples/multi-audience.trig",
+      "/spec/rdf-html/examples/alice-rabbit-hole.ttl",
+      "/spec/rdf-html/examples/whatwg-dom-introduction.ttl",
+      "/spec/rdf-html/examples/nasa-apollo-11.ttl",
+    ];
+    const entries = [...page.querySelectorAll<HTMLElement>(".rdfhtml-entry")];
+
+    expect(entries).toHaveLength(expected.length);
+    entries.forEach((entry, index) => {
+      const plain = entry.querySelector<HTMLAnchorElement>('a[rdf-predicate="http://purl.org/dc/terms/hasPart"]');
+      const renderer = entry.querySelector<HTMLAnchorElement>("a[data-rdfhtml-render]");
+      const rendererUrl = new URL(renderer?.getAttribute("href") ?? "", "https://ia2.dev");
+
+      expect(plain?.getAttribute("href")).toBe(expected[index]);
+      expect(renderer?.dataset.rdfhtmlRender).toBe(expected[index]);
+      expect(`${rendererUrl.pathname}${rendererUrl.search}`).toBe(`/render/${new URL(expected[index]!, "https://ia2.dev").href}`);
+    });
+
+    const result = extractDataset(page);
+    expect(result.diagnostics).toEqual([]);
+    for (const path of expected) {
+      expect(result.quads).toContainEqual(expect.objectContaining({
+        subject: { termType: "NamedNode", value: DIRECTORY },
+        predicate: { termType: "NamedNode", value: `${DCTERMS}hasPart` },
+        object: { termType: "NamedNode", value: new URL(path, DIRECTORY).href },
+      }));
+    }
+  });
+
   it("connects the release, decision, evidence, claim, and contract", () => {
     const page = new DOMParser().parseFromString(briefingHtml, "text/html");
     Object.defineProperty(page, "URL", { configurable: true, value: "http://127.0.0.1:8791/demos/live-workspace/release-brief/" });

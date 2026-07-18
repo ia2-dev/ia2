@@ -8,6 +8,7 @@ import {
 import { highlightedCode } from "./highlight.js";
 import type { Diagnostic, ExtractionResult, GraphTerm, ObjectTerm, Quad, SubjectTerm } from "./model.js";
 import { compactTerm, containsTripleTerms, PREFIXES, serializeJsonLd, serializeTurtle } from "./serialize.js";
+import { fromPortableExtractionResult, type NavigatorSource, type PortableNavigatorSource } from "./sources.js";
 import {
   extractDocumentVocabulary,
   type DocumentVocabulary,
@@ -131,6 +132,17 @@ const CSS = String.raw`
   .tabs[data-compact="3"] .tab-icon { display: grid; }
   .viewport { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 18px 22px 28px; }
   .notice { background: var(--accent-soft); border: 1px solid color-mix(in oklch, var(--accent), var(--paper) 68%); border-radius: 8px; color: color-mix(in oklch, var(--ink), var(--accent) 25%); font-size: 12px; margin: 0 0 14px; padding: 9px 11px; }
+  .sources-intro { color: var(--muted); font-size: 12px; margin: 0 0 16px; max-width: 66ch; }
+  .source-list { border-bottom: 1px solid var(--line); list-style: none; margin: 0; padding: 0; }
+  .source-item { border-top: 1px solid var(--line); }
+  .source-option { align-items: start; cursor: pointer; display: grid; gap: 10px; grid-template-columns: auto minmax(0, 1fr) auto; padding: 14px 4px; }
+  .source-option:hover { background: color-mix(in oklch, var(--accent-soft), transparent 42%); }
+  .source-option input { accent-color: var(--accent); margin: 3px 0 0; }
+  .source-copy { min-width: 0; }
+  .source-title { display: block; font-size: 13px; font-weight: 700; line-height: 1.35; }
+  .source-url { color: var(--muted); display: block; font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin-top: 3px; overflow-wrap: anywhere; }
+  .source-access { color: var(--muted); display: block; font-size: 10.5px; line-height: 1.35; margin-top: 5px; }
+  .source-count { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; padding-top: 2px; white-space: nowrap; }
   .discovery-intro { color: var(--muted); font-size: 12px; margin: 0 0 16px; max-width: 66ch; }
   .discovery-list { list-style: none; margin: 0; padding: 0; }
   .discovery-item { border-bottom: 1px solid var(--line); display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr) auto; padding: 15px 0; }
@@ -307,7 +319,7 @@ const CSS = String.raw`
   @media (prefers-reduced-motion: reduce) { .launcher, .panel { transition: none; } }
 `;
 
-type View = "turtle" | "json" | "navigator" | "vocabulary" | "discovery" | "diagnostics";
+type View = "turtle" | "json" | "navigator" | "sources" | "vocabulary" | "discovery" | "diagnostics";
 type SyncMode = "off" | "page" | "navigator";
 export type DrawerPosition = "right" | "right-top" | "right-bottom" | "floating" | "left" | "left-bottom" | "left-top";
 type ResizeDirection = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
@@ -315,6 +327,7 @@ type ResourcePreviewKind = "definition" | "resource";
 
 const TAB_ICONS: Readonly<Record<View, string>> = {
   navigator: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="3" cy="5" r=".8" fill="currentColor" stroke="none"/><circle cx="3" cy="9" r=".8" fill="currentColor" stroke="none"/><circle cx="3" cy="13" r=".8" fill="currentColor" stroke="none"/><path d="M6 5h9M6 9h9M6 13h9"/></svg>',
+  sources: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><rect x="2.5" y="3" width="13" height="9" rx="1.5"/><path d="M6 15h6M9 12v3"/></svg>',
   vocabulary: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="3.5" r="2"/><circle cx="4" cy="14" r="2"/><circle cx="14" cy="14" r="2"/><path d="M9 5.5v3M4 12V9h10v3"/></svg>',
   discovery: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="9" r="6.5"/><path d="m11.7 6.3-1.5 3.9-3.9 1.5 1.5-3.9z"/></svg>',
   turtle: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="m6.5 4.5-4 4.5 4 4.5M11.5 4.5l4 4.5-4 4.5"/></svg>',
@@ -364,7 +377,7 @@ interface PersistedNavigatorState {
 interface FocusSnapshot {
   end?: number | null;
   key?: string;
-  kind: "close" | "copy" | "discovery-action" | "fallback" | "launcher" | "namespace" | "position" | "refresh" | "search" | "sync" | "tab" | "viewport";
+  kind: "close" | "copy" | "discovery-action" | "fallback" | "launcher" | "namespace" | "position" | "refresh" | "search" | "source" | "sync" | "tab" | "viewport";
   start?: number | null;
 }
 
@@ -1078,6 +1091,13 @@ function discoveryErrorMessage(error: unknown): string {
 export class Ia2RdfNavigator extends HTMLElement {
   #result: ExtractionResult | null = null;
   #sourceResult: ExtractionResult | null = null;
+  #topSourceResult: ExtractionResult | null = null;
+  #directFrameSources: NavigatorSource[] = [];
+  #externalSources: NavigatorSource[] = [];
+  #sources: NavigatorSource[] = [];
+  #selectedSourceId = "top-document";
+  #frameSourceIds = new WeakMap<Element, string>();
+  #nextFrameSourceId = 1;
   #discoveryCandidates: DiscoveryCandidate[] = [];
   #discoveryLoads = new Map<string, DiscoveryLoadState>();
   #documentVocabulary: DocumentVocabulary = { classes: [], count: 0, definitions: [], properties: [] };
@@ -1494,6 +1514,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (active.classList.contains("sync-option") && active.dataset.syncMode) return { kind: "sync", key: active.dataset.syncMode };
     if (active.classList.contains("position-option") && active.dataset.position) return { kind: "position", key: active.dataset.position };
     if (active.classList.contains("discovery-action") && active.dataset.candidateId) return { kind: "discovery-action", key: active.dataset.candidateId };
+    if (active.classList.contains("source-input") && active.dataset.sourceId) return { kind: "source", key: active.dataset.sourceId };
     if (active.classList.contains("tab") && active.dataset.view) return { kind: "tab", key: active.dataset.view };
     if (active.classList.contains("launcher")) return { kind: "launcher" };
     if (active.classList.contains("refresh")) return { kind: "refresh" };
@@ -1514,6 +1535,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (snapshot.kind === "sync") target = Array.from(this.shadowRoot.querySelectorAll<HTMLButtonElement>(".sync-option")).find((button) => button.dataset.syncMode === snapshot.key) ?? null;
     if (snapshot.kind === "position") target = Array.from(this.shadowRoot.querySelectorAll<HTMLButtonElement>(".position-option")).find((button) => button.dataset.position === snapshot.key) ?? null;
     if (snapshot.kind === "discovery-action") target = Array.from(this.shadowRoot.querySelectorAll<HTMLButtonElement>(".discovery-action")).find((button) => button.dataset.candidateId === snapshot.key) ?? null;
+    if (snapshot.kind === "source") target = Array.from(this.shadowRoot.querySelectorAll<HTMLInputElement>(".source-input")).find((input) => input.dataset.sourceId === snapshot.key) ?? null;
     if (snapshot.kind === "tab") target = Array.from(this.shadowRoot.querySelectorAll<HTMLButtonElement>(".tab")).find((button) => button.dataset.view === snapshot.key) ?? null;
     if (snapshot.kind === "launcher") target = this.shadowRoot.querySelector<HTMLElement>(".launcher");
     if (snapshot.kind === "refresh") target = this.shadowRoot.querySelector<HTMLElement>(".refresh");
@@ -1640,10 +1662,52 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.#renderDiscoveryState(candidate.id);
   }
 
-  /** Re-extract the current owner document and redraw every view. */
-  refresh(): void {
-    const focus = this.#captureFocus();
-    this.#sourceResult = extractDataset(this.ownerDocument);
+  #sourceIdForFrame(frame: Element): string {
+    let id = this.#frameSourceIds.get(frame);
+    if (!id) {
+      id = `document-frame-${this.#nextFrameSourceId++}`;
+      this.#frameSourceIds.set(frame, id);
+    }
+    return id;
+  }
+
+  #extractDirectFrameSources(): NavigatorSource[] {
+    const frames = Array.from(this.ownerDocument.querySelectorAll("iframe, frame"));
+    return frames.flatMap((frame, index) => {
+      let frameDocument: Document | null = null;
+      try {
+        frameDocument = (frame as HTMLIFrameElement).contentDocument;
+        if (!frameDocument?.documentElement) return [];
+        // Accessing the root is the actual same-origin check in browsers.
+        void frameDocument.documentElement.localName;
+      } catch {
+        return [];
+      }
+      const url = frameDocument.URL || frameDocument.baseURI;
+      let origin = "Opaque origin";
+      try { origin = new URL(url).origin; } catch { /* keep the explicit fallback */ }
+      const title = frame.getAttribute("title")?.trim() || frameDocument.title.trim() || `Embedded document ${index + 1}`;
+      return [{
+        access: "direct" as const,
+        id: this.#sourceIdForFrame(frame),
+        label: title,
+        origin,
+        result: extractDataset(frameDocument),
+        url,
+      }];
+    });
+  }
+
+  #applySelectedSource(preserveDiscovery: boolean): void {
+    const source = this.#sources.find((candidate) => candidate.id === this.#selectedSourceId) ?? this.#sources[0];
+    if (!source) return;
+    const sourceChanged = this.#sourceResult !== source.result;
+    this.#selectedSourceId = source.id;
+    this.#sourceResult = source.result;
+    if (sourceChanged && !preserveDiscovery) {
+      for (const state of this.#discoveryLoads.values()) state.controller?.abort();
+      this.#discoveryLoads.clear();
+    }
     this.#discoveryCandidates = detectDiscoveryCandidates(this.#sourceResult);
     this.#documentVocabulary = extractDocumentVocabulary(this.#sourceResult);
     const candidateIds = new Set(this.#discoveryCandidates.map((candidate) => candidate.id));
@@ -1653,6 +1717,81 @@ export class Ia2RdfNavigator extends HTMLElement {
       this.#discoveryLoads.delete(candidateId);
     }
     this.#rebuildResult();
+  }
+
+  #rebuildSources(preserveDiscovery: boolean): void {
+    if (!this.#topSourceResult) return;
+    const topUrl = this.ownerDocument.URL || this.ownerDocument.baseURI;
+    let topOrigin = "Opaque origin";
+    try { topOrigin = new URL(topUrl).origin; } catch { /* keep the explicit fallback */ }
+    const seen = new Set<string>();
+    const candidates: NavigatorSource[] = [
+      {
+        access: "direct",
+        id: "top-document",
+        label: "Top document",
+        origin: topOrigin,
+        result: this.#topSourceResult,
+        url: topUrl,
+      },
+      ...this.#directFrameSources,
+      ...this.#externalSources,
+    ];
+    this.#sources = candidates.filter((source) => {
+      if (seen.has(source.id)) return false;
+      seen.add(source.id);
+      return true;
+    });
+    if (!this.#sources.some((source) => source.id === this.#selectedSourceId)) this.#selectedSourceId = "top-document";
+    const top = this.#sources[0]!;
+    const rdfChildren = this.#sources.slice(1).filter((source) => source.result.quads.length > 0);
+    if (this.#selectedSourceId === top.id && top.result.quads.length === 0 && rdfChildren.length === 1) {
+      this.#selectedSourceId = rdfChildren[0]!.id;
+    }
+    this.#applySelectedSource(preserveDiscovery);
+  }
+
+  #selectSource(sourceId: string): void {
+    if (sourceId === this.#selectedSourceId || !this.#sources.some((source) => source.id === sourceId)) return;
+    this.#selectedSourceId = sourceId;
+    this.#applySelectedSource(false);
+    this.#view = "navigator";
+    this.#navigatorQuery = "";
+    this.#disabledNamespaces.clear();
+    this.#syncMode = "off";
+    this.#render();
+  }
+
+  /** Supply structured-clone-safe document sources collected by an extension. */
+  setSources(sources: readonly PortableNavigatorSource[]): void {
+    this.#externalSources = sources.flatMap((source) => {
+      if (!source || source.access !== "portable" || !source.id || source.id === "top-document") return [];
+      try {
+        return [{
+          access: "portable" as const,
+          id: source.id,
+          label: source.label || "Embedded document",
+          origin: source.origin || "Opaque origin",
+          result: fromPortableExtractionResult(source.result, this.ownerDocument),
+          url: source.url || source.result.retrievalDocumentIri,
+        }];
+      } catch {
+        return [];
+      }
+    });
+    if (!this.#topSourceResult) return;
+    const focus = this.#captureFocus();
+    this.#rebuildSources(true);
+    this.#render();
+    if (focus) queueMicrotask(() => this.#restoreFocus(focus));
+  }
+
+  /** Re-extract the current owner document and redraw every view. */
+  refresh(): void {
+    const focus = this.#captureFocus();
+    this.#topSourceResult = extractDataset(this.ownerDocument);
+    this.#directFrameSources = this.#extractDirectFrameSources();
+    this.#rebuildSources(true);
     this.#render();
     if (focus) queueMicrotask(() => this.#restoreFocus(focus));
   }
@@ -2875,6 +3014,49 @@ export class Ia2RdfNavigator extends HTMLElement {
     container.append(list);
   }
 
+  #renderSources(container: HTMLElement): void {
+    const intro = this.ownerDocument.createElement("p");
+    intro.className = "sources-intro";
+    intro.textContent = "Inspect one document at a time. Sources remain separate so blank nodes, bases, and document identity are not silently merged.";
+    const list = this.ownerDocument.createElement("ul");
+    list.className = "source-list";
+    for (const source of this.#sources) {
+      const item = this.ownerDocument.createElement("li");
+      item.className = "source-item";
+      const label = this.ownerDocument.createElement("label");
+      label.className = "source-option";
+      const input = this.ownerDocument.createElement("input");
+      input.className = "source-input";
+      input.type = "radio";
+      input.name = "ia2-navigator-source";
+      input.checked = source.id === this.#selectedSourceId;
+      input.dataset.sourceId = source.id;
+      input.addEventListener("change", () => this.#selectSource(source.id));
+      const copy = this.ownerDocument.createElement("span");
+      copy.className = "source-copy";
+      const title = this.ownerDocument.createElement("strong");
+      title.className = "source-title";
+      title.textContent = source.label;
+      const url = this.ownerDocument.createElement("span");
+      url.className = "source-url";
+      url.textContent = source.url;
+      const access = this.ownerDocument.createElement("span");
+      access.className = "source-access";
+      const accessLabel = source.access === "direct"
+        ? "DOM correlation available"
+        : "Collected from an isolated frame; source locations are read-only";
+      access.textContent = `${source.origin} · ${accessLabel}`;
+      copy.append(title, url, access);
+      const count = this.ownerDocument.createElement("span");
+      count.className = "source-count";
+      count.textContent = `${source.result.quads.length} statement${source.result.quads.length === 1 ? "" : "s"}`;
+      label.append(input, copy, count);
+      item.append(label);
+      list.append(item);
+    }
+    container.append(intro, list);
+  }
+
   #render(): void {
     this.#stopFloatingInteraction();
     this.#stopLauncherInteraction();
@@ -2892,17 +3074,23 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (this.#view === "diagnostics" && !result.diagnostics.length) this.#view = "navigator";
     if (this.#view === "discovery" && !this.#discoveryCandidates.length) this.#view = "navigator";
     if (this.#view === "vocabulary" && !this.#documentVocabulary.count) this.#view = "navigator";
+    if (this.#view === "sources" && this.#sources.length <= 1) this.#view = "navigator";
+    const activeSource = this.#sources.find((source) => source.id === this.#selectedSourceId) ?? this.#sources[0];
+    const sourceStatements = this.#sources.reduce((sum, source) => sum + source.result.quads.length, 0);
+    const selectedContributions = Math.max(0, result.quads.length - (activeSource?.result.quads.length ?? 0));
+    const totalStatements = sourceStatements + selectedContributions;
     this.shadowRoot.innerHTML = `
       <style>${CSS}</style>
       <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel" title="Open RDF Navigator. Drag to move."${this.hasAttribute("data-ia2-extension") ? " hidden" : ""}>
         <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="2.6" fill="currentColor"/><circle cx="18.5" cy="5" r="2.6" fill="currentColor"/><circle cx="18.5" cy="19" r="2.6" fill="currentColor"/><path d="M7.2 10.8 16 6.2M7.2 13.2 16 17.8" stroke="currentColor" stroke-width="1.8"/></svg></span>
-        <span>RDF</span><span class="count">${result.quads.length}</span>
+        <span>RDF</span><span class="count">${totalStatements}</span>
       </button>
       <aside class="panel" id="ia2-rdf-panel" data-open="${this.#open}" data-position="${this.#position}" aria-label="Document RDF" tabindex="-1">
         <header class="toolbar">
           <span class="drag-grip" aria-hidden="true" title="Drag floating navigator"><svg viewBox="0 0 8 18"><circle cx="2" cy="4" r="1.2"/><circle cx="6" cy="4" r="1.2"/><circle cx="2" cy="9" r="1.2"/><circle cx="6" cy="9" r="1.2"/><circle cx="2" cy="14" r="1.2"/><circle cx="6" cy="14" r="1.2"/></svg></span>
           <div class="tabs" role="tablist" aria-label="RDF views" data-compact="0">
             ${tabMarkup("navigator", this.#view === "navigator", "Navigator", "Nav")}
+            ${this.#sources.length > 1 ? tabMarkup("sources", this.#view === "sources", "Sources", "Sources", this.#sources.length, "document") : ""}
             ${this.#documentVocabulary.count ? tabMarkup("vocabulary", this.#view === "vocabulary", "Vocabulary", "Vocab", this.#documentVocabulary.count, "definition") : ""}
             ${this.#discoveryCandidates.length ? tabMarkup("discovery", this.#view === "discovery", "Discovery", "Discover", this.#discoveryCandidates.length, "candidate") : ""}
             ${tabMarkup("turtle", this.#view === "turtle", "Turtle", "TTL")}
@@ -2917,7 +3105,7 @@ export class Ia2RdfNavigator extends HTMLElement {
           </div>
         </header>
         <section class="viewport" role="tabpanel" tabindex="0"></section>
-        <footer class="footer"><span>RDF 1.2 · Core 0.1 preview</span>${this.#view === "turtle" || this.#view === "json" ? '<button class="copy" type="button">Copy view</button>' : ""}</footer>
+        <footer class="footer"><span>RDF 1.2 · ${activeSource?.label ?? "Document"}</span>${this.#view === "turtle" || this.#view === "json" ? '<button class="copy" type="button">Copy view</button>' : ""}</footer>
         <div class="resize-handles" aria-hidden="true">
           ${(["n", "ne", "e", "se", "s", "sw", "w", "nw"] as ResizeDirection[]).map((direction) => `<span class="resize-handle" data-resize="${direction}"></span>`).join("")}
         </div>
@@ -2939,6 +3127,7 @@ export class Ia2RdfNavigator extends HTMLElement {
       viewport.append(highlightedCode(serializeJsonLd(result), "json", document));
     }
     if (this.#view === "navigator") this.#renderNavigator(viewport, result);
+    if (this.#view === "sources") this.#renderSources(viewport);
     if (this.#view === "vocabulary") this.#renderVocabulary(viewport);
     if (this.#view === "discovery") this.#renderDiscovery(viewport);
     if (this.#view === "diagnostics") this.#renderDiagnostics(viewport, result.diagnostics);

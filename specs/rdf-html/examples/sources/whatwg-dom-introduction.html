@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>A quick introduction to the DOM</title>
+  <style>
+    body { color: #202124; font: 1rem/1.65 system-ui, sans-serif; margin: 0 auto; max-width: 52rem; padding: 3.5rem 1.25rem; }
+    h1 { color: #3c2a78; font-size: 2.7rem; letter-spacing: -.045em; line-height: 1.05; }
+    code { background: #f0edf8; border-radius: .25rem; padding: .08rem .3rem; }
+    .note { background: #f7f5ff; border-left: .3rem solid #7657c8; padding: .8rem 1rem; }
+    footer { border-top: 1px solid #d6d1e3; color: #555; font-size: .85rem; margin-top: 2.5rem; padding-top: 1rem; }
+  </style>
+</head>
+<body>
+  <article>
+    <h1>A quick introduction to the DOM</h1>
+    <p>HTML documents consist of a tree of elements and text. Each element is denoted in the source by a start tag, such as <code>&lt;body&gt;</code>, and an end tag, such as <code>&lt;/body&gt;</code>. Certain start tags and end tags can in certain cases be omitted and are implied by other tags.</p>
+    <p>HTML user agents, such as web browsers, then <em>parse</em> this markup, turning it into a DOM, or Document Object Model, tree. A DOM tree is an in-memory representation of a document.</p>
+    <p>DOM trees contain several kinds of nodes, in particular <code>DocumentType</code>, <code>Element</code>, <code>Text</code>, and <code>Comment</code> nodes.</p>
+    <p class="note">Since DOM trees represent HTML documents when implementations process and present them, the HTML Standard is mostly phrased in terms of DOM trees instead of source markup.</p>
+    <footer>
+      <p>Adapted from “A quick introduction to HTML” in the <a href="https://html.spec.whatwg.org/dev/introduction.html#a-quick-introduction-to-html">WHATWG HTML Living Standard</a>. Copyright WHATWG contributors. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. This adaptation shortens the source and focuses on its DOM explanation.</p>
+    </footer>
+  </article>
+</body>
+</html>

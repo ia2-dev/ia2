@@ -1,0 +1,105 @@
+@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .
+@prefix ord: <https://ontology.inferal.com/modules/ordering/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <https://schema.org/> .
+@prefix doc: <https://ia2.dev/spec/rdf-html/examples/multi-audience#> .
+
+{
+  doc:public-update
+      a rdfhtml:Document ;
+      rdfhtml:base <https://status.example.invalid/incidents/cache-latency/> ;
+      dcterms:conformsTo <https://ia2.dev/spec/rdf-html/vocabulary/rdf-html-2026-07-18.ttl> ;
+      dcterms:title "Public service update" ;
+      schema:about doc:incident ;
+      rdfhtml:hasChild [
+          a rdfhtml:Html ;
+          rdfhtml:hasChild [
+              a rdfhtml:Head ;
+              rdfhtml:hasChild [
+                  a rdfhtml:Title ;
+                  rdfhtml:hasChild [ a rdfhtml:Text ; rdfhtml:data "Service update" ] ;
+                  ord:immediatelyPrecedes [
+                      a rdfhtml:Style ;
+                      rdfhtml:hasChild [ a rdfhtml:Text ; rdfhtml:data "body{color:#17212b;font:1rem/1.6 system-ui,sans-serif;margin:0 auto;max-width:48rem;padding:4rem 1.25rem}h1{font-size:3.5rem;letter-spacing:-.055em;line-height:.95}.status{background:#fff3c4;border-radius:.5rem;padding:1rem}time{font-weight:700}" ]
+                  ]
+              ] ;
+              ord:immediatelyPrecedes [
+                  a rdfhtml:Body ;
+                  rdfhtml:hasChild [
+                      a rdfhtml:Main ;
+                      rdfhtml:hasChild [
+                          a rdfhtml:H1 ; rdfhtml:hasChild [ a rdfhtml:Text ; rdfhtml:data "Service update" ] ;
+                          ord:immediatelyPrecedes [
+                              a rdfhtml:P ;
+                              rdfhtml:class "status" ;
+                              rdfhtml:hasChild [ a rdfhtml:Text ; rdfhtml:data "We are investigating elevated response times for cached reports." ] ;
+                              ord:immediatelyPrecedes [
+                                  a rdfhtml:P ;
+                                  rdfhtml:hasChild [
+                                      a rdfhtml:Text ; rdfhtml:data "Next update: " ;
+                                      ord:immediatelyPrecedes [
+                                          a rdfhtml:Time ;
+                                          rdfhtml:dateTime "2026-07-18T19:30:00Z" ;
+                                          rdfhtml:hasChild [ a rdfhtml:Text ; rdfhtml:data "19:30 UTC" ]
+                                      ]
+                                  ]
+                              ]
+                          ]
+                      ]
+                  ]
+              ]
+          ]
+      ] .
+
+  doc:operations-note
+      a rdfhtml:Document ;
+      rdfhtml:base <https://ops.example.invalid/incidents/cache-latency/> ;
+      dcterms:conformsTo <https://ia2.dev/spec/rdf-html/vocabulary/rdf-html-2026-07-18.ttl> ;
+      dcterms:title "Operations handoff" ;
+      schema:about doc:incident ;
+      rdfhtml:hasChild [
+          a rdfhtml:Html ;
+          rdfhtml:hasChild [
+              a rdfhtml:Head ;
+              rdfhtml:hasChild [
+                  a rdfhtml:Title ;
+                  rdfhtml:hasChild [ a rdfhtml:Text ; rdfhtml:data "Operations handoff" ]
+              ] ;
+              ord:immediatelyPrecedes [
+                  a rdfhtml:Body ;
+                  rdfhtml:hasChild [
+                      a rdfhtml:Main ;
+                      rdfhtml:hasChild [
+                          a rdfhtml:H1 ; rdfhtml:hasChild [ a rdfhtml:Text ; rdfhtml:data "Operations handoff" ] ;
+                          ord:immediatelyPrecedes [
+                              a rdfhtml:P ; rdfhtml:hasChild [ a rdfhtml:Text ; rdfhtml:data "Incident IR-204 · cache saturation · mitigation in progress" ] ;
+                              ord:immediatelyPrecedes [
+                                  a rdfhtml:H2 ; rdfhtml:hasChild [ a rdfhtml:Text ; rdfhtml:data "Current actions" ] ;
+                                  ord:immediatelyPrecedes [
+                                      a rdfhtml:Ol ;
+                                      rdfhtml:hasChild [
+                                          a rdfhtml:Li ; rdfhtml:hasChild [ a rdfhtml:Text ; rdfhtml:data "Hold report prewarming at 40 percent." ] ;
+                                          ord:immediatelyPrecedes [
+                                              a rdfhtml:Li ; rdfhtml:hasChild [ a rdfhtml:Text ; rdfhtml:data "Compare eviction rates across the two newest regions." ] ;
+                                              ord:immediatelyPrecedes [
+                                                  a rdfhtml:Li ; rdfhtml:hasChild [ a rdfhtml:Text ; rdfhtml:data "Prepare rollback decision at 19:20 UTC." ]
+                                              ]
+                                          ]
+                                      ]
+                                  ]
+                              ]
+                          ]
+                      ]
+                  ]
+              ]
+          ]
+      ] .
+}
+
+doc:incident-graph {
+  doc:incident
+      a schema:Event ;
+      schema:name "Cached report latency" ;
+      schema:eventStatus <https://schema.org/EventScheduled> ;
+      dcterms:identifier "IR-204" .
+}

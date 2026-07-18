@@ -1,0 +1,447 @@
+@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://ia2.dev/spec/rdf-html/examples/field-observations#document>
+    a rdfhtml:Document ;
+    rdfhtml:base <https://example.invalid/field-observations/> ;
+    dcterms:conformsTo <https://ia2.dev/spec/rdf-html/vocabulary/rdf-html-2026-07-18.ttl> ;
+    dcterms:title "Estuary field observations" ;
+    dcterms:source <https://ia2.dev/spec/rdf-html/examples/sources/field-observations.html> ;
+    dcterms:license <https://github.com/ia2-dev/ia2/blob/main/LICENSE> ;
+    dcterms:creator "IA² contributors" ;
+    dcterms:description "Authored example demonstrating an article, mixed content, metadata, and measurements." ;
+    rdfhtml:children (
+        [
+            a rdfhtml:DocumentType ;
+            rdfhtml:documentTypeName "html"
+        ]
+        [
+            a rdfhtml:Html ;
+            rdfhtml:lang "en" ;
+            rdfhtml:children (
+                [
+                    a rdfhtml:Head ;
+                    rdfhtml:children (
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Meta ;
+                            rdfhtml:charset "utf-8"
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Title ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "Estuary field observations"
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Style ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    body { color: #17312c; font: 1rem/1.6 Georgia, serif; margin: 0 auto; max-width: 52rem; padding: 3rem 1.25rem 5rem; }\n    h1, h2 { font-family: system-ui, sans-serif; letter-spacing: -.035em; }\n    h1 { font-size: 3rem; line-height: 1; }\n    .metadata { border-block: 1px solid #9db9b0; display: grid; gap: .5rem; grid-template-columns: repeat(3, 1fr); padding: 1rem 0; }\n    .metadata dt { color: #526e66; font: .75rem system-ui, sans-serif; text-transform: uppercase; }\n    .metadata dd { margin: 0; }\n    blockquote { border-left: .3rem solid #56a487; margin-left: 0; padding-left: 1rem; }\n    table { border-collapse: collapse; width: 100%; }\n    th, td { border-bottom: 1px solid #c4d5cf; padding: .65rem; text-align: left; }\n  "
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n"
+                        ]
+                    )
+                ]
+                [
+                    a rdfhtml:Text ;
+                    rdfhtml:data "\n"
+                ]
+                [
+                    a rdfhtml:Body ;
+                    rdfhtml:children (
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Article ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:H1 ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "Estuary field observations"
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:Dl ;
+                                    rdfhtml:class "metadata" ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:Div ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Dt ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "Station"
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Dd ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "Delta 03"
+                                                        ]
+                                                    )
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:Div ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Dt ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "Observer"
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Dd ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "M. Chen"
+                                                        ]
+                                                    )
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:Div ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Dt ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "Date"
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Dd ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Time ;
+                                                            rdfhtml:dateTime "2026-07-14" ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "14 July 2026"
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n    "
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:P ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "Cloud cover increased after noon. The upstream sensor remained stable while salinity at the outer marker changed with the incoming tide."
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:Blockquote ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:P ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "Three harbour seals surfaced east of the transect at 13:42. No disturbance to the sampling route was required."
+                                                ]
+                                            )
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:H2 ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "Measurements"
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:Table ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:Thead ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Tr ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Th ;
+                                                            rdfhtml:scope "col" ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Time"
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Th ;
+                                                            rdfhtml:scope "col" ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Temperature"
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Th ;
+                                                            rdfhtml:scope "col" ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Salinity"
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:Tbody ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Tr ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Time ;
+                                                                    rdfhtml:dateTime "12:00" ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "12:00"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "14.8 °C"
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "18.2 ppt"
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Tr ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Time ;
+                                                                    rdfhtml:dateTime "13:00" ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "13:00"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "15.1 °C"
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "20.7 ppt"
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Tr ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Time ;
+                                                                    rdfhtml:dateTime "14:00" ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "14:00"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "15.0 °C"
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "23.4 ppt"
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n      "
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n    "
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n  "
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n\n\n"
+                        ]
+                    )
+                ]
+            )
+        ]
+    ) .

@@ -4,6 +4,8 @@ export type { DiscoveryCandidate, DiscoveryContribution } from "./discovery.js";
 export { Ia2RdfNavigator } from "./navigator.js";
 export type { DrawerPosition } from "./navigator.js";
 export { serializeJsonLd, serializeTurtle, termToTurtle } from "./serialize.js";
+export { fromPortableExtractionResult, toPortableExtractionResult } from "./sources.js";
+export type { NavigatorSource, NavigatorSourceAccess, PortableExtractionResult, PortableNavigatorSource } from "./sources.js";
 export { extractDocumentVocabulary } from "./vocabulary.js";
 export type { DocumentVocabulary, VocabularyDefinition, VocabularyKind } from "./vocabulary.js";
 export type * from "./model.js";

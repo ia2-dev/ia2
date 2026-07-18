@@ -151,6 +151,9 @@ and inspected while the document is inert or changing at runtime.
   HTML attribute binding for complete RDF 1.2 datasets. The file is both the
   authored ReSpec source and an IA² document; there is no generated Markdown or
   template layer.
+- [`specs/rdf-html/index.html`](specs/rdf-html/index.html): an exploratory DOM
+  vocabulary and processing model for rendering one or more HTML documents
+  described in RDF 1.2 Turtle or TriG.
 - [`specs/discovery-enrichment/index.html`](specs/discovery-enrichment/index.html):
   a supplemental profile for advertising, qualifying, retrieving, and
   presenting additional RDF sources. It publishes a self-described vocabulary
@@ -163,20 +166,26 @@ and inspected while the document is inert or changing at runtime.
 ### Guides
 
 - [`site/guide/index.html`](site/guide/index.html) — an example-driven guide
-  to authoring IA² HTML/RDF, from a first complete statement through named
-  graphs, RDF 1.2 triple terms, and live DOM extraction.
+  to authoring IA² HTML/RDF and RDF/HTML, from a first complete statement
+  through named graphs, live DOM extraction, and inert rendering from RDF.
 
 ### Packages
 
 - [`@ia2-dev/html-rdf-navigator`](packages/html-rdf-navigator/) — a dependency-free browser
   component and TypeScript library for extracting, navigating, and serializing
   the RDF expressed by an IA² HTML document.
+- [`@ia2-dev/rdf-html`](packages/rdf-html/) parses Turtle and TriG descriptions
+  of DOM nodes, validates strict child ordering, renders direct HTML or inert
+  workspaces, describes parsed HTML as RDF/HTML, and preserves every unconsumed
+  RDF statement through HTML/RDF carriers. Browser and Node APIs are paired
+  with an `npx` CLI that accepts files, URLs, and standard input.
 - [`@ia2-dev/hare-viewer`](packages/hare-viewer/) provides an optional file
   browser, integrity verifier, virtual-URL router, and inert preview surface for
   HARE envelopes.
 - [`packages/browser-extension`](packages/browser-extension/): a least-permission
-  WebExtension adapter that opens the Navigator on demand in Chrome, Firefox,
-  and Safari.
+  WebExtension adapter that opens the Navigator on demand, renders
+  browser-opened RDF/HTML Turtle and TriG, and enhances HARE in Chrome,
+  Firefox, and Safari.
 
 ### Agent skills
 

@@ -1,0 +1,258 @@
+@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://ia2.dev/spec/rdf-html/examples/nasa-apollo-11#document>
+    a rdfhtml:Document ;
+    rdfhtml:base <https://www.nasa.gov/history/apollo-11-mission-overview/> ;
+    dcterms:conformsTo <https://ia2.dev/spec/rdf-html/vocabulary/rdf-html-2026-07-18.ttl> ;
+    dcterms:title "Apollo 11 mission overview" ;
+    dcterms:source <https://www.nasa.gov/history/apollo-11-mission-overview/> ;
+    dcterms:license <https://www.nasa.gov/nasa-brand-center/images-and-media/> ;
+    dcterms:creator "National Aeronautics and Space Administration" ;
+    dcterms:description "Text-only adapted excerpt; NASA identifiers, imagery, and third-party media are omitted." ;
+    rdfhtml:children (
+        [
+            a rdfhtml:DocumentType ;
+            rdfhtml:documentTypeName "html"
+        ]
+        [
+            a rdfhtml:Html ;
+            rdfhtml:lang "en" ;
+            rdfhtml:children (
+                [
+                    a rdfhtml:Head ;
+                    rdfhtml:children (
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Meta ;
+                            rdfhtml:charset "utf-8"
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Title ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "Apollo 11 mission overview"
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Style ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    body { background: #07111f; color: #e9f0f7; font: 1rem/1.65 system-ui, sans-serif; margin: 0; }\n    article { margin: 0 auto; max-width: 58rem; padding: 4rem 1.25rem; }\n    h1 { font-size: clamp(3rem, 9vw, 7rem); letter-spacing: -.07em; line-height: .85; }\n    h2, a { color: #9fd7ff; }\n    blockquote { border-left: .25rem solid #ef394b; font-size: 1.4rem; margin-left: 0; padding-left: 1rem; }\n    footer { border-top: 1px solid #526275; color: #b9c7d5; font-size: .85rem; margin-top: 3rem; padding-top: 1rem; }\n  "
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n"
+                        ]
+                    )
+                ]
+                [
+                    a rdfhtml:Text ;
+                    rdfhtml:data "\n"
+                ]
+                [
+                    a rdfhtml:Body ;
+                    rdfhtml:children (
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Article ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:H1 ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "Apollo 11"
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:Blockquote ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:P ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "“The Eagle has landed…”"
+                                                ]
+                                            )
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:H2 ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "Mission objective"
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:P ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "The primary objective of Apollo 11 was to complete a national goal set by President John F. Kennedy on May 25, 1961: perform a crewed lunar landing and return to Earth."
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:P ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "Additional objectives included scientific exploration by the lunar module crew, deployment of experiments, and gathering samples of lunar-surface materials for return to Earth."
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:H2 ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "Crew"
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:Ul ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Li ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "Neil Armstrong, Commander"
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Li ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "Edwin E. “Buzz” Aldrin Jr., Lunar Module Pilot"
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Li ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "Michael Collins, Command Module Pilot"
+                                                ]
+                                            )
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:Footer ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:P ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "Adapted as a text-only excerpt from "
+                                                ]
+                                                [
+                                                    a rdfhtml:A ;
+                                                    rdfhtml:href "https://www.nasa.gov/history/apollo-11-mission-overview/" ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "NASA’s Apollo 11 Mission Overview"
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data ". NASA is acknowledged as the source. No NASA identifiers, imagery, or third-party media are reproduced. See the "
+                                                ]
+                                                [
+                                                    a rdfhtml:A ;
+                                                    rdfhtml:href "https://www.nasa.gov/nasa-brand-center/images-and-media/" ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "NASA media usage guidelines"
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "."
+                                                ]
+                                            )
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n  "
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n\n\n"
+                        ]
+                    )
+                ]
+            )
+        ]
+    ) .

@@ -1,0 +1,196 @@
+@prefix rules: <https://ia2.dev/spec/rdf-html/conditional-rules#> .
+@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .
+@prefix ord: <https://ontology.inferal.com/modules/ordering/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+<https://ia2.dev/spec/rdf-html/conditional-rules>
+    a owl:Ontology ;
+    dcterms:title "IA² RDF/HTML reviewed conditional classification rules"@en ;
+    dcterms:description "Maintained SHACL-AF rules for the subset of conditional HTML content-category memberships that can be expressed faithfully over RDF/HTML 0.1 data."@en ;
+    dcterms:isPartOf <https://ia2.dev/spec/rdf-html> ;
+    owl:versionInfo "Exploratory 0.1" .
+
+rules:HasHrefAttribute
+    a sh:NodeShape ;
+    sh:or (
+        [ sh:property [ sh:path rdfhtml:href ; sh:minCount 1 ] ]
+        [ sh:property [
+            sh:path rdfhtml:attribute ;
+            sh:qualifiedValueShape [
+                sh:property [ sh:path rdfhtml:attributeDefinition ; sh:hasValue rdfhtml:href ]
+            ] ;
+            sh:qualifiedMinCount 1
+        ] ]
+    ) .
+
+rules:HasControlsAttribute
+    a sh:NodeShape ;
+    sh:or (
+        [ sh:property [ sh:path rdfhtml:controls ; sh:minCount 1 ] ]
+        [ sh:property [
+            sh:path rdfhtml:attribute ;
+            sh:qualifiedValueShape [
+                sh:property [ sh:path rdfhtml:attributeDefinition ; sh:hasValue rdfhtml:controls ]
+            ] ;
+            sh:qualifiedMinCount 1
+        ] ]
+    ) .
+
+rules:HasItempropAttribute
+    a sh:NodeShape ;
+    sh:or (
+        [ sh:property [ sh:path rdfhtml:itemprop ; sh:minCount 1 ] ]
+        [ sh:property [
+            sh:path rdfhtml:attribute ;
+            sh:qualifiedValueShape [
+                sh:property [ sh:path rdfhtml:attributeDefinition ; sh:hasValue rdfhtml:itemprop ]
+            ] ;
+            sh:qualifiedMinCount 1
+        ] ]
+    ) .
+
+rules:HasUsemapAttribute
+    a sh:NodeShape ;
+    sh:or (
+        [ sh:property [ sh:path rdfhtml:useMap ; sh:minCount 1 ] ]
+        [ sh:property [
+            sh:path rdfhtml:attribute ;
+            sh:qualifiedValueShape [
+                sh:property [ sh:path rdfhtml:attributeDefinition ; sh:hasValue rdfhtml:useMap ]
+            ] ;
+            sh:qualifiedMinCount 1
+        ] ]
+    ) .
+
+rules:HasUsemapOrControlsAttribute
+    a sh:NodeShape ;
+    sh:or ( rules:HasUsemapAttribute rules:HasControlsAttribute ) .
+
+rules:HasLiChild
+    a sh:NodeShape ;
+    sh:or (
+        [ sh:property [
+            sh:path ( rdfhtml:children [ sh:zeroOrMorePath rdf:rest ] rdf:first ) ;
+            sh:qualifiedValueShape [ sh:class rdfhtml:Li ] ;
+            sh:qualifiedMinCount 1
+        ] ]
+        [ sh:property [
+            sh:path ( rdfhtml:hasChild [ sh:zeroOrMorePath ord:immediatelyPrecedes ] ) ;
+            sh:qualifiedValueShape [ sh:class rdfhtml:Li ] ;
+            sh:qualifiedMinCount 1
+        ] ]
+    ) .
+
+rules:AClassification
+    a sh:NodeShape ;
+    sh:targetClass rdfhtml:A ;
+    sh:rule [
+        a sh:TripleRule ;
+        dcterms:source rdfhtml:condition-interactive-a ;
+        sh:condition rules:HasHrefAttribute ;
+        sh:subject sh:this ;
+        sh:predicate rdf:type ;
+        sh:object rdfhtml:InteractiveContent
+    ] .
+
+rules:AudioClassification
+    a sh:NodeShape ;
+    sh:targetClass rdfhtml:Audio ;
+    sh:rule [
+        a sh:TripleRule ;
+        dcterms:source rdfhtml:condition-interactive-audio ;
+        sh:condition rules:HasControlsAttribute ;
+        sh:subject sh:this ;
+        sh:predicate rdf:type ;
+        sh:object rdfhtml:InteractiveContent
+    ], [
+        a sh:TripleRule ;
+        dcterms:source rdfhtml:condition-palpable-audio ;
+        sh:condition rules:HasControlsAttribute ;
+        sh:subject sh:this ;
+        sh:predicate rdf:type ;
+        sh:object rdfhtml:PalpableContent
+    ] .
+
+rules:VideoClassification
+    a sh:NodeShape ;
+    sh:targetClass rdfhtml:Video ;
+    sh:rule [
+        a sh:TripleRule ;
+        dcterms:source rdfhtml:condition-interactive-video ;
+        sh:condition rules:HasControlsAttribute ;
+        sh:subject sh:this ;
+        sh:predicate rdf:type ;
+        sh:object rdfhtml:InteractiveContent
+    ] .
+
+rules:ImgClassification
+    a sh:NodeShape ;
+    sh:targetClass rdfhtml:Img ;
+    sh:rule [
+        a sh:TripleRule ;
+        dcterms:source rdfhtml:condition-interactive-img ;
+        sh:condition rules:HasUsemapOrControlsAttribute ;
+        sh:subject sh:this ;
+        sh:predicate rdf:type ;
+        sh:object rdfhtml:InteractiveContent
+    ] .
+
+rules:MetaClassification
+    a sh:NodeShape ;
+    sh:targetClass rdfhtml:Meta ;
+    sh:rule [
+        a sh:TripleRule ;
+        dcterms:source rdfhtml:condition-flow-meta ;
+        sh:condition rules:HasItempropAttribute ;
+        sh:subject sh:this ;
+        sh:predicate rdf:type ;
+        sh:object rdfhtml:FlowContent
+    ], [
+        a sh:TripleRule ;
+        dcterms:source rdfhtml:condition-phrasing-meta ;
+        sh:condition rules:HasItempropAttribute ;
+        sh:subject sh:this ;
+        sh:predicate rdf:type ;
+        sh:object rdfhtml:PhrasingContent
+    ] .
+
+rules:MenuClassification
+    a sh:NodeShape ;
+    sh:targetClass rdfhtml:Menu ;
+    sh:rule [
+        a sh:TripleRule ;
+        dcterms:source rdfhtml:condition-palpable-menu ;
+        sh:condition rules:HasLiChild ;
+        sh:subject sh:this ;
+        sh:predicate rdf:type ;
+        sh:object rdfhtml:PalpableContent
+    ] .
+
+rules:OlClassification
+    a sh:NodeShape ;
+    sh:targetClass rdfhtml:Ol ;
+    sh:rule [
+        a sh:TripleRule ;
+        dcterms:source rdfhtml:condition-palpable-ol ;
+        sh:condition rules:HasLiChild ;
+        sh:subject sh:this ;
+        sh:predicate rdf:type ;
+        sh:object rdfhtml:PalpableContent
+    ] .
+
+rules:UlClassification
+    a sh:NodeShape ;
+    sh:targetClass rdfhtml:Ul ;
+    sh:rule [
+        a sh:TripleRule ;
+        dcterms:source rdfhtml:condition-palpable-ul ;
+        sh:condition rules:HasLiChild ;
+        sh:subject sh:this ;
+        sh:predicate rdf:type ;
+        sh:object rdfhtml:PalpableContent
+    ] .

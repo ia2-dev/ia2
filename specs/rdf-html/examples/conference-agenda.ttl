@@ -1,0 +1,472 @@
+@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://ia2.dev/spec/rdf-html/examples/conference-agenda#document>
+    a rdfhtml:Document ;
+    rdfhtml:base <https://example.invalid/open-systems-forum/> ;
+    dcterms:conformsTo <https://ia2.dev/spec/rdf-html/vocabulary/rdf-html-2026-07-18.ttl> ;
+    dcterms:title "Open Systems Forum agenda" ;
+    dcterms:source <https://ia2.dev/spec/rdf-html/examples/sources/conference-agenda.html> ;
+    dcterms:license <https://github.com/ia2-dev/ia2/blob/main/LICENSE> ;
+    dcterms:creator "IA² contributors" ;
+    dcterms:description "Authored example demonstrating tables, dates, and a styled event program." ;
+    rdfhtml:children (
+        [
+            a rdfhtml:DocumentType ;
+            rdfhtml:documentTypeName "html"
+        ]
+        [
+            a rdfhtml:Html ;
+            rdfhtml:lang "en" ;
+            rdfhtml:children (
+                [
+                    a rdfhtml:Head ;
+                    rdfhtml:children (
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Meta ;
+                            rdfhtml:charset "utf-8"
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Title ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "Open Systems Forum agenda"
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Style ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    body { background: #f7f5ff; color: #21194d; font: 1rem/1.55 system-ui, sans-serif; margin: 0; }\n    main { margin: 0 auto; max-width: 64rem; padding: 4rem 1.25rem; }\n    h1 { font-size: clamp(2.5rem, 7vw, 5.5rem); letter-spacing: -.06em; line-height: .92; max-width: 10ch; }\n    .lede { font-size: 1.2rem; max-width: 45rem; }\n    table { border-collapse: collapse; margin-top: 2.5rem; width: 100%; }\n    caption { font-size: 1.35rem; font-weight: 750; padding-bottom: .75rem; text-align: left; }\n    th, td { border-top: 1px solid #c9c1e4; padding: 1rem .75rem; text-align: left; vertical-align: top; }\n    time { font-variant-numeric: tabular-nums; font-weight: 750; }\n    .track { background: #dff5bc; border-radius: 99px; display: inline-block; font-size: .75rem; padding: .2rem .55rem; }\n  "
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n"
+                        ]
+                    )
+                ]
+                [
+                    a rdfhtml:Text ;
+                    rdfhtml:data "\n"
+                ]
+                [
+                    a rdfhtml:Body ;
+                    rdfhtml:children (
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Main ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:Header ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:P ;
+                                            rdfhtml:class "track" ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "Community program"
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:H1 ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "Open Systems Forum"
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:P ;
+                                            rdfhtml:class "lede" ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "A one-day gathering about durable formats, inspectable systems, and software that leaves room for its users."
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:P ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Time ;
+                                                    rdfhtml:dateTime "2026-09-18" ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "18 September 2026"
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data ", Harbour Centre, Vancouver"
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n    "
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:Table ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:Caption ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "Program"
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:Thead ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Tr ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Th ;
+                                                            rdfhtml:scope "col" ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Time"
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Th ;
+                                                            rdfhtml:scope "col" ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Session"
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Th ;
+                                                            rdfhtml:scope "col" ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Room"
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:Tbody ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Tr ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Time ;
+                                                                    rdfhtml:dateTime "09:00" ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "09:00"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Strong ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "Opening:"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data " Information architecture after the application boundary"
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Terrace"
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Tr ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Time ;
+                                                                    rdfhtml:dateTime "10:15" ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "10:15"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Documents that explain themselves"
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Studio A"
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Tr ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Time ;
+                                                                    rdfhtml:dateTime "11:30" ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "11:30"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Ordering, provenance, and the shape of evidence"
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Studio B"
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Tr ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Time ;
+                                                                    rdfhtml:dateTime "14:00" ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "14:00"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Hands-on lab: publish a semantic island"
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Workshop"
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Tr ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Time ;
+                                                                    rdfhtml:dateTime "16:30" ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "16:30"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Closing roundtable"
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Td ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "Terrace"
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n      "
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n    "
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n  "
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n\n\n"
+                        ]
+                    )
+                ]
+            )
+        ]
+    ) .

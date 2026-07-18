@@ -121,6 +121,16 @@ h2 { margin: 0; font-size: 19px; line-height: 1.25; letter-spacing: -0.025em; }
 .app-directory-group { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: baseline; gap: 18px; padding: 32px 4px 14px; border-bottom: 1px solid var(--line); }
 .app-directory-group p { margin: 0; }
 .app-directory-group > p:last-child { max-width: 68ch; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.rdfhtml-entry { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 18px; min-height: 90px; padding: 16px 4px; border-bottom: 1px solid var(--line); }
+.rdfhtml-entry-copy strong, .rdfhtml-entry-copy small { display: block; }
+.rdfhtml-entry-copy strong { font-size: 16px; letter-spacing: -.02em; }
+.rdfhtml-entry-copy small { max-width: 66ch; margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.rdfhtml-entry-actions { display: flex; align-items: center; gap: 7px; }
+.rdfhtml-action { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; padding: 0 11px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: var(--surface); font-size: 11px; font-weight: 680; text-decoration: none; white-space: nowrap; transition: background 160ms var(--ease), border-color 160ms var(--ease), color 160ms var(--ease), transform 160ms var(--ease); }
+.rdfhtml-action:hover { border-color: color-mix(in oklch, var(--accent) 35%, var(--line)); color: var(--ink); background: var(--surface-2); }
+.rdfhtml-action:active { transform: translateY(1px); }
+.rdfhtml-action-render { border-color: color-mix(in oklch, var(--accent) 25%, var(--line)); color: var(--accent); background: var(--accent-soft); }
+.rdfhtml-action-render:hover { border-color: var(--accent); color: var(--accent-hover); background: color-mix(in oklch, var(--accent-soft) 78%, var(--surface)); }
 .federation-note { max-width: 760px; margin-top: 42px; padding-top: 24px; border-top: 1px solid var(--line); }
 .federation-note h2 { font-size: 23px; }
 .federation-note > p:last-child { max-width: 66ch; margin: 10px 0 0; color: var(--muted); line-height: 1.65; }
@@ -370,6 +380,9 @@ kbd { padding: 1px 5px; border: 1px solid var(--line); border-radius: 4px; backg
   .app-entry { grid-template-columns: 30px minmax(0, 1fr) 16px; gap: 10px; }
   .app-entry-state { display: none; }
   .app-directory-group { grid-template-columns: 1fr; gap: 5px; padding-top: 28px; }
+  .rdfhtml-entry { grid-template-columns: 30px minmax(0, 1fr); gap: 6px 10px; padding: 16px 4px; }
+  .rdfhtml-entry-actions { grid-column: 2; margin-top: 5px; }
+  .rdfhtml-action { min-height: 38px; }
   .review-summary { grid-template-columns: 1fr; }
   .review-summary > span { min-height: 62px; border-right: 0; border-bottom: 1px solid var(--line); }
   .review-summary > span:last-child { border-bottom: 0; }

@@ -1,0 +1,11 @@
+{
+  "title": "RDF/HTML 0.1 implementation-neutral conformance fixtures",
+  "vocabulary": "https://ia2.dev/spec/rdf-html/vocabulary/rdf-html-2026-07-18.ttl",
+  "tests": [
+    { "id": "collection-document", "input": "collection-document.ttl", "contentType": "text/turtle", "documents": 1, "renderable": true, "htmlContains": "<h1>Complete document</h1>" },
+    { "id": "named-graph-duplicates", "input": "named-graph-duplicates.trig", "contentType": "application/trig", "documents": 1, "renderable": true, "htmlContains": "<p>Named graph merge</p>" },
+    { "id": "partial-description", "input": "partial-description.ttl", "contentType": "text/turtle", "documents": 1, "renderable": false, "errorContains": "unique child order" },
+    { "id": "missing-vocabulary", "input": "missing-vocabulary.ttl", "contentType": "text/turtle", "documents": 1, "renderable": false, "errorContains": "dcterms:conformsTo" },
+    { "id": "contradictory-order", "input": "contradictory-order.ttl", "contentType": "text/turtle", "documents": 1, "renderable": false, "errorContains": "contradicts immediate adjacency" }
+  ]
+}

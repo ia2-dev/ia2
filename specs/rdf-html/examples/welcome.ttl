@@ -1,0 +1,43 @@
+@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <https://schema.org/> .
+@prefix doc: <https://ia2.dev/spec/rdf-html/examples/welcome#> .
+
+doc:document
+    a rdfhtml:Document ;
+    rdfhtml:base <https://example.invalid/welcome/> ;
+    dcterms:conformsTo <https://ia2.dev/spec/rdf-html/vocabulary/rdf-html-2026-07-18.ttl> ;
+    dcterms:title "RDF Collection ordering example" ;
+    schema:about doc:rdf-html ;
+    rdfhtml:children (
+        [ a rdfhtml:DocumentType ; rdfhtml:documentTypeName "html" ]
+        doc:html
+    ) .
+
+doc:html
+    a rdfhtml:Html ;
+    rdfhtml:lang "en" ;
+    rdfhtml:children ( doc:head doc:body ) .
+
+doc:head a rdfhtml:Head ;
+    rdfhtml:children (
+        [ a rdfhtml:Title ; rdfhtml:children (
+            [ a rdfhtml:Text ; rdfhtml:data "Welcome to RDF/HTML" ]
+        ) ]
+    ) .
+
+doc:body
+    a rdfhtml:Body ;
+    rdfhtml:children (
+        [ a rdfhtml:H1 ; rdfhtml:children (
+            [ a rdfhtml:Text ; rdfhtml:data "Welcome" ]
+        ) ]
+        [ a rdfhtml:P ; rdfhtml:children (
+            [ a rdfhtml:Text ; rdfhtml:data "This document was described in RDF, then rendered as HTML." ]
+        ) ]
+    ) .
+
+doc:rdf-html
+    a schema:DefinedTerm ;
+    schema:name "RDF/HTML" ;
+    schema:url <https://ia2.dev/spec/rdf-html> .

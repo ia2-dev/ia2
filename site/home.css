@@ -755,6 +755,7 @@ footer p {
 footer > div {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   font-size: 0.76rem;
   font-weight: 700;
   gap: 1.5rem;

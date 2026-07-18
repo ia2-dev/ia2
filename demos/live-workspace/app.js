@@ -34,6 +34,11 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const issueList = $("#issue-list");
 const mailList = $("#mail-list");
 
+$$('[data-rdfhtml-render]').forEach((link) => {
+  const source = new URL(link.dataset.rdfhtmlRender, window.location.origin);
+  link.setAttribute("href", `/render/${source.href}`);
+});
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 }

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { injectNavigator, registerExtension, statementBadge } from "../src/background.js";
+import { injectNavigator, isRdfHtmlRendererUrl, registerExtension, statementBadge } from "../src/background.js";
 
 function mockApi(executeScript) {
   const calls = [];
@@ -24,6 +24,7 @@ function mockApi(executeScript) {
       },
       tabs: {
         onUpdated: { addListener(value) { updatedListener = value; } },
+        sendMessage(tabId, message, options) { calls.push(["send", { message, options, tabId }]); return Promise.resolve(); },
       },
     },
     calls,
@@ -41,13 +42,13 @@ test("injects the Navigator into only the selected top-level tab", async () => {
     ["icon", { path: { 16: "icons/ia2-mark-16.png", 32: "icons/ia2-mark-32.png" }, tabId: 42 }],
     ["title", { tabId: 42, title: "Open IA² Navigator" }],
     ["execute", {
+      files: ["status.js"],
+      target: { allFrames: false, tabId: 42 },
+    }],
+    ["execute", {
       files: ["content.js"],
       target: { allFrames: false, tabId: 42 },
       world: "MAIN",
-    }],
-    ["execute", {
-      files: ["status.js"],
-      target: { allFrames: false, tabId: 42 },
     }],
   ]);
 });
@@ -66,15 +67,55 @@ test("marks browser-restricted pages as unavailable", async () => {
     ["icon", { path: { 16: "icons/ia2-mark-16.png", 32: "icons/ia2-mark-32.png" }, tabId: 7 }],
     ["title", { tabId: 7, title: "Open IA² Navigator" }],
     ["execute", {
-      files: ["content.js"],
+      files: ["status.js"],
       target: { allFrames: false, tabId: 7 },
-      world: "MAIN",
     }],
     ["badge", { tabId: 7, text: "!" }],
     ["icon", { path: { 16: "icons/ia2-mark-muted-16.png", 32: "icons/ia2-mark-muted-32.png" }, tabId: 7 }],
     ["title", { tabId: 7, title: "IA² Navigator is unavailable on this page" }],
     ["badge-color", { color: "#6842c2", tabId: 7 }],
   ]);
+});
+
+test("publishes declaratively collected frames only for the RDF/HTML renderer", async () => {
+  const fixture = mockApi(() => Promise.resolve());
+  assert.equal(isRdfHtmlRendererUrl("https://ia2.dev/render/https://example.test/doc.ttl"), true);
+  assert.equal(isRdfHtmlRendererUrl("http://localhost:8788/render"), true);
+  assert.equal(isRdfHtmlRendererUrl("https://example.test/render"), false);
+  assert.equal(await injectNavigator(fixture.api, { id: 55, url: "http://localhost:8788/render" }), true);
+  assert.equal(fixture.calls.filter(([kind, value]) => kind === "execute" && value.files.includes("collector.js")).length, 0);
+  assert.deepEqual(fixture.calls.filter(([kind]) => kind === "send").map(([, value]) => value.message.type), [
+    "ia2:collect-frame-source",
+    "ia2:navigator-sources",
+  ]);
+});
+
+test("relays portable child-frame sources and includes them in the badge count", async () => {
+  const fixture = mockApi(() => Promise.resolve());
+  registerExtension(fixture.api);
+  fixture.message({
+    source: {
+      access: "portable",
+      label: "Rendered document",
+      origin: "Opaque origin",
+      result: { portableVersion: 1, quads: [{ sourceId: "source-1" }] },
+      url: "about:srcdoc",
+    },
+    type: "ia2:frame-source",
+  }, { frameId: 4, tab: { id: 56, url: "http://localhost:8788/render" } });
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(fixture.calls.filter(([kind]) => kind === "send").length, 0);
+  await injectNavigator(fixture.api, { id: 56, url: "http://localhost:8788/render" });
+  await new Promise((resolve) => setImmediate(resolve));
+
+  const relay = fixture.calls.filter(([kind, value]) => kind === "send" && value.tabId === 56 && value.message.type === "ia2:navigator-sources").at(-1);
+  assert.equal(relay[1].message.sources[0].id, "extension-frame-4");
+  assert.deepEqual(fixture.calls.filter(([kind]) => kind === "badge").at(-1), ["badge", { tabId: 56, text: "1" }]);
+
+  fixture.message({ statements: 1, type: "ia2:navigator-status" }, { tab: { id: 56 } });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(fixture.calls.filter(([kind]) => kind === "badge").at(-1), ["badge", { tabId: 56, text: "1" }]);
 });
 
 test("formats statement counts for the browser badge", () => {

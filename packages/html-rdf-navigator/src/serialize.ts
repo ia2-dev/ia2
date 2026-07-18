@@ -29,6 +29,9 @@ export const PREFIXES: Readonly<Record<string, string>> = {
   doco: "http://purl.org/spar/doco/",
   pattern: "http://www.essepuntato.it/2008/12/pattern#",
   decision: "https://ontology.inferal.com/modules/decision/",
+  ord: "https://ontology.inferal.com/modules/ordering/",
+  htmlrdf: "https://ia2.dev/spec/html-rdf#",
+  rdfhtml: "https://ia2.dev/spec/rdf-html#",
   de: "https://ia2.dev/spec/discovery-enrichment#",
 };
 

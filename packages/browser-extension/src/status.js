@@ -3,9 +3,20 @@ const EXTENSION_TAG = "ia2-extension-navigator";
 const PAGE_TAG = "ia2-rdf-navigator";
 const EXTENSION_HARE_TAG = "ia2-extension-hare-viewer";
 const PAGE_HARE_TAG = "ia2-hare-viewer";
+const SOURCE_RELAY = Symbol.for("ia2.navigator.extension.source-relay");
 const extensionApi = globalThis.browser ?? globalThis.chrome;
 let lastStatements = null;
 let lastFiles = null;
+
+function relaySources(message) {
+  if (message?.type !== "ia2:navigator-sources" || !Array.isArray(message.sources)) return;
+  globalThis.postMessage({ sources: message.sources, type: "ia2:navigator-sources" }, "*");
+}
+
+if (!globalThis[SOURCE_RELAY] && extensionApi?.runtime?.onMessage) {
+  extensionApi.runtime.onMessage.addListener(relaySources);
+  globalThis[SOURCE_RELAY] = true;
+}
 
 async function findNavigator() {
   for (let attempt = 0; attempt < 100; attempt += 1) {
@@ -58,3 +69,4 @@ async function observeStatus() {
 }
 
 void observeStatus();
+extensionApi?.runtime?.sendMessage?.({ type: "ia2:request-frame-sources" }).catch?.(() => {});

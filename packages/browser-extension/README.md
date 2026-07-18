@@ -1,7 +1,9 @@
 # IA² Navigator browser extension
 
 This private workspace package adapts the existing IA² HTML/RDF Navigator for
-Chrome, Firefox, and Safari. HARE resource envelopes are enhanced
+Chrome, Firefox, and Safari. Browser-opened Turtle and TriG resources that
+describe RDF/HTML documents are replaced with their active rendered HTML;
+multiple documents receive a selector around one active frame. HARE resource envelopes are enhanced
 automatically. An authored envelope receives the same Document and Files
 header as `@ia2-dev/hare-viewer`; a bare envelope opens directly into its
 verified file browser. Selecting the extension toolbar action still opens the
@@ -22,6 +24,42 @@ download. HTML previews use a sandbox without scripts. On an authored
 envelope, selecting **Document** or pressing Escape closes the file workspace
 while preserving the header. A bare envelope remains a full file browser
 because it has no authored document view to restore.
+
+## RDF/HTML documents
+
+The automatic enhancer recognizes browser-opened <code>.ttl</code> and
+<code>.trig</code> documents by media type or URL. It parses the displayed RDF
+locally with `@ia2-dev/rdf-html`, validates the described DOM and child
+orderings, and renders a single declared document directly. A source with
+several documents gets a compact selector and one unsandboxed document frame. RDF
+statements not consumed by structural rendering remain embedded as HTML/RDF so
+the Navigator can inspect them. Servers that force RDF to download instead of
+opening in a browser remain outside content-script injection.
+
+This path is intentionally faithful, not an inert preview. Scripts, forms,
+stylesheets, media, and subresource loads described by the RDF/HTML source can
+run with the source document's origin and normal browser policy. Opening an
+RDF/HTML source through the extension should therefore carry the same trust
+decision as opening active HTML from that publisher. The separate package
+`renderRdfHtmlWorkspace()` API remains available for callers that require
+sandboxed inspection.
+
+The hosted RDF/HTML renderer keeps its rendered document in a sandbox without
+`allow-same-origin`. A declarative isolated-world collector, limited to IA²
+renderer origins and their frames, retains a portable extraction for the
+top-document Navigator. When a person invokes the toolbar action, a Sources tab
+lists the top document and rendered documents with their URL or origin, RDF
+statement count, and DOM
+access status. Inspection is radio-style and always applies to one document at
+a time. If the top document has no RDF and exactly one rendered child does, the
+child is selected automatically.
+
+The extension does not remove or weaken the renderer sandbox. Portable frame
+results contain RDF terms and inert carrier markup, not cross-frame `Element`
+references, so source locating and synchronized scrolling are read-only for an
+isolated frame. The collector bridge is limited to the IA² production renderer
+and loopback `/render` development routes. Arbitrary cross-origin frame data is
+not relayed into the page's main JavaScript world.
 
 ## Permission model
 
@@ -102,8 +140,12 @@ changes in this package's shared sources and regenerate the project.
 ## Scope
 
 The adapter intentionally preserves the Navigator's current extraction and
-network boundaries. It reads the top-level document light tree, observes live
-semantic DOM changes, and leaves cross-origin discovery subject to CORS. Page
-reloads automatically restore HARE enhancement; ordinary Navigator drawers
-remain toolbar-initiated. Shadow roots, embedded documents, templates, PDF
-viewers, and browser UI remain outside the observed document.
+network boundaries. It reads each selected document's light tree, observes live
+semantic DOM changes, and leaves cross-origin discovery subject to CORS. The
+package can inspect directly accessible embedded documents; the extension also
+retains the renderer's opaque child frame for explicit selection after toolbar
+activation.
+Page reloads automatically restore HARE enhancement; ordinary Navigator
+drawers remain toolbar-initiated. Shadow roots, templates, arbitrary
+cross-origin frames, PDF viewers, and browser UI remain outside the observed
+document.

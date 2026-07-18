@@ -42,6 +42,8 @@ For programmatic control, disable automatic mounting before import:
 
 - IA² Core 0.1 extraction from a `Document` or `DocumentFragment`
 - Navigator-first inspection with source correlation and vocabulary links
+- a Sources view for choosing among the top document and directly accessible
+  embedded documents without merging their datasets
 - a conditional Vocabulary view for document-defined classes and properties,
   including RDFS subclass and subproperty trees
 - live, case-insensitive filtering across terms, IRIs, graphs, and carriers
@@ -75,6 +77,7 @@ import {
   mountRdfNavigator,
   serializeJsonLd,
   serializeTurtle,
+  toPortableExtractionResult,
 } from "@ia2-dev/html-rdf-navigator";
 ```
 
@@ -98,6 +101,21 @@ may load an HTML/RDF target explicitly; the retrieved document is parsed
 without script execution and its default graph is presented as a named graph
 identified by the target document's canonical IRI. Contributions remain
 removable and never alter the source extraction.
+
+The component discovers embedded documents whose DOM is directly accessible
+under the browser same-origin policy. When several documents are available, a
+Sources tab presents one dataset at a time. If the top document has no RDF and
+exactly one child document does, that child is selected automatically. The
+launcher count covers all listed documents, but Turtle, JSON-LD, diagnostics,
+discovery, and source correlation always apply only to the selected document.
+Datasets are not silently unioned.
+
+Extension adapters can carry an extraction across an isolated frame boundary
+with `toPortableExtractionResult(result)` and supply it through
+`navigator.setSources(sources)`. Portable results replace live `Element`
+references with stable carrier IDs and markup. The component reconstructs
+detached, inert carrier elements for source display; locating or synchronizing
+with the inaccessible frame DOM remains unavailable.
 
 ## Development
 
@@ -136,7 +154,9 @@ oracle.
   grandfathered and uncommon valid tags may be diagnosed.
 - JSON-LD 1.1 has no native RDF 1.2 triple-term syntax. The JSON-LD view uses
   typed JSON literals and displays a notice; Turtle/TriG retains triple terms.
-- Extraction reads only the supplied light-tree root. Template contents,
-  shadow roots, and embedded documents require separately supplied fragments.
+- Extraction reads only the supplied light-tree root. The component treats
+  accessible embedded documents as separate sources; opaque or cross-origin
+  frames require a privileged adapter. Template contents and shadow roots
+  require separately supplied fragments.
 - Canonicalization, signatures, remote contexts, SHACL validation, and rule
   execution are outside the Navigator's scope.

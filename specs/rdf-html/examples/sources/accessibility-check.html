@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Accessibility review</title>
+  <style>
+    body { color: #17212b; font: 1rem/1.55 system-ui, sans-serif; margin: 0 auto; max-width: 48rem; padding: 3rem 1.25rem; }
+    h1 { font-size: 2.4rem; letter-spacing: -.04em; }
+    fieldset { border: 1px solid #aab4be; border-radius: .65rem; display: grid; gap: 1rem; padding: 1.25rem; }
+    label { display: grid; font-weight: 650; gap: .35rem; }
+    input, select, textarea, button { font: inherit; padding: .7rem; }
+    button { background: #30206f; border: 0; border-radius: .45rem; color: white; font-weight: 700; }
+    .hint { color: #53606d; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Accessibility review</h1>
+    <p>Record the result of a keyboard and screen-reader pass before release.</p>
+    <form action="/reviews" method="post">
+      <fieldset>
+        <legend>Review details</legend>
+        <label for="surface">Surface
+          <select id="surface" name="surface" required>
+            <option value="checkout">Checkout</option>
+            <option value="account">Account settings</option>
+            <option value="reports">Reports</option>
+          </select>
+        </label>
+        <label for="reviewer">Reviewer
+          <input id="reviewer" name="reviewer" autocomplete="name" required>
+        </label>
+        <label for="result">Result
+          <select id="result" name="result" required>
+            <option value="pass">Pass</option>
+            <option value="follow-up">Follow-up required</option>
+          </select>
+        </label>
+        <label for="notes">Notes
+          <textarea id="notes" name="notes" rows="5" aria-describedby="notes-hint"></textarea>
+        </label>
+        <p class="hint" id="notes-hint">Include the control, expected behavior, and observed behavior.</p>
+        <button type="submit">Save review</button>
+      </fieldset>
+    </form>
+  </main>
+</body>
+</html>

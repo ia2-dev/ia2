@@ -1,0 +1,16 @@
+@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ex: <https://example.test/rdf-html/conformance/> .
+
+ex:collection a rdfhtml:Document ;
+    rdfhtml:base <https://example.test/rendered/> ;
+    dcterms:conformsTo <https://ia2.dev/spec/rdf-html/vocabulary/rdf-html-2026-07-18.ttl> ;
+    rdfhtml:children (
+        [ a rdfhtml:DocumentType ; rdfhtml:documentTypeName "html" ]
+        [ a rdfhtml:Html ; rdfhtml:children (
+            [ a rdfhtml:Head ]
+            [ a rdfhtml:Body ; rdfhtml:children (
+                [ a rdfhtml:H1 ; rdfhtml:children ( [ a rdfhtml:Text ; rdfhtml:data "Complete document" ] ) ]
+            ) ]
+        ) ]
+    ) .

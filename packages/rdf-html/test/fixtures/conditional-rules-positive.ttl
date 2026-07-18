@@ -1,0 +1,40 @@
+@prefix ex: <https://example.test/conditional/> .
+@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .
+@prefix ord: <https://ontology.inferal.com/modules/ordering/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:a a rdfhtml:A ;
+    rdfhtml:href "/target" ;
+    ex:expectedCategory rdfhtml:InteractiveContent .
+
+ex:audio a rdfhtml:Audio ;
+    rdfhtml:attribute [ a rdfhtml:Attribute ; rdfhtml:attributeDefinition rdfhtml:controls ; rdfhtml:attributeValue "" ] ;
+    ex:expectedCategory rdfhtml:InteractiveContent, rdfhtml:PalpableContent .
+
+ex:video a rdfhtml:Video ;
+    rdfhtml:controls "" ;
+    ex:expectedCategory rdfhtml:InteractiveContent .
+
+ex:img a rdfhtml:Img ;
+    rdfhtml:useMap "#map" ;
+    ex:expectedCategory rdfhtml:InteractiveContent .
+
+ex:meta a rdfhtml:Meta ;
+    rdfhtml:itemprop "name" ;
+    ex:expectedCategory rdfhtml:FlowContent, rdfhtml:PhrasingContent .
+
+ex:menu a rdfhtml:Menu ;
+    rdfhtml:hasChild ex:menu-li ;
+    ex:expectedCategory rdfhtml:PalpableContent .
+ex:menu-li a rdfhtml:Li .
+
+ex:ol a rdfhtml:Ol ;
+    rdfhtml:children ( ex:ol-text ex:ol-li ) ;
+    ex:expectedCategory rdfhtml:PalpableContent .
+ex:ol-text a rdfhtml:Text .
+ex:ol-li a rdfhtml:Li .
+
+ex:ul a rdfhtml:Ul ;
+    rdfhtml:children ( ex:ul-li ) ;
+    ex:expectedCategory rdfhtml:PalpableContent .
+ex:ul-li a rdfhtml:Li .

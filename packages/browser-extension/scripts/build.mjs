@@ -80,11 +80,12 @@ async function bundle(entryPoint, outputName) {
 }
 
 await rm(distRoot, { force: true, recursive: true });
-const [background, content, auto, status] = await Promise.all([
+const [background, content, auto, status, collector] = await Promise.all([
   bundle("src/background.js", "background.js"),
   bundle("src/content.js", "content.js"),
   bundle("src/auto.js", "auto.js"),
   bundle("src/status.js", "status.js"),
+  bundle("src/collector.js", "collector.js"),
 ]);
 const iconSource = resolve(repositoryRoot, "site/assets/ia2-mark-512.png");
 const icons = new Map(await Promise.all(iconSizes.map(async (size) => [
@@ -104,6 +105,7 @@ for (const target of targets) {
     writeFile(resolve(targetRoot, "content.js"), content),
     writeFile(resolve(targetRoot, "auto.js"), auto),
     writeFile(resolve(targetRoot, "status.js"), status),
+    writeFile(resolve(targetRoot, "collector.js"), collector),
     writeFile(resolve(targetRoot, "manifest.json"), `${JSON.stringify(manifestFor(target), null, 2)}\n`),
     copyFile(resolve(repositoryRoot, "LICENSE"), resolve(targetRoot, "LICENSE")),
     ...iconSizes.map((size) => writeFile(resolve(targetRoot, `icons/ia2-mark-${size}.png`), icons.get(size))),

@@ -1,0 +1,373 @@
+@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://ia2.dev/spec/rdf-html/examples/accessibility-check#document>
+    a rdfhtml:Document ;
+    rdfhtml:base <https://example.invalid/accessibility-review/> ;
+    dcterms:conformsTo <https://ia2.dev/spec/rdf-html/vocabulary/rdf-html-2026-07-18.ttl> ;
+    dcterms:title "Accessibility review" ;
+    dcterms:source <https://ia2.dev/spec/rdf-html/examples/sources/accessibility-check.html> ;
+    dcterms:license <https://github.com/ia2-dev/ia2/blob/main/LICENSE> ;
+    dcterms:creator "IA² contributors" ;
+    dcterms:description "Authored example demonstrating accessible form structure and attributes." ;
+    rdfhtml:children (
+        [
+            a rdfhtml:DocumentType ;
+            rdfhtml:documentTypeName "html"
+        ]
+        [
+            a rdfhtml:Html ;
+            rdfhtml:lang "en" ;
+            rdfhtml:children (
+                [
+                    a rdfhtml:Head ;
+                    rdfhtml:children (
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Meta ;
+                            rdfhtml:charset "utf-8"
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Title ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "Accessibility review"
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Style ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    body { color: #17212b; font: 1rem/1.55 system-ui, sans-serif; margin: 0 auto; max-width: 48rem; padding: 3rem 1.25rem; }\n    h1 { font-size: 2.4rem; letter-spacing: -.04em; }\n    fieldset { border: 1px solid #aab4be; border-radius: .65rem; display: grid; gap: 1rem; padding: 1.25rem; }\n    label { display: grid; font-weight: 650; gap: .35rem; }\n    input, select, textarea, button { font: inherit; padding: .7rem; }\n    button { background: #30206f; border: 0; border-radius: .45rem; color: white; font-weight: 700; }\n    .hint { color: #53606d; font-size: .9rem; }\n  "
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n"
+                        ]
+                    )
+                ]
+                [
+                    a rdfhtml:Text ;
+                    rdfhtml:data "\n"
+                ]
+                [
+                    a rdfhtml:Body ;
+                    rdfhtml:children (
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Main ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:H1 ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "Accessibility review"
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:P ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "Record the result of a keyboard and screen-reader pass before release."
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:Form ;
+                                    rdfhtml:action "/reviews" ;
+                                    rdfhtml:method "post" ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:Fieldset ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Legend ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "Review details"
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Label ;
+                                                    rdfhtml:for "surface" ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "Surface\n          "
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Select ;
+                                                            rdfhtml:id "surface" ;
+                                                            rdfhtml:name "surface" ;
+                                                            rdfhtml:required "" ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "\n            "
+                                                                ]
+                                                                [
+                                                                    a rdfhtml:Option ;
+                                                                    rdfhtml:value "checkout" ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "Checkout"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "\n            "
+                                                                ]
+                                                                [
+                                                                    a rdfhtml:Option ;
+                                                                    rdfhtml:value "account" ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "Account settings"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "\n            "
+                                                                ]
+                                                                [
+                                                                    a rdfhtml:Option ;
+                                                                    rdfhtml:value "reports" ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "Reports"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "\n          "
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "\n        "
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Label ;
+                                                    rdfhtml:for "reviewer" ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "Reviewer\n          "
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Input ;
+                                                            rdfhtml:id "reviewer" ;
+                                                            rdfhtml:name "reviewer" ;
+                                                            rdfhtml:autocomplete "name" ;
+                                                            rdfhtml:required ""
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "\n        "
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Label ;
+                                                    rdfhtml:for "result" ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "Result\n          "
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Select ;
+                                                            rdfhtml:id "result" ;
+                                                            rdfhtml:name "result" ;
+                                                            rdfhtml:required "" ;
+                                                            rdfhtml:children (
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "\n            "
+                                                                ]
+                                                                [
+                                                                    a rdfhtml:Option ;
+                                                                    rdfhtml:value "pass" ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "Pass"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "\n            "
+                                                                ]
+                                                                [
+                                                                    a rdfhtml:Option ;
+                                                                    rdfhtml:value "follow-up" ;
+                                                                    rdfhtml:children (
+                                                                        [
+                                                                            a rdfhtml:Text ;
+                                                                            rdfhtml:data "Follow-up required"
+                                                                        ]
+                                                                    )
+                                                                ]
+                                                                [
+                                                                    a rdfhtml:Text ;
+                                                                    rdfhtml:data "\n          "
+                                                                ]
+                                                            )
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "\n        "
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Label ;
+                                                    rdfhtml:for "notes" ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "Notes\n          "
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Textarea ;
+                                                            rdfhtml:id "notes" ;
+                                                            rdfhtml:name "notes" ;
+                                                            rdfhtml:rows "5" ;
+                                                            rdfhtml:attribute [
+                                                                a rdfhtml:Attribute ;
+                                                                rdfhtml:attributeName "aria-describedby" ;
+                                                                rdfhtml:attributeValue "notes-hint"
+                                                            ]
+                                                        ]
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "\n        "
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:P ;
+                                                    rdfhtml:class "hint" ;
+                                                    rdfhtml:id "notes-hint" ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "Include the control, expected behavior, and observed behavior."
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n        "
+                                                ]
+                                                [
+                                                    a rdfhtml:Button ;
+                                                    rdfhtml:type "submit" ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "Save review"
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "\n      "
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n    "
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n  "
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n\n\n"
+                        ]
+                    )
+                ]
+            )
+        ]
+    ) .

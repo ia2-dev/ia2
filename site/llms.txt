@@ -21,15 +21,17 @@ it.
 ## Specifications
 
 - [HTML/RDF Core Model](https://ia2.dev/spec/html-rdf): Exploratory HTML attribute binding for locally extractable, complete RDF 1.2 datasets, including named graphs, blank nodes, triple terms, reification, language direction, datatypes, SHACL, and SHACL-AF.
+- [RDF/HTML](https://ia2.dev/spec/rdf-html): Exploratory DOM vocabulary and deterministic renderer for HTML documents described in RDF 1.2 Turtle or TriG, with explicit ordering and HTML/RDF preservation.
 - [Discovery and Enrichment](https://ia2.dev/spec/discovery-enrichment): Supplemental profile for advertising, qualifying, retrieving, and presenting additional RDF sources without implicit merging, trust, or execution.
 - [HTML Agent Resource Envelope (HARE)](https://ia2.dev/spec/resource-envelope): HARE 0.1 proposal for self-contained HTML/RDF resource envelopes with a declarative manifest, inert carriers, integrity metadata, and optional progressive enhancement.
 
 ## Guides and implementations
 
-- [Using IA² in HTML](https://ia2.dev/guide/html-rdf): Example-driven authoring guide covering complete statements, named graphs, RDF 1.2 triple terms, and live DOM extraction.
+- [Using IA² with HTML](https://ia2.dev/guide/html-rdf): Example-driven guide to RDF in HTML, live DOM extraction, and HTML documents described in RDF.
+- [RDF/HTML package source](https://github.com/ia2-dev/ia2/tree/main/packages/rdf-html): Browser and Node APIs plus an npx CLI for rendering RDF/HTML or describing HTML as RDF/HTML, with a generated current-element vocabulary and inert multi-document workspace.
 - [HTML/RDF Navigator source](https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator): Dependency-free TypeScript extractor, serializers, and web component that correlate RDF statements with their DOM carriers.
 - [HARE Viewer source](https://github.com/ia2-dev/ia2/tree/main/packages/hare-viewer): Optional file-browser UI, manifest parser, integrity verification, and inert preview support for HARE envelopes.
-- [Browser extension source](https://github.com/ia2-dev/ia2/tree/main/packages/browser-extension): Chrome, Firefox, and Safari adapter for the HTML/RDF Navigator and automatic HARE enhancement.
+- [Browser extension source](https://github.com/ia2-dev/ia2/tree/main/packages/browser-extension): Chrome, Firefox, and Safari adapter for HTML/RDF navigation, RDF/HTML Turtle and TriG rendering, and automatic HARE enhancement.
 
 ## Examples
 

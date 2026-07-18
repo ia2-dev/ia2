@@ -1,0 +1,304 @@
+@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://ia2.dev/spec/rdf-html/examples/whatwg-dom-introduction#document>
+    a rdfhtml:Document ;
+    rdfhtml:base <https://html.spec.whatwg.org/dev/> ;
+    dcterms:conformsTo <https://ia2.dev/spec/rdf-html/vocabulary/rdf-html-2026-07-18.ttl> ;
+    dcterms:title "A quick introduction to the DOM" ;
+    dcterms:source <https://html.spec.whatwg.org/dev/introduction.html#a-quick-introduction-to-html> ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:creator "WHATWG contributors" ;
+    dcterms:description "Adapted and shortened from the HTML Living Standard to focus on its DOM explanation." ;
+    rdfhtml:children (
+        [
+            a rdfhtml:DocumentType ;
+            rdfhtml:documentTypeName "html"
+        ]
+        [
+            a rdfhtml:Html ;
+            rdfhtml:lang "en" ;
+            rdfhtml:children (
+                [
+                    a rdfhtml:Head ;
+                    rdfhtml:children (
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Meta ;
+                            rdfhtml:charset "utf-8"
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Title ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "A quick introduction to the DOM"
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Style ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    body { color: #202124; font: 1rem/1.65 system-ui, sans-serif; margin: 0 auto; max-width: 52rem; padding: 3.5rem 1.25rem; }\n    h1 { color: #3c2a78; font-size: 2.7rem; letter-spacing: -.045em; line-height: 1.05; }\n    code { background: #f0edf8; border-radius: .25rem; padding: .08rem .3rem; }\n    .note { background: #f7f5ff; border-left: .3rem solid #7657c8; padding: .8rem 1rem; }\n    footer { border-top: 1px solid #d6d1e3; color: #555; font-size: .85rem; margin-top: 2.5rem; padding-top: 1rem; }\n  "
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n"
+                        ]
+                    )
+                ]
+                [
+                    a rdfhtml:Text ;
+                    rdfhtml:data "\n"
+                ]
+                [
+                    a rdfhtml:Body ;
+                    rdfhtml:children (
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n  "
+                        ]
+                        [
+                            a rdfhtml:Article ;
+                            rdfhtml:children (
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:H1 ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "A quick introduction to the DOM"
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:P ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "HTML documents consist of a tree of elements and text. Each element is denoted in the source by a start tag, such as "
+                                        ]
+                                        [
+                                            a rdfhtml:Code ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "<body>"
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data ", and an end tag, such as "
+                                        ]
+                                        [
+                                            a rdfhtml:Code ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "</body>"
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data ". Certain start tags and end tags can in certain cases be omitted and are implied by other tags."
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:P ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "HTML user agents, such as web browsers, then "
+                                        ]
+                                        [
+                                            a rdfhtml:Em ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "parse"
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data " this markup, turning it into a DOM, or Document Object Model, tree. A DOM tree is an in-memory representation of a document."
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:P ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "DOM trees contain several kinds of nodes, in particular "
+                                        ]
+                                        [
+                                            a rdfhtml:Code ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "DocumentType"
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data ", "
+                                        ]
+                                        [
+                                            a rdfhtml:Code ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "Element"
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data ", "
+                                        ]
+                                        [
+                                            a rdfhtml:Code ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "Text"
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data ", and "
+                                        ]
+                                        [
+                                            a rdfhtml:Code ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "Comment"
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data " nodes."
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:P ;
+                                    rdfhtml:class "note" ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "Since DOM trees represent HTML documents when implementations process and present them, the HTML Standard is mostly phrased in terms of DOM trees instead of source markup."
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n    "
+                                ]
+                                [
+                                    a rdfhtml:Footer ;
+                                    rdfhtml:children (
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n      "
+                                        ]
+                                        [
+                                            a rdfhtml:P ;
+                                            rdfhtml:children (
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data "Adapted from “A quick introduction to HTML” in the "
+                                                ]
+                                                [
+                                                    a rdfhtml:A ;
+                                                    rdfhtml:href "https://html.spec.whatwg.org/dev/introduction.html#a-quick-introduction-to-html" ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "WHATWG HTML Living Standard"
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data ". Copyright WHATWG contributors. Licensed under "
+                                                ]
+                                                [
+                                                    a rdfhtml:A ;
+                                                    rdfhtml:href "https://creativecommons.org/licenses/by/4.0/" ;
+                                                    rdfhtml:children (
+                                                        [
+                                                            a rdfhtml:Text ;
+                                                            rdfhtml:data "CC BY 4.0"
+                                                        ]
+                                                    )
+                                                ]
+                                                [
+                                                    a rdfhtml:Text ;
+                                                    rdfhtml:data ". This adaptation shortens the source and focuses on its DOM explanation."
+                                                ]
+                                            )
+                                        ]
+                                        [
+                                            a rdfhtml:Text ;
+                                            rdfhtml:data "\n    "
+                                        ]
+                                    )
+                                ]
+                                [
+                                    a rdfhtml:Text ;
+                                    rdfhtml:data "\n  "
+                                ]
+                            )
+                        ]
+                        [
+                            a rdfhtml:Text ;
+                            rdfhtml:data "\n\n\n"
+                        ]
+                    )
+                ]
+            )
+        ]
+    ) .

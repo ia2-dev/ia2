@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="A collection of focused IA² applications whose separate RDF spaces connect through stable resource identities." rdf-subject="" rdf-predicate="http://purl.org/dc/terms/description">
+    <meta name="description" content="A collection of focused IA² HTML/RDF applications, portable handoffs, and RDF/HTML documents with direct source and renderer access." rdf-subject="" rdf-predicate="http://purl.org/dc/terms/description">
     <meta id="format-note" name="ia2-format-note" content="This document uses IA² HTML/RDF 0.1. Its RDF 1.2 dataset is carried directly by HTML elements with locally complete rdf-predicate statements; rdf-subject identifies subjects, rdf-graph identifies named graphs, and native HTML values or text carry objects. The dataset may be extracted from inert source or the current live DOM without the extraction process executing scripts." rdf-subject="" rdf-predicate="http://purl.org/dc/terms/abstract">
     <link href="https://ia2.dev/spec/html-rdf" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/conformsTo">
     <title rdf-subject="" rdf-predicate="http://purl.org/dc/terms/title">Connected application demos · IA²</title>
@@ -103,6 +103,74 @@
               <span><strong>Orion release handoff</strong><small>The launch summary stays primary while Files opens linked release notes, rollback steps, styles, and a system map.</small></span>
               <span class="app-entry-state">Tabbed viewer</span><span aria-hidden="true">↗</span>
             </a>
+            <div class="app-directory-group" id="rdf-html-examples">
+              <p class="panel-kicker">RDF/HTML documents</p>
+              <p>Inspect each Turtle or TriG description directly, or pass the same source through the RDF/HTML renderer to derive its document.</p>
+            </div>
+            <article class="rdfhtml-entry">
+              <span class="app-entry-index">R1</span>
+              <span class="rdfhtml-entry-copy"><strong>Welcome</strong><small>A minimal hand-authored document with compact ordering and retained domain RDF.</small></span>
+              <span class="rdfhtml-entry-actions">
+                <a class="rdfhtml-action" href="/spec/rdf-html/examples/welcome.ttl" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart">Plain .ttl</a>
+                <a class="rdfhtml-action rdfhtml-action-render" href="/render/https://ia2.dev/spec/rdf-html/examples/welcome.ttl" data-rdfhtml-render="/spec/rdf-html/examples/welcome.ttl">Renderer <span aria-hidden="true">↗</span></a>
+              </span>
+            </article>
+            <article class="rdfhtml-entry">
+              <span class="app-entry-index">R2</span>
+              <span class="rdfhtml-entry-copy"><strong>Accessibility review</strong><small>Labels, fieldsets, controls, attributes, and comments in a practical review form.</small></span>
+              <span class="rdfhtml-entry-actions">
+                <a class="rdfhtml-action" href="/spec/rdf-html/examples/accessibility-check.ttl" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart">Plain .ttl</a>
+                <a class="rdfhtml-action rdfhtml-action-render" href="/render/https://ia2.dev/spec/rdf-html/examples/accessibility-check.ttl" data-rdfhtml-render="/spec/rdf-html/examples/accessibility-check.ttl">Renderer <span aria-hidden="true">↗</span></a>
+              </span>
+            </article>
+            <article class="rdfhtml-entry">
+              <span class="app-entry-index">R3</span>
+              <span class="rdfhtml-entry-copy"><strong>Open Systems Forum</strong><small>A styled conference program with dates, links, lists, and a schedule table.</small></span>
+              <span class="rdfhtml-entry-actions">
+                <a class="rdfhtml-action" href="/spec/rdf-html/examples/conference-agenda.ttl" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart">Plain .ttl</a>
+                <a class="rdfhtml-action rdfhtml-action-render" href="/render/https://ia2.dev/spec/rdf-html/examples/conference-agenda.ttl" data-rdfhtml-render="/spec/rdf-html/examples/conference-agenda.ttl">Renderer <span aria-hidden="true">↗</span></a>
+              </span>
+            </article>
+            <article class="rdfhtml-entry">
+              <span class="app-entry-index">R4</span>
+              <span class="rdfhtml-entry-copy"><strong>Estuary field observations</strong><small>Article structure, measurements, quotations, mixed content, and descriptive metadata.</small></span>
+              <span class="rdfhtml-entry-actions">
+                <a class="rdfhtml-action" href="/spec/rdf-html/examples/field-observations.ttl" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart">Plain .ttl</a>
+                <a class="rdfhtml-action rdfhtml-action-render" href="/render/https://ia2.dev/spec/rdf-html/examples/field-observations.ttl" data-rdfhtml-render="/spec/rdf-html/examples/field-observations.ttl">Renderer <span aria-hidden="true">↗</span></a>
+              </span>
+            </article>
+            <article class="rdfhtml-entry">
+              <span class="app-entry-index">R5</span>
+              <span class="rdfhtml-entry-copy"><strong>Multi-audience incident</strong><small>Two selectable HTML documents over one dataset and one shared named graph.</small></span>
+              <span class="rdfhtml-entry-actions">
+                <a class="rdfhtml-action" href="/spec/rdf-html/examples/multi-audience.trig" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart">Plain .trig</a>
+                <a class="rdfhtml-action rdfhtml-action-render" href="/render/https://ia2.dev/spec/rdf-html/examples/multi-audience.trig" data-rdfhtml-render="/spec/rdf-html/examples/multi-audience.trig">Renderer <span aria-hidden="true">↗</span></a>
+              </span>
+            </article>
+            <article class="rdfhtml-entry">
+              <span class="app-entry-index">R6</span>
+              <span class="rdfhtml-entry-copy"><strong>Down the Rabbit-Hole</strong><small>A text-focused public-domain excerpt from <cite>Alice’s Adventures in Wonderland</cite>.</small></span>
+              <span class="rdfhtml-entry-actions">
+                <a class="rdfhtml-action" href="/spec/rdf-html/examples/alice-rabbit-hole.ttl" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart">Plain .ttl</a>
+                <a class="rdfhtml-action rdfhtml-action-render" href="/render/https://ia2.dev/spec/rdf-html/examples/alice-rabbit-hole.ttl" data-rdfhtml-render="/spec/rdf-html/examples/alice-rabbit-hole.ttl">Renderer <span aria-hidden="true">↗</span></a>
+              </span>
+            </article>
+            <article class="rdfhtml-entry">
+              <span class="app-entry-index">R7</span>
+              <span class="rdfhtml-entry-copy"><strong>A quick introduction to the DOM</strong><small>An attributed, shortened adaptation from the WHATWG HTML Living Standard.</small></span>
+              <span class="rdfhtml-entry-actions">
+                <a class="rdfhtml-action" href="/spec/rdf-html/examples/whatwg-dom-introduction.ttl" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart">Plain .ttl</a>
+                <a class="rdfhtml-action rdfhtml-action-render" href="/render/https://ia2.dev/spec/rdf-html/examples/whatwg-dom-introduction.ttl" data-rdfhtml-render="/spec/rdf-html/examples/whatwg-dom-introduction.ttl">Renderer <span aria-hidden="true">↗</span></a>
+              </span>
+            </article>
+            <article class="rdfhtml-entry">
+              <span class="app-entry-index">R8</span>
+              <span class="rdfhtml-entry-copy"><strong>Apollo 11 mission overview</strong><small>A text-only adaptation of NASA’s overview, without imagery, insignia, or third-party media.</small></span>
+              <span class="rdfhtml-entry-actions">
+                <a class="rdfhtml-action" href="/spec/rdf-html/examples/nasa-apollo-11.ttl" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart">Plain .ttl</a>
+                <a class="rdfhtml-action rdfhtml-action-render" href="/render/https://ia2.dev/spec/rdf-html/examples/nasa-apollo-11.ttl" data-rdfhtml-render="/spec/rdf-html/examples/nasa-apollo-11.ttl">Renderer <span aria-hidden="true">↗</span></a>
+              </span>
+            </article>
           </div>
 
           <aside class="federation-note">

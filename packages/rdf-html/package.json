@@ -1,0 +1,79 @@
+{
+  "name": "@ia2-dev/rdf-html",
+  "version": "0.1.0",
+  "description": "Parse RDF 1.2 descriptions of HTML documents and render direct HTML or inert inspection workspaces.",
+  "author": "Yurii Rashkovskii",
+  "homepage": "https://ia2.dev/spec/rdf-html",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ia2-dev/ia2.git",
+    "directory": "packages/rdf-html"
+  },
+  "bugs": {
+    "url": "https://github.com/ia2-dev/ia2/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "bin": {
+    "rdf-html": "./bin/rdf-html.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "vocabulary",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "import": "./dist/node.js",
+      "default": "./dist/node.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && npm run generate:check && tsc -p tsconfig.build.json && esbuild src/index.ts --bundle --format=esm --platform=neutral --main-fields=module,main --target=es2022 --outfile=dist/index.js --sourcemap=external && esbuild src/node.ts --bundle --format=esm --platform=node --packages=external --target=node20 --outfile=dist/node.js --sourcemap=external",
+    "clean": "rm -rf dist",
+    "generate": "node scripts/generate-vocabulary.mjs",
+    "generate:check": "node scripts/generate-vocabulary.mjs --check",
+    "refresh:classification": "node scripts/refresh-html-elements.mjs && npm run generate",
+    "refresh:elements": "npm run refresh:classification",
+    "test": "npm run build && vitest run",
+    "check": "npm run generate:check && tsc -p tsconfig.json --noEmit"
+  },
+  "keywords": [
+    "rdf",
+    "html",
+    "turtle",
+    "trig",
+    "rdfjs",
+    "renderer",
+    "ia2"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "jsdom": "^26.0.0",
+    "n3": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/n3": "^1.26.1",
+    "@types/jsdom": "^21.1.7",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
+  }
+}

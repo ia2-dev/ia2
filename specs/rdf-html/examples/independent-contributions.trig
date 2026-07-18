@@ -1,0 +1,74 @@
+@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .
+@prefix ord: <https://ontology.inferal.com/modules/ordering/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doc: <https://ia2.dev/spec/rdf-html/examples/independent-contributions#> .
+
+doc:document
+    a rdfhtml:Document ;
+    rdfhtml:base <https://example.invalid/service-status/> ;
+    dcterms:conformsTo <https://ia2.dev/spec/rdf-html/vocabulary/rdf-html-2026-07-18.ttl> ;
+    dcterms:title "Independently contributed status page" ;
+    rdfhtml:children (
+        [ a rdfhtml:DocumentType ; rdfhtml:documentTypeName "html" ]
+        doc:html
+    ) .
+
+doc:html
+    a rdfhtml:Html ;
+    rdfhtml:lang "en" ;
+    rdfhtml:children ( doc:head doc:body ) .
+
+doc:head
+    a rdfhtml:Head ;
+    rdfhtml:children (
+        [ a rdfhtml:Title ; rdfhtml:children (
+            [ a rdfhtml:Text ; rdfhtml:data "Service status" ]
+        ) ]
+    ) .
+
+# The body is deliberately not an RDF list. Three independently maintained
+# graphs contribute named children and only the ordering facts they know.
+doc:body
+    a rdfhtml:Body ;
+    rdfhtml:hasChild doc:heading .
+
+doc:editorial {
+    doc:heading
+        a rdfhtml:H1 ;
+        dcterms:creator "Editorial team" ;
+        rdfhtml:children (
+            [ a rdfhtml:Text ; rdfhtml:data "Service status" ]
+        ) ;
+        ord:immediatelyPrecedes doc:status .
+}
+
+doc:operations {
+    doc:status
+        a rdfhtml:P ;
+        dcterms:creator "Operations team" ;
+        rdfhtml:childOf doc:body ;
+        rdfhtml:class "status" ;
+        rdfhtml:children (
+            [ a rdfhtml:Text ; rdfhtml:data "All systems are operational." ]
+        ) ;
+        # Operations knows that actions come later, but does not claim that
+        # no independently contributed child may appear between them.
+        ord:precedes doc:actions .
+}
+
+doc:product {
+    doc:actions
+        a rdfhtml:Nav ;
+        dcterms:creator "Product team" ;
+        rdfhtml:childOf doc:body ;
+        rdfhtml:attribute [
+            a rdfhtml:Attribute ;
+            rdfhtml:attributeName "aria-label" ;
+            rdfhtml:attributeValue "Status actions"
+        ] ;
+        rdfhtml:children (
+            [ a rdfhtml:A ; rdfhtml:href "/history" ; rdfhtml:children (
+                [ a rdfhtml:Text ; rdfhtml:data "View incident history" ]
+            ) ]
+        ) .
+}
