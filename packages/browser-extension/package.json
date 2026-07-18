@@ -1,6 +1,6 @@
 {
   "name": "@ia2-dev/browser-extension",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Chrome, Firefox, and Safari packaging for RDF/HTML rendering, automatic HARE viewing, and the IA² HTML/RDF Navigator.",
   "license": "MIT",
