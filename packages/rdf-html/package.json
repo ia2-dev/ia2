@@ -15,7 +15,7 @@
   "type": "module",
   "sideEffects": false,
   "bin": {
-    "rdf-html": "./bin/rdf-html.mjs"
+    "rdf-html": "bin/rdf-html.mjs"
   },
   "engines": {
     "node": ">=20"
