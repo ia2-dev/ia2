@@ -201,7 +201,7 @@ is reserved for source, identifiers, and graph terms.
 - **Headline** (780, fluid 2.25rem to 4.9rem, 0.98): The real project title and major page identity.
 - **Title** (700, fluid 1.25rem to 2rem, 1.2): Linked artifacts and product-level headings.
 - **Body** (400, fluid 1.08rem to 1.35rem, 1.55): Public explanation, capped near 62ch. Product body text may step down to 14px at 1.5.
-- **Label** (750, 0.72rem, 0.05em): Short indices and statuses. Uppercase is permitted only for compact labels.
+- **Label** (750, 0.72rem, 0.05em): Short contextual labels and statuses. Uppercase is permitted only for compact labels.
 - **Code** (400, 0.83rem, 1.8): HTML, Turtle, RDF terms, and inspectable source.
 
 ### Named Rules
@@ -212,6 +212,13 @@ let display tracking make letters touch.
 
 **The Monospace Evidence Rule.** Use monospace only when the content is itself
 code, syntax, an identifier, or machine-readable evidence.
+
+**The Ordinal Meaning Rule.** Show a number only when its value changes how the
+content is understood or used: an instruction step, chronological position,
+rank, quantity, version, or stable identifier referenced elsewhere. Do not
+number sections, examples, layers, catalogue rows, or navigation items merely
+to create rhythm or imply technical rigor. Use headings, group labels,
+alignment, spacing, and rules to expose non-sequential structure.
 
 ## Elevation
 
@@ -287,6 +294,7 @@ locators, namespace filters, and document synchronization.
 - **Do** preserve WCAG 2.2 AA contrast, full keyboard navigation, strong focus states, and reduced-motion behavior.
 - **Do** keep description, validation, authority, and execution visibly distinct.
 - **Do** show real artifacts, code, graphs, and interactive tools instead of visual metaphors for intelligence.
+- **Do** reserve ordinals for meaningful sequence, chronology, rank, quantity, versioning, or stable references.
 
 ### Don't:
 
@@ -298,4 +306,5 @@ locators, namespace filters, and document synchronization.
 - **Don't** drift into editorial-magazine affectation.
 - **Don't** use gradient text, decorative glassmorphism, or colored side-stripe borders.
 - **Don't** use monospace as a costume for technical credibility.
+- **Don't** decorate sections, examples, layers, catalogue rows, or navigation with arbitrary ordinals.
 - **Don't** animate meaning into existence; every state must remain understandable without motion.

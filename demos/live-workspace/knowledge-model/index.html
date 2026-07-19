@@ -81,10 +81,10 @@
                 <h2 id="concept-index-title">Payment processing</h2>
               </div>
               <nav aria-label="Model concepts">
-                <a class="concept-link is-current" href="#authorization-flow"><span>01</span><strong>Authorization</strong><small>Selected concept</small></a>
-                <a class="concept-link" href="#settlement"><span>02</span><strong id="settlement" rdf-subject="#settlement" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Settlement</strong><small>Downstream</small></a>
-                <a class="concept-link" href="#disputes"><span>03</span><strong id="disputes" rdf-subject="#disputes" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Disputes</strong><small>Related</small></a>
-                <a class="concept-link" href="#webhooks"><span>04</span><strong id="webhooks" rdf-subject="#webhooks" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Webhooks</strong><small>Unmapped</small></a>
+                <a class="concept-link is-current" href="#authorization-flow"><strong>Authorization</strong><small>Selected concept</small></a>
+                <a class="concept-link" href="#settlement"><strong id="settlement" rdf-subject="#settlement" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Settlement</strong><small>Downstream</small></a>
+                <a class="concept-link" href="#disputes"><strong id="disputes" rdf-subject="#disputes" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Disputes</strong><small>Related</small></a>
+                <a class="concept-link" href="#webhooks"><strong id="webhooks" rdf-subject="#webhooks" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Webhooks</strong><small>Unmapped</small></a>
               </nav>
               <div hidden>
                 <a href="http://www.w3.org/2004/02/skos/core#ConceptScheme" rdf-subject="#payment-concepts" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
@@ -106,13 +106,13 @@
               </header>
 
               <section class="knowledge-section prose-layer" data-layer-panel="prose" aria-labelledby="purpose-title">
-                <div class="section-label"><span>01</span><h3 id="purpose-title">Purpose and operating rule</h3></div>
+                <div class="section-label"><h3 id="purpose-title">Purpose and operating rule</h3></div>
                 <p>The acquirer sends an authorization request to the issuer. The issuer validates account state and available funds, then returns an approval code or a decline reason within the selected latency budget.</p>
                 <aside class="knowledge-note"><strong>Operational constraint</strong><span>All changes to this path require replay testing against the network timeout suite.</span></aside>
               </section>
 
               <section class="knowledge-section" data-layer-panel="terminology" aria-labelledby="terms-title">
-                <div class="section-label"><span>02</span><h3 id="terms-title">Canonical terminology</h3></div>
+                <div class="section-label"><h3 id="terms-title">Canonical terminology</h3></div>
                 <dl class="term-list">
                   <div id="acquirer"><dt rdf-subject="#acquirer" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Acquirer</dt><dd rdf-subject="#acquirer" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition" rdf-graph="#knowledge-model">The financial institution that processes card payments for a merchant.</dd></div>
                   <div id="issuer"><dt rdf-subject="#issuer" rdf-predicate="http://www.w3.org/2004/02/skos/core#prefLabel" rdf-graph="#knowledge-model">Issuer</dt><dd rdf-subject="#issuer" rdf-predicate="http://www.w3.org/2004/02/skos/core#definition" rdf-graph="#knowledge-model">The institution that issued the customer account and authorizes the transaction.</dd></div>
@@ -126,7 +126,7 @@
               </section>
 
               <section class="knowledge-section" data-layer-panel="relations" aria-labelledby="relations-title">
-                <div class="section-label"><span>03</span><h3 id="relations-title">Connected concepts</h3></div>
+                <div class="section-label"><h3 id="relations-title">Connected concepts</h3></div>
                 <div class="relation-map" aria-label="Authorization flow relationships">
                   <a href="#acquirer" rdf-subject="#authorization-flow" rdf-predicate="http://purl.org/dc/terms/requires" rdf-graph="#knowledge-model"><strong>Authorization</strong><span>requires</span><b>Acquirer</b></a>
                   <a href="#issuer" rdf-subject="#authorization-flow" rdf-predicate="http://purl.org/dc/terms/requires" rdf-graph="#knowledge-model"><strong>Authorization</strong><span>requires</span><b>Issuer</b></a>
@@ -135,7 +135,7 @@
               </section>
 
               <section class="knowledge-section" data-layer-panel="decision" aria-labelledby="decision-title">
-                <div class="section-label"><span>04</span><h3 id="decision-title" rdf-subject="#latency-record" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">Authorization latency budget</h3></div>
+                <div class="section-label"><h3 id="decision-title" rdf-subject="#latency-record" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">Authorization latency budget</h3></div>
                 <a hidden href="https://ontology.inferal.com/modules/decision/DecisionRecord" rdf-subject="#latency-record" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
                 <a hidden href="#latency-decision" rdf-subject="#latency-record" rdf-predicate="https://ontology.inferal.com/modules/decision/recordsDecision" rdf-graph="#knowledge-model"></a>
                 <a hidden href="#latency-rationale" rdf-subject="#latency-record" rdf-predicate="https://ontology.inferal.com/modules/decision/hasRationale" rdf-graph="#knowledge-model"></a>
@@ -157,7 +157,7 @@
               </section>
 
               <section class="knowledge-section artifact-layer" data-layer-panel="artifact" aria-labelledby="artifact-title">
-                <div class="section-label"><span>05</span><h3 id="artifact-title" rdf-subject="#artifact-map-auth" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">Authorization handler mapping</h3></div>
+                <div class="section-label"><h3 id="artifact-title" rdf-subject="#artifact-map-auth" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">Authorization handler mapping</h3></div>
                 <a hidden href="http://www.w3.org/ns/prov#Entity" rdf-subject="#artifact-map-auth" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#knowledge-model"></a>
                 <a hidden href="#authorization-flow" rdf-subject="#artifact-map-auth" rdf-predicate="http://purl.org/dc/terms/subject" rdf-graph="#knowledge-model"></a>
                 <a hidden href="#auth-handler" rdf-subject="#artifact-map-auth" rdf-predicate="http://www.w3.org/ns/prov#hadPrimarySource" rdf-graph="#knowledge-model"></a>
@@ -178,7 +178,7 @@
               </section>
 
               <section class="knowledge-section" data-layer-panel="revision" aria-labelledby="revision-title">
-                <div class="section-label"><span>06</span><h3 id="revision-title">Revision lineage</h3></div>
+                <div class="section-label"><h3 id="revision-title">Revision lineage</h3></div>
                 <ol class="revision-line">
                   <li><span>v2.0</span><strong id="model-revision-2-0" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">Initial fraud checks</strong><time datetime="2026-06-21" rdf-subject="#model-revision-2-0" rdf-predicate="http://www.w3.org/ns/prov#generatedAtTime" rdf-datatype="http://www.w3.org/2001/XMLSchema#date" rdf-graph="#knowledge-model">21 Jun</time></li>
                   <li class="is-current"><span>v2.1</span><strong id="model-revision-2-1" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#knowledge-model">Latency budget clarified</strong><time datetime="2026-07-16" rdf-subject="#model-revision-2-1" rdf-predicate="http://www.w3.org/ns/prov#generatedAtTime" rdf-datatype="http://www.w3.org/2001/XMLSchema#date" rdf-graph="#knowledge-model">16 Jul</time></li>

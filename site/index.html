@@ -133,11 +133,11 @@
               <span class="conclusion-status"><i></i> Conditional approval</span>
               <p>The contract promises notice within 72 hours. Internal policy requires 24.</p>
             </a>
-            <ol class="agent-trace" aria-label="Evidence behind the recommendation">
+            <ul class="agent-trace" aria-label="Evidence behind the recommendation">
               <li><a id="proof-policy" class="agent-trace-target" href="/demos/live-workspace/vendor-review/#security-policy" data-rdf-target="#proof-policy" rdf-subject="https://ia2.dev/demos/live-workspace/vendor-review/#review-northstar" rdf-predicate="http://purl.org/dc/terms/conformsTo" aria-label="Inspect the policy governing the review in the RDF Navigator"><span>Policy</span><strong>24-hour requirement</strong></a></li>
               <li><a id="proof-contract-source" class="agent-trace-target" href="/demos/live-workspace/vendor-review/#dpa" data-rdf-target="#proof-contract-source" rdf-subject="https://ia2.dev/demos/live-workspace/vendor-review/#claim-notification" rdf-predicate="http://www.w3.org/ns/prov#wasDerivedFrom" aria-label="Inspect the contract evidence behind the claim in the RDF Navigator"><span>Contract</span><strong>72-hour commitment</strong></a></li>
               <li><a id="proof-rationale" class="agent-trace-target" href="/demos/live-workspace/vendor-review/#approval-rationale" data-rdf-target="#proof-rationale" rdf-subject="https://ia2.dev/demos/live-workspace/vendor-review/#approval-record" rdf-predicate="https://ontology.inferal.com/modules/decision/hasRationale" aria-label="Inspect the rationale for requiring an amendment in the RDF Navigator"><span>Gap</span><strong>Amendment required</strong></a></li>
-            </ol>
+            </ul>
             <div class="authority-boundary" aria-label="Authority boundary">
               <a
                 id="proof-agent-permission"
@@ -168,11 +168,7 @@
 
       <section id="grounded-case" class="grounded-case" aria-labelledby="grounded-case-title">
         <div class="case-heading">
-          <p class="section-index case-example-index" aria-label="Example 1: Vendor review">
-            <span class="case-example-label">Example</span>
-            <span class="case-example-number" aria-hidden="true">01</span>
-            <span class="case-example-name">Vendor review</span>
-          </p>
+          <p class="case-example-label">Vendor review example</p>
           <h2 id="grounded-case-title">When an agent says “conditional,” follow every edge.</h2>
           <div class="case-intro">
             <p>
@@ -188,32 +184,28 @@
           </div>
         </div>
 
-        <ol class="decision-path">
+        <ul class="decision-path">
           <li>
-            <span class="path-number">01</span>
             <span class="path-kind">Governing policy</span>
             <strong><a id="case-policy-rule" class="path-link" href="/demos/live-workspace/vendor-review/#incident-notification-rule" data-rdf-target="#case-policy-rule" rdf-subject="https://ia2.dev/demos/live-workspace/vendor-review/#security-policy" rdf-predicate="http://purl.org/dc/terms/hasPart">Notify customers within 24 hours</a></strong>
             <span class="path-detail">A machine-checkable requirement, not a phrase recovered from a summary.</span>
           </li>
           <li>
-            <span class="path-number">02</span>
             <span class="path-kind">Vendor evidence</span>
             <strong><a id="case-dpa-section" class="path-link" href="/demos/live-workspace/vendor-review/#dpa-section-8-2" data-rdf-target="#case-dpa-section" rdf-subject="https://ia2.dev/demos/live-workspace/vendor-review/#dpa" rdf-predicate="http://purl.org/dc/terms/hasPart">Section 8.2 commits to 72 hours</a></strong>
             <span class="path-detail">The claim remains linked to the contract that supports it.</span>
           </li>
           <li>
-            <span class="path-number">03</span>
             <span class="path-kind">Recommendation</span>
             <strong><a id="case-selected-option" class="path-link" href="/demos/live-workspace/vendor-review/#option-conditional" data-rdf-target="#case-selected-option" rdf-subject="https://ia2.dev/demos/live-workspace/vendor-review/#decision-northstar" rdf-predicate="https://ontology.inferal.com/modules/decision/selectedOption" rdf-graph="https://ia2.dev/demos/live-workspace/vendor-review/#runtime-state">Proceed only after amendment</a></strong>
             <span class="path-detail">The recommendation exposes the policy gap and its rationale.</span>
           </li>
           <li>
-            <span class="path-number">04</span>
             <span class="path-kind">Authority boundary</span>
             <strong><a id="case-agent-permission" class="path-link" href="/demos/live-workspace/vendor-review/#draft-amendment-permission" data-rdf-target="#case-agent-permission" rdf-subject="https://ia2.dev/demos/live-workspace/vendor-review/#authority-policy" rdf-predicate="http://www.w3.org/ns/odrl/2/permission">The agent drafts.</a> <a id="case-human-duty" class="path-link" href="/demos/live-workspace/vendor-review/#approve-vendor-duty" data-rdf-target="#case-human-duty" rdf-subject="https://ia2.dev/demos/live-workspace/vendor-review/#authority-policy" rdf-predicate="http://www.w3.org/ns/odrl/2/obligation">Maya approves.</a></strong>
             <span class="path-detail">Describing a possible action never grants permission to execute it.</span>
           </li>
-        </ol>
+        </ul>
 
         <div class="case-action">
           <p>
@@ -243,7 +235,6 @@
 
       <section id="architecture" class="architecture" aria-labelledby="architecture-title">
         <div class="section-heading">
-          <p class="section-index">02 / Connected architecture</p>
           <h2 id="architecture-title">A shared layer, not a new silo.</h2>
           <p>
             Documents, interfaces, APIs, and agent tools contribute different
@@ -252,9 +243,8 @@
           </p>
         </div>
 
-        <ol class="layers">
+        <ul class="layers">
           <li>
-            <span class="layer-number">01</span>
             <h3>Surfaces and live state</h3>
             <p>Where is information encountered, and what is changing now?</p>
             <span class="layer-territory">Documents, interfaces,
@@ -265,7 +255,6 @@
               >ActivityStreams</a>, and host-native bindings.</span>
           </li>
           <li>
-            <span class="layer-number">02</span>
             <h3>Identity and relationships</h3>
             <p>What is this, and how does it connect across surfaces?</p>
             <span class="layer-territory">
@@ -291,7 +280,6 @@
               >R2RML mappings</a>.</span>
           </li>
           <li>
-            <span class="layer-number">03</span>
             <h3>Integrity and evidence</h3>
             <p>What supports it, and what must remain true?</p>
             <span class="layer-territory">
@@ -317,7 +305,6 @@
               >scoped statements</a>, validation, and signatures.</span>
           </li>
           <li>
-            <span class="layer-number">04</span>
             <h3>Interaction and authority</h3>
             <p>What may happen next, under which conditions, and by whose authority?</p>
             <span class="layer-territory">
@@ -333,7 +320,6 @@
               >conversational interaction</a>, with controlled execution.</span>
           </li>
           <li>
-            <span class="layer-number">05</span>
             <h3>Continuity and exchange</h3>
             <p>How does context survive across surfaces, sessions, and organizations?</p>
             <span class="layer-territory">
@@ -353,12 +339,11 @@
                 rdf-predicate="http://purl.org/dc/terms/references"
               >governed artifact evolution</a>, snapshots, diffs, and subscriptions.</span>
           </li>
-        </ol>
+        </ul>
       </section>
 
       <section id="work" class="work" aria-labelledby="work-title">
         <div class="section-heading work-heading">
-          <p class="section-index">03 / Working system</p>
           <h2 id="work-title">Use the substrate. Inspect the proof.</h2>
         </div>
 
@@ -369,7 +354,6 @@
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
-              <span class="work-number">01</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://ia2.dev/spec/html-rdf"
@@ -390,7 +374,6 @@
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
-              <span class="work-number">02</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://ia2.dev/spec/rdf-html"
@@ -411,7 +394,6 @@
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
-              <span class="work-number">03</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://ia2.dev/render"
@@ -432,7 +414,6 @@
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
-              <span class="work-number">04</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://ia2.dev/spec/discovery-enrichment"
@@ -453,7 +434,6 @@
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
-              <span class="work-number">05</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://ia2.dev/spec/resource-envelope"
@@ -474,7 +454,6 @@
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
-              <span class="work-number">06</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://ia2.dev/guide/html-rdf"
@@ -495,7 +474,6 @@
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
-              <span class="work-number">07</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://ia2.dev/demos/live-workspace"
@@ -516,7 +494,6 @@
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
-              <span class="work-number">08</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://github.com/ia2-dev/ia2/tree/main/packages/html-rdf-navigator"
@@ -537,7 +514,6 @@
               rdf-subject="#project"
               rdf-predicate="http://purl.org/dc/terms/hasPart"
             >
-              <span class="work-number">09</span>
               <span class="work-copy">
                 <strong
                   rdf-subject="https://github.com/ia2-dev/ia2/tree/main/packages/hare-viewer"
@@ -556,7 +532,6 @@
       </section>
 
       <section class="north-star" aria-labelledby="north-star-title">
-        <p class="section-index">04 / Direction</p>
         <div>
           <h2 id="north-star-title">
             The web should not make every agent start from text.

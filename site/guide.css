@@ -34,7 +34,6 @@ html {
 }
 
 .guide-kicker,
-.guide-section-number,
 .guide-toc > p {
   font-size: 0.72rem;
   font-weight: 750;
@@ -75,19 +74,13 @@ html {
   border-top: 1px solid oklch(90% 0.04 294 / 38%);
   display: grid;
   gap: 0.9rem;
-  grid-template-columns: 2rem auto 1fr;
+  grid-template-columns: minmax(8rem, auto) minmax(0, 1fr);
   line-height: 1.45;
   padding: 1rem 0 1.1rem;
 }
 
 .guide-promises li:last-child {
   border-bottom: 1px solid oklch(90% 0.04 294 / 38%);
-}
-
-.guide-promises span {
-  color: var(--signal);
-  font-size: 0.72rem;
-  font-weight: 800;
 }
 
 .guide-promises strong {
@@ -180,11 +173,6 @@ html {
 
 .guide-section:first-child {
   border-top: 0;
-}
-
-.guide-section-number {
-  color: var(--violet);
-  margin: 0 0 1.1rem;
 }
 
 .guide-section h2 {
@@ -590,24 +578,16 @@ html {
   }
 
   .guide-promises li {
-    grid-template-columns: 1.8rem 1fr;
+    grid-template-columns: 1fr;
   }
 
   .guide-promises li strong {
     white-space: normal;
   }
 
-  .guide-promises li:not(:first-child) strong,
-  .guide-promises li:not(:first-child) span + strong {
-    grid-column: 2;
-  }
-
   .guide-promises li {
     align-items: start;
-  }
-
-  .guide-promises li > :last-child {
-    grid-column: 2;
+    gap: 0.25rem;
   }
 
   .definition-rows > div,
