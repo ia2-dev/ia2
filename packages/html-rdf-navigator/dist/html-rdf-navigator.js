@@ -1870,6 +1870,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
   #linkPreviewZIndex = 20;
   #locateAnimation = null;
   #syncCleanup = null;
+  #resetSyncControl = null;
   #vocabularyTreeCleanup = null;
   #vocabularyResizeObserver = null;
   #tabResizeObserver = null;
@@ -1911,6 +1912,14 @@ var Ia2RdfNavigator = class extends HTMLElement {
   #clearNavigatorSync() {
     this.#syncCleanup?.();
     this.#syncCleanup = null;
+  }
+  #turnOffNavigatorSync() {
+    if (this.#resetSyncControl) {
+      this.#resetSyncControl();
+      return;
+    }
+    this.#syncMode = "off";
+    this.#clearNavigatorSync();
   }
   #clearVocabularyTreeInteractions() {
     this.#vocabularyTreeCleanup?.();
@@ -2518,6 +2527,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     this.#stopFloatingInteraction();
     this.#clearLinkPreviews();
     this.#clearLocateEmphasis();
+    this.#turnOffNavigatorSync();
     this.shadowRoot?.querySelector(".launcher")?.setAttribute("aria-expanded", "false");
     const panel = this.shadowRoot?.querySelector(".panel");
     if (panel) panel.dataset.open = "false";
@@ -3362,6 +3372,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
       applyFilter();
       configureSync();
     };
+    this.#resetSyncControl = () => setSyncMode("off");
     for (const option of syncOptions) {
       option.addEventListener("click", () => setSyncMode(option.dataset.syncMode));
     }
@@ -3680,6 +3691,7 @@ var Ia2RdfNavigator = class extends HTMLElement {
     this.#stopLauncherInteraction();
     this.#clearLinkPreviews();
     this.#clearLocateEmphasis();
+    this.#resetSyncControl = null;
     this.#clearNavigatorSync();
     this.#clearVocabularyTreeInteractions();
     this.#vocabularyResizeObserver?.disconnect();

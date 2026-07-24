@@ -1026,6 +1026,58 @@ describe("Ia2RdfNavigator", () => {
     expect(sources[0]?.animate).toHaveBeenCalled();
   });
 
+  it("turns off scroll synchronization when the Navigator is closed", async () => {
+    document.body.innerHTML = [
+      '<span rdf-subject="https://example.com/alice" rdf-predicate="https://schema.org/name">Alice</span>',
+      '<span rdf-subject="https://example.com/bob" rdf-predicate="https://schema.org/name">Bob</span>',
+    ].join("");
+    const sources = Array.from(document.body.querySelectorAll<HTMLElement>("[rdf-predicate]"));
+    const makeRect = (top: number, height = 30): DOMRect => ({
+      bottom: top + height,
+      height,
+      left: 10,
+      right: 210,
+      top,
+      width: 200,
+      x: 10,
+      y: top,
+      toJSON: () => ({}),
+    });
+    sources[0]!.getBoundingClientRect = () => makeRect(20);
+    sources[1]!.getBoundingClientRect = () => makeRect(window.innerHeight + 100);
+    sources.forEach((source) => {
+      source.scrollIntoView = vi.fn();
+      source.animate = vi.fn(() => ({ cancel: vi.fn() }) as unknown as Animation);
+    });
+
+    const drawer = mountRdfNavigator();
+    const viewport = drawer.shadowRoot?.querySelector<HTMLElement>(".viewport")!;
+    viewport.getBoundingClientRect = () => makeRect(0, 300);
+    const rows = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLLIElement>(".quad") ?? []);
+    rows[0]!.getBoundingClientRect = () => makeRect(8, 40);
+    rows[1]!.getBoundingClientRect = () => makeRect(105, 40);
+    const syncOptions = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLButtonElement>(".sync-option") ?? []);
+
+    syncOptions[1]!.click();
+    expect(rows.map((row) => row.hidden)).toEqual([false, true]);
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>(".close")?.click();
+    expect(drawer.shadowRoot?.querySelector<HTMLElement>(".panel")?.dataset.open).toBe("false");
+    expect(syncOptions.map((option) => option.getAttribute("aria-checked"))).toEqual(["true", "false", "false"]);
+    expect(syncOptions.map((option) => option.tabIndex)).toEqual([0, -1, -1]);
+    expect(rows.map((row) => row.hidden)).toEqual([false, false]);
+
+    drawer.open();
+    syncOptions[2]!.click();
+    await new Promise((resolve) => window.setTimeout(resolve, 60));
+    sources.forEach((source) => vi.mocked(source.scrollIntoView).mockClear());
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>(".close")?.click();
+    viewport.dispatchEvent(new Event("scroll"));
+    sources[0]!.dispatchEvent(new Event("pointerenter"));
+    await new Promise((resolve) => window.setTimeout(resolve, 60));
+    expect(sources.every((source) => vi.mocked(source.scrollIntoView).mock.calls.length === 0)).toBe(true);
+    expect(rows.every((row) => !row.classList.contains("is-corresponding"))).toBe(true);
+  });
+
   it("indents nested RDF carriers while ignoring unannotated wrappers", () => {
     document.body.innerHTML = `
       <a id="parent" href="https://example.com/bob" rdf-predicate="https://schema.org/knows">

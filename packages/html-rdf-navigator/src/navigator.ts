@@ -1118,6 +1118,7 @@ export class Ia2RdfNavigator extends HTMLElement {
   #linkPreviewZIndex = 20;
   #locateAnimation: Animation | null = null;
   #syncCleanup: (() => void) | null = null;
+  #resetSyncControl: (() => void) | null = null;
   #vocabularyTreeCleanup: (() => void) | null = null;
   #vocabularyResizeObserver: ResizeObserver | null = null;
   #tabResizeObserver: ResizeObserver | null = null;
@@ -1163,6 +1164,15 @@ export class Ia2RdfNavigator extends HTMLElement {
   #clearNavigatorSync(): void {
     this.#syncCleanup?.();
     this.#syncCleanup = null;
+  }
+
+  #turnOffNavigatorSync(): void {
+    if (this.#resetSyncControl) {
+      this.#resetSyncControl();
+      return;
+    }
+    this.#syncMode = "off";
+    this.#clearNavigatorSync();
   }
 
   #clearVocabularyTreeInteractions(): void {
@@ -1814,6 +1824,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.#stopFloatingInteraction();
     this.#clearLinkPreviews();
     this.#clearLocateEmphasis();
+    this.#turnOffNavigatorSync();
     this.shadowRoot?.querySelector(".launcher")?.setAttribute("aria-expanded", "false");
     const panel = this.shadowRoot?.querySelector<HTMLElement>(".panel");
     if (panel) panel.dataset.open = "false";
@@ -2711,6 +2722,7 @@ export class Ia2RdfNavigator extends HTMLElement {
       applyFilter();
       configureSync();
     };
+    this.#resetSyncControl = () => setSyncMode("off");
     for (const option of syncOptions) {
       option.addEventListener("click", () => setSyncMode(option.dataset.syncMode as SyncMode));
     }
@@ -3062,6 +3074,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.#stopLauncherInteraction();
     this.#clearLinkPreviews();
     this.#clearLocateEmphasis();
+    this.#resetSyncControl = null;
     this.#clearNavigatorSync();
     this.#clearVocabularyTreeInteractions();
     this.#vocabularyResizeObserver?.disconnect();
