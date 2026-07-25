@@ -65,6 +65,8 @@ describe("live workspace semantics", () => {
     const expected = [
       "/spec/rdf-html/examples/welcome.ttl",
       "/spec/rdf-html/examples/accessibility-check.ttl",
+      "/spec/rdf-html/examples/assignment.ttl",
+      "/spec/rdf-html/examples/assignment-review.ttl",
       "/spec/rdf-html/examples/conference-agenda.ttl",
       "/spec/rdf-html/examples/field-observations.ttl",
       "/spec/rdf-html/examples/multi-audience.trig",

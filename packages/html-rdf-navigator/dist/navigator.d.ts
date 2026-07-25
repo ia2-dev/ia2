@@ -1,5 +1,6 @@
+import { type WindowPosition } from "@ia2-dev/ui-primitives";
 import { type PortableNavigatorSource } from "./sources.js";
-export type DrawerPosition = "right" | "right-top" | "right-bottom" | "floating" | "left" | "left-bottom" | "left-top";
+export type DrawerPosition = WindowPosition;
 export declare class Ia2RdfNavigator extends HTMLElement {
     #private;
     constructor();

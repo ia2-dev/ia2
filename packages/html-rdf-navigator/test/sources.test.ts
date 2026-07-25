@@ -62,6 +62,17 @@ describe("Navigator document sources", () => {
     expect(drawer.shadowRoot?.querySelector(".footer")?.textContent).toContain("Rendered document");
   });
 
+  it("observes the owner-document realm after a navigator is adopted into a frame", () => {
+    const frame = document.createElement("iframe");
+    document.body.append(frame);
+    frame.contentDocument!.documentElement.setAttribute("rdf-version", "1.2");
+    frame.contentDocument!.body.innerHTML = '<span rdf-subject="https://example.test/frame" rdf-predicate="https://schema.org/name">Frame fact</span>';
+
+    const drawer = mountRdfNavigator();
+    expect(() => frame.contentDocument!.body.append(drawer)).not.toThrow();
+    expect(drawer.shadowRoot?.textContent).toContain("Frame fact");
+  });
+
   it("automatically selects the sole RDF-bearing portable child of an empty top document", () => {
     const frameDocument = document.implementation.createHTMLDocument("Rendered report");
     frameDocument.documentElement.setAttribute("rdf-version", "1.2");

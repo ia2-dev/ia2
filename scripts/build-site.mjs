@@ -77,6 +77,21 @@ for (const [source, destination] of assets) {
 
 await cp(join(root, "demos"), join(output, "demos"), { recursive: true });
 await cp(
+  join(root, "packages/html-rdf-navigator/dist/chunks"),
+  join(output, "packages/html-rdf-navigator/dist/chunks"),
+  { recursive: true },
+);
+await cp(
+  join(root, "packages/rdf-value-editor/dist"),
+  join(output, "packages/rdf-value-editor/dist"),
+  { recursive: true },
+);
+await cp(
+  join(root, "packages/rdf-policy-reviewer/dist"),
+  join(output, "packages/rdf-policy-reviewer/dist"),
+  { recursive: true },
+);
+await cp(
   join(root, "packages/rdf-html/vocabulary"),
   join(output, "spec/rdf-html/vocabulary"),
   { recursive: true },

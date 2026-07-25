@@ -9,18 +9,23 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build:rdf-html && npm run build:navigator && npm run build:extension && npm run build:hare-viewer && npm run build:site",
+    "build": "npm run build:rdf-html && npm run build:html-rdf && npm run build:ui-primitives && npm run build:navigator && npm run build:rdf-value-editor && npm run build:rdf-policy-reviewer && npm run build:extension && npm run build:hare-viewer && npm run build:site",
     "build:extension": "npm --prefix packages/browser-extension run build",
     "build:hare-viewer": "npm --prefix packages/hare-viewer run build",
+    "build:html-rdf": "npm --prefix packages/html-rdf run build",
     "build:navigator": "npm --prefix packages/html-rdf-navigator run build",
     "build:rdf-html": "npm --prefix packages/rdf-html run build",
+    "build:ui-primitives": "npm --prefix packages/ui-primitives run build",
+    "build:rdf-value-editor": "npm --prefix packages/rdf-value-editor run build",
+    "build:rdf-policy-reviewer": "npm --prefix packages/rdf-policy-reviewer run build",
     "build:site": "node scripts/build-site.mjs",
-    "check": "npm --prefix packages/rdf-html run check && npm run check:rdf-html-examples && npm --prefix packages/html-rdf-navigator run check && npm --prefix packages/browser-extension run check && npm --prefix packages/hare-viewer run check && node --check worker.js",
+    "check": "npm --prefix packages/rdf-html run check && npm run check:rdf-html-examples && npm --prefix packages/html-rdf run check && npm --prefix packages/ui-primitives run check && npm --prefix packages/html-rdf-navigator run check && npm --prefix packages/rdf-value-editor run check && npm --prefix packages/rdf-policy-reviewer run check && npm --prefix packages/browser-extension run check && npm --prefix packages/hare-viewer run check && node --check worker.js",
     "check:rdf-html-examples": "npm run build:rdf-html && node scripts/generate-rdf-html-examples.mjs --check",
     "dev": "npm run build && wrangler dev --var RDF_HTML_ALLOW_LOCALHOST:true",
     "generate:rdf-html-examples": "npm run build:rdf-html && node scripts/generate-rdf-html-examples.mjs",
     "deploy": "npm run build && wrangler deploy",
-    "test": "npm --prefix packages/rdf-html test && npm --prefix packages/html-rdf-navigator test && npm --prefix packages/browser-extension test && npm --prefix packages/hare-viewer test && npm run test:worker",
+    "test": "npm --prefix packages/rdf-html test && npm --prefix packages/html-rdf test && npm --prefix packages/ui-primitives test && npm --prefix packages/html-rdf-navigator test && npm --prefix packages/rdf-value-editor test && npm --prefix packages/rdf-policy-reviewer test && npm --prefix packages/browser-extension test && npm --prefix packages/hare-viewer test && npm run test:integration && npm run test:worker",
+    "test:integration": "vitest run test/semantic-contract.integration.test.ts",
     "test:worker": "npm run build:rdf-html && node --test test/worker.test.mjs",
     "test:ae2e": "npm run test:ae2e:navigator && npm run test:ae2e:extension",
     "test:ae2e:navigator": "npm run build:navigator && playwright test",
@@ -33,6 +38,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
+    "jsdom": "^26.0.0",
+    "vitest": "^3.0.0",
     "web-ext": "^8.10.0",
     "wrangler": "^4.111.0"
   }

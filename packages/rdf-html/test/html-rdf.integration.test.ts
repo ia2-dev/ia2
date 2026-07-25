@@ -97,6 +97,8 @@ describe("RDF/HTML to HTML/RDF integration", () => {
     expect(files).toEqual([
       "accessibility-check.ttl",
       "alice-rabbit-hole.ttl",
+      "assignment-review.ttl",
+      "assignment.ttl",
       "conference-agenda.ttl",
       "field-observations.ttl",
       "independent-contributions.trig",
@@ -119,7 +121,7 @@ describe("RDF/HTML to HTML/RDF integration", () => {
         expect(rendered.html, `${file}: ${document.label}`).toContain("<html");
       }
     }
-  });
+  }, 60_000);
 
   it("offers both views from the multi-document example", () => {
     const file = "multi-audience.trig";

@@ -1,7 +1,8 @@
-type Syntax = "turtle" | "json" | "html";
+type Syntax = "turtle" | "json" | "html" | "sparql";
 
 const TURTLE_TOKENS = /(<https?:\/\/[^>]+>)|("(?:\\.|[^"\\])*"(?:@[A-Za-z0-9-]+(?:--(?:ltr|rtl))?|\^\^(?:<[^>]+>|[A-Za-z][\w-]*:[\w.-]+))?)|(^|\s)(@[a-z]+|[A-Za-z][\w-]*:[\w.-]+)|(_:[A-Za-z][\w-]*)|(#[^\n]*)/gim;
 const JSON_TOKENS = /("(?:\\.|[^"\\])*")\s*(?=:)|("(?:\\.|[^"\\])*")|\b(true|false|null)\b|\b(-?\d+(?:\.\d+)?)\b/g;
+const SPARQL_TOKENS = /(#[^\n\r]*)|("""(?:\\.|[\s\S])*?"""|'''(?:\\.|[\s\S])*?'''|"(?:\\.|[^"\\])*"(?:@[A-Za-z0-9-]+|\^\^(?:<[^>]+>|[A-Za-z][\w-]*:[\w.-]+))?|'(?:\\.|[^'\\])*'(?:@[A-Za-z0-9-]+|\^\^(?:<[^>]+>|[A-Za-z][\w-]*:[\w.-]+))?)|(<[^<>"{}|^`\\\u0000-\u0020]*>)|([?$][A-Za-z_][\w-]*)|\b(ADD|ALL|AS|ASC|ASK|BASE|BIND|BY|CLEAR|CONSTRUCT|COPY|CREATE|DATA|DEFAULT|DELETE|DESC|DESCRIBE|DISTINCT|DROP|EXISTS|FILTER|FROM|GRAPH|GROUP|HAVING|IN|INSERT|LIMIT|LOAD|MINUS|MOVE|NAMED|NOT|OFFSET|OPTIONAL|ORDER|PREFIX|REDUCED|SELECT|SERVICE|SILENT|TO|UNDEF|UNION|USING|VALUES|WHERE|WITH|TRUE|FALSE|A)\b|(\b-?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?\b)|((?:[A-Za-z_][\w-]*)?:[\w.-]*)|([{}()[\];,.])/gim;
 
 function spanToken(parent: Node, value: string, className: string, document: Document): void {
   const span = document.createElement("span");
@@ -47,6 +48,17 @@ function jsonClass(match: RegExpExecArray): string {
   }
   if (match[3]) return "keyword";
   return "number";
+}
+
+function sparqlClass(match: RegExpExecArray): string {
+  if (match[1]) return "comment";
+  if (match[2]) return "string";
+  if (match[3]) return "iri";
+  if (match[4]) return "variable";
+  if (match[5]) return "keyword";
+  if (match[6]) return "number";
+  if (match[7]) return "name";
+  return "punctuation";
 }
 
 function appendHtmlTag(parent: Node, source: string, document: Document): void {
@@ -123,12 +135,20 @@ export function highlightedCode(source: string, syntax: Syntax, document: Docume
     highlightHtml(source, code, document);
     return pre;
   }
-  const pattern = syntax === "turtle" ? new RegExp(TURTLE_TOKENS) : new RegExp(JSON_TOKENS);
+  const pattern = syntax === "turtle"
+    ? new RegExp(TURTLE_TOKENS)
+    : syntax === "sparql"
+      ? new RegExp(SPARQL_TOKENS)
+      : new RegExp(JSON_TOKENS);
   let cursor = 0;
   let match: RegExpExecArray | null;
   while ((match = pattern.exec(source))) {
     code.append(document.createTextNode(source.slice(cursor, match.index)));
-    const className = syntax === "turtle" ? turtleClass(match) : jsonClass(match);
+    const className = syntax === "turtle"
+      ? turtleClass(match)
+      : syntax === "sparql"
+        ? sparqlClass(match)
+        : jsonClass(match);
     if (className === "json-iri") {
       const anchor = document.createElement("a");
       anchor.className = "tok iri";
@@ -137,6 +157,8 @@ export function highlightedCode(source: string, syntax: Syntax, document: Docume
       anchor.target = "_blank";
       anchor.rel = "noopener noreferrer";
       code.append(anchor);
+    } else if (syntax === "sparql" && className === "iri") {
+      spanToken(code, match[0], className, document);
     } else {
       appendToken(code, match[0], className, document);
     }

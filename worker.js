@@ -13,6 +13,8 @@ const RENDERER_EXAMPLE_GROUPS = [
     examples: [
       { description: "A minimal document with retained domain RDF.", file: "welcome.ttl", format: "Turtle", label: "Welcome" },
       { description: "Forms, labels, attributes, and a comment.", file: "accessibility-check.ttl", format: "Turtle", label: "Accessibility review" },
+      { description: "A customer-safe legal assignment without internal review data.", file: "assignment.ttl", format: "Turtle", label: "Contract assignment" },
+      { description: "Internal annotations targeting a separately distributable contract.", file: "assignment-review.ttl", format: "Turtle", label: "Internal counsel review" },
       { description: "Dates, tables, links, lists, and styling.", file: "conference-agenda.ttl", format: "Turtle", label: "Open Systems Forum" },
       { description: "Mixed content, measurements, and quotations.", file: "field-observations.ttl", format: "Turtle", label: "Estuary observations" },
       { description: "Independent graphs contribute children with broad relative ordering.", file: "independent-contributions.trig", format: "TriG", label: "Independent contributions" },
