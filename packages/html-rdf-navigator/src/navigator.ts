@@ -6,14 +6,21 @@ import {
 } from "@ia2-dev/html-rdf";
 import {
   WINDOW_PLACEMENT_CSS,
+  applyDockedWindowDimensions,
   bindScrollSyncControls,
   bindWindowPositionControls,
+  constrainDockedWindowDimensions,
   isWindowPosition,
   positionControlsMarkup,
   scrollSyncControlsMarkup,
+  startWindowResize,
   updateScrollSyncControls,
+  windowResizeHandlesMarkup,
+  type DockedWindowDimensions,
   type ScrollSyncMode,
   type WindowPosition,
+  type WindowResizeDirection,
+  type WindowResizeOptions,
 } from "@ia2-dev/ui-primitives";
 import {
   detectDiscoveryCandidates,
@@ -125,8 +132,6 @@ const CSS = String.raw`
   .position-option:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; position: relative; z-index: 1; }
   .position-icon { display: block; fill: none; height: 16px; stroke: currentColor; stroke-linejoin: round; stroke-width: 1.25; width: 20px; }
   .position-region { fill: currentColor; stroke: none; }
-  .resize-handles { display: none; }
-  .panel[data-position="floating"] .resize-handles { display: contents; }
   .resize-handle { position: absolute; touch-action: none; z-index: 12; }
   .resize-handle[data-resize="n"], .resize-handle[data-resize="s"] { cursor: ns-resize; height: 8px; left: 14px; right: 14px; }
   .resize-handle[data-resize="n"] { top: 0; }
@@ -555,7 +560,6 @@ type View = "turtle" | "json" | "navigator" | "sources" | "vocabulary" | "shapes
 type SyncMode = ScrollSyncMode;
 export type DrawerPosition = WindowPosition;
 type SideDrawerPosition = "right" | "right-top" | "right-bottom" | "left" | "left-bottom" | "left-top";
-type ResizeDirection = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
 type ResourcePreviewKind = "definition" | "resource";
 
 const TAB_ICONS: Readonly<Record<View, string>> = {
@@ -604,6 +608,7 @@ interface LinkPreviewState {
 }
 
 interface PersistedNavigatorState {
+  dockedDimensions: DockedWindowDimensions;
   floatingRect: FloatingRect | null;
   lastSidePosition: SideDrawerPosition;
   launcherPosition: LauncherPosition | null;
@@ -724,6 +729,17 @@ function isFloatingRect(value: unknown): value is FloatingRect {
     && typeof rect.y === "number" && Number.isFinite(rect.y);
 }
 
+function isDockedDimensions(value: unknown): value is DockedWindowDimensions {
+  if (!value || typeof value !== "object") return false;
+  const dimensions = value as Partial<Record<keyof DockedWindowDimensions, unknown>>;
+  return (dimensions.halfHeight === undefined
+      || (typeof dimensions.halfHeight === "number" && Number.isFinite(dimensions.halfHeight) && dimensions.halfHeight > 0))
+    && (dimensions.horizontalHeight === undefined
+      || (typeof dimensions.horizontalHeight === "number" && Number.isFinite(dimensions.horizontalHeight) && dimensions.horizontalHeight > 0))
+    && (dimensions.width === undefined
+      || (typeof dimensions.width === "number" && Number.isFinite(dimensions.width) && dimensions.width > 0));
+}
+
 function isLauncherPosition(value: unknown): value is LauncherPosition {
   if (!value || typeof value !== "object") return false;
   const position = value as Partial<Record<keyof LauncherPosition, unknown>>;
@@ -774,7 +790,6 @@ const RDF_TYPE_IRI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const RDFS_DOMAIN_IRI = "http://www.w3.org/2000/01/rdf-schema#domain";
 const RDFS_RANGE_IRI = "http://www.w3.org/2000/01/rdf-schema#range";
 const TYPEAHEAD_LIMIT = 8;
-
 const TYPE_LABELS: Readonly<Record<string, string>> = {
   "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property": "RDF property",
   "http://www.w3.org/2000/01/rdf-schema#Class": "RDFS class",
@@ -1487,6 +1502,7 @@ export class Ia2RdfNavigator extends HTMLElement {
   #syncMode: SyncMode = "off";
   #position: DrawerPosition = "right";
   #lastSidePosition: SideDrawerPosition = "right";
+  #dockedDimensions: DockedWindowDimensions = {};
   #floatingRect: FloatingRect | null = null;
   #floatingInteractionCleanup: (() => void) | null = null;
   #launcherPosition: LauncherPosition | null = null;
@@ -1632,7 +1648,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.#applyLinkPreviewGeometry(preview, this.#linkPreviewRect(preview));
   }
 
-  #startLinkPreviewInteraction(event: PointerEvent, preview: HTMLElement, resize?: ResizeDirection): void {
+  #startLinkPreviewInteraction(event: PointerEvent, preview: HTMLElement, resize?: WindowResizeDirection): void {
     if (event.button !== 0) return;
     const view = this.ownerDocument.defaultView;
     const state = this.#linkPreviews.get(preview);
@@ -1836,7 +1852,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     const resizeHandles = document.createElement("div");
     resizeHandles.className = "resource-preview-resize-handles";
     resizeHandles.setAttribute("aria-hidden", "true");
-    for (const direction of ["n", "ne", "e", "se", "s", "sw", "w", "nw"] as ResizeDirection[]) {
+    for (const direction of ["n", "ne", "e", "se", "s", "sw", "w", "nw"] as WindowResizeDirection[]) {
       const handle = document.createElement("span");
       handle.className = "resize-handle";
       handle.dataset.resize = direction;
@@ -1910,6 +1926,13 @@ export class Ia2RdfNavigator extends HTMLElement {
       if (isWindowPosition(state.position)) this.#position = state.position;
       if (isSideDrawerPosition(state.lastSidePosition)) this.#lastSidePosition = state.lastSidePosition;
       else if (isSideDrawerPosition(state.position)) this.#lastSidePosition = state.position;
+      if (isDockedDimensions(state.dockedDimensions)) {
+        this.#dockedDimensions = constrainDockedWindowDimensions(
+          this.ownerDocument,
+          state.dockedDimensions,
+          { minWidth: 360 },
+        );
+      }
       if (isFloatingRect(state.floatingRect)) this.#floatingRect = this.#constrainFloatingRect(state.floatingRect);
       if (isLauncherPosition(state.launcherPosition)) this.#launcherPosition = state.launcherPosition;
     } catch {
@@ -1920,6 +1943,7 @@ export class Ia2RdfNavigator extends HTMLElement {
   #persistSessionState(): void {
     try {
       const state: PersistedNavigatorState = {
+        dockedDimensions: this.#dockedDimensions,
         floatingRect: this.#floatingRect,
         lastSidePosition: this.#lastSidePosition,
         launcherPosition: this.#launcherPosition,
@@ -2463,6 +2487,14 @@ export class Ia2RdfNavigator extends HTMLElement {
     return true;
   }
 
+  #applyDockedGeometry(panel: HTMLElement): void {
+    this.#dockedDimensions = applyDockedWindowDimensions(
+      panel,
+      this.#dockedDimensions,
+      { minWidth: 360 },
+    );
+  }
+
   #floatingLimits(): { height: number; margin: number; minHeight: number; minWidth: number; width: number } {
     const view = this.ownerDocument.defaultView;
     const width = Math.max(view?.innerWidth ?? 1024, 1);
@@ -2526,7 +2558,10 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (panel) {
       panel.dataset.position = position;
       if (position === "floating") this.#applyFloatingGeometry(panel);
-      else this.#clearFloatingGeometry(panel);
+      else {
+        this.#clearFloatingGeometry(panel);
+        this.#applyDockedGeometry(panel);
+      }
     }
     if (launcher) {
       launcher.dataset.position = position;
@@ -2659,7 +2694,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.#floatingInteractionCleanup = null;
   }
 
-  #startFloatingInteraction(event: PointerEvent, panel: HTMLElement, resize?: ResizeDirection): void {
+  #startFloatingInteraction(event: PointerEvent, panel: HTMLElement): void {
     if (this.#position !== "floating" || event.button !== 0) return;
     const view = this.ownerDocument.defaultView;
     if (!view) return;
@@ -2669,28 +2704,16 @@ export class Ia2RdfNavigator extends HTMLElement {
     const startRect = { ...this.#floatingRect! };
     const startX = event.clientX;
     const startY = event.clientY;
-    panel.classList.add(resize ? "is-resizing" : "is-dragging");
+    panel.classList.add("is-dragging");
 
     const update = (moveEvent: PointerEvent): void => {
       const deltaX = moveEvent.clientX - startX;
       const deltaY = moveEvent.clientY - startY;
-      const limits = this.#floatingLimits();
-      const next = { ...startRect };
-      if (!resize) {
-        next.x = startRect.x + deltaX;
-        next.y = startRect.y + deltaY;
-      } else {
-        if (resize.includes("e")) next.width = Math.min(Math.max(startRect.width + deltaX, limits.minWidth), limits.width - limits.margin - startRect.x);
-        if (resize.includes("s")) next.height = Math.min(Math.max(startRect.height + deltaY, limits.minHeight), limits.height - limits.margin - startRect.y);
-        if (resize.includes("w")) {
-          next.x = Math.min(Math.max(startRect.x + deltaX, limits.margin), startRect.x + startRect.width - limits.minWidth);
-          next.width = startRect.x + startRect.width - next.x;
-        }
-        if (resize.includes("n")) {
-          next.y = Math.min(Math.max(startRect.y + deltaY, limits.margin), startRect.y + startRect.height - limits.minHeight);
-          next.height = startRect.y + startRect.height - next.y;
-        }
-      }
+      const next = {
+        ...startRect,
+        x: startRect.x + deltaX,
+        y: startRect.y + deltaY,
+      };
       this.#floatingRect = this.#constrainFloatingRect(next);
       this.#applyFloatingGeometry(panel);
     };
@@ -2708,6 +2731,52 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.#floatingInteractionCleanup = stop;
   }
 
+  #startResizeInteraction(
+    event: PointerEvent,
+    panel: HTMLElement,
+    direction: WindowResizeDirection,
+  ): void {
+    this.#stopFloatingInteraction();
+    const position = this.#position;
+    if (position === "floating") this.#applyFloatingGeometry(panel);
+    else this.#applyDockedGeometry(panel);
+    const options: WindowResizeOptions = {
+      margin: this.#floatingLimits().margin,
+      minHeight: 280,
+      minWidth: 360,
+      onChange: (rect) => {
+        if (position === "floating") {
+          this.#floatingRect = { ...rect };
+          return;
+        }
+        if (direction.includes("e") || direction.includes("w")) {
+          this.#dockedDimensions.width = rect.width;
+        }
+        if (direction.includes("n") || direction.includes("s")) {
+          if (position === "top" || position === "bottom") {
+            this.#dockedDimensions.horizontalHeight = rect.height;
+          } else {
+            this.#dockedDimensions.halfHeight = rect.height;
+          }
+        }
+      },
+      onEnd: () => {
+        this.#persistSessionState();
+        this.#floatingInteractionCleanup = null;
+      },
+    };
+    if (position === "floating" && this.#floatingRect) {
+      options.initialRect = { ...this.#floatingRect };
+    }
+    this.#floatingInteractionCleanup = startWindowResize(
+      event,
+      panel,
+      position,
+      direction,
+      options,
+    );
+  }
+
   #onWindowResize = (): void => {
     for (const preview of this.#linkPreviews.keys()) this.#constrainLinkPreview(preview);
     const launcher = this.shadowRoot?.querySelector<HTMLElement>(".launcher");
@@ -2715,10 +2784,13 @@ export class Ia2RdfNavigator extends HTMLElement {
       this.#applyLauncherGeometry(launcher);
       this.#persistSessionState();
     }
-    if (this.#position !== "floating") return;
     const panel = this.shadowRoot?.querySelector<HTMLElement>(".panel");
-    if (panel) {
+    if (!panel) return;
+    if (this.#position === "floating") {
       this.#applyFloatingGeometry(panel);
+      this.#persistSessionState();
+    } else if ((this.ownerDocument.defaultView?.innerWidth ?? 0) > 760) {
+      this.#applyDockedGeometry(panel);
       this.#persistSessionState();
     }
   };
@@ -4518,9 +4590,7 @@ export class Ia2RdfNavigator extends HTMLElement {
         </header>
         <section class="viewport" role="tabpanel" tabindex="0"></section>
         <footer class="footer"><span>RDF 1.2 · ${activeSource?.label ?? "Document"}</span>${this.#view === "turtle" || this.#view === "json" ? '<button class="copy" type="button">Copy view</button>' : ""}</footer>
-        <div class="resize-handles" aria-hidden="true">
-          ${(["n", "ne", "e", "se", "s", "sw", "w", "nw"] as ResizeDirection[]).map((direction) => `<span class="resize-handle" data-resize="${direction}"></span>`).join("")}
-        </div>
+        ${windowResizeHandlesMarkup()}
         <p class="sr-only" aria-live="polite">${this.#status}</p>
       </aside>`;
 
@@ -4566,6 +4636,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     const panel = this.shadowRoot.querySelector<HTMLElement>(".panel");
     if (panel) {
       if (this.#position === "floating") this.#applyFloatingGeometry(panel);
+      else this.#applyDockedGeometry(panel);
       const toolbar = panel.querySelector<HTMLElement>(".toolbar");
       const tabs = toolbar?.querySelector<HTMLElement>(".tabs");
       toolbar?.addEventListener("pointerdown", (event) => {
@@ -4573,9 +4644,13 @@ export class Ia2RdfNavigator extends HTMLElement {
         if (target !== toolbar && target !== tabs && !target?.closest(".drag-grip")) return;
         this.#startFloatingInteraction(event, panel);
       });
-      panel.querySelectorAll<HTMLElement>(".resize-handle").forEach((handle) => {
+      panel.querySelectorAll<HTMLElement>(".ia2-window-resize-handle").forEach((handle) => {
         handle.addEventListener("pointerdown", (event) => {
-          this.#startFloatingInteraction(event, panel, handle.dataset.resize as ResizeDirection);
+          this.#startResizeInteraction(
+            event,
+            panel,
+            handle.dataset.resize as WindowResizeDirection,
+          );
         });
       });
     }

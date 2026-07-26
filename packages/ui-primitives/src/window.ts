@@ -30,6 +30,18 @@ const WINDOW_RESIZE_DIRECTIONS: readonly WindowResizeDirection[] = [
   "n", "ne", "e", "se", "s", "sw", "w", "nw",
 ];
 
+const WINDOW_RESIZE_DIRECTIONS_BY_POSITION: Readonly<Record<WindowPosition, readonly WindowResizeDirection[]>> = {
+  right: ["w"],
+  "right-top": ["w", "s", "sw"],
+  "right-bottom": ["n", "w", "nw"],
+  bottom: ["n"],
+  floating: WINDOW_RESIZE_DIRECTIONS,
+  top: ["s"],
+  left: ["e"],
+  "left-bottom": ["n", "e", "ne"],
+  "left-top": ["e", "s", "se"],
+};
+
 export const WINDOW_POSITIONS: ReadonlyArray<WindowPositionDefinition> = [
   { position: "right", label: "Right, full height", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M13 2h5v12h-5z"/></svg>' },
   { position: "right-top", label: "Right, top half", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M13 2h5v5.5h-5z"/></svg>' },
@@ -143,16 +155,31 @@ export const WINDOW_PLACEMENT_CSS = `
   .ia2-window-surface[data-position="floating"][data-dragged="true"] {
     transform: none;
   }
-  .ia2-window-resize-handles {
-    display: none;
-  }
-  .ia2-window-surface[data-position="floating"] .ia2-window-resize-handles {
-    display: contents;
-  }
+  .ia2-window-resize-handles { display: contents; }
   .ia2-window-resize-handle {
+    display: none;
     position: absolute;
     touch-action: none;
     z-index: 12;
+  }
+  .ia2-window-surface[data-position="floating"] .ia2-window-resize-handle,
+  .ia2-window-surface[data-position="right"] .ia2-window-resize-handle[data-resize="w"],
+  .ia2-window-surface[data-position="right-top"] .ia2-window-resize-handle[data-resize="w"],
+  .ia2-window-surface[data-position="right-top"] .ia2-window-resize-handle[data-resize="s"],
+  .ia2-window-surface[data-position="right-top"] .ia2-window-resize-handle[data-resize="sw"],
+  .ia2-window-surface[data-position="right-bottom"] .ia2-window-resize-handle[data-resize="n"],
+  .ia2-window-surface[data-position="right-bottom"] .ia2-window-resize-handle[data-resize="w"],
+  .ia2-window-surface[data-position="right-bottom"] .ia2-window-resize-handle[data-resize="nw"],
+  .ia2-window-surface[data-position="bottom"] .ia2-window-resize-handle[data-resize="n"],
+  .ia2-window-surface[data-position="top"] .ia2-window-resize-handle[data-resize="s"],
+  .ia2-window-surface[data-position="left"] .ia2-window-resize-handle[data-resize="e"],
+  .ia2-window-surface[data-position="left-bottom"] .ia2-window-resize-handle[data-resize="n"],
+  .ia2-window-surface[data-position="left-bottom"] .ia2-window-resize-handle[data-resize="e"],
+  .ia2-window-surface[data-position="left-bottom"] .ia2-window-resize-handle[data-resize="ne"],
+  .ia2-window-surface[data-position="left-top"] .ia2-window-resize-handle[data-resize="e"],
+  .ia2-window-surface[data-position="left-top"] .ia2-window-resize-handle[data-resize="s"],
+  .ia2-window-surface[data-position="left-top"] .ia2-window-resize-handle[data-resize="se"] {
+    display: block;
   }
   .ia2-window-resize-handle[data-resize="n"],
   .ia2-window-resize-handle[data-resize="s"] {
@@ -247,9 +274,7 @@ export const WINDOW_PLACEMENT_CSS = `
       right: auto;
       transform: translateX(-105%);
     }
-    .ia2-window-surface[data-position="floating"] .ia2-window-resize-handles {
-      display: none;
-    }
+    .ia2-window-surface[data-position] .ia2-window-resize-handles { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     .ia2-window-surface { transition: none; }
@@ -270,7 +295,13 @@ export function parseWindowPositions(
   return positions.length > 0 ? Array.from(new Set(positions)) : [fallback];
 }
 
-export function floatingWindowResizeHandlesMarkup(): string {
+export function windowResizeDirections(
+  position: WindowPosition,
+): readonly WindowResizeDirection[] {
+  return WINDOW_RESIZE_DIRECTIONS_BY_POSITION[position];
+}
+
+export function windowResizeHandlesMarkup(): string {
   return `<div class="ia2-window-resize-handles" aria-hidden="true">${
     WINDOW_RESIZE_DIRECTIONS
       .map((direction) => (
@@ -278,6 +309,10 @@ export function floatingWindowResizeHandlesMarkup(): string {
       ))
       .join("")
   }</div>`;
+}
+
+export function floatingWindowResizeHandlesMarkup(): string {
+  return windowResizeHandlesMarkup();
 }
 
 export interface PositionControlsMarkupOptions {
@@ -369,6 +404,75 @@ export function bindWindowPositionControls(
   };
 }
 
+export interface DockedWindowDimensions {
+  halfHeight?: number;
+  horizontalHeight?: number;
+  width?: number;
+}
+
+export interface DockedWindowDimensionsOptions {
+  minHeight?: number;
+  minWidth?: number;
+  mobileBreakpoint?: number;
+}
+
+function windowViewport(document: Document): { height: number; width: number } {
+  const view = document.defaultView;
+  return {
+    height: Math.max(document.documentElement?.clientHeight || view?.innerHeight || 768, 1),
+    width: Math.max(document.documentElement?.clientWidth || view?.innerWidth || 1024, 1),
+  };
+}
+
+export function constrainDockedWindowDimensions(
+  document: Document,
+  dimensions: DockedWindowDimensions,
+  {
+    minHeight = 280,
+    minWidth = 320,
+    mobileBreakpoint = 760,
+  }: DockedWindowDimensionsOptions = {},
+): DockedWindowDimensions {
+  const viewport = windowViewport(document);
+  if (viewport.width <= mobileBreakpoint) return { ...dimensions };
+  const minimumWidth = Math.min(minWidth, viewport.width);
+  const minimumHeight = Math.min(minHeight, viewport.height);
+  const constrained: DockedWindowDimensions = {};
+  if (dimensions.halfHeight !== undefined) {
+    constrained.halfHeight = Math.min(Math.max(dimensions.halfHeight, minimumHeight), viewport.height);
+  }
+  if (dimensions.horizontalHeight !== undefined) {
+    constrained.horizontalHeight = Math.min(Math.max(dimensions.horizontalHeight, minimumHeight), viewport.height);
+  }
+  if (dimensions.width !== undefined) {
+    constrained.width = Math.min(Math.max(dimensions.width, minimumWidth), viewport.width);
+  }
+  return constrained;
+}
+
+export function applyDockedWindowDimensions(
+  element: HTMLElement,
+  dimensions: DockedWindowDimensions,
+  options: DockedWindowDimensionsOptions = {},
+): DockedWindowDimensions {
+  const constrained = constrainDockedWindowDimensions(
+    element.ownerDocument,
+    dimensions,
+    options,
+  );
+  const properties: Array<[keyof DockedWindowDimensions, string]> = [
+    ["width", "--ia2-window-width"],
+    ["halfHeight", "--ia2-window-half-height"],
+    ["horizontalHeight", "--ia2-window-horizontal-height"],
+  ];
+  for (const [key, property] of properties) {
+    const value = constrained[key];
+    if (value === undefined) element.style.removeProperty(property);
+    else element.style.setProperty(property, `${value}px`);
+  }
+  return constrained;
+}
+
 export interface FloatingWindowDragOptions {
   disabled?: boolean;
   margin?: number;
@@ -411,51 +515,117 @@ export function startFloatingWindowDrag(
   event.preventDefault();
 }
 
-export interface FloatingWindowResizeOptions {
+export interface WindowResizeOptions extends DockedWindowDimensionsOptions {
   disabled?: boolean;
+  initialRect?: FloatingWindowRect;
   margin?: number;
-  minHeight?: number;
-  minWidth?: number;
   onChange?: (rect: FloatingWindowRect) => void;
+  onEnd?: (rect: FloatingWindowRect) => void;
 }
 
-export function startFloatingWindowResize(
+export interface FloatingWindowResizeOptions extends WindowResizeOptions {}
+
+export function startWindowResize(
   event: PointerEvent,
   element: HTMLElement,
+  position: WindowPosition,
   direction: WindowResizeDirection,
   {
     disabled = false,
+    initialRect,
     margin = 8,
     minHeight = 280,
     minWidth = 320,
+    mobileBreakpoint = 760,
     onChange,
-  }: FloatingWindowResizeOptions = {},
-): void {
-  if (disabled || event.button !== 0) return;
+    onEnd,
+  }: WindowResizeOptions = {},
+): (() => void) | null {
+  if (
+    disabled
+    || event.button !== 0
+    || !windowResizeDirections(position).includes(direction)
+  ) return null;
   const view = element.ownerDocument.defaultView;
-  if (!view || view.innerWidth <= 760) return;
+  const viewport = windowViewport(element.ownerDocument);
+  if (!view || viewport.width <= mobileBreakpoint) return null;
 
-  const start = element.getBoundingClientRect();
+  const measured = element.getBoundingClientRect();
+  const start = initialRect
+    ? {
+        bottom: initialRect.y + initialRect.height,
+        height: initialRect.height,
+        left: initialRect.x,
+        right: initialRect.x + initialRect.width,
+        top: initialRect.y,
+        width: initialRect.width,
+      }
+    : measured;
   const startX = event.clientX;
   const startY = event.clientY;
-  const availableWidth = Math.max(view.innerWidth - margin * 2, 1);
-  const availableHeight = Math.max(view.innerHeight - margin * 2, 1);
+  const availableWidth = Math.max(viewport.width - margin * 2, 1);
+  const availableHeight = Math.max(viewport.height - margin * 2, 1);
   const minimumWidth = Math.min(minWidth, availableWidth);
   const minimumHeight = Math.min(minHeight, availableHeight);
+  let currentRect: FloatingWindowRect = {
+    height: start.height,
+    width: start.width,
+    x: start.left,
+    y: start.top,
+  };
 
   const apply = (moveEvent: PointerEvent): void => {
     const deltaX = moveEvent.clientX - startX;
     const deltaY = moveEvent.clientY - startY;
+    if (position !== "floating") {
+      const dimensions: DockedWindowDimensions = {};
+      if (direction.includes("e")) dimensions.width = start.width + deltaX;
+      if (direction.includes("w")) dimensions.width = start.width - deltaX;
+      if (direction.includes("n") || direction.includes("s")) {
+        const height = direction.includes("s") ? start.height + deltaY : start.height - deltaY;
+        if (position === "top" || position === "bottom") dimensions.horizontalHeight = height;
+        else dimensions.halfHeight = height;
+      }
+      const constrained = constrainDockedWindowDimensions(
+        element.ownerDocument,
+        dimensions,
+        { minHeight, minWidth, mobileBreakpoint },
+      );
+      const width = constrained.width ?? start.width;
+      const height = position === "top" || position === "bottom"
+        ? constrained.horizontalHeight ?? start.height
+        : constrained.halfHeight ?? start.height;
+      if (constrained.width !== undefined) {
+        element.style.setProperty("--ia2-window-width", `${constrained.width}px`);
+      }
+      if (constrained.halfHeight !== undefined) {
+        element.style.setProperty("--ia2-window-half-height", `${constrained.halfHeight}px`);
+      }
+      if (constrained.horizontalHeight !== undefined) {
+        element.style.setProperty("--ia2-window-horizontal-height", `${constrained.horizontalHeight}px`);
+      }
+      currentRect = {
+        height,
+        width,
+        x: position.startsWith("right") ? viewport.width - width : 0,
+        y: position === "bottom" || position.endsWith("-bottom")
+          ? viewport.height - height
+          : 0,
+      };
+      onChange?.(currentRect);
+      return;
+    }
+
     let left = start.left;
     let top = start.top;
     let right = start.right;
     let bottom = start.bottom;
 
     if (direction.includes("e")) {
-      right = Math.min(view.innerWidth - margin, Math.max(start.left + minimumWidth, start.right + deltaX));
+      right = Math.min(viewport.width - margin, Math.max(start.left + minimumWidth, start.right + deltaX));
     }
     if (direction.includes("s")) {
-      bottom = Math.min(view.innerHeight - margin, Math.max(start.top + minimumHeight, start.bottom + deltaY));
+      bottom = Math.min(viewport.height - margin, Math.max(start.top + minimumHeight, start.bottom + deltaY));
     }
     if (direction.includes("w")) {
       left = Math.max(margin, Math.min(start.right - minimumWidth, start.left + deltaX));
@@ -464,29 +634,40 @@ export function startFloatingWindowResize(
       top = Math.max(margin, Math.min(start.bottom - minimumHeight, start.top + deltaY));
     }
 
-    const rect = {
+    currentRect = {
       height: bottom - top,
       width: right - left,
       x: left,
       y: top,
     };
-    element.style.height = `${rect.height}px`;
-    element.style.left = `${rect.x}px`;
-    element.style.top = `${rect.y}px`;
-    element.style.width = `${rect.width}px`;
+    element.style.height = `${currentRect.height}px`;
+    element.style.left = `${currentRect.x}px`;
+    element.style.top = `${currentRect.y}px`;
+    element.style.width = `${currentRect.width}px`;
     element.dataset.dragged = "true";
-    onChange?.(rect);
+    onChange?.(currentRect);
   };
   const stop = (): void => {
     view.removeEventListener("pointermove", apply);
     view.removeEventListener("pointerup", stop);
     view.removeEventListener("pointercancel", stop);
     element.classList.remove("is-resizing");
+    onEnd?.(currentRect);
   };
 
   element.classList.add("is-resizing");
   view.addEventListener("pointermove", apply);
-  view.addEventListener("pointerup", stop, { once: true });
-  view.addEventListener("pointercancel", stop, { once: true });
+  view.addEventListener("pointerup", stop);
+  view.addEventListener("pointercancel", stop);
   event.preventDefault();
+  return stop;
+}
+
+export function startFloatingWindowResize(
+  event: PointerEvent,
+  element: HTMLElement,
+  direction: WindowResizeDirection,
+  options: FloatingWindowResizeOptions = {},
+): void {
+  startWindowResize(event, element, "floating", direction, options);
 }

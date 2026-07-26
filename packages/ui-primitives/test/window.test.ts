@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyDockedWindowDimensions,
   bindWindowPositionControls,
   floatingWindowResizeHandlesMarkup,
   isWindowPosition,
   parseWindowPositions,
   positionControlsMarkup,
   startFloatingWindowResize,
+  startWindowResize,
+  windowResizeDirections,
+  windowResizeHandlesMarkup,
   WINDOW_PLACEMENT_CSS,
 } from "../src/window.js";
 
@@ -21,6 +25,7 @@ describe("shared IA² window primitives", () => {
   it("provides shared side, horizontal, floating, mobile, and reduced-motion geometry", () => {
     expect(WINDOW_PLACEMENT_CSS).toContain('[data-position="bottom"]');
     expect(WINDOW_PLACEMENT_CSS).toContain('[data-position="floating"]');
+    expect(WINDOW_PLACEMENT_CSS).toContain('[data-position="right-top"] .ia2-window-resize-handle[data-resize="sw"]');
     expect(WINDOW_PLACEMENT_CSS).toContain("@media (max-width: 760px)");
     expect(WINDOW_PLACEMENT_CSS).toContain("width: 100%;");
     expect(WINDOW_PLACEMENT_CSS).toContain("@media (prefers-reduced-motion: reduce)");
@@ -99,6 +104,84 @@ describe("shared IA² window primitives", () => {
 
     window.dispatchEvent(new MouseEvent("pointerup"));
     expect(surface.classList.contains("is-resizing")).toBe(false);
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: originalInnerWidth });
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: originalInnerHeight });
+  });
+
+  it("maps and resizes only browser-detached dock edges", () => {
+    document.body.innerHTML = windowResizeHandlesMarkup();
+    expect(windowResizeDirections("right")).toEqual(["w"]);
+    expect(windowResizeDirections("right-top")).toEqual(["w", "s", "sw"]);
+    expect(windowResizeDirections("bottom")).toEqual(["n"]);
+    expect(windowResizeDirections("floating")).toEqual(["n", "ne", "e", "se", "s", "sw", "w", "nw"]);
+
+    const surface = document.createElement("section");
+    surface.dataset.position = "right-top";
+    surface.getBoundingClientRect = () => ({
+      bottom: 400,
+      height: 300,
+      left: 800,
+      right: 1200,
+      top: 100,
+      width: 400,
+      x: 800,
+      y: 100,
+      toJSON: () => ({}),
+    });
+    document.body.append(surface);
+    const originalInnerWidth = window.innerWidth;
+    const originalInnerHeight = window.innerHeight;
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1200 });
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 800 });
+
+    const disallowed = startWindowResize(
+      new MouseEvent("pointerdown", {
+        button: 0,
+        cancelable: true,
+        clientX: 1200,
+        clientY: 200,
+      }) as unknown as PointerEvent,
+      surface,
+      "right-top",
+      "e",
+    );
+    expect(disallowed).toBeNull();
+
+    let resized: { height: number; width: number } | null = null;
+    startWindowResize(
+      new MouseEvent("pointerdown", {
+        button: 0,
+        cancelable: true,
+        clientX: 800,
+        clientY: 400,
+      }) as unknown as PointerEvent,
+      surface,
+      "right-top",
+      "sw",
+      {
+        onChange: ({ height, width }) => {
+          resized = { height, width };
+        },
+      },
+    );
+    window.dispatchEvent(new MouseEvent("pointermove", {
+      clientX: 750,
+      clientY: 440,
+    }));
+    expect(surface.style.getPropertyValue("--ia2-window-width")).toBe("450px");
+    expect(surface.style.getPropertyValue("--ia2-window-half-height")).toBe("340px");
+    expect(resized).toEqual({ height: 340, width: 450 });
+    window.dispatchEvent(new MouseEvent("pointerup"));
+
+    expect(applyDockedWindowDimensions(surface, {
+      halfHeight: 120,
+      horizontalHeight: 900,
+      width: 200,
+    })).toEqual({
+      halfHeight: 280,
+      horizontalHeight: 800,
+      width: 320,
+    });
     Object.defineProperty(window, "innerWidth", { configurable: true, value: originalInnerWidth });
     Object.defineProperty(window, "innerHeight", { configurable: true, value: originalInnerHeight });
   });

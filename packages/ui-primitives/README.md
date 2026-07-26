@@ -8,11 +8,12 @@ consistent without coupling component content or visual themes.
 ```ts
 import {
   WINDOW_POSITIONS,
+  applyDockedWindowDimensions,
   bindWindowPositionControls,
-  floatingWindowResizeHandlesMarkup,
   positionControlsMarkup,
   startFloatingWindowDrag,
-  startFloatingWindowResize,
+  startWindowResize,
+  windowResizeHandlesMarkup,
   type WindowPosition,
 } from "@ia2-dev/ui-primitives";
 ```
@@ -22,8 +23,10 @@ The shared position vocabulary is `right`, `right-top`, `right-bottom`,
 `WINDOW_PLACEMENT_CSS` supplies the shared geometry for an
 `.ia2-window-surface`; components retain their theme, internal layout,
 persistence, and content. Shared drag and eight-direction resize helpers keep
-floating geometry inside the viewport. Resizing is intentionally suppressed at
-the mobile full-screen breakpoint.
+floating geometry inside the viewport and expose only browser-detached edges
+for docked positions. Docked dimensions use the shared window custom properties
+and can be constrained and restored with `applyDockedWindowDimensions`.
+Resizing is intentionally suppressed at the mobile full-screen breakpoint.
 
 The package also provides the shared three-state scroll-sync control used by
 Navigator and RDF Value Editor. Its component-neutral modes are `off`, `page`, and

@@ -10,16 +10,16 @@ import {
   WINDOW_POSITIONS,
   bindScrollSyncControls,
   bindWindowPositionControls,
-  floatingWindowResizeHandlesMarkup,
   isScrollSyncMode,
   isWindowPosition,
   parseWindowPositions,
   positionControlsMarkup,
   scrollSyncControlsMarkup,
   startFloatingWindowDrag,
-  startFloatingWindowResize,
+  startWindowResize,
   updateScrollSyncControls,
   updateWindowPositionControls,
+  windowResizeHandlesMarkup,
   type ScrollSyncMode,
   type WindowResizeDirection,
   type WindowPosition,
@@ -1887,7 +1887,7 @@ export class Ia2RdfValueEditor extends HTMLElement {
           <p class="data-status" aria-live="polite" hidden></p>
         </div>
         <form class="controls" novalidate></form>
-        ${this.getAttribute("positioning") === "fixed" ? "" : floatingWindowResizeHandlesMarkup()}
+        ${this.getAttribute("positioning") === "fixed" ? "" : windowResizeHandlesMarkup()}
       </aside>
       <section
         class="architecture-window"
@@ -2027,13 +2027,13 @@ export class Ia2RdfValueEditor extends HTMLElement {
       .forEach((handle) => {
         handle.addEventListener("pointerdown", (event) => {
           if (!this.#drawer) return;
-          startFloatingWindowResize(
+          startWindowResize(
             event as PointerEvent,
             this.#drawer,
+            this.#position,
             handle.dataset.resize as WindowResizeDirection,
             {
-              disabled: this.#position !== "floating"
-                || this.getAttribute("positioning") === "fixed",
+              disabled: this.getAttribute("positioning") === "fixed",
             },
           );
         });

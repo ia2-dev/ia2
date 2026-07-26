@@ -1162,7 +1162,7 @@ describe("Ia2RdfNavigator", () => {
     expect(panel.style.top).not.toBe("");
     expect(panel.style.width).not.toBe("");
     expect(panel.style.height).not.toBe("");
-    expect(drawer.shadowRoot?.querySelectorAll(".resize-handle")).toHaveLength(8);
+    expect(drawer.shadowRoot?.querySelectorAll(".ia2-window-resize-handle")).toHaveLength(8);
 
     const startingLeft = Number.parseFloat(panel.style.left);
     const startingTop = Number.parseFloat(panel.style.top);
@@ -1195,6 +1195,96 @@ describe("Ia2RdfNavigator", () => {
     options[7]!.click();
     drawer.refresh();
     expect(drawer.shadowRoot?.querySelector<HTMLButtonElement>('.position-option[aria-checked="true"]')?.dataset.position).toBe("left-bottom");
+  });
+
+  it("resizes docked layouts only from browser-detached edges and restores their dimensions", () => {
+    const drawer = mountRdfNavigator();
+    const panel = drawer.shadowRoot?.querySelector<HTMLElement>(".panel")!;
+    const options = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLButtonElement>(".position-option") ?? []);
+    panel.getBoundingClientRect = () => {
+      const sideWidth = Number.parseFloat(panel.style.getPropertyValue("--ia2-window-width")) || 760;
+      const halfHeight = Number.parseFloat(panel.style.getPropertyValue("--ia2-window-half-height")) || window.innerHeight / 2;
+      const horizontalHeight = Number.parseFloat(panel.style.getPropertyValue("--ia2-window-horizontal-height")) || window.innerHeight / 2;
+      const position = panel.dataset.position;
+      const width = position === "top" || position === "bottom" ? window.innerWidth : sideWidth;
+      const height = position === "top" || position === "bottom"
+        ? horizontalHeight
+        : position?.endsWith("-top") || position?.endsWith("-bottom")
+          ? halfHeight
+          : window.innerHeight;
+      const left = position?.startsWith("right") ? window.innerWidth - width : 0;
+      const top = position === "bottom" || position?.endsWith("-bottom") ? window.innerHeight - height : 0;
+      return {
+        bottom: top + height,
+        height,
+        left,
+        right: left + width,
+        top,
+        width,
+        x: left,
+        y: top,
+        toJSON: () => ({}),
+      } as DOMRect;
+    };
+
+    panel.querySelector<HTMLElement>('[data-resize="w"]')!.dispatchEvent(new MouseEvent("pointerdown", {
+      bubbles: true,
+      button: 0,
+      clientX: 264,
+      clientY: 200,
+    }));
+    window.dispatchEvent(new MouseEvent("pointermove", { clientX: 224, clientY: 200 }));
+    window.dispatchEvent(new MouseEvent("pointerup"));
+    expect(panel.style.getPropertyValue("--ia2-window-width")).toBe("800px");
+
+    panel.querySelector<HTMLElement>('[data-resize="e"]')!.dispatchEvent(new MouseEvent("pointerdown", {
+      bubbles: true,
+      button: 0,
+      clientX: 1024,
+      clientY: 200,
+    }));
+    window.dispatchEvent(new MouseEvent("pointermove", { clientX: 964, clientY: 200 }));
+    window.dispatchEvent(new MouseEvent("pointerup"));
+    expect(panel.style.getPropertyValue("--ia2-window-width")).toBe("800px");
+
+    options[1]!.click();
+    panel.querySelector<HTMLElement>('[data-resize="sw"]')!.dispatchEvent(new MouseEvent("pointerdown", {
+      bubbles: true,
+      button: 0,
+      clientX: 224,
+      clientY: window.innerHeight / 2,
+    }));
+    window.dispatchEvent(new MouseEvent("pointermove", { clientX: 204, clientY: window.innerHeight / 2 + 30 }));
+    window.dispatchEvent(new MouseEvent("pointerup"));
+    expect(panel.style.getPropertyValue("--ia2-window-width")).toBe("820px");
+    expect(panel.style.getPropertyValue("--ia2-window-half-height")).toBe(`${window.innerHeight / 2 + 30}px`);
+
+    options[5]!.click();
+    panel.querySelector<HTMLElement>('[data-resize="s"]')!.dispatchEvent(new MouseEvent("pointerdown", {
+      bubbles: true,
+      button: 0,
+      clientX: 500,
+      clientY: window.innerHeight / 2,
+    }));
+    window.dispatchEvent(new MouseEvent("pointermove", { clientX: 500, clientY: window.innerHeight / 2 + 50 }));
+    window.dispatchEvent(new MouseEvent("pointerup"));
+    expect(panel.style.getPropertyValue("--ia2-window-horizontal-height")).toBe(`${window.innerHeight / 2 + 50}px`);
+
+    const stored = JSON.parse(sessionStorage.getItem(SESSION_STATE_KEY)!) as {
+      dockedDimensions: { halfHeight: number; horizontalHeight: number; width: number };
+    };
+    expect(stored.dockedDimensions).toEqual({
+      halfHeight: window.innerHeight / 2 + 30,
+      horizontalHeight: window.innerHeight / 2 + 50,
+      width: 820,
+    });
+
+    drawer.remove();
+    const restored = mountRdfNavigator();
+    const restoredPanel = restored.shadowRoot?.querySelector<HTMLElement>(".panel")!;
+    expect(restoredPanel.style.getPropertyValue("--ia2-window-width")).toBe("820px");
+    expect(restoredPanel.style.getPropertyValue("--ia2-window-half-height")).toBe(`${window.innerHeight / 2 + 30}px`);
+    expect(restoredPanel.style.getPropertyValue("--ia2-window-horizontal-height")).toBe(`${window.innerHeight / 2 + 50}px`);
   });
 
   it("restores the position mode and floating geometry from session storage", () => {

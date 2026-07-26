@@ -599,6 +599,21 @@ describe("IA² RDF value editor", () => {
     expect(drawer.style.width).toBe("");
     expect(drawer.style.height).toBe("");
     expect(drawer.dataset.dragged).toBeUndefined();
+
+    editor.shadowRoot!.querySelector<HTMLElement>('[data-resize="w"]')!
+      .dispatchEvent(new MouseEvent("pointerdown", {
+        bubbles: true,
+        button: 0,
+        cancelable: true,
+        clientX: 100,
+        clientY: 200,
+      }));
+    window.dispatchEvent(new MouseEvent("pointermove", {
+      clientX: 50,
+      clientY: 200,
+    }));
+    window.dispatchEvent(new MouseEvent("pointerup"));
+    expect(drawer.style.getPropertyValue("--ia2-window-width")).toBe("450px");
   });
 
   it("lets the host restrict or disable reader positioning", async () => {

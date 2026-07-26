@@ -67,7 +67,8 @@ For programmatic control, disable automatic mounting before import:
 - Turtle/TriG and JSON-LD serialization
 - live-DOM refresh through a debounced `MutationObserver`
 - independent diagnostics that do not abort valid statements
-- nine persistent side, top, bottom, and floating drawer positions
+- nine persistent side, top, bottom, and floating drawer positions, with
+  resizing from every edge not attached to the browser
 - keyboard access, visible focus, reduced motion, and responsive themes
 - Shadow DOM isolation from host-page and ReSpec styles
 
