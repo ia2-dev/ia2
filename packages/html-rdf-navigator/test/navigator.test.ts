@@ -1536,7 +1536,7 @@ describe("Ia2RdfNavigator", () => {
     const drawer = mountRdfNavigator();
     const elementButton = drawer.shadowRoot?.querySelector<HTMLButtonElement>('.source-toggle[data-children="false"]');
     const childrenButton = drawer.shadowRoot?.querySelector<HTMLButtonElement>('.source-toggle[data-children="true"]');
-    expect(drawer.shadowRoot?.querySelector(".quad-actions > .preview-actions")).not.toBeNull();
+    expect(drawer.shadowRoot?.querySelector(".quad-actions.preview-actions")).not.toBeNull();
     expect(elementButton?.textContent).toBe("</>");
     expect(childrenButton?.textContent).toBe("</>+");
 

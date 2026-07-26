@@ -1106,15 +1106,11 @@ function locateButton(
   delegatedTargets?: WeakMap<HTMLElement, Element>,
 ): HTMLButtonElement {
   const button = document.createElement("button");
-  button.className = `row-action-button locate-button ${className}`;
+  button.className = `row-action-button locate-button locate-glyph ${className}`;
   button.type = "button";
   button.setAttribute("aria-label", `Locate ${elementLabel(target)}`);
   button.title = button.getAttribute("aria-label")!;
-  const glyph = document.createElement("span");
-  glyph.className = "locate-glyph";
-  glyph.setAttribute("aria-hidden", "true");
-  glyph.textContent = "⌖";
-  button.append(glyph);
+  button.textContent = "⌖";
   if (delegatedTargets) delegatedTargets.set(button, target);
   else button.addEventListener("click", () => onLocate(target));
   return button;
@@ -3080,17 +3076,17 @@ export class Ia2RdfNavigator extends HTMLElement {
           .filter((target): target is Element => target !== null),
       );
       const sourceId = `ia2-source-${index}`;
-      const previewActions = document.createElement("div");
-      previewActions.className = "preview-actions";
-      previewActions.setAttribute("role", "group");
-      previewActions.setAttribute("aria-label", `Actions for ${elementLabel(quad.source)}`);
+      const actions = document.createElement("div");
+      actions.className = "quad-actions preview-actions";
+      actions.setAttribute("role", "group");
+      actions.setAttribute("aria-label", `Actions for ${elementLabel(quad.source)}`);
       if (isLocatableSource(quad.source) && !termTargets.has(quad.source)) {
-        previewActions.append(locateButton(document, quad.source, "carrier-locate-button", onLocate, delegatedLocateTargets));
+        actions.append(locateButton(document, quad.source, "carrier-locate-button", onLocate, delegatedLocateTargets));
       }
       const hasChildren = hasSerializableChildren(quad.source);
       const createToggle = (includeChildren: boolean, equivalentOutput = false): HTMLButtonElement => {
         const button = document.createElement("button");
-        button.className = "row-action-button source-toggle";
+        button.className = "row-action-button source-toggle source-glyph";
         button.type = "button";
         button.dataset.children = String(includeChildren);
         button.setAttribute("aria-expanded", "false");
@@ -3102,11 +3098,7 @@ export class Ia2RdfNavigator extends HTMLElement {
         button.dataset.hideLabel = hideLabel;
         button.setAttribute("aria-label", showLabel);
         button.title = showLabel;
-        const glyph = document.createElement("span");
-        glyph.className = "source-glyph";
-        glyph.setAttribute("aria-hidden", "true");
-        glyph.textContent = includeChildren ? "</>+" : "</>";
-        button.append(glyph);
+        button.textContent = includeChildren ? "</>+" : "</>";
         delegatedSourceToggles.set(button, {
           equivalentOutput,
           includeChildren,
@@ -3116,13 +3108,9 @@ export class Ia2RdfNavigator extends HTMLElement {
         });
         return button;
       };
-      previewActions.append(createToggle(false, !hasChildren));
-      if (hasChildren) previewActions.append(createToggle(true));
-      item.append(terms);
-      const actions = document.createElement("div");
-      actions.className = "quad-actions";
-      actions.append(previewActions);
-      item.append(actions);
+      actions.append(createToggle(false, !hasChildren));
+      if (hasChildren) actions.append(createToggle(true));
+      item.append(terms, actions);
       list.append(item);
       rows.push({ item, namespaces: new Set(namespacesInQuad(quad).map((entry) => entry.namespace)), quad, searchText: quadSearchText(quad) });
     });
