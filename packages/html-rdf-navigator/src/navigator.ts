@@ -1000,7 +1000,14 @@ function quadSearchText(quad: Quad): string {
   ].join(" ").toLocaleLowerCase();
 }
 
-function localDocumentUrl(document: Document, value: string, sourceDocumentIri = document.URL): URL | null {
+function localDocumentUrl(
+  document: Document,
+  value: string,
+  sourceDocumentIri = document.URL,
+  cache?: Map<string, URL | null>,
+): URL | null {
+  if (cache?.has(value)) return cache.get(value) ?? null;
+  let result: URL | null = null;
   try {
     const termUrl = new URL(value);
     const documentUrl = new URL(sourceDocumentIri);
@@ -1008,10 +1015,12 @@ function localDocumentUrl(document: Document, value: string, sourceDocumentIri =
     const currentDocument = new URL(documentUrl);
     termDocument.hash = "";
     currentDocument.hash = "";
-    return termDocument.href === currentDocument.href ? termUrl : null;
+    result = termDocument.href === currentDocument.href ? termUrl : null;
   } catch {
-    return null;
+    result = null;
   }
+  cache?.set(value, result);
+  return result;
 }
 
 function retrievalUrlForSemanticIri(value: string, result: ExtractionResult): string {
@@ -1063,10 +1072,15 @@ function locatableElementForTerm(
   document: Document,
   term: SubjectTerm | ObjectTerm | GraphTerm,
   sourceDocumentIri = document.URL,
+  localUrlCache?: Map<string, URL | null>,
+  targetCache?: Map<string, Element | null>,
 ): Element | null {
   if (term.termType !== "NamedNode" || !isWebIri(term.value)) return null;
-  const localUrl = localDocumentUrl(document, term.value, sourceDocumentIri);
-  return localUrl ? locatableElementForUrl(document, localUrl) : null;
+  if (targetCache?.has(term.value)) return targetCache.get(term.value) ?? null;
+  const localUrl = localDocumentUrl(document, term.value, sourceDocumentIri, localUrlCache);
+  const target = localUrl ? locatableElementForUrl(document, localUrl) : null;
+  targetCache?.set(term.value, target);
+  return target;
 }
 
 function definitionTarget(
@@ -1111,6 +1125,8 @@ function termCode(
   className = "",
   onLocate?: (target: Element) => void,
   sourceDocumentIri = document.URL,
+  localUrlCache?: Map<string, URL | null>,
+  targetCache?: Map<string, Element | null>,
 ): HTMLElement {
   const code = document.createElement("code");
   if (className) code.className = className;
@@ -1123,7 +1139,7 @@ function termCode(
   const anchor = document.createElement("a");
   anchor.className = "term-link";
   anchor.href = term.value;
-  const localUrl = localDocumentUrl(document, term.value, sourceDocumentIri);
+  const localUrl = localDocumentUrl(document, term.value, sourceDocumentIri, localUrlCache);
   if (localUrl) {
     anchor.classList.add("local-term");
     anchor.title = localUrl.hash ? `Scroll to ${localUrl.hash} in this document` : "Scroll to the start of this document";
@@ -1135,7 +1151,7 @@ function termCode(
   }
   anchor.textContent = label;
   code.append(anchor);
-  const target = locatableElementForTerm(document, term, sourceDocumentIri);
+  const target = locatableElementForTerm(document, term, sourceDocumentIri, localUrlCache, targetCache);
   if (target && onLocate) code.append(locateButton(document, target, "term-locate-button", onLocate));
   return code;
 }
@@ -2987,6 +3003,8 @@ export class Ia2RdfNavigator extends HTMLElement {
     const list = document.createElement("ol");
     list.className = "navigator";
     const carriers = new Set(result.quads.map((quad) => quad.source));
+    const localUrlCache = new Map<string, URL | null>();
+    const targetCache = new Map<string, Element | null>();
     const rows: NavigatorRow[] = [];
     result.quads.forEach((quad, index) => {
       const item = document.createElement("li");
@@ -3005,20 +3023,20 @@ export class Ia2RdfNavigator extends HTMLElement {
       const terms = document.createElement("div");
       terms.className = "quad-terms";
       const onLocate = (target: Element): void => this.#locateElement(target);
-      const subject = termCode(document, quad.subject, "", "subject", onLocate, result.sourceDocumentIri);
-      const predicate = termCode(document, quad.predicate, "   ", "predicate", onLocate, result.sourceDocumentIri);
-      const object = termCode(document, quad.object, "   ", "object", onLocate, result.sourceDocumentIri);
+      const subject = termCode(document, quad.subject, "", "subject", onLocate, result.sourceDocumentIri, localUrlCache, targetCache);
+      const predicate = termCode(document, quad.predicate, "   ", "predicate", onLocate, result.sourceDocumentIri, localUrlCache, targetCache);
+      const object = termCode(document, quad.object, "   ", "object", onLocate, result.sourceDocumentIri, localUrlCache, targetCache);
       terms.append(subject, predicate, object);
       if (quad.graph) {
         const graph = document.createElement("div");
         graph.className = "graph";
-        graph.append("Graph: ", termCode(document, quad.graph, "", "", onLocate, result.sourceDocumentIri));
+        graph.append("Graph: ", termCode(document, quad.graph, "", "", onLocate, result.sourceDocumentIri, localUrlCache, targetCache));
         terms.append(graph);
       }
       const termTargets = new Set(
         [quad.subject, quad.predicate, quad.object, quad.graph]
           .filter((term): term is SubjectTerm | ObjectTerm | GraphTerm => term !== null)
-          .map((term) => locatableElementForTerm(document, term, result.sourceDocumentIri))
+          .map((term) => locatableElementForTerm(document, term, result.sourceDocumentIri, localUrlCache, targetCache))
           .filter((target): target is Element => target !== null),
       );
       const sourceId = `ia2-source-${index}`;
