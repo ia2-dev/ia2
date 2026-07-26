@@ -1,6 +1,6 @@
 {
   "name": "@ia2-dev/html-rdf-navigator",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A live RDF dataset navigator and inspector for IA² HTML/RDF documents.",
   "author": "Yurii Rashkovskii",
   "homepage": "https://ia2.dev/",
@@ -62,7 +62,7 @@
   "dependencies": {
     "@comunica/query-sparql-rdfjs-lite": "^5.3.0",
     "@ia2-dev/html-rdf": "^0.1.1",
-    "@ia2-dev/ui-primitives": "^0.1.1",
+    "@ia2-dev/ui-primitives": "^0.1.2",
     "@rdfjs/types": "^2.0.1",
     "n3": "^2.1.1",
     "sparqljs": "^3.7.4"
