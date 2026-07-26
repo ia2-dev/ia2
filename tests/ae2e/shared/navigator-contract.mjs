@@ -251,7 +251,7 @@ export async function runNavigatorContract({ expectedTag } = {}) {
   await run("supports page and navigator scroll synchronization modes", async () => {
     tab("navigator");
     const pageMode = one('.sync-option[data-sync-mode="page"]');
-    const navigatorMode = one('.sync-option[data-sync-mode="navigator"]');
+    const navigatorMode = one('.sync-option[data-sync-mode="panel"]');
     pageMode.click();
     assert(pageMode.getAttribute("aria-checked") === "true", "page sync mode did not activate");
     navigatorMode.click();

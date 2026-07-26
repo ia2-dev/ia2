@@ -38,6 +38,7 @@ async function extensionOwnedHareHtml(filename) {
 
 const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? "/", `http://127.0.0.1:${port}`);
+  const chunkName = /^\/chunks\/([A-Za-z0-9._-]+\.js)$/.exec(url.pathname)?.[1];
   if (url.pathname === "/health") {
     response.writeHead(200, { "content-type": "text/plain" });
     response.end("ok");
@@ -79,7 +80,9 @@ const server = createServer(async (request, response) => {
     response.end(JSON.stringify(results.at(-1) ?? null));
     return;
   }
-  const file = files.get(url.pathname);
+  const file = chunkName
+    ? resolve(root, "packages/html-rdf-navigator/dist/chunks", chunkName)
+    : files.get(url.pathname);
   if (file) {
     try {
       await readFile(file);
