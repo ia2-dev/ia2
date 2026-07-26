@@ -4,6 +4,32 @@ function escapeMarkup(value) {
 }
 
 // src/window.ts
+var IA2_WINDOW_ACTIVATE_EVENT = "ia2:window-activate";
+function activateWindow(activeWindow) {
+  const { source } = activeWindow;
+  const EventConstructor = source.ownerDocument.defaultView?.CustomEvent ?? globalThis.CustomEvent;
+  const detail = {
+    source,
+    windows: [activeWindow]
+  };
+  source.ownerDocument.dispatchEvent(new EventConstructor(
+    IA2_WINDOW_ACTIVATE_EVENT,
+    { detail }
+  ));
+  const view = source.ownerDocument.defaultView;
+  if (!view || view.innerWidth <= 760) {
+    for (const window of detail.windows) {
+      if (window.source !== source) window.close();
+    }
+    return;
+  }
+  if (windowPositionsAreCompatible(detail.windows, view.innerWidth, view.innerHeight)) return;
+  const arranged = arrangeWindowPositions(detail.windows, view.innerWidth, view.innerHeight);
+  for (const window of detail.windows) {
+    const position = arranged.get(window.source);
+    if (position && position !== window.position) window.setPosition(position);
+  }
+}
 var WINDOW_RESIZE_DIRECTIONS = [
   "n",
   "ne",
@@ -25,6 +51,75 @@ var WINDOW_RESIZE_DIRECTIONS_BY_POSITION = {
   "left-bottom": ["n", "e", "ne"],
   "left-top": ["e", "s", "se"]
 };
+function windowRect(window, position, viewportWidth, viewportHeight) {
+  if (position === "floating") return null;
+  const measuredWidth = window.surface.getBoundingClientRect().width;
+  const width = Math.min(measuredWidth || window.preferredWidth, viewportWidth);
+  const halfHeight = viewportHeight / 2;
+  if (position === "top") {
+    return { bottom: halfHeight, left: 0, right: viewportWidth, top: 0 };
+  }
+  if (position === "bottom") {
+    return { bottom: viewportHeight, left: 0, right: viewportWidth, top: halfHeight };
+  }
+  const left = position.startsWith("left") ? 0 : viewportWidth - width;
+  const right = left + width;
+  if (position.endsWith("-top")) {
+    return { bottom: halfHeight, left, right, top: 0 };
+  }
+  if (position.endsWith("-bottom")) {
+    return { bottom: viewportHeight, left, right, top: halfHeight };
+  }
+  return { bottom: viewportHeight, left, right, top: 0 };
+}
+function rectanglesOverlap(left, right) {
+  if (!left || !right) return false;
+  return left.left < right.right && left.right > right.left && left.top < right.bottom && left.bottom > right.top;
+}
+function positionsAreCompatible(windows, positions, viewportWidth, viewportHeight) {
+  for (let leftIndex = 0; leftIndex < windows.length; leftIndex += 1) {
+    const leftWindow = windows[leftIndex];
+    const leftPosition = positions.get(leftWindow.source) ?? leftWindow.position;
+    const leftRect = windowRect(leftWindow, leftPosition, viewportWidth, viewportHeight);
+    for (let rightIndex = leftIndex + 1; rightIndex < windows.length; rightIndex += 1) {
+      const rightWindow = windows[rightIndex];
+      const rightPosition = positions.get(rightWindow.source) ?? rightWindow.position;
+      if (rectanglesOverlap(
+        leftRect,
+        windowRect(rightWindow, rightPosition, viewportWidth, viewportHeight)
+      )) return false;
+    }
+  }
+  return true;
+}
+function windowPositionsAreCompatible(windows, viewportWidth, viewportHeight) {
+  return positionsAreCompatible(
+    windows,
+    new Map(windows.map((window) => [window.source, window.position])),
+    viewportWidth,
+    viewportHeight
+  );
+}
+function positionCandidates(window) {
+  const allowed = new Set(window.allowedPositions);
+  return Array.from(/* @__PURE__ */ new Set([...window.preferredPositions, window.position, ...window.allowedPositions])).filter((position) => allowed.has(position));
+}
+function arrangeWindowPositions(windows, viewportWidth, viewportHeight) {
+  const ordered = [...windows].sort((left, right) => right.priority - left.priority);
+  const selected = /* @__PURE__ */ new Map();
+  const choose = (index) => {
+    if (index >= ordered.length) return true;
+    const window = ordered[index];
+    for (const position of positionCandidates(window)) {
+      selected.set(window.source, position);
+      if (positionsAreCompatible(ordered.slice(0, index + 1), selected, viewportWidth, viewportHeight) && choose(index + 1)) return true;
+    }
+    selected.delete(window.source);
+    return false;
+  };
+  if (choose(0)) return selected;
+  return new Map(windows.map((window) => [window.source, window.position]));
+}
 var WINDOW_POSITIONS = [
   { position: "right", label: "Right, full height", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M13 2h5v12h-5z"/></svg>' },
   { position: "right-top", label: "Right, top half", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M13 2h5v5.5h-5z"/></svg>' },
@@ -37,6 +132,9 @@ var WINDOW_POSITIONS = [
   { position: "left-top", label: "Left, top half", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M2 2h5v5.5H2z"/></svg>' }
 ];
 var WINDOW_PLACEMENT_CSS = `
+  .ia2-window-launcher {
+    z-index: var(--ia2-window-launcher-layer, 2147483020);
+  }
   .ia2-window-surface {
     border-left: 1px solid var(--ia2-window-rule, currentColor);
     bottom: 0;
@@ -52,6 +150,7 @@ var WINDOW_PLACEMENT_CSS = `
       visibility var(--ia2-window-transition-duration, 220ms);
     visibility: hidden;
     width: var(--ia2-window-width, min(760px, 72vw));
+    z-index: var(--ia2-window-surface-layer, 2147483000);
   }
   .ia2-window-surface[data-open=""],
   .ia2-window-surface[data-open="true"] {
@@ -630,9 +729,11 @@ function bindScrollSyncControls(root, applyMode) {
   };
 }
 export {
+  IA2_WINDOW_ACTIVATE_EVENT,
   SCROLL_SYNC_MODES,
   WINDOW_PLACEMENT_CSS,
   WINDOW_POSITIONS,
+  activateWindow,
   applyDockedWindowDimensions,
   bindScrollSyncControls,
   bindWindowPositionControls,

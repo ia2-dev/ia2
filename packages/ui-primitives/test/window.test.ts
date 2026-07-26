@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  IA2_WINDOW_ACTIVATE_EVENT,
+  activateWindow,
   applyDockedWindowDimensions,
   bindWindowPositionControls,
   floatingWindowResizeHandlesMarkup,
@@ -11,9 +13,77 @@ import {
   windowResizeDirections,
   windowResizeHandlesMarkup,
   WINDOW_PLACEMENT_CSS,
+  type CoordinatedWindow,
 } from "../src/window.js";
 
 describe("shared IA² window primitives", () => {
+  it("arranges contributed desktop windows by their independent placement preferences", () => {
+    const editorSource = document.createElement("aside");
+    const editorSurface = document.createElement("section");
+    const navigatorSource = document.createElement("aside");
+    const navigatorSurface = document.createElement("section");
+    document.body.append(editorSource, navigatorSource);
+    let editorPosition: CoordinatedWindow["position"] = "right";
+    let navigatorPosition: CoordinatedWindow["position"] = "right";
+    let navigatorClosed = false;
+    const editor: CoordinatedWindow = {
+      allowedPositions: ["right", "floating"],
+      close: () => undefined,
+      position: editorPosition,
+      preferredPositions: ["right", "floating"],
+      preferredWidth: 416,
+      priority: 20,
+      setPosition: (position) => {
+        editorPosition = position;
+      },
+      source: editorSource,
+      surface: editorSurface,
+    };
+    const navigator: CoordinatedWindow = {
+      allowedPositions: ["right", "left", "floating"],
+      close: () => {
+        navigatorClosed = true;
+      },
+      position: navigatorPosition,
+      preferredPositions: ["left", "floating"],
+      preferredWidth: 760,
+      priority: 10,
+      setPosition: (position) => {
+        navigatorPosition = position;
+      },
+      source: navigatorSource,
+      surface: navigatorSurface,
+    };
+    const originalInnerWidth = window.innerWidth;
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1400 });
+    document.addEventListener(IA2_WINDOW_ACTIVATE_EVENT, (event) => {
+      (event as CustomEvent<{ windows: CoordinatedWindow[] }>).detail.windows.push(navigator);
+    }, { once: true });
+
+    activateWindow(editor);
+
+    expect(editorPosition).toBe("right");
+    expect(navigatorPosition).toBe("left");
+
+    navigatorPosition = "right";
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1000 });
+    document.addEventListener(IA2_WINDOW_ACTIVATE_EVENT, (event) => {
+      (event as CustomEvent<{ windows: CoordinatedWindow[] }>).detail.windows.push(navigator);
+    }, { once: true });
+    activateWindow(editor);
+    expect(navigatorPosition).toBe("floating");
+
+    navigatorPosition = "right";
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 390 });
+    document.addEventListener(IA2_WINDOW_ACTIVATE_EVENT, (event) => {
+      (event as CustomEvent<{ windows: CoordinatedWindow[] }>).detail.windows.push(navigator);
+    }, { once: true });
+    activateWindow(editor);
+    expect(navigatorClosed).toBe(true);
+
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: originalInnerWidth });
+  });
+
   it("parses the shared position vocabulary with stable de-duplication", () => {
     expect(isWindowPosition("floating")).toBe(true);
     expect(isWindowPosition("bottom")).toBe(true);
@@ -23,6 +93,9 @@ describe("shared IA² window primitives", () => {
   });
 
   it("provides shared side, horizontal, floating, mobile, and reduced-motion geometry", () => {
+    expect(WINDOW_PLACEMENT_CSS).toContain(".ia2-window-launcher");
+    expect(WINDOW_PLACEMENT_CSS).toContain("--ia2-window-launcher-layer");
+    expect(WINDOW_PLACEMENT_CSS).toContain("--ia2-window-surface-layer");
     expect(WINDOW_PLACEMENT_CSS).toContain('[data-position="bottom"]');
     expect(WINDOW_PLACEMENT_CSS).toContain('[data-position="floating"]');
     expect(WINDOW_PLACEMENT_CSS).toContain('[data-position="right-top"] .ia2-window-resize-handle[data-resize="sw"]');

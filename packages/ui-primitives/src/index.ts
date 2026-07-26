@@ -1,7 +1,9 @@
 export {
+  IA2_WINDOW_ACTIVATE_EVENT,
   WINDOW_POSITIONS,
   WINDOW_PLACEMENT_CSS,
   applyDockedWindowDimensions,
+  activateWindow,
   bindWindowPositionControls,
   constrainDockedWindowDimensions,
   floatingWindowResizeHandlesMarkup,
@@ -18,10 +20,12 @@ export {
 export type {
   DockedWindowDimensions,
   DockedWindowDimensionsOptions,
+  CoordinatedWindow,
   FloatingWindowRect,
   FloatingWindowDragOptions,
   FloatingWindowResizeOptions,
   PositionControlsMarkupOptions,
+  WindowActivationDetail,
   WindowPosition,
   WindowPositionDefinition,
   WindowResizeDirection,

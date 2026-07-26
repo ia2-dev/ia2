@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { JSDOM } from "jsdom";
 import { extractDataset } from "@ia2-dev/html-rdf";
+import { activateWindow, type CoordinatedWindow } from "@ia2-dev/ui-primitives";
 import { Ia2RdfValueEditor } from "../src/rdf-value-editor.js";
 // @ts-expect-error Vitest supplies Vite's raw-fixture import during tests.
 import assignmentHtml from "../../../specs/rdf-html/examples/sources/assignment.html?raw";
@@ -192,6 +193,7 @@ describe("IA² RDF value editor", () => {
     const nameInput = Array.from(editor.shadowRoot!.querySelectorAll<HTMLInputElement>(".controls input"))
       .find((input) => input.previousElementSibling?.textContent === "Party legal name")!;
 
+    expect(editor.shadowRoot?.querySelector(".launcher")?.classList.contains("ia2-window-launcher")).toBe(true);
     expect(editor.shadowRoot!.querySelectorAll(".controls input, .controls select")).toHaveLength(5);
     expect(editor.shadowRoot?.textContent).not.toContain("SHACL shape enforced");
     expect(nameInput.required).toBe(true);
@@ -476,6 +478,53 @@ describe("IA² RDF value editor", () => {
     expect(placeholder.hasAttribute("tabindex")).toBe(false);
     expect(placeholder.hasAttribute("aria-label")).toBe(false);
     expect(editor.shadowRoot!.querySelector(".drawer")?.hasAttribute("data-open")).toBe(false);
+  });
+
+  it("hides its launcher while the editor is open and restores it on close", async () => {
+    const editor = await mount();
+    const root = editor.shadowRoot!;
+    const launcher = root.querySelector<HTMLButtonElement>(".launcher")!;
+    const style = root.querySelector("style")?.textContent ?? "";
+
+    expect(style).toContain('.launcher[aria-expanded="true"]');
+    editor.open();
+    expect(launcher.getAttribute("aria-expanded")).toBe("true");
+    expect(root.activeElement).not.toBe(launcher);
+
+    editor.close();
+    expect(launcher.getAttribute("aria-expanded")).toBe("false");
+    expect(root.activeElement).toBe(launcher);
+  });
+
+  it("stays right while an activating Navigator moves left", async () => {
+    const editor = await mount();
+    editor.open();
+    const source = document.createElement("aside");
+    const surface = document.createElement("section");
+    let navigatorPosition: CoordinatedWindow["position"] = "right";
+    const originalInnerWidth = window.innerWidth;
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1400 });
+    const navigator: CoordinatedWindow = {
+      allowedPositions: ["right", "left", "floating"],
+      close: () => undefined,
+      position: navigatorPosition,
+      preferredPositions: ["left", "floating"],
+      preferredWidth: 760,
+      priority: 10,
+      setPosition: (position) => {
+        navigatorPosition = position;
+      },
+      source,
+      surface,
+    };
+
+    activateWindow(navigator);
+
+    const drawer = editor.shadowRoot!.querySelector<HTMLElement>(".drawer")!;
+    expect(drawer.hasAttribute("data-open")).toBe(true);
+    expect(drawer.dataset.position).toBe("right");
+    expect(navigatorPosition).toBe("left");
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: originalInnerWidth });
   });
 
   it("shares Navigator sync modes and follows in either direction", async () => {

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { activateWindow, type CoordinatedWindow } from "@ia2-dev/ui-primitives";
 import { mountRdfNavigator as mountClosedRdfNavigator } from "../src/index.js";
 
 const SESSION_STATE_KEY = "ia2:rdf-navigator:state:v1";
@@ -32,6 +33,7 @@ describe("Ia2RdfNavigator", () => {
     const tools = drawer.shadowRoot?.querySelector<HTMLElement>(".navigator-tools");
     expect(toolbar?.querySelector(".tabs")).not.toBeNull();
     expect(toolbar?.querySelector(".header-actions")).not.toBeNull();
+    expect(drawer.shadowRoot?.querySelector(".launcher")?.classList.contains("ia2-window-launcher")).toBe(true);
     expect(drawer.shadowRoot?.querySelector(".heading")).toBeNull();
     expect(tools?.contains(drawer.shadowRoot?.querySelector(".navigator-search") ?? null)).toBe(true);
     expect(tools?.contains(drawer.shadowRoot?.querySelector(".sync-control") ?? null)).toBe(true);
@@ -667,6 +669,32 @@ describe("Ia2RdfNavigator", () => {
       window.requestIdleCallback = originalRequestIdleCallback;
       window.cancelIdleCallback = originalCancelIdleCallback;
     }
+  });
+
+  it("moves left so an activating editor can remain docked right", () => {
+    const drawer = mountRdfNavigator();
+    drawer.open();
+    const source = document.createElement("aside");
+    const surface = document.createElement("section");
+    const originalInnerWidth = window.innerWidth;
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1400 });
+    const editor: CoordinatedWindow = {
+      allowedPositions: ["right", "floating"],
+      close: () => undefined,
+      position: "right",
+      preferredPositions: ["right", "floating"],
+      preferredWidth: 416,
+      priority: 20,
+      setPosition: () => undefined,
+      source,
+      surface,
+    };
+
+    activateWindow(editor);
+
+    expect(drawer.shadowRoot?.querySelector<HTMLElement>(".panel")?.dataset.open).toBe("true");
+    expect(drawer.shadowRoot?.querySelector<HTMLElement>(".panel")?.dataset.position).toBe("left");
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: originalInnerWidth });
   });
 
   it("moves the RDF launcher freely, snaps near viewport edges, and preserves its position", async () => {

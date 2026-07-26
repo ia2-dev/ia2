@@ -6,8 +6,10 @@ import {
 } from "@ia2-dev/html-rdf";
 import type { ExtractionRoot, Literal, NamedNode, ObjectTerm, Quad } from "@ia2-dev/html-rdf";
 import {
+  IA2_WINDOW_ACTIVATE_EVENT,
   WINDOW_PLACEMENT_CSS,
   WINDOW_POSITIONS,
+  activateWindow,
   bindScrollSyncControls,
   bindWindowPositionControls,
   isScrollSyncMode,
@@ -20,7 +22,9 @@ import {
   updateScrollSyncControls,
   updateWindowPositionControls,
   windowResizeHandlesMarkup,
+  type CoordinatedWindow,
   type ScrollSyncMode,
+  type WindowActivationDetail,
   type WindowResizeDirection,
   type WindowPosition,
 } from "@ia2-dev/ui-primitives";
@@ -404,10 +408,12 @@ export class Ia2RdfValueEditor extends HTMLElement {
   connectedCallback(): void {
     if (this.#initialized) return;
     this.#initialized = true;
+    this.ownerDocument.addEventListener(IA2_WINDOW_ACTIVATE_EVENT, this.#onWindowActivate);
     queueMicrotask(() => this.#initialize());
   }
 
   disconnectedCallback(): void {
+    this.ownerDocument.removeEventListener(IA2_WINDOW_ACTIVATE_EVENT, this.#onWindowActivate);
     this.#teardown();
     this.#initialized = false;
   }
@@ -460,6 +466,7 @@ export class Ia2RdfValueEditor extends HTMLElement {
   }
 
   #show(configureSync = true): void {
+    if (this.#drawer) activateWindow(this.#coordinatedWindow(this.#drawer));
     this.#drawer?.setAttribute("data-open", "");
     this.#drawer?.removeAttribute("inert");
     this.#launcher?.setAttribute("aria-expanded", "true");
@@ -467,13 +474,39 @@ export class Ia2RdfValueEditor extends HTMLElement {
   }
 
   close(): void {
+    this.#hide(true);
+  }
+
+  #hide(restoreFocus: boolean): void {
     this.#drawer?.removeAttribute("data-open");
     this.#drawer?.setAttribute("inert", "");
     this.#launcher?.setAttribute("aria-expanded", "false");
     this.#syncCleanup?.();
     this.#syncCleanup = null;
-    (this.#returnFocus ?? this.#launcher)?.focus();
+    if (restoreFocus) (this.#returnFocus ?? this.#launcher)?.focus();
     this.#returnFocus = null;
+  }
+
+  #onWindowActivate = (event: Event): void => {
+    const detail = (event as CustomEvent<WindowActivationDetail>).detail;
+    if (detail?.source === this || !this.#drawer?.hasAttribute("data-open")) return;
+    detail.windows.push(this.#coordinatedWindow(this.#drawer));
+  };
+
+  #coordinatedWindow(drawer: HTMLElement): CoordinatedWindow {
+    return {
+      allowedPositions: this.#allowedPositions,
+      close: () => this.#hide(false),
+      position: this.#position,
+      preferredPositions: ["right", "floating", "right-bottom", "right-top"],
+      preferredWidth: 416,
+      priority: 20,
+      setPosition: (position) => {
+        this.setPosition(position);
+      },
+      source: this,
+      surface: drawer,
+    };
   }
 
   setPosition(position: RdfValueEditorPosition): boolean {
@@ -1380,6 +1413,10 @@ export class Ia2RdfValueEditor extends HTMLElement {
           z-index: 30;
         }
         .launcher[data-position^="left"] { left: 1rem; right: auto; }
+        .launcher[aria-expanded="true"] {
+          pointer-events: none;
+          visibility: hidden;
+        }
         .count {
           background: var(--editor-paper);
           border-radius: 999px;
@@ -1639,7 +1676,7 @@ export class Ia2RdfValueEditor extends HTMLElement {
           transition: opacity 180ms ease, transform 220ms cubic-bezier(.22, 1, .36, 1), visibility 220ms;
           visibility: hidden;
           width: min(760px, calc(100vw - 48px));
-          z-index: 60;
+          z-index: var(--ia2-window-dialog-layer, 2147483040);
         }
         .architecture-window[data-open="true"] {
           opacity: 1;
@@ -1837,7 +1874,7 @@ export class Ia2RdfValueEditor extends HTMLElement {
         }
         ${WINDOW_PLACEMENT_CSS}
       </style>
-      <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="false" aria-controls="ia2-rdf-value-editor-drawer">
+      <button class="launcher ia2-window-launcher" type="button" data-position="${this.#position}" aria-expanded="false" aria-controls="ia2-rdf-value-editor-drawer">
         ${panelLabel} <span class="count">${this.#bindings.length}</span>
       </button>
       <aside class="drawer ia2-window-surface" id="ia2-rdf-value-editor-drawer" data-position="${this.#position}" aria-label="${panelLabel}" inert>

@@ -5,8 +5,11 @@ import {
   termLabelMap,
 } from "@ia2-dev/html-rdf";
 import {
+  IA2_WINDOW_ACTIVATE_EVENT,
+  WINDOW_POSITIONS,
   WINDOW_PLACEMENT_CSS,
   applyDockedWindowDimensions,
+  activateWindow,
   bindScrollSyncControls,
   bindWindowPositionControls,
   constrainDockedWindowDimensions,
@@ -17,7 +20,9 @@ import {
   updateScrollSyncControls,
   windowResizeHandlesMarkup,
   type DockedWindowDimensions,
+  type CoordinatedWindow,
   type ScrollSyncMode,
+  type WindowActivationDetail,
   type WindowPosition,
   type WindowResizeDirection,
   type WindowResizeOptions,
@@ -69,8 +74,6 @@ const CSS = String.raw`
     --warning: oklch(64% 0.15 67);
     color: var(--ink);
     font: 400 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-    position: fixed;
-    z-index: 2147483000;
   }
   *, *::before, *::after { box-sizing: border-box; }
   [hidden] { display: none !important; }
@@ -1535,6 +1538,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.refresh();
     this.addEventListener("keydown", this.#onKeydown);
     this.addEventListener("keyup", this.#onKeyup);
+    this.ownerDocument.addEventListener(IA2_WINDOW_ACTIVATE_EVENT, this.#onWindowActivate);
     this.ownerDocument.defaultView?.addEventListener("resize", this.#onWindowResize, { passive: true });
     this.#observeDocument();
   }
@@ -1542,6 +1546,7 @@ export class Ia2RdfNavigator extends HTMLElement {
   disconnectedCallback(): void {
     this.removeEventListener("keydown", this.#onKeydown);
     this.removeEventListener("keyup", this.#onKeyup);
+    this.ownerDocument.removeEventListener(IA2_WINDOW_ACTIVATE_EVENT, this.#onWindowActivate);
     this.ownerDocument.defaultView?.removeEventListener("resize", this.#onWindowResize);
     this.#observer?.disconnect();
     this.#observer = null;
@@ -2416,8 +2421,9 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (!this.#contentRendered) {
       this.#render();
     }
-    this.shadowRoot?.querySelector(".launcher")?.setAttribute("aria-expanded", "true");
     const panel = this.shadowRoot?.querySelector<HTMLElement>(".panel");
+    if (panel) activateWindow(this.#coordinatedWindow(panel));
+    this.shadowRoot?.querySelector(".launcher")?.setAttribute("aria-expanded", "true");
     if (panel) panel.dataset.open = "true";
     queueMicrotask(() => {
       const active = this.shadowRoot?.activeElement;
@@ -2430,6 +2436,10 @@ export class Ia2RdfNavigator extends HTMLElement {
   }
 
   close(): void {
+    this.#close(true);
+  }
+
+  #close(restoreFocus: boolean): void {
     this.#open = false;
     this.#stopFloatingInteraction();
     this.#clearLinkPreviews();
@@ -2438,7 +2448,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.shadowRoot?.querySelector(".launcher")?.setAttribute("aria-expanded", "false");
     const panel = this.shadowRoot?.querySelector<HTMLElement>(".panel");
     if (panel) panel.dataset.open = "false";
-    queueMicrotask(() => {
+    if (restoreFocus) queueMicrotask(() => {
       const launcher = this.shadowRoot?.querySelector<HTMLButtonElement>(".launcher");
       if (launcher?.hidden) {
         (this.shadowRoot?.activeElement as HTMLElement | null)?.blur();
@@ -2446,6 +2456,27 @@ export class Ia2RdfNavigator extends HTMLElement {
       }
       launcher?.focus();
     });
+  }
+
+  #onWindowActivate = (event: Event): void => {
+    const detail = (event as CustomEvent<WindowActivationDetail>).detail;
+    const panel = this.shadowRoot?.querySelector<HTMLElement>(".panel");
+    if (detail?.source === this || !this.#open || !panel) return;
+    detail.windows.push(this.#coordinatedWindow(panel));
+  };
+
+  #coordinatedWindow(panel: HTMLElement): CoordinatedWindow {
+    return {
+      allowedPositions: WINDOW_POSITIONS.map(({ position }) => position),
+      close: () => this.#close(false),
+      position: this.#position,
+      preferredPositions: ["left", "floating", "left-top", "left-bottom"],
+      preferredWidth: 760,
+      priority: 10,
+      setPosition: (position) => this.#applyPosition(position, false, false),
+      source: this,
+      surface: panel,
+    };
   }
 
   toggle(focusTarget: "panel" | "tab" = "tab"): void {
@@ -2550,7 +2581,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     panel.style.width = "";
   }
 
-  #applyPosition(position: DrawerPosition, focus = false): void {
+  #applyPosition(position: DrawerPosition, focus = false, persist = true): void {
     this.#position = position;
     if (isSideDrawerPosition(position)) this.#lastSidePosition = position;
     const panel = this.shadowRoot?.querySelector<HTMLElement>(".panel");
@@ -2573,7 +2604,7 @@ export class Ia2RdfNavigator extends HTMLElement {
       option.tabIndex = selected ? 0 : -1;
       if (selected && focus) option.focus();
     });
-    this.#persistSessionState();
+    if (persist) this.#persistSessionState();
   }
 
   #launcherLimits(launcher: HTMLElement): { margin: number; maxX: number; maxY: number } {
@@ -4560,7 +4591,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     const totalStatements = this.#totalStatementCount();
     this.shadowRoot.innerHTML = `
       <style>${CSS}</style>
-      <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel" title="Open RDF Navigator. Drag to move."${this.hasAttribute("data-ia2-extension") ? " hidden" : ""}>
+      <button class="launcher ia2-window-launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel" title="Open RDF Navigator. Drag to move."${this.hasAttribute("data-ia2-extension") ? " hidden" : ""}>
         <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="2.6" fill="currentColor"/><circle cx="18.5" cy="5" r="2.6" fill="currentColor"/><circle cx="18.5" cy="19" r="2.6" fill="currentColor"/><path d="M7.2 10.8 16 6.2M7.2 13.2 16 17.8" stroke="currentColor" stroke-width="1.8"/></svg></span>
         <span>RDF</span><span class="count">${totalStatements}</span>
       </button>
