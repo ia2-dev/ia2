@@ -567,14 +567,16 @@ function termLabelMap(quads, options = {}) {
   const languageRanks = new Map(languages.map((language, index) => [language, index]));
   const fallbackLanguageRank = languages.length;
   const otherLanguageRank = fallbackLanguageRank + 1;
+  const resources = /* @__PURE__ */ new Set();
   const candidates = /* @__PURE__ */ new Map();
   quads.forEach((quad, sourceRank) => {
+    const key = `${quad.subject.termType}:${quad.subject.value}`;
+    resources.add(key);
     if (quad.object.termType !== "Literal") return;
     const predicateRank = predicateRanks.get(quad.predicate.value);
     if (predicateRank === void 0) return;
     const language = quad.object.language.toLowerCase();
     const languageRank = languageRanks.get(language) ?? (language ? otherLanguageRank : fallbackLanguageRank);
-    const key = `${quad.subject.termType}:${quad.subject.value}`;
     const candidate = { languageRank, predicateRank, sourceRank, value: quad.object.value };
     const current = candidates.get(key);
     if (!current || predicateRank < current.predicateRank || predicateRank === current.predicateRank && (languageRank < current.languageRank || languageRank === current.languageRank && sourceRank < current.sourceRank)) {
@@ -582,7 +584,10 @@ function termLabelMap(quads, options = {}) {
     }
   });
   const labels = /* @__PURE__ */ new Map();
-  for (const [key, candidate] of candidates) labels.set(key, candidate.value);
+  for (const key of resources) {
+    const candidate = candidates.get(key);
+    if (candidate) labels.set(key, candidate.value);
+  }
   return labels;
 }
 function annotationTargetIris(quads, body) {
