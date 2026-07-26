@@ -77,13 +77,10 @@ export function labelMap(
   quads: readonly Quad[],
   options: LabelOptions = {},
 ): Map<string, string> {
-  const resources = Array.from(new Set(quads.flatMap((quad) => (
-    quad.subject.termType === "NamedNode" ? [quad.subject.value] : []
-  ))));
-  return new Map(resources.flatMap((resource) => {
-    const label = labelFor(quads, resource, options);
-    return label === undefined ? [] : [[resource, label] as const];
-  }));
+  const labels = termLabelMap(quads, options);
+  return new Map(Array.from(labels).flatMap(([key, label]) => (
+    key.startsWith("NamedNode:") ? [[key.slice("NamedNode:".length), label]] : []
+  )));
 }
 
 /** Build labels keyed as `NamedNode:iri` or `BlankNode:label`. */
@@ -91,14 +88,50 @@ export function termLabelMap(
   quads: readonly Quad[],
   options: LabelOptions = {},
 ): Map<string, string> {
-  const resources = new Map<string, SubjectTerm>();
-  for (const quad of quads) {
-    resources.set(`${quad.subject.termType}:${quad.subject.value}`, quad.subject);
-  }
+  const predicates = options.predicates ?? DEFAULT_LABEL_PREDICATES;
+  const predicateRanks = new Map(predicates.map((predicate, index) => [predicate, index]));
+  const languages = options.languages?.map((language) => language.toLowerCase()) ?? [];
+  const languageRanks = new Map(languages.map((language, index) => [language, index]));
+  const fallbackLanguageRank = languages.length;
+  const otherLanguageRank = fallbackLanguageRank + 1;
+  const resources = new Set<string>();
+  const candidates = new Map<string, {
+    languageRank: number;
+    predicateRank: number;
+    sourceRank: number;
+    value: string;
+  }>();
+
+  quads.forEach((quad, sourceRank) => {
+    const key = `${quad.subject.termType}:${quad.subject.value}`;
+    resources.add(key);
+    if (quad.object.termType !== "Literal") return;
+    const predicateRank = predicateRanks.get(quad.predicate.value);
+    if (predicateRank === undefined) return;
+    const language = quad.object.language.toLowerCase();
+    const languageRank = languageRanks.get(language)
+      ?? (language ? otherLanguageRank : fallbackLanguageRank);
+    const candidate = { languageRank, predicateRank, sourceRank, value: quad.object.value };
+    const current = candidates.get(key);
+    if (
+      !current
+      || predicateRank < current.predicateRank
+      || (
+        predicateRank === current.predicateRank
+        && (
+          languageRank < current.languageRank
+          || (languageRank === current.languageRank && sourceRank < current.sourceRank)
+        )
+      )
+    ) {
+      candidates.set(key, candidate);
+    }
+  });
+
   const labels = new Map<string, string>();
-  for (const [key, resource] of resources) {
-    const label = labelFor(quads, resource, options);
-    if (label !== undefined) labels.set(key, label);
+  for (const key of resources) {
+    const candidate = candidates.get(key);
+    if (candidate) labels.set(key, candidate.value);
   }
   return labels;
 }

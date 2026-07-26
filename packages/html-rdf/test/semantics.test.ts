@@ -3,6 +3,7 @@ import type { Quad } from "../src/model.js";
 import {
   annotationTargetIris,
   labelFor,
+  labelMap,
   projectQuadsToDefaultGraph,
   termLabelMap,
 } from "../src/semantics.js";
@@ -31,10 +32,17 @@ describe("shared HTML/RDF semantics", () => {
       quad(named("https://example.test/item"), "http://www.w3.org/2000/01/rdf-schema#label", literal("Article", "fr")),
       quad(named("https://example.test/item"), "http://www.w3.org/2000/01/rdf-schema#label", literal("Item", "en")),
       quad(named("https://example.test/item"), "https://schema.org/name", literal("Fallback")),
+      quad(blank("section"), "https://schema.org/name", literal("Section")),
+      quad(named("https://example.test/unlabeled"), "https://schema.org/url", named("https://example.test/")),
     ];
     expect(labelFor(quads, "https://example.test/item", { languages: ["en"] })).toBe("Item");
-    expect(termLabelMap(quads, { languages: ["en"] }).get("NamedNode:https://example.test/item"))
-      .toBe("Item");
+    expect(Array.from(termLabelMap(quads, { languages: ["en"] }))).toEqual([
+      ["NamedNode:https://example.test/item", "Item"],
+      ["BlankNode:section", "Section"],
+    ]);
+    expect(Array.from(labelMap(quads, { languages: ["en"] }))).toEqual([
+      ["https://example.test/item", "Item"],
+    ]);
   });
 
   it("resolves direct and SpecificResource annotation targets", () => {

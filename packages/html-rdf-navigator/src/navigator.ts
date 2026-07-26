@@ -2,7 +2,6 @@ import { extractDataset } from "./extract.js";
 import {
   annotationTargetIris,
   DEFAULT_LABEL_PREDICATES,
-  labelFor,
   termLabelMap,
 } from "@ia2-dev/html-rdf";
 import {
@@ -1262,6 +1261,7 @@ function sparqlPresentationSignature(
 
 function semanticSuggestionsIn(result: ExtractionResult): SemanticSuggestion[] {
   const builders = new Map<string, SemanticSuggestionBuilder>();
+  const labels = termLabelMap(result.quads);
   const ensure = (iri: string): SemanticSuggestionBuilder => {
     const existing = builders.get(iri);
     if (existing) return existing;
@@ -1294,7 +1294,7 @@ function semanticSuggestionsIn(result: ExtractionResult): SemanticSuggestion[] {
   return Array.from(builders.values()).map((builder) => {
     const display = compactIri(builder.iri);
     const localName = localNameForIri(builder.iri);
-    const label = labelFor(result.quads, builder.iri) ?? "";
+    const label = labels.get(`NamedNode:${builder.iri}`) ?? "";
     const kinds = Array.from(builder.types, (type) => TYPE_LABELS[type] ?? `type ${compactIri(type)}`).sort();
     const domains = Array.from(builder.domains).sort();
     const ranges = Array.from(builder.ranges).sort();
@@ -3001,7 +3001,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     tools.append(filter);
     container.append(tools);
     const vocabularies = vocabulariesIn(result);
-    const semanticSuggestions = semanticSuggestionsIn(result);
+    let semanticSuggestions: SemanticSuggestion[] | null = null;
     const namespaceButtons = new Map<string, HTMLButtonElement>();
     let applyFilter = (): void => {};
     if (vocabularies.length) {
@@ -3247,6 +3247,7 @@ export class Ia2RdfNavigator extends HTMLElement {
       closeTypeahead();
     };
     const renderTypeahead = (): void => {
+      semanticSuggestions ??= semanticSuggestionsIn(result);
       visibleSuggestions = matchingSemanticSuggestions(semanticSuggestions, search.value);
       activeSuggestion = -1;
       typeahead.replaceChildren();
