@@ -19,6 +19,7 @@
     "build:rdf-value-editor": "npm --prefix packages/rdf-value-editor run build",
     "build:rdf-policy-reviewer": "npm --prefix packages/rdf-policy-reviewer run build",
     "build:site": "node scripts/build-site.mjs",
+    "benchmark:navigator": "npm run build:navigator && npm run build:site && node scripts/benchmark-navigator.mjs",
     "check": "npm --prefix packages/rdf-html run check && npm run check:rdf-html-examples && npm --prefix packages/html-rdf run check && npm --prefix packages/ui-primitives run check && npm --prefix packages/html-rdf-navigator run check && npm --prefix packages/rdf-value-editor run check && npm --prefix packages/rdf-policy-reviewer run check && npm --prefix packages/browser-extension run check && npm --prefix packages/hare-viewer run check && node --check worker.js",
     "check:rdf-html-examples": "npm run build:rdf-html && node scripts/generate-rdf-html-examples.mjs --check",
     "dev": "npm run build && wrangler dev --var RDF_HTML_ALLOW_LOCALHOST:true",
