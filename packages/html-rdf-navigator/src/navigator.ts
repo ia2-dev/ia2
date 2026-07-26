@@ -1468,6 +1468,7 @@ export class Ia2RdfNavigator extends HTMLElement {
   #observer: MutationObserver | null = null;
   #refreshTimer: number | null = null;
   #navigatorRows: NavigatorRow[] = [];
+  #contentRendered = false;
 
   constructor() {
     super();
@@ -2307,11 +2308,17 @@ export class Ia2RdfNavigator extends HTMLElement {
   }
 
   open(focusTarget: "panel" | "tab" = "tab"): void {
+    if (this.#open) return;
     this.#open = true;
+    if (!this.#contentRendered) {
+      this.#render();
+    }
     this.shadowRoot?.querySelector(".launcher")?.setAttribute("aria-expanded", "true");
     const panel = this.shadowRoot?.querySelector<HTMLElement>(".panel");
     if (panel) panel.dataset.open = "true";
     queueMicrotask(() => {
+      const active = this.shadowRoot?.activeElement;
+      if (active instanceof HTMLElement && panel?.contains(active)) return;
       const target = focusTarget === "tab"
         ? this.shadowRoot?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
         : this.shadowRoot?.querySelector<HTMLElement>(".panel");
@@ -4277,6 +4284,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.#tabResizeObserver?.disconnect();
     this.#tabResizeObserver = null;
     this.#navigatorRows = [];
+    this.#contentRendered = false;
     const result = this.#result;
     if (!result || !this.shadowRoot) return;
     if (this.#view === "diagnostics" && !result.diagnostics.length) this.#view = "navigator";
@@ -4328,8 +4336,8 @@ export class Ia2RdfNavigator extends HTMLElement {
     const tabs = this.shadowRoot.querySelector<HTMLElement>(".tabs");
     this.#configureTabCompaction(tabs);
     if (!viewport) return;
-    if (this.#view === "turtle") viewport.append(highlightedCode(serializeTurtle(result), "turtle", document));
-    if (this.#view === "json") {
+    if (this.#open && this.#view === "turtle") viewport.append(highlightedCode(serializeTurtle(result), "turtle", document));
+    if (this.#open && this.#view === "json") {
       if (containsTripleTerms(result)) {
         const notice = document.createElement("p");
         notice.className = "notice";
@@ -4338,13 +4346,14 @@ export class Ia2RdfNavigator extends HTMLElement {
       }
       viewport.append(highlightedCode(serializeJsonLd(result), "json", document));
     }
-    if (this.#view === "navigator") this.#renderNavigator(viewport, result);
-    if (this.#view === "sources") this.#renderSources(viewport);
-    if (this.#view === "vocabulary") this.#renderVocabulary(viewport);
-    if (this.#view === "shapes") this.#renderShapes(viewport);
-    if (this.#view === "discovery") this.#renderDiscovery(viewport);
-    if (this.#view === "sparql") this.#renderSparql(viewport);
-    if (this.#view === "diagnostics") this.#renderDiagnostics(viewport, result.diagnostics);
+    if (this.#open && this.#view === "navigator") this.#renderNavigator(viewport, result);
+    if (this.#open && this.#view === "sources") this.#renderSources(viewport);
+    if (this.#open && this.#view === "vocabulary") this.#renderVocabulary(viewport);
+    if (this.#open && this.#view === "shapes") this.#renderShapes(viewport);
+    if (this.#open && this.#view === "discovery") this.#renderDiscovery(viewport);
+    if (this.#open && this.#view === "sparql") this.#renderSparql(viewport);
+    if (this.#open && this.#view === "diagnostics") this.#renderDiagnostics(viewport, result.diagnostics);
+    this.#contentRendered = this.#open;
 
     const launcher = this.shadowRoot.querySelector<HTMLElement>(".launcher");
     if (launcher) {

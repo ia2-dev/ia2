@@ -41,6 +41,7 @@ describe("Navigator document sources", () => {
     frame.contentDocument!.body.innerHTML = '<span rdf-subject="https://example.test/frame" rdf-predicate="https://schema.org/name">Frame fact</span>';
 
     const drawer = mountRdfNavigator();
+    drawer.open();
     expect(drawer.shadowRoot?.querySelector(".launcher .count")?.textContent).toBe("2");
     expect(drawer.shadowRoot?.querySelectorAll(".quad")).toHaveLength(1);
     expect(drawer.shadowRoot?.textContent).toContain("Top fact");
@@ -70,6 +71,7 @@ describe("Navigator document sources", () => {
 
     const drawer = mountRdfNavigator();
     expect(() => frame.contentDocument!.body.append(drawer)).not.toThrow();
+    drawer.open();
     expect(drawer.shadowRoot?.textContent).toContain("Frame fact");
   });
 
@@ -86,6 +88,7 @@ describe("Navigator document sources", () => {
       result: toPortableExtractionResult(extractDataset(frameDocument)),
       url: "about:srcdoc",
     }]);
+    drawer.open();
 
     expect(drawer.shadowRoot?.querySelector(".launcher .count")?.textContent).toBe("1");
     expect(drawer.shadowRoot?.textContent).toContain("Isolated fact");

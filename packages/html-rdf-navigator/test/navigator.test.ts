@@ -1,7 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { mountRdfNavigator } from "../src/index.js";
+import { mountRdfNavigator as mountClosedRdfNavigator } from "../src/index.js";
 
 const SESSION_STATE_KEY = "ia2:rdf-navigator:state:v1";
+
+function mountRdfNavigator() {
+  const drawer = mountClosedRdfNavigator();
+  drawer.open();
+  return drawer;
+}
 
 beforeEach(() => {
   sessionStorage.removeItem(SESSION_STATE_KEY);
@@ -601,7 +607,7 @@ describe("Ia2RdfNavigator", () => {
   });
 
   it("distinguishes pointer and keyboard focus when opening the drawer", async () => {
-    const drawer = mountRdfNavigator();
+    const drawer = mountClosedRdfNavigator();
     drawer.shadowRoot?.querySelector<HTMLButtonElement>(".launcher")
       ?.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
     await Promise.resolve();
@@ -615,25 +621,26 @@ describe("Ia2RdfNavigator", () => {
     expect(drawer.shadowRoot?.activeElement).toBe(drawer.shadowRoot?.querySelector('.tab[aria-selected="true"]'));
   });
 
-  it("opens and closes without rebuilding the extracted view", () => {
-    const drawer = mountRdfNavigator();
-    const row = drawer.shadowRoot?.querySelector(".quad");
-    const panel = drawer.shadowRoot?.querySelector<HTMLElement>(".panel");
-    const launcher = drawer.shadowRoot?.querySelector(".launcher");
+  it("defers the extracted view until first open, then reuses it", () => {
+    const drawer = mountClosedRdfNavigator();
 
+    expect(drawer.shadowRoot?.querySelector(".quad")).toBeNull();
     drawer.open();
-    expect(drawer.shadowRoot?.querySelector(".quad")).toBe(row);
-    expect(panel?.dataset.open).toBe("true");
-    expect(launcher?.getAttribute("aria-expanded")).toBe("true");
+    const row = drawer.shadowRoot?.querySelector(".quad");
+    const openedPanel = drawer.shadowRoot?.querySelector<HTMLElement>(".panel");
+    const openedLauncher = drawer.shadowRoot?.querySelector(".launcher");
+    expect(row).not.toBeNull();
+    expect(openedPanel?.dataset.open).toBe("true");
+    expect(openedLauncher?.getAttribute("aria-expanded")).toBe("true");
 
     drawer.close();
     expect(drawer.shadowRoot?.querySelector(".quad")).toBe(row);
-    expect(panel?.dataset.open).toBe("false");
-    expect(launcher?.getAttribute("aria-expanded")).toBe("false");
+    expect(drawer.shadowRoot?.querySelector<HTMLElement>(".panel")?.dataset.open).toBe("false");
+    expect(drawer.shadowRoot?.querySelector(".launcher")?.getAttribute("aria-expanded")).toBe("false");
   });
 
   it("moves the RDF launcher freely, snaps near viewport edges, and preserves its position", async () => {
-    const drawer = mountRdfNavigator();
+    const drawer = mountClosedRdfNavigator();
     const launcher = drawer.shadowRoot?.querySelector<HTMLElement>(".launcher")!;
     launcher.getBoundingClientRect = () => {
       const left = Number.parseFloat(launcher.style.left) || 920;
@@ -695,7 +702,7 @@ describe("Ia2RdfNavigator", () => {
     const scrollIntoView = vi.fn();
     Object.defineProperty(HTMLElement.prototype, "scrollIntoView", { configurable: true, value: scrollIntoView });
     try {
-      const drawer = mountRdfNavigator();
+      const drawer = mountClosedRdfNavigator();
       expect(drawer.revealSource(alice, "left")).toBe(true);
       await Promise.resolve();
 
