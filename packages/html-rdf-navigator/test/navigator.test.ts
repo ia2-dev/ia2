@@ -1527,7 +1527,7 @@ describe("Ia2RdfNavigator", () => {
     expect(search.value).toBe("alice");
     expect(viewport.scrollTop).toBe(96);
 
-    row.dispatchEvent(new Event("pointerleave"));
+    row.dispatchEvent(new MouseEvent("pointerout", { bubbles: true, relatedTarget: document.body }));
     expect(cancelLocate).toHaveBeenCalledOnce();
   });
 

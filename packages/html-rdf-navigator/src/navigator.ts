@@ -1103,6 +1103,7 @@ function locateButton(
   target: Element,
   className: string,
   onLocate: (target: Element) => void,
+  delegatedTargets?: WeakMap<HTMLElement, Element>,
 ): HTMLButtonElement {
   const button = document.createElement("button");
   button.className = `row-action-button locate-button ${className}`;
@@ -1114,7 +1115,8 @@ function locateButton(
   glyph.setAttribute("aria-hidden", "true");
   glyph.textContent = "⌖";
   button.append(glyph);
-  button.addEventListener("click", () => onLocate(target));
+  if (delegatedTargets) delegatedTargets.set(button, target);
+  else button.addEventListener("click", () => onLocate(target));
   return button;
 }
 
@@ -1127,6 +1129,8 @@ function termCode(
   sourceDocumentIri = document.URL,
   localUrlCache?: Map<string, URL | null>,
   targetCache?: Map<string, Element | null>,
+  delegatedLocalLinks?: WeakMap<HTMLAnchorElement, URL>,
+  delegatedLocateTargets?: WeakMap<HTMLElement, Element>,
 ): HTMLElement {
   const code = document.createElement("code");
   if (className) code.className = className;
@@ -1143,7 +1147,8 @@ function termCode(
   if (localUrl) {
     anchor.classList.add("local-term");
     anchor.title = localUrl.hash ? `Scroll to ${localUrl.hash} in this document` : "Scroll to the start of this document";
-    anchor.addEventListener("click", (event) => navigateLocalDocument(document, localUrl, event));
+    if (delegatedLocalLinks) delegatedLocalLinks.set(anchor, localUrl);
+    else anchor.addEventListener("click", (event) => navigateLocalDocument(document, localUrl, event));
   } else {
     anchor.target = "_blank";
     anchor.rel = "noopener noreferrer";
@@ -1152,7 +1157,9 @@ function termCode(
   anchor.textContent = label;
   code.append(anchor);
   const target = locatableElementForTerm(document, term, sourceDocumentIri, localUrlCache, targetCache);
-  if (target && onLocate) code.append(locateButton(document, target, "term-locate-button", onLocate));
+  if (target && onLocate) {
+    code.append(locateButton(document, target, "term-locate-button", onLocate, delegatedLocateTargets));
+  }
   return code;
 }
 
@@ -3005,6 +3012,15 @@ export class Ia2RdfNavigator extends HTMLElement {
     const carriers = new Set(result.quads.map((quad) => quad.source));
     const localUrlCache = new Map<string, URL | null>();
     const targetCache = new Map<string, Element | null>();
+    const delegatedLocalLinks = new WeakMap<HTMLAnchorElement, URL>();
+    const delegatedLocateTargets = new WeakMap<HTMLElement, Element>();
+    const delegatedSourceToggles = new WeakMap<HTMLButtonElement, {
+      equivalentOutput: boolean;
+      includeChildren: boolean;
+      item: HTMLLIElement;
+      source: Element;
+      sourceId: string;
+    }>();
     const rows: NavigatorRow[] = [];
     result.quads.forEach((quad, index) => {
       const item = document.createElement("li");
@@ -3023,14 +3039,14 @@ export class Ia2RdfNavigator extends HTMLElement {
       const terms = document.createElement("div");
       terms.className = "quad-terms";
       const onLocate = (target: Element): void => this.#locateElement(target);
-      const subject = termCode(document, quad.subject, "", "subject", onLocate, result.sourceDocumentIri, localUrlCache, targetCache);
-      const predicate = termCode(document, quad.predicate, "   ", "predicate", onLocate, result.sourceDocumentIri, localUrlCache, targetCache);
-      const object = termCode(document, quad.object, "   ", "object", onLocate, result.sourceDocumentIri, localUrlCache, targetCache);
+      const subject = termCode(document, quad.subject, "", "subject", onLocate, result.sourceDocumentIri, localUrlCache, targetCache, delegatedLocalLinks, delegatedLocateTargets);
+      const predicate = termCode(document, quad.predicate, "   ", "predicate", onLocate, result.sourceDocumentIri, localUrlCache, targetCache, delegatedLocalLinks, delegatedLocateTargets);
+      const object = termCode(document, quad.object, "   ", "object", onLocate, result.sourceDocumentIri, localUrlCache, targetCache, delegatedLocalLinks, delegatedLocateTargets);
       terms.append(subject, predicate, object);
       if (quad.graph) {
         const graph = document.createElement("div");
         graph.className = "graph";
-        graph.append("Graph: ", termCode(document, quad.graph, "", "", onLocate, result.sourceDocumentIri, localUrlCache, targetCache));
+        graph.append("Graph: ", termCode(document, quad.graph, "", "", onLocate, result.sourceDocumentIri, localUrlCache, targetCache, delegatedLocalLinks, delegatedLocateTargets));
         terms.append(graph);
       }
       const termTargets = new Set(
@@ -3045,7 +3061,7 @@ export class Ia2RdfNavigator extends HTMLElement {
       previewActions.setAttribute("role", "group");
       previewActions.setAttribute("aria-label", `Actions for ${elementLabel(quad.source)}`);
       if (isLocatableSource(quad.source) && !termTargets.has(quad.source)) {
-        previewActions.append(locateButton(document, quad.source, "carrier-locate-button", onLocate));
+        previewActions.append(locateButton(document, quad.source, "carrier-locate-button", onLocate, delegatedLocateTargets));
       }
       const hasChildren = hasSerializableChildren(quad.source);
       const createToggle = (includeChildren: boolean, equivalentOutput = false): HTMLButtonElement => {
@@ -3067,7 +3083,13 @@ export class Ia2RdfNavigator extends HTMLElement {
         glyph.setAttribute("aria-hidden", "true");
         glyph.textContent = includeChildren ? "</>+" : "</>";
         button.append(glyph);
-        button.addEventListener("click", () => this.#toggleSource(item, button, quad.source, includeChildren, sourceId, equivalentOutput));
+        delegatedSourceToggles.set(button, {
+          equivalentOutput,
+          includeChildren,
+          item,
+          source: quad.source,
+          sourceId,
+        });
         return button;
       };
       previewActions.append(createToggle(false, !hasChildren));
@@ -3077,9 +3099,41 @@ export class Ia2RdfNavigator extends HTMLElement {
       actions.className = "quad-actions";
       actions.append(previewActions);
       item.append(actions);
-      item.addEventListener("pointerleave", () => this.#clearLocateEmphasis());
       list.append(item);
       rows.push({ item, namespaces: new Set(namespacesInQuad(quad).map((entry) => entry.namespace)), quad, searchText: quadSearchText(quad) });
+    });
+    list.addEventListener("click", (event) => {
+      if (!(event.target instanceof Element)) return;
+      const localLink = event.target.closest<HTMLAnchorElement>("a.local-term");
+      const localUrl = localLink ? delegatedLocalLinks.get(localLink) : undefined;
+      if (localUrl) {
+        navigateLocalDocument(document, localUrl, event);
+        return;
+      }
+      const button = event.target.closest<HTMLButtonElement>("button");
+      if (!button) return;
+      const locateTarget = delegatedLocateTargets.get(button);
+      if (locateTarget) {
+        this.#locateElement(locateTarget);
+        return;
+      }
+      const toggle = delegatedSourceToggles.get(button);
+      if (toggle) {
+        this.#toggleSource(
+          toggle.item,
+          button,
+          toggle.source,
+          toggle.includeChildren,
+          toggle.sourceId,
+          toggle.equivalentOutput,
+        );
+      }
+    });
+    list.addEventListener("pointerout", (event) => {
+      if (!(event.target instanceof Element)) return;
+      const item = event.target.closest(".quad");
+      if (!item || (event.relatedTarget instanceof Node && item.contains(event.relatedTarget))) return;
+      this.#clearLocateEmphasis();
     });
     container.append(list);
     this.#navigatorRows = rows;
