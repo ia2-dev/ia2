@@ -5,7 +5,11 @@ import { Parser } from "n3";
 import { describe, expect, it, vi } from "vitest";
 import { extractDataset } from "../../html-rdf-navigator/src/extract.js";
 import { serializeTurtle } from "../../html-rdf-navigator/src/serialize.js";
-import { HTML_SNAPSHOT_DATE } from "../src/generated/elements.js";
+import {
+  HTML_ATTRIBUTES,
+  HTML_ELEMENTS,
+  HTML_SNAPSHOT_DATE,
+} from "../src/generated/elements.js";
 import { parseRdfHtml } from "../src/parse.js";
 import { renderRdfHtmlDocument } from "../src/render.js";
 
@@ -45,10 +49,17 @@ describe("RDF/HTML to HTML/RDF integration", () => {
       }
     })();
     const embedded = extracted.quads.filter((quad) => quad.source.closest("#embedded-rdfhtml-vocabulary"));
+    const visible = extracted.quads.filter((quad) => quad.source.hasAttribute("data-rdfhtml-vocabulary-carrier"));
+    const published = [...embedded, ...visible];
 
     expect(extracted.diagnostics).toHaveLength(0);
-    expect(embedded).toHaveLength(expected.length);
-    expect(normalizedQuadKeys(embedded)).toEqual(normalizedQuadKeys(expected));
+    expect(visible).toHaveLength(HTML_ELEMENTS.length + HTML_ATTRIBUTES.length);
+    expect(embedded).toHaveLength(expected.length - visible.length);
+    expect(visible.every((quad) => (
+      quad.source.localName === "data"
+      && !quad.source.closest("head, template, [hidden]")
+    ))).toBe(true);
+    expect(normalizedQuadKeys(published).sort()).toEqual(normalizedQuadKeys(expected).sort());
     const turtle = serializeTurtle(extracted);
     expect(turtle).toContain("@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .");
     expect(turtle).toContain("@prefix ord: <https://ontology.inferal.com/modules/ordering/> .");

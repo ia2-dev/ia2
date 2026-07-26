@@ -318,10 +318,16 @@ describe("Living Standard classification", () => {
   it("injects one generated HTML/RDF publication of the complete Turtle vocabulary", () => {
     const specification = readFileSync(resolve(process.cwd(), "../../specs/rdf-html/index.html"), "utf8");
     const vocabulary = parseTurtle(resolve(process.cwd(), `vocabulary/rdf-html-${HTML_SNAPSHOT_DATE}.ttl`));
+    const visibleStatementCount = snapshot.elements.length + snapshot.attributes.length;
     expect(specification.match(/BEGIN GENERATED RDF\/HTML HTML\/RDF VOCABULARY/g)).toHaveLength(1);
     expect(specification.match(/END GENERATED RDF\/HTML HTML\/RDF VOCABULARY/g)).toHaveLength(1);
-    expect(specification).toContain(`id="embedded-rdfhtml-vocabulary" hidden data-generated-vocabulary-statements="${vocabulary.size}"`);
+    expect(specification).toContain(`data-generated-vocabulary-statements="${vocabulary.size}"`);
+    expect(specification).toContain(`data-generated-hidden-vocabulary-statements="${vocabulary.size - visibleStatementCount}"`);
     expect(specification.match(/data-generated-vocabulary-statements=/g)).toHaveLength(1);
+    expect(specification.match(/data-rdfhtml-vocabulary-carrier="element"/g)).toHaveLength(snapshot.elements.length);
+    expect(specification.match(/data-rdfhtml-vocabulary-carrier="attribute"/g)).toHaveLength(snapshot.attributes.length);
+    expect(specification).toContain('<data class="element-summary" value="a" rdf-subject="#A" rdf-predicate="#tagName"');
+    expect(specification).toContain('<data class="attribute-summary" value="async" rdf-subject="#async" rdf-predicate="#attributeLocalName"');
   });
 
   it("never emits a conditional membership as an unconditional subclass", () => {

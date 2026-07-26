@@ -347,9 +347,38 @@ function embeddedVocabularyCarrier(quad) {
 }
 
 const embeddedVocabularyQuads = new Parser({ baseIRI: ontologyIri }).parse(ttl);
+const visibleVocabularyQuads = new Set();
+
+function selectVisibleVocabularyQuad(subject, predicate, expectedObject) {
+  const matches = embeddedVocabularyQuads.filter((quad) => (
+    quad.subject.termType === "NamedNode"
+    && quad.subject.value === subject
+    && quad.predicate.value === predicate
+    && quad.object.termType === "Literal"
+    && quad.object.value === expectedObject
+  ));
+  if (matches.length !== 1) {
+    throw new Error(`Expected one visible vocabulary statement for ${subject} ${predicate}, found ${matches.length}.`);
+  }
+  visibleVocabularyQuads.add(matches[0]);
+}
+
+for (const element of snapshot.elements) {
+  selectVisibleVocabularyQuad(`${namespace}${className(element.name)}`, `${namespace}tagName`, element.name);
+}
+for (const attribute of snapshot.attributes) {
+  selectVisibleVocabularyQuad(`${namespace}${attribute.termName}`, `${namespace}attributeLocalName`, attribute.name);
+}
+
+const hiddenVocabularyQuads = embeddedVocabularyQuads.filter((quad) => !visibleVocabularyQuads.has(quad));
 const generatedEmbeddedVocabulary = `${embeddedVocabularyStart}
-    <div id="embedded-rdfhtml-vocabulary" hidden data-generated-vocabulary-statements="${embeddedVocabularyQuads.length}">
-${embeddedVocabularyQuads.map(embeddedVocabularyCarrier).join("\n")}
+    <div
+      id="embedded-rdfhtml-vocabulary"
+      hidden
+      data-generated-vocabulary-statements="${embeddedVocabularyQuads.length}"
+      data-generated-hidden-vocabulary-statements="${hiddenVocabularyQuads.length}"
+    >
+${hiddenVocabularyQuads.map(embeddedVocabularyCarrier).join("\n")}
     </div>
 ${embeddedVocabularyEnd}`;
 
@@ -385,11 +414,11 @@ const generatedElementDefinitions = snapshot.elements.map((element) => {
   const globalAttributeItems = globalAttributes.map((attribute) => renderElementAttribute(attribute)).join("\n                  ");
   return `        <details id="element-${html(element.name)}" class="element-definition" data-generated-element="${html(element.name)}">
           <summary>
-            <span class="element-summary">
+            <data class="element-summary" value="${html(element.name)}" rdf-subject="#${html(term)}" rdf-predicate="#tagName" lang="" data-rdfhtml-vocabulary-carrier="element">
               <strong><code>rdfhtml:${html(term)}</code></strong>
               <code class="element-local-name">&lt;${html(element.name)}&gt;</code>
               <span class="element-attribute-count">${specificAttributes.length} specific · ${globalAttributes.length} global</span>
-            </span>
+            </data>
           </summary>
           <div class="element-definition-body">
             <p>
@@ -459,11 +488,11 @@ const generatedAttributeDefinitions = snapshot.attributes.map((attribute) => {
   const contextCount = attribute.contexts.length;
   return `        <details id="attribute-${html(attribute.name)}" class="attribute-definition" data-generated-attribute="${html(attribute.name)}">
           <summary>
-            <span class="attribute-summary">
+            <data class="attribute-summary" value="${html(attribute.name)}" rdf-subject="#${html(term)}" rdf-predicate="#attributeLocalName" lang="" data-rdfhtml-vocabulary-carrier="attribute">
               <strong><code>rdfhtml:${html(term)}</code></strong>
               <code class="attribute-local-name">${html(attribute.name)}</code>
               <span class="attribute-context-count">${contextCount} ${contextCount === 1 ? "context" : "contexts"}</span>
-            </span>
+            </data>
           </summary>
           <div class="attribute-definition-body">
             <p>

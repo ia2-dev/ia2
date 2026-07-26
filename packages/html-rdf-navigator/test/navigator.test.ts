@@ -1537,6 +1537,75 @@ describe("Ia2RdfNavigator", () => {
     expect(sources[0]?.animate).toHaveBeenCalled();
   });
 
+  it("synchronizes visible exact-value data carriers with their rendered summaries", async () => {
+    document.body.innerHTML = `
+      <details open>
+        <summary>
+          <data
+            value="a"
+            rdf-subject="https://example.com/rdf-html#A"
+            rdf-predicate="https://example.com/rdf-html#tagName"
+          >
+            <strong>rdfhtml:A</strong>
+          </data>
+        </summary>
+      </details>
+    `;
+    const source = document.body.querySelector<HTMLDataElement>("data")!;
+    const makeRect = (top: number, height = 30): DOMRect => ({
+      bottom: top + height,
+      height,
+      left: 10,
+      right: 210,
+      top,
+      width: 200,
+      x: 10,
+      y: top,
+      toJSON: () => ({}),
+    });
+    source.getBoundingClientRect = () => makeRect(20);
+    source.scrollIntoView = vi.fn();
+    source.animate = vi.fn(() => ({ cancel: vi.fn() }) as unknown as Animation);
+
+    const drawer = mountRdfNavigator();
+    const viewport = drawer.shadowRoot?.querySelector<HTMLElement>(".viewport")!;
+    const row = drawer.shadowRoot?.querySelector<HTMLLIElement>(".quad")!;
+    const syncOptions = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLButtonElement>(".sync-option") ?? []);
+    viewport.getBoundingClientRect = () => makeRect(0, 300);
+    row.getBoundingClientRect = () => makeRect(8, 40);
+
+    expect(row.textContent).toContain('"a"');
+    expect(row.textContent).not.toContain("rdfhtml:A");
+
+    syncOptions[1]!.click();
+    expect(row.hidden).toBe(false);
+
+    syncOptions[2]!.click();
+    await new Promise((resolve) => window.setTimeout(resolve, 60));
+    expect(source.scrollIntoView).toHaveBeenCalledWith({ behavior: "auto", block: "center" });
+  });
+
+  it("shows only rendered carriers while the Navigator drives page scrolling", () => {
+    document.head.insertAdjacentHTML(
+      "beforeend",
+      '<meta content="Hidden metadata" rdf-subject="https://example.com/page" rdf-predicate="https://schema.org/description">',
+    );
+    const drawer = mountRdfNavigator();
+    const rows = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLLIElement>(".quad") ?? []);
+    const hiddenMetadata = rows.find((row) => row.textContent?.includes("Hidden metadata"))!;
+    const visibleStatement = rows.find((row) => row.textContent?.includes("Alice"))!;
+    const syncOptions = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLButtonElement>(".sync-option") ?? []);
+
+    expect(hiddenMetadata.hidden).toBe(false);
+    expect(visibleStatement.hidden).toBe(false);
+
+    syncOptions[2]!.click();
+
+    expect(hiddenMetadata.hidden).toBe(true);
+    expect(visibleStatement.hidden).toBe(false);
+    expect(drawer.shadowRoot?.querySelector(".filter-count")?.textContent).toBe("1 of 2");
+  });
+
   it("turns off scroll synchronization when the Navigator is closed", async () => {
     document.body.innerHTML = [
       '<span rdf-subject="https://example.com/alice" rdf-predicate="https://schema.org/name">Alice</span>',

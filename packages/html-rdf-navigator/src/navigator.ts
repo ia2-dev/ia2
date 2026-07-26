@@ -3263,8 +3263,12 @@ export class Ia2RdfNavigator extends HTMLElement {
       let matchCount = 0;
       rows.forEach(({ item, namespaces, quad, searchText }) => {
         const matchesNamespace = Array.from(namespaces).every((namespace) => !this.#disabledNamespaces.has(namespace));
-        const matchesViewport = this.#syncMode !== "page" || isInPageViewport(quad.source);
-        const matches = quad.source === hoveredSource || (matchesNamespace && matchesViewport && (!query || searchText.includes(query)));
+        const matchesSync = this.#syncMode === "page"
+          ? isInPageViewport(quad.source)
+          : this.#syncMode === "panel"
+            ? isLocatableSource(quad.source)
+            : true;
+        const matches = quad.source === hoveredSource || (matchesNamespace && matchesSync && (!query || searchText.includes(query)));
         item.hidden = !matches;
         if (matches) matchCount += 1;
       });
@@ -3277,7 +3281,7 @@ export class Ia2RdfNavigator extends HTMLElement {
         button.title = button.getAttribute("aria-label")!;
       });
       const hasNamespaceFilter = vocabularies.some((vocabulary) => this.#disabledNamespaces.has(vocabulary.namespace));
-      const filtering = Boolean(query) || hasNamespaceFilter || this.#syncMode === "page";
+      const filtering = Boolean(query) || hasNamespaceFilter || this.#syncMode !== "off";
       filterCount.textContent = filtering && matchCount !== rows.length ? `${matchCount} of ${rows.length}` : "";
       noMatches.hidden = !filtering || matchCount > 0;
       list.hidden = filtering && matchCount === 0;
