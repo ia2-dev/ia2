@@ -554,6 +554,7 @@ const CSS = String.raw`
 type View = "turtle" | "json" | "navigator" | "sources" | "vocabulary" | "shapes" | "discovery" | "sparql" | "diagnostics";
 type SyncMode = ScrollSyncMode;
 export type DrawerPosition = WindowPosition;
+type SideDrawerPosition = "right" | "right-top" | "right-bottom" | "left" | "left-bottom" | "left-top";
 type ResizeDirection = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
 type ResourcePreviewKind = "definition" | "resource";
 
@@ -604,6 +605,7 @@ interface LinkPreviewState {
 
 interface PersistedNavigatorState {
   floatingRect: FloatingRect | null;
+  lastSidePosition: SideDrawerPosition;
   launcherPosition: LauncherPosition | null;
   position: DrawerPosition;
 }
@@ -638,6 +640,21 @@ const SPARQL_LABEL_PREDICATES = [
 ] as const;
 const LAUNCHER_DRAG_THRESHOLD = 4;
 const LAUNCHER_EDGE_SNAP_DISTANCE = 28;
+const LAUNCHER_FLOATING_ZONE_START = 1 / 3;
+const LAUNCHER_FLOATING_ZONE_END = 2 / 3;
+const MIRRORED_SIDE_POSITIONS: Readonly<Record<SideDrawerPosition, SideDrawerPosition>> = {
+  left: "right",
+  "left-bottom": "right-bottom",
+  "left-top": "right-top",
+  right: "left",
+  "right-bottom": "left-bottom",
+  "right-top": "left-top",
+};
+
+function isSideDrawerPosition(position: unknown): position is SideDrawerPosition {
+  return typeof position === "string" && position in MIRRORED_SIDE_POSITIONS;
+}
+
 const DISCOVERY_MAX_HTML_LENGTH = 2_000_000;
 const DISCOVERY_FETCH_TIMEOUT_MS = 10_000;
 const DISCOVERY_ACCEPT = "text/html, application/xhtml+xml;q=0.95";
@@ -1469,6 +1486,7 @@ export class Ia2RdfNavigator extends HTMLElement {
   #disabledNamespaces = new Set<string>();
   #syncMode: SyncMode = "off";
   #position: DrawerPosition = "right";
+  #lastSidePosition: SideDrawerPosition = "right";
   #floatingRect: FloatingRect | null = null;
   #floatingInteractionCleanup: (() => void) | null = null;
   #launcherPosition: LauncherPosition | null = null;
@@ -1890,6 +1908,8 @@ export class Ia2RdfNavigator extends HTMLElement {
       if (!serialized) return;
       const state = JSON.parse(serialized) as Partial<PersistedNavigatorState>;
       if (isWindowPosition(state.position)) this.#position = state.position;
+      if (isSideDrawerPosition(state.lastSidePosition)) this.#lastSidePosition = state.lastSidePosition;
+      else if (isSideDrawerPosition(state.position)) this.#lastSidePosition = state.position;
       if (isFloatingRect(state.floatingRect)) this.#floatingRect = this.#constrainFloatingRect(state.floatingRect);
       if (isLauncherPosition(state.launcherPosition)) this.#launcherPosition = state.launcherPosition;
     } catch {
@@ -1901,6 +1921,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     try {
       const state: PersistedNavigatorState = {
         floatingRect: this.#floatingRect,
+        lastSidePosition: this.#lastSidePosition,
         launcherPosition: this.#launcherPosition,
         position: this.#position,
       };
@@ -2414,6 +2435,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (!represented || source.ownerDocument !== this.ownerDocument) return false;
 
     this.#position = position;
+    if (isSideDrawerPosition(position)) this.#lastSidePosition = position;
     this.#view = "navigator";
     this.#navigatorQuery = "";
     this.#disabledNamespaces.clear();
@@ -2496,6 +2518,29 @@ export class Ia2RdfNavigator extends HTMLElement {
     panel.style.width = "";
   }
 
+  #applyPosition(position: DrawerPosition, focus = false): void {
+    this.#position = position;
+    if (isSideDrawerPosition(position)) this.#lastSidePosition = position;
+    const panel = this.shadowRoot?.querySelector<HTMLElement>(".panel");
+    const launcher = this.shadowRoot?.querySelector<HTMLElement>(".launcher");
+    if (panel) {
+      panel.dataset.position = position;
+      if (position === "floating") this.#applyFloatingGeometry(panel);
+      else this.#clearFloatingGeometry(panel);
+    }
+    if (launcher) {
+      launcher.dataset.position = position;
+      this.#applyLauncherGeometry(launcher);
+    }
+    this.shadowRoot?.querySelectorAll<HTMLButtonElement>(".position-option").forEach((option) => {
+      const selected = option.dataset.position === position;
+      option.setAttribute("aria-checked", String(selected));
+      option.tabIndex = selected ? 0 : -1;
+      if (selected && focus) option.focus();
+    });
+    this.#persistSessionState();
+  }
+
   #launcherLimits(launcher: HTMLElement): { margin: number; maxX: number; maxY: number } {
     const view = this.ownerDocument.defaultView;
     const viewportWidth = Math.max(view?.innerWidth ?? 1024, 1);
@@ -2538,6 +2583,22 @@ export class Ia2RdfNavigator extends HTMLElement {
     launcher.style.top = `${this.#launcherPosition.y}px`;
   }
 
+  #positionFromLauncherDrop(launcher: HTMLElement): DrawerPosition {
+    const sidePosition = isSideDrawerPosition(this.#position)
+      ? this.#position
+      : this.#position === "floating" ? this.#lastSidePosition : null;
+    if (!sidePosition) return this.#position;
+    const viewportWidth = Math.max(this.ownerDocument.defaultView?.innerWidth ?? 1024, 1);
+    const rect = launcher.getBoundingClientRect();
+    const horizontalRatio = (rect.left + rect.width / 2) / viewportWidth;
+    if (horizontalRatio >= LAUNCHER_FLOATING_ZONE_START && horizontalRatio <= LAUNCHER_FLOATING_ZONE_END) {
+      return "floating";
+    }
+    const startsLeft = sidePosition.startsWith("left");
+    const droppedLeft = horizontalRatio < LAUNCHER_FLOATING_ZONE_START;
+    return startsLeft === droppedLeft ? sidePosition : MIRRORED_SIDE_POSITIONS[sidePosition];
+  }
+
   #stopLauncherInteraction(): void {
     this.#launcherInteractionCleanup?.();
     this.#launcherInteractionCleanup = null;
@@ -2577,7 +2638,9 @@ export class Ia2RdfNavigator extends HTMLElement {
       if (dragged && this.#launcherPosition) {
         this.#launcherPosition = this.#snapLauncherPosition(launcher, this.#launcherPosition);
         this.#applyLauncherGeometry(launcher);
-        this.#persistSessionState();
+        const position = this.#positionFromLauncherDrop(launcher);
+        if (position === this.#position) this.#persistSessionState();
+        else this.#applyPosition(position);
         this.#suppressLauncherClick = true;
         view.setTimeout(() => {
           this.#suppressLauncherClick = false;
@@ -4496,28 +4559,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.shadowRoot.querySelector(".close")?.addEventListener("click", () => this.close());
     this.shadowRoot.querySelector(".refresh")?.addEventListener("click", () => this.refresh());
     const positionSwitch = this.shadowRoot.querySelector<HTMLElement>(".position-switch");
-    const positionOptions = Array.from(this.shadowRoot.querySelectorAll<HTMLButtonElement>(".position-option"));
     const panel = this.shadowRoot.querySelector<HTMLElement>(".panel");
-    const applyPosition = (position: DrawerPosition, focus = false): void => {
-      this.#position = position;
-      const launcher = this.shadowRoot?.querySelector<HTMLElement>(".launcher");
-      if (panel) {
-        panel.dataset.position = this.#position;
-        if (position === "floating") this.#applyFloatingGeometry(panel);
-        else this.#clearFloatingGeometry(panel);
-      }
-      if (launcher) {
-        launcher.dataset.position = this.#position;
-        this.#applyLauncherGeometry(launcher);
-      }
-      for (const option of positionOptions) {
-        const selected = option.dataset.position === this.#position;
-        option.setAttribute("aria-checked", String(selected));
-        option.tabIndex = selected ? 0 : -1;
-        if (selected && focus) option.focus();
-      }
-      this.#persistSessionState();
-    };
     if (panel) {
       if (this.#position === "floating") this.#applyFloatingGeometry(panel);
       const toolbar = panel.querySelector<HTMLElement>(".toolbar");
@@ -4535,7 +4577,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     }
     if (positionSwitch) {
       bindWindowPositionControls(positionSwitch, (position, focus) => {
-        applyPosition(position, focus);
+        this.#applyPosition(position, focus);
       });
     }
     this.shadowRoot.querySelector(".copy")?.addEventListener("click", () => void this.#copyCurrent());

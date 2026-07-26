@@ -722,6 +722,94 @@ describe("Ia2RdfNavigator", () => {
     expect(drawer.shadowRoot?.querySelector<HTMLElement>(".panel")?.dataset.open).toBe("true");
   });
 
+  it("derives mirrored or floating placement when a side-attached launcher is moved", () => {
+    const cases = [
+      { from: "right", targetLeft: 20, to: "left" },
+      { from: "right-top", targetLeft: 20, to: "left-top" },
+      { from: "right-bottom", targetLeft: 20, to: "left-bottom" },
+      { from: "left", targetLeft: 920, to: "right" },
+      { from: "left-top", targetLeft: 920, to: "right-top" },
+      { from: "left-bottom", targetLeft: 920, to: "right-bottom" },
+      { from: "right-top", targetLeft: 470, to: "floating" },
+      { from: "left-bottom", targetLeft: 470, to: "floating" },
+    ] as const;
+
+    for (const { from, targetLeft, to } of cases) {
+      sessionStorage.removeItem(SESSION_STATE_KEY);
+      const drawer = mountClosedRdfNavigator();
+      drawer.shadowRoot?.querySelector<HTMLButtonElement>(`.position-option[data-position="${from}"]`)?.click();
+      const launcher = drawer.shadowRoot?.querySelector<HTMLElement>(".launcher")!;
+      const startLeft = from.startsWith("left") ? 20 : 920;
+      launcher.getBoundingClientRect = () => {
+        const left = Number.parseFloat(launcher.style.left) || startLeft;
+        const top = Number.parseFloat(launcher.style.top) || 700;
+        const width = 84;
+        const height = 44;
+        return { bottom: top + height, height, left, right: left + width, top, width, x: left, y: top, toJSON: () => ({}) } as DOMRect;
+      };
+
+      launcher.dispatchEvent(new MouseEvent("pointerdown", {
+        bubbles: true,
+        button: 0,
+        clientX: startLeft + 20,
+        clientY: 720,
+      }));
+      window.dispatchEvent(new MouseEvent("pointermove", {
+        clientX: targetLeft + 20,
+        clientY: 720,
+      }));
+      window.dispatchEvent(new MouseEvent("pointerup"));
+
+      expect(drawer.shadowRoot?.querySelector<HTMLElement>(".panel")?.dataset.position, `${from} → ${to}`).toBe(to);
+      expect(drawer.shadowRoot?.querySelector<HTMLElement>(".launcher")?.dataset.position, `${from} → ${to}`).toBe(to);
+      expect(drawer.shadowRoot?.querySelector<HTMLButtonElement>('.position-option[aria-checked="true"]')?.dataset.position, `${from} → ${to}`).toBe(to);
+      expect(JSON.parse(sessionStorage.getItem(SESSION_STATE_KEY)!).position, `${from} → ${to}`).toBe(to);
+      drawer.remove();
+    }
+  });
+
+  it("reattaches a floating navigator at an edge while preserving its last side layout", () => {
+    const drawer = mountClosedRdfNavigator();
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>('.position-option[data-position="right-top"]')?.click();
+    const launcher = drawer.shadowRoot?.querySelector<HTMLElement>(".launcher")!;
+    launcher.getBoundingClientRect = () => {
+      const left = Number.parseFloat(launcher.style.left) || 920;
+      const top = Number.parseFloat(launcher.style.top) || 700;
+      const width = 84;
+      const height = 44;
+      return { bottom: top + height, height, left, right: left + width, top, width, x: left, y: top, toJSON: () => ({}) } as DOMRect;
+    };
+    const dragTo = (targetLeft: number): void => {
+      const startLeft = launcher.getBoundingClientRect().left;
+      launcher.dispatchEvent(new MouseEvent("pointerdown", {
+        bubbles: true,
+        button: 0,
+        clientX: startLeft + 20,
+        clientY: 720,
+      }));
+      window.dispatchEvent(new MouseEvent("pointermove", {
+        clientX: targetLeft + 20,
+        clientY: 720,
+      }));
+      window.dispatchEvent(new MouseEvent("pointerup"));
+    };
+    const currentPosition = (): string | undefined =>
+      drawer.shadowRoot?.querySelector<HTMLElement>(".panel")?.dataset.position;
+
+    dragTo(470);
+    expect(currentPosition()).toBe("floating");
+    expect(JSON.parse(sessionStorage.getItem(SESSION_STATE_KEY)!).lastSidePosition).toBe("right-top");
+
+    dragTo(20);
+    expect(currentPosition()).toBe("left-top");
+
+    dragTo(470);
+    expect(currentPosition()).toBe("floating");
+
+    dragTo(920);
+    expect(currentPosition()).toBe("right-top");
+  });
+
   it("opens on a requested side and reveals one carrier in the Navigator", async () => {
     document.body.innerHTML = [
       '<span id="alice" rdf-subject="https://example.com/alice" rdf-predicate="https://schema.org/name">Alice</span>',
