@@ -639,6 +639,36 @@ describe("Ia2RdfNavigator", () => {
     expect(drawer.shadowRoot?.querySelector(".launcher")?.getAttribute("aria-expanded")).toBe("false");
   });
 
+  it("prepares contextual analysis during idle time without rendering the closed view", () => {
+    let idleCallback: IdleRequestCallback | undefined;
+    const originalRequestIdleCallback = window.requestIdleCallback;
+    const originalCancelIdleCallback = window.cancelIdleCallback;
+    window.requestIdleCallback = vi.fn((callback: IdleRequestCallback) => {
+      idleCallback = callback;
+      return 17;
+    });
+    window.cancelIdleCallback = vi.fn();
+
+    try {
+      const drawer = mountClosedRdfNavigator();
+      expect(window.requestIdleCallback).toHaveBeenCalledWith(expect.any(Function), { timeout: 1_000 });
+      expect(drawer.shadowRoot?.querySelector(".quad")).toBeNull();
+
+      idleCallback?.({
+        didTimeout: false,
+        timeRemaining: () => 12,
+      });
+      expect(drawer.shadowRoot?.querySelector(".quad")).toBeNull();
+
+      drawer.open();
+      expect(drawer.shadowRoot?.querySelector(".quad")).not.toBeNull();
+      expect(window.cancelIdleCallback).not.toHaveBeenCalledWith(17);
+    } finally {
+      window.requestIdleCallback = originalRequestIdleCallback;
+      window.cancelIdleCallback = originalCancelIdleCallback;
+    }
+  });
+
   it("moves the RDF launcher freely, snaps near viewport edges, and preserves its position", async () => {
     const drawer = mountClosedRdfNavigator();
     const launcher = drawer.shadowRoot?.querySelector<HTMLElement>(".launcher")!;

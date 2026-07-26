@@ -1488,6 +1488,8 @@ export class Ia2RdfNavigator extends HTMLElement {
   #refreshTimer: number | null = null;
   #navigatorRows: NavigatorRow[] = [];
   #contentRendered = false;
+  #analysisDirty = false;
+  #analysisIdleHandle: number | null = null;
 
   constructor() {
     super();
@@ -1509,6 +1511,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.ownerDocument.defaultView?.removeEventListener("resize", this.#onWindowResize);
     this.#observer?.disconnect();
     this.#observer = null;
+    this.#cancelScheduledAnalysis();
     for (const state of this.#discoveryLoads.values()) state.controller?.abort();
     this.#discoveryLoads.clear();
     this.#vocabularyResizeObserver?.disconnect();
@@ -2017,21 +2020,69 @@ export class Ia2RdfNavigator extends HTMLElement {
     }
   }
 
-  #rebuildResult(): void {
-    if (!this.#sourceResult) {
-      this.#result = null;
-      this.#shaclCatalog = { count: 0, groups: [], shapes: [] };
-      this.#sparqlResourceLabels.clear();
-      return;
+  #clearAnalysis(): void {
+    this.#discoveryCandidates = [];
+    this.#documentVocabulary = { classes: [], count: 0, definitions: [], properties: [] };
+    this.#shaclCatalog = { count: 0, groups: [], shapes: [] };
+    this.#sparqlSuggestions = [];
+    this.#sparqlSuggestionDiagnostics = [];
+    this.#sparqlResourceLabels.clear();
+  }
+
+  #cancelScheduledAnalysis(): void {
+    if (this.#analysisIdleHandle === null) return;
+    this.ownerDocument.defaultView?.cancelIdleCallback?.(this.#analysisIdleHandle);
+    this.#analysisIdleHandle = null;
+  }
+
+  #scheduleAnalysis(): void {
+    this.#cancelScheduledAnalysis();
+    if (this.#open || !this.#analysisDirty) return;
+    const view = this.ownerDocument.defaultView;
+    if (!view?.requestIdleCallback) return;
+    this.#analysisIdleHandle = view.requestIdleCallback(() => {
+      this.#analysisIdleHandle = null;
+      if (!this.#open) this.#ensureAnalysis();
+    }, { timeout: 1_000 });
+  }
+
+  #ensureAnalysis(): void {
+    if (!this.#analysisDirty || !this.#sourceResult || !this.#result) return;
+    this.#discoveryCandidates = detectDiscoveryCandidates(this.#sourceResult);
+    this.#documentVocabulary = extractDocumentVocabulary(this.#sourceResult);
+    const queryCatalog = extractSuggestedSparqlQueryCatalog(this.#sourceResult);
+    this.#sparqlSuggestions = queryCatalog.queries;
+    this.#sparqlSuggestionDiagnostics = queryCatalog.diagnostics;
+    if (!this.#sparqlSuggestions.some((query) => query.id === this.#selectedSparqlSuggestionId)) {
+      this.#selectedSparqlSuggestionId = "";
     }
-    const contributions = Array.from(this.#discoveryLoads.values())
-      .flatMap((state) => state.status === "loaded" && state.contribution ? [state.contribution] : []);
-    this.#result = mergeDiscoveryContributions(this.#sourceResult, contributions);
+    const candidateIds = new Set(this.#discoveryCandidates.map((candidate) => candidate.id));
+    for (const [candidateId, state] of this.#discoveryLoads) {
+      if (candidateIds.has(candidateId)) continue;
+      state.controller?.abort();
+      this.#discoveryLoads.delete(candidateId);
+    }
     this.#shaclCatalog = extractShaclCatalog(this.#result);
     this.#sparqlResourceLabels = termLabelMap(this.#result.quads, {
       predicates: SPARQL_LABEL_PREDICATES,
       languages: [this.ownerDocument.documentElement.lang || "en"],
     });
+    this.#analysisDirty = false;
+  }
+
+  #rebuildResult(): void {
+    if (!this.#sourceResult) {
+      this.#result = null;
+      this.#analysisDirty = false;
+      this.#clearAnalysis();
+      return;
+    }
+    const contributions = Array.from(this.#discoveryLoads.values())
+      .flatMap((state) => state.status === "loaded" && state.contribution ? [state.contribution] : []);
+    this.#result = mergeDiscoveryContributions(this.#sourceResult, contributions);
+    this.#analysisDirty = true;
+    this.#clearAnalysis();
+    this.#scheduleAnalysis();
   }
 
   #renderDiscoveryState(candidateId: string): void {
@@ -2157,25 +2208,11 @@ export class Ia2RdfNavigator extends HTMLElement {
       for (const state of this.#discoveryLoads.values()) state.controller?.abort();
       this.#discoveryLoads.clear();
     }
-    this.#discoveryCandidates = detectDiscoveryCandidates(this.#sourceResult);
-    this.#documentVocabulary = extractDocumentVocabulary(this.#sourceResult);
-    const queryCatalog = extractSuggestedSparqlQueryCatalog(this.#sourceResult);
-    this.#sparqlSuggestions = queryCatalog.queries;
-    this.#sparqlSuggestionDiagnostics = queryCatalog.diagnostics;
-    if (!this.#sparqlSuggestions.some((query) => query.id === this.#selectedSparqlSuggestionId)) {
-      this.#selectedSparqlSuggestionId = "";
-    }
     if (!preserveSparqlExecution) {
       this.#sparqlRunId += 1;
       this.#sparqlPage = 0;
       this.#sparqlExecution = { status: "idle" };
       this.#sparqlPresentationSignature = "";
-    }
-    const candidateIds = new Set(this.#discoveryCandidates.map((candidate) => candidate.id));
-    for (const [candidateId, state] of this.#discoveryLoads) {
-      if (candidateIds.has(candidateId)) continue;
-      state.controller?.abort();
-      this.#discoveryLoads.delete(candidateId);
     }
     this.#rebuildResult();
   }
@@ -2309,6 +2346,7 @@ export class Ia2RdfNavigator extends HTMLElement {
   async #refreshAfterDocumentChange(): Promise<void> {
     const selectedSourceId = this.#selectedSourceId;
     this.#refreshExtraction(true);
+    if (this.#open) this.#ensureAnalysis();
     if (selectedSourceId !== this.#selectedSourceId || this.#sparqlExecution.status !== "success") {
       this.#render();
       return;
@@ -2328,6 +2366,7 @@ export class Ia2RdfNavigator extends HTMLElement {
 
   open(focusTarget: "panel" | "tab" = "tab"): void {
     if (this.#open) return;
+    this.#cancelScheduledAnalysis();
     this.#open = true;
     if (!this.#contentRendered) {
       this.#render();
@@ -4369,6 +4408,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.#tabResizeObserver = null;
     this.#navigatorRows = [];
     this.#contentRendered = false;
+    if (this.#open) this.#ensureAnalysis();
     const result = this.#result;
     if (!result || !this.shadowRoot) return;
     if (this.#view === "diagnostics" && !result.diagnostics.length) this.#view = "navigator";
