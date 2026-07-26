@@ -2396,6 +2396,8 @@ function literalAttributes(literal2) {
   if (literal2.language) {
     attributes.push(`lang="${escapeAttribute(literal2.language)}"`);
     if (direction === "ltr" || direction === "rtl") attributes.push(`dir="${direction}"`);
+  } else if (literal2.datatype.value === `${XSD}string`) {
+    attributes.push('lang=""');
   } else if (literal2.datatype.value !== `${XSD}string`) {
     attributes.push(`rdf-datatype="${escapeAttribute(literal2.datatype.value)}"`);
   }

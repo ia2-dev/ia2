@@ -332,7 +332,11 @@ function embeddedVocabularyCarrier(quad) {
     return `      <meta hidden ${subject} ${predicate} rdf-object-key="${html(embeddedBlankKey(quad.object))}">`;
   }
   if (quad.object.termType === "Literal") {
-    const language = quad.object.language ? ` lang="${html(quad.object.language)}"` : "";
+    const language = quad.object.language
+      ? ` lang="${html(quad.object.language)}"`
+      : quad.object.datatype.value === xsdString
+        ? ' lang=""'
+        : "";
     const direction = quad.object.direction ? ` dir="${html(quad.object.direction)}"` : "";
     const datatype = !quad.object.language && quad.object.datatype.value !== xsdString
       ? ` rdf-datatype="${html(embeddedIri(quad.object.datatype.value))}"`

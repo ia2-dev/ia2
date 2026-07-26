@@ -187,7 +187,9 @@ function isLanguageTag(value) {
 }
 function literalFor(element, lexical, ctx) {
   const datatype = element.getAttribute("rdf-datatype");
-  const language = element.getAttribute("lang") ?? "";
+  const directLanguage = element.getAttribute("lang");
+  const documentLanguage = ctx.document.documentElement?.getAttribute("lang") ?? "";
+  const language = directLanguage ?? documentLanguage;
   const directionSource = element.getAttribute("dir");
   const direction = directionSource?.toLowerCase();
   if (datatype !== null) {
@@ -195,7 +197,7 @@ function literalFor(element, lexical, ctx) {
     if (datatypeIri === RDF_LANG_STRING || datatypeIri === RDF_DIR_LANG_STRING) {
       throw new InvalidStatement("invalid-literal-metadata", "rdf-datatype cannot explicitly select an RDF language-string datatype.");
     }
-    if (language || direction === "ltr" || direction === "rtl") {
+    if (directLanguage || direction === "ltr" || direction === "rtl") {
       throw new InvalidStatement("competing-literal-metadata", "A typed literal cannot also carry RDF language or direction.");
     }
     return { termType: "Literal", value: lexical, datatype: namedNode(datatypeIri), language: "" };

@@ -123,6 +123,7 @@ describe("RDF/HTML rendering", () => {
     const rendered = renderRdfHtmlDocument(parsed.dataset, parsed.documents[0]!);
     expect(rendered.html).toContain('<html lang="en">');
     expect(rendered.publicationHtml).toContain('<html rdf-version="1.2" lang="en">');
+    expect(rendered.publicationHtml).toContain('lang=""');
     expect(rendered.html).toContain('<!--checked--><h1 data-kind="note">Field <em>note</em></h1>');
     expect(rendered.html).toContain('<p>Temperature: <strong>18 °C</strong>.</p>');
     expect(turtle).toContain('rdfhtml:lang "en"');

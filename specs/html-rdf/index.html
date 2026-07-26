@@ -343,17 +343,17 @@ ancestor, sibling, or later element.</p>
 <li>graph name;</li>
 <li>blank-node identity;</li>
 <li>datatype;</li>
-<li>language;</li>
+<li>language from non-root ancestors;</li>
 <li>base direction.</li>
 </ul>
 <p>HTML nesting has no RDF meaning by itself.</p>
 <p>This decision rejects RDFa-style scoped evaluation context in favor
 of <strong>local decidability</strong>. Once the source document IRI and
-document base IRI are known, a processor can determine a statement by
-inspecting its element and, only for a triple-term object, its direct
-object template. It never needs to walk ancestors looking for a subject,
-graph, datatype, language, vocabulary, or partially constructed
-relationship.</p>
+document base IRI and document element’s language are known, a processor
+can determine a statement by inspecting its element and, only for a
+triple-term object, its direct object template. It never needs to walk
+the ancestor chain looking for a subject, graph, datatype, language,
+vocabulary, or partially constructed relationship.</p>
 <p>The rationale is practical:</p>
 <a hidden class="no-link-warnings" href="http://purl.org/spar/doco/List" rdf-subject="#no-inheritance-list-2" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
 <a hidden class="no-link-warnings" href="#no-inheritance-list-2" rdf-subject="#no-inheritance" rdf-predicate="http://purl.org/dc/terms/hasPart">RDF</a>
@@ -378,17 +378,20 @@ coordinating hidden parser state with their eventual ancestors.</li>
 </ul>
 <p>The cost is some repetition: a descendant that describes an
 identified ancestor refers to that ancestor explicitly, and graph names,
-datatypes, and literal metadata may appear on multiple elements. The
-Core model accepts that cost because explicit references are easier to
-inspect, move, sign, cache, and debug than inherited meaning. An element
-describing itself does not repeat its subject: its own HTML identity
-supplies the default.</p>
+datatypes, base directions, and non-default languages may appear on
+multiple elements. The Core model accepts that cost because explicit
+references are easier to inspect, move, sign, cache, and debug than
+inherited meaning. An element describing itself does not repeat its
+subject: its own HTML identity supplies the default. Likewise, a literal
+in the document’s declared language does not repeat that language.</p>
 <p>HTML inheritance still controls presentation and accessibility as
-usual. For example, an ancestor’s <code>lang</code> continues to affect
-the rendered document, but it does not become part of an RDF literal
-unless <code>lang</code> is directly present on the statement element.
-This keeps the identity of the extracted RDF term stable when the
-element moves between HTML contexts.</p>
+usual. The document element’s non-empty <code>lang</code> is the one
+envelope-level exception: it supplies the default RDF language for an
+untyped literal whose statement element has no directly present
+<code>lang</code>. A <code>lang</code> on any other ancestor does not
+affect RDF extraction. This keeps the extracted term stable when its
+element moves between ordinary HTML contexts while aligning the
+document’s dominant RDF language with its HTML language.</p>
 </section>
 <section id="no-implicit-chaining" class="level3">
 <a hidden class="no-link-warnings" href="http://purl.org/spar/doco/Section" rdf-subject="#no-implicit-chaining" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
@@ -512,9 +515,9 @@ graph on a non-statement element</td>
 <p>The existing HTML <code>id</code> attribute participates in subject
 construction. The native single-IRI carriers listed in §5.4.3,
 <code>meta[content]</code>, <code>data[value]</code>,
-<code>time[datetime]</code>, and the directly present <code>lang</code>
-and <code>dir</code> attributes participate in object construction as
-defined below.</p>
+<code>time[datetime]</code>, the document element’s <code>lang</code>,
+and the directly present <code>lang</code> and <code>dir</code>
+attributes participate in object construction as defined below.</p>
 <p>There is intentionally no general <code>rdf-object</code> attribute
 containing a serialized RDF term. <code>rdf-object-key</code> is a
 specialized correlation carrier for the one object kind that native HTML
@@ -1610,14 +1613,17 @@ and</li>
 <li>construct a typed literal with no language tag and no base
 direction.</li>
 </ol></li>
-<li>Otherwise, inspect only <code>lang</code> and <code>dir</code>
-directly present on the statement element:
+<li>Otherwise, determine the literal language and base direction:
 <a hidden class="no-link-warnings" href="http://purl.org/spar/doco/List" rdf-subject="#literal-datatype-language-and-direction-list-3" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
 <a hidden class="no-link-warnings" href="#literal-datatype-language-and-direction-list-3" rdf-subject="#literal-datatype-language-and-direction" rdf-predicate="http://purl.org/dc/terms/hasPart">RDF</a>
 <ol id="literal-datatype-language-and-direction-list-3" type="1">
-<li>an absent or empty <code>lang</code> supplies no language tag;</li>
-<li>a non-empty <code>lang</code> MUST be a well-formed BCP 47 language
-tag;</li>
+<li>if <code>lang</code> is directly present on the statement element,
+use its value; an empty value explicitly supplies no language tag;</li>
+<li>otherwise, use a non-empty <code>lang</code> directly present on the
+source document element; an absent or empty document language supplies
+no language tag;</li>
+<li>a non-empty language value selected by the preceding steps MUST be
+a well-formed BCP 47 language tag;</li>
 <li><code>dir</code> values are matched ASCII case-insensitively:
 <code>ltr</code> and <code>rtl</code> supply the corresponding lowercase
 RDF base direction, while an absent <code>dir</code> or
@@ -1641,10 +1647,13 @@ and</li>
 RDF 1.2. An extractor MAY preserve their source case or normalize them
 according to BCP 47; either representation denotes the same RDF 1.2
 term.</p>
-<p>HTML language or direction inherited from ancestors affects
-presentation but not RDF extraction. <code>dir="auto"</code> remains
-available for HTML presentation but has no RDF base-direction
-equivalent.</p>
+<p>The document language default does not compete with
+<code>rdf-datatype</code>, which constructs a typed literal without a
+language tag. A directly present <code>lang=""</code> suppresses the
+document default. Language on any other ancestor and direction inherited
+from any ancestor affect presentation but not RDF extraction.
+<code>dir="auto"</code> remains available for HTML presentation but has
+no RDF base-direction equivalent.</p>
 <p><code>rdf-datatype</code> on an IRI, blank-node, or triple-term
 object is an authoring error.</p>
 <div class="sourceCode" id="cb40">
@@ -2244,8 +2253,9 @@ declaration exactly one graph-name form;</li>
 <li>does not depend on inherited RDF state;</li>
 <li>gives every term fragment exactly one top-level statement;</li>
 <li>does not place graph attributes on a term-fragment statement;</li>
-<li>uses directly present <code>lang</code> and <code>dir</code> for RDF
-literal metadata;</li>
+<li>uses the document element’s <code>lang</code> as the default RDF
+literal language, with directly present <code>lang</code> and
+<code>dir</code> providing local literal metadata;</li>
 <li>does not combine datatype and language metadata;</li>
 <li>uses non-empty, whitespace-free values for all local keys;</li>
 <li>does not rely on script execution for extraction; and</li>
@@ -2944,7 +2954,7 @@ Citation Typing Ontology</span>
     <article class="decision-card">
       <h3 id="decision-literal-carriers" rdf-predicate="http://purl.org/dc/terms/title">Separate visible text from exact literal values when needed</h3>
       <p><strong>Selected option:</strong> <span id="option-literal-carriers" rdf-predicate="http://purl.org/dc/terms/title">Use normalized text by default, with <code>meta[content]</code>, <code>data[value]</code>, and <code>time[datetime]</code> as exact lexical carriers.</span></p>
-      <p rdf-subject="#decision-literal-carriers" rdf-predicate="http://purl.org/dc/terms/description">Datatype uses <code>rdf-datatype</code>; language and base direction use only directly present native <code>lang</code> and <code>dir</code>.</p>
+      <p rdf-subject="#decision-literal-carriers" rdf-predicate="http://purl.org/dc/terms/description">Datatype uses <code>rdf-datatype</code>; the document element’s <code>lang</code> supplies the default language, while directly present native <code>lang</code> and <code>dir</code> supply local literal metadata.</p>
       <p class="decision-link">Controls <a href="#literal-object">Literal objects</a> and <a href="#literal-datatype-language-and-direction">literal metadata</a>.</p>
       <a hidden class="no-link-warnings" href="https://ontology.inferal.com/modules/decision/Decision" rdf-subject="#decision-literal-carriers" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
       <a hidden class="no-link-warnings" href="#core-design-deliberation" rdf-subject="#decision-literal-carriers" rdf-predicate="https://ontology.inferal.com/modules/decision/resultedFromDeliberation">RDF</a>

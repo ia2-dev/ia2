@@ -197,7 +197,7 @@
               <div class="rdf-result">
                 <span>Yields</span>
                 <code>&lt;https://example.com/notes#note-7&gt;
-  &lt;https://schema.org/headline&gt; "A field note" ;
+  &lt;https://schema.org/headline&gt; "A field note"@en ;
   &lt;https://schema.org/dateCreated&gt;
     "2026-07-15"^^&lt;http://www.w3.org/2001/XMLSchema#date&gt; .</code>
               </div>
@@ -326,9 +326,10 @@ _:location &lt;https://schema.org/name&gt; "Lab 3" .</code></div>
             >Put datatype, language, and direction where they apply.</h2>
             <p class="section-lede">
               <code>rdf-datatype</code> gives a literal datatype. Native
-              <code>lang</code> and <code>dir</code> give language and base
-              direction, but only when directly present on the statement
-              carrier.
+              <code>lang</code> on the document element supplies the default
+              literal language. A statement carrier’s own <code>lang</code>
+              overrides or suppresses that default, and its own
+              <code>dir</code> gives RDF base direction.
             </p>
 
             <figure class="code-sample compact">
@@ -352,10 +353,13 @@ _:location &lt;https://schema.org/name&gt; "Lab 3" .</code></div>
 
             <div class="guide-note">
               <p>
-                <strong>Literal metadata never inherits for RDF.</strong> An
-                ancestor’s <code>lang</code> still affects HTML presentation and
-                accessibility, but it does not silently change an extracted
-                literal. Datatype and language are mutually exclusive.
+                <strong>Only the document language defaults for RDF.</strong>
+                A <code>lang</code> on any other ancestor still affects HTML
+                presentation and accessibility, but not extraction. Put
+                <code>lang=""</code> directly on a carrier to produce an
+                untagged string. A typed literal ignores the document default,
+                and directly present datatype and language are mutually
+                exclusive.
               </p>
             </div>
           </section>
@@ -1151,7 +1155,7 @@ $ia2-hare</code>
               <li><span>Use a full predicate IRI on every statement carrier.</span></li>
               <li><span>Make every carrier determine exactly one object form.</span></li>
               <li><span>Use explicit subjects for statements about another element or resource.</span></li>
-              <li><span>Put graph membership, datatype, language, and direction directly on the statement where they apply.</span></li>
+              <li><span>Declare the dominant language on <code>html</code>; put overrides, suppression with <code>lang=""</code>, and direction directly on the statement where they apply.</span></li>
               <li><span>Inspect diagnostics, then verify the resulting Turtle and its DOM correlation.</span></li>
             </ul>
 

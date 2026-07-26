@@ -42,6 +42,8 @@ function literalAttributes(literal: RDF.Literal): string[] {
   if (literal.language) {
     attributes.push(`lang="${escapeAttribute(literal.language)}"`);
     if (direction === "ltr" || direction === "rtl") attributes.push(`dir="${direction}"`);
+  } else if (literal.datatype.value === `${XSD}string`) {
+    attributes.push('lang=""');
   } else if (literal.datatype.value !== `${XSD}string`) {
     attributes.push(`rdf-datatype="${escapeAttribute(literal.datatype.value)}"`);
   }

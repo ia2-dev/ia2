@@ -4,6 +4,7 @@ import { serializeJsonLd, serializeTurtle } from "../src/serialize.js";
 
 function page(body: string, head = ""): void {
   document.documentElement.setAttribute("rdf-version", "1.2");
+  document.documentElement.removeAttribute("lang");
   document.head.innerHTML = `<base href="https://example.com/base/">${head}`;
   document.body.innerHTML = body;
   Object.defineProperty(document, "URL", { configurable: true, value: "https://example.com/page" });
@@ -11,6 +12,7 @@ function page(body: string, head = ""): void {
 
 function pageWithoutBase(body: string, head = ""): void {
   document.documentElement.setAttribute("rdf-version", "1.2");
+  document.documentElement.removeAttribute("lang");
   document.head.innerHTML = head;
   document.body.innerHTML = body;
   Object.defineProperty(document, "URL", { configurable: true, value: "http://127.0.0.1:8765/specs/html-rdf/" });
@@ -87,6 +89,75 @@ describe("extractDataset", () => {
     const result = extractDataset(document);
     expect(result.quads[0]?.object).toEqual({ termType: "NamedNode", value: "https://example.com/bob" });
     expect(result.quads[1]?.object).toMatchObject({ termType: "Literal", value: "01" });
+  });
+
+  it("uses the document language as the default for untyped literals", () => {
+    page(`
+      <h1 id="intro" rdf-predicate="http://purl.org/dc/terms/title">Introduction</h1>
+      <p id="resume" lang="fr" rdf-predicate="http://purl.org/dc/terms/title">Résumé</p>
+      <p id="code" lang="" rdf-predicate="http://purl.org/dc/terms/title">IA2</p>
+      <p id="directed" dir="RTL" rdf-predicate="http://purl.org/dc/terms/title">مقدمة</p>
+      <data id="count" value="01" rdf-predicate="https://example.com/count"
+        rdf-datatype="http://www.w3.org/2001/XMLSchema#integer">1</data>
+    `);
+    document.documentElement.setAttribute("lang", "en");
+
+    const result = extractDataset(document);
+
+    expect(result.diagnostics).toHaveLength(0);
+    expect(result.quads.map(({ object }) => object)).toEqual([
+      expect.objectContaining({ termType: "Literal", value: "Introduction", language: "en" }),
+      expect.objectContaining({ termType: "Literal", value: "Résumé", language: "fr" }),
+      expect.objectContaining({
+        termType: "Literal",
+        value: "IA2",
+        datatype: { termType: "NamedNode", value: "http://www.w3.org/2001/XMLSchema#string" },
+        language: "",
+      }),
+      expect.objectContaining({ termType: "Literal", value: "مقدمة", language: "en", direction: "rtl" }),
+      expect.objectContaining({
+        termType: "Literal",
+        value: "01",
+        datatype: { termType: "NamedNode", value: "http://www.w3.org/2001/XMLSchema#integer" },
+        language: "",
+      }),
+    ]);
+  });
+
+  it("does not use non-root ancestor language as an RDF default", () => {
+    page(`
+      <section lang="fr">
+        <p id="local" rdf-predicate="http://purl.org/dc/terms/title">Sans langue RDF</p>
+      </section>
+    `);
+
+    const result = extractDataset(document);
+
+    expect(result.diagnostics).toHaveLength(0);
+    expect(result.quads[0]?.object).toEqual({
+      termType: "Literal",
+      value: "Sans langue RDF",
+      datatype: { termType: "NamedNode", value: "http://www.w3.org/2001/XMLSchema#string" },
+      language: "",
+    });
+  });
+
+  it("diagnoses a malformed document language only when it supplies a literal default", () => {
+    page(`
+      <p id="defaulted" rdf-predicate="http://purl.org/dc/terms/title">Invalid default</p>
+      <p id="suppressed" lang="" rdf-predicate="http://purl.org/dc/terms/title">Suppressed default</p>
+      <data id="typed" value="1" rdf-predicate="https://example.com/count"
+        rdf-datatype="http://www.w3.org/2001/XMLSchema#integer">1</data>
+    `);
+    document.documentElement.setAttribute("lang", "not_a_language");
+
+    const result = extractDataset(document);
+
+    expect(result.diagnostics.map(({ code }) => code)).toEqual(["invalid-language"]);
+    expect(result.quads.map(({ object }) => object)).toEqual([
+      expect.objectContaining({ termType: "Literal", value: "Suppressed default", language: "" }),
+      expect.objectContaining({ termType: "Literal", value: "1", language: "" }),
+    ]);
   });
 
   it("keeps a triple term inert while constructing the outer statement", () => {
