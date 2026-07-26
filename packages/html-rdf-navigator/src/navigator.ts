@@ -18,6 +18,7 @@ import {
   scrollSyncControlsMarkup,
   startWindowResize,
   updateScrollSyncControls,
+  updateWindowPositionControls,
   windowResizeHandlesMarkup,
   type DockedWindowDimensions,
   type CoordinatedWindow,
@@ -120,13 +121,16 @@ const CSS = String.raw`
     grid-template-rows: auto minmax(0, 1fr) auto;
   }
   .panel:focus { outline: none; }
-  .toolbar { align-items: center; border-bottom: 1px solid var(--line); display: flex; gap: 8px; min-width: 0; padding: 0 8px 0 12px; }
+  .toolbar { align-items: center; border-bottom: 1px solid var(--line); container-name: navigator-toolbar; container-type: inline-size; display: flex; gap: 8px; min-width: 0; padding: 0 8px 0 12px; }
   .drag-grip { color: var(--muted); display: none; flex: 0 0 30px; height: 36px; place-items: center; touch-action: none; user-select: none; }
   .panel[data-position="floating"] .drag-grip { cursor: grab; display: grid; }
   .panel[data-position="floating"] .tabs { cursor: grab; }
   .panel[data-position="floating"].is-dragging .drag-grip, .panel[data-position="floating"].is-dragging .tabs { cursor: grabbing; }
   .drag-grip svg { fill: currentColor; height: 18px; opacity: .68; width: 10px; }
   .header-actions { align-items: center; display: flex; flex: 0 0 auto; gap: 4px; }
+  .ia2-position-control { flex: 0 0 auto; position: relative; z-index: 14; }
+  .ia2-position-trigger { align-items: center; background: var(--accent); border: 0; border-radius: 7px; color: var(--paper); cursor: pointer; display: none; height: 36px; justify-content: center; padding: 0; width: 36px; }
+  .ia2-position-trigger:hover { background: color-mix(in oklch, var(--accent), var(--ink) 12%); }
   .position-switch { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 7px; display: inline-flex; flex: 0 0 auto; overflow: hidden; transition: background 140ms ease, border-color 140ms ease; width: auto; }
   .position-switch:hover, .position-switch:focus-within { background: var(--layer); border-color: var(--line); }
   .position-switch:focus-within { border-color: var(--accent); }
@@ -136,6 +140,7 @@ const CSS = String.raw`
   .position-option:hover { background: var(--accent-soft); color: var(--accent); }
   .position-option[aria-checked="true"] { background: var(--accent); color: var(--paper); opacity: 1; pointer-events: auto; visibility: visible; }
   .position-option:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; position: relative; z-index: 1; }
+  .ia2-position-label { display: none; }
   .position-icon { display: block; fill: none; height: 16px; stroke: currentColor; stroke-linejoin: round; stroke-width: 1.25; width: 20px; }
   .position-region { fill: currentColor; stroke: none; }
   .resize-handle { position: absolute; touch-action: none; z-index: 12; }
@@ -509,13 +514,43 @@ const CSS = String.raw`
   .footer { align-items: center; background: var(--layer); border-top: 1px solid var(--line); color: var(--muted); display: flex; font-size: 12px; justify-content: space-between; padding: 10px 18px; }
   .copy { background: transparent; border: 0; color: var(--accent); cursor: pointer; font-size: 12px; font-weight: 700; padding: 4px 5px; }
   .sr-only { height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; clip: rect(0,0,0,0); }
+  @container navigator-toolbar (max-width: 720px) {
+    .ia2-position-trigger { display: inline-flex; }
+    .position-switch {
+      align-items: stretch;
+      background: var(--paper);
+      border-color: var(--line);
+      box-shadow: 0 12px 36px oklch(20% 0.03 286 / 20%);
+      display: none;
+      flex-direction: column;
+      min-width: 190px;
+      overflow: hidden;
+      padding: 4px;
+      position: absolute;
+      right: 0;
+      top: calc(100% + 6px);
+    }
+    .ia2-position-control[data-expanded="true"] .position-switch { display: flex; }
+    .position-option {
+      border: 0;
+      border-radius: 5px;
+      flex: 0 0 36px;
+      gap: 10px;
+      justify-content: flex-start;
+      opacity: 1;
+      padding: 0 10px;
+      pointer-events: auto;
+      width: 100%;
+    }
+    .position-switch:hover .position-option,
+    .position-switch:focus-within .position-option { border: 0; }
+    .position-option[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); }
+    .ia2-position-label { display: inline; font-size: 12px; font-weight: 650; white-space: nowrap; }
+  }
   @media (max-width: 760px) {
     .launcher { bottom: var(--ia2-rdf-launcher-bottom, 14px); right: 14px; }
     .launcher[data-position^="left"] { left: 14px; right: auto; }
-    .toolbar { flex-wrap: wrap; padding: 8px 10px 0; }
-    .drag-grip { order: 1; }
-    .header-actions { margin-left: auto; order: 2; }
-    .tabs { flex-basis: 100%; order: 3; }
+    .toolbar { padding-inline: 10px 8px; }
     .viewport { padding-inline: 16px; }
     .navigator-tools { margin-inline: -16px; padding-inline: 16px; }
     .navigator-search-group { grid-column: 1 / -1; }
@@ -624,7 +659,7 @@ interface PersistedNavigatorState {
 interface FocusSnapshot {
   end?: number | null;
   key?: string;
-  kind: "close" | "copy" | "discovery-action" | "fallback" | "launcher" | "namespace" | "position" | "refresh" | "search" | "shapes-search" | "source" | "sparql-editor" | "sparql-observe" | "sparql-reset" | "sparql-run" | "sparql-suggestion" | "sync" | "tab" | "viewport";
+  kind: "close" | "copy" | "discovery-action" | "fallback" | "launcher" | "namespace" | "position" | "position-trigger" | "refresh" | "search" | "shapes-search" | "source" | "sparql-editor" | "sparql-observe" | "sparql-reset" | "sparql-run" | "sparql-suggestion" | "sync" | "tab" | "viewport";
   start?: number | null;
 }
 
@@ -1985,6 +2020,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (active.classList.contains("vocabulary-toggle") && active.dataset.namespace) return { kind: "namespace", key: active.dataset.namespace };
     if (active.classList.contains("sync-option") && active.dataset.syncMode) return { kind: "sync", key: active.dataset.syncMode };
     if (active.classList.contains("position-option") && active.dataset.position) return { kind: "position", key: active.dataset.position };
+    if (active.classList.contains("ia2-position-trigger")) return { kind: "position-trigger" };
     if (active.classList.contains("discovery-action") && active.dataset.candidateId) return { kind: "discovery-action", key: active.dataset.candidateId };
     if (active.classList.contains("source-input") && active.dataset.sourceId) return { kind: "source", key: active.dataset.sourceId };
     if (active.classList.contains("tab") && active.dataset.view) return { kind: "tab", key: active.dataset.view };
@@ -2012,6 +2048,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     }
     if (snapshot.kind === "sync") target = Array.from(this.shadowRoot.querySelectorAll<HTMLButtonElement>(".sync-option")).find((button) => button.dataset.syncMode === snapshot.key) ?? null;
     if (snapshot.kind === "position") target = Array.from(this.shadowRoot.querySelectorAll<HTMLButtonElement>(".position-option")).find((button) => button.dataset.position === snapshot.key) ?? null;
+    if (snapshot.kind === "position-trigger") target = this.shadowRoot.querySelector<HTMLButtonElement>(".ia2-position-trigger");
     if (snapshot.kind === "discovery-action") target = Array.from(this.shadowRoot.querySelectorAll<HTMLButtonElement>(".discovery-action")).find((button) => button.dataset.candidateId === snapshot.key) ?? null;
     if (snapshot.kind === "source") target = Array.from(this.shadowRoot.querySelectorAll<HTMLInputElement>(".source-input")).find((input) => input.dataset.sourceId === snapshot.key) ?? null;
     if (snapshot.kind === "tab") target = Array.from(this.shadowRoot.querySelectorAll<HTMLButtonElement>(".tab")).find((button) => button.dataset.view === snapshot.key) ?? null;
@@ -2601,12 +2638,7 @@ export class Ia2RdfNavigator extends HTMLElement {
       launcher.dataset.position = position;
       this.#applyLauncherGeometry(launcher);
     }
-    this.shadowRoot?.querySelectorAll<HTMLButtonElement>(".position-option").forEach((option) => {
-      const selected = option.dataset.position === position;
-      option.setAttribute("aria-checked", String(selected));
-      option.tabIndex = selected ? 0 : -1;
-      if (selected && focus) option.focus();
-    });
+    if (this.shadowRoot) updateWindowPositionControls(this.shadowRoot, position, focus);
     if (persist) this.#persistSessionState();
   }
 

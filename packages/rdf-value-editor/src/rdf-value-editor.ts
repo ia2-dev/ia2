@@ -1463,6 +1463,7 @@ export class Ia2RdfValueEditor extends HTMLElement {
         }
         .how-link:hover { text-decoration-color: currentColor; }
         .head-actions { align-items: center; display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
+        .ia2-position-trigger, .ia2-position-label { display: none; }
         .editor-position-switch {
           align-items: center;
           border: 1px solid transparent;

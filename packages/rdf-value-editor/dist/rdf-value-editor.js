@@ -1843,27 +1843,66 @@ function positionControlsMarkup({
   const safeGroupClass = escapeMarkup(groupClass);
   const safeOptionClass = escapeMarkup(optionClass);
   const allowedSet = new Set(allowed);
-  const options = WINDOW_POSITIONS.filter(({ position }) => allowedSet.has(position)).map(({ icon, label, position }) => `<button class="ia2-position-option ${safeOptionClass}" type="button" role="radio" data-position="${position}" aria-checked="${current === position}" aria-label="${escapeMarkup(label)}" title="${escapeMarkup(label)}" tabindex="${current === position ? "0" : "-1"}">${icon}</button>`).join("");
-  return `<div class="ia2-position-switch ${safeGroupClass}" role="radiogroup" aria-label="${escapeMarkup(ariaLabel)}">${options}</div>`;
+  const currentDefinition = WINDOW_POSITIONS.find(({ position }) => position === current) ?? WINDOW_POSITIONS[0];
+  const options = WINDOW_POSITIONS.filter(({ position }) => allowedSet.has(position)).map(({ icon, label, position }) => `<button class="ia2-position-option ${safeOptionClass}" type="button" role="radio" data-position="${position}" aria-checked="${current === position}" aria-label="${escapeMarkup(label)}" title="${escapeMarkup(label)}" tabindex="${current === position ? "0" : "-1"}">${icon}<span class="ia2-position-label">${escapeMarkup(label)}</span></button>`).join("");
+  const triggerLabel = `${ariaLabel}: ${currentDefinition.label}. Choose another position`;
+  return `<div class="ia2-position-control" data-expanded="false"><button class="ia2-position-trigger" type="button" data-position="${current}" aria-expanded="false" aria-label="${escapeMarkup(triggerLabel)}" title="${escapeMarkup(currentDefinition.label)}">${currentDefinition.icon}</button><div class="ia2-position-switch ${safeGroupClass}" role="radiogroup" aria-label="${escapeMarkup(ariaLabel)}">${options}</div></div>`;
 }
 function updateWindowPositionControls(root, position, focus = false) {
-  const options = Array.from(root.querySelectorAll(".ia2-position-option"));
+  const control = root instanceof Element ? root.matches(".ia2-position-control") ? root : root.closest(".ia2-position-control") ?? root.querySelector(".ia2-position-control") : root.querySelector(".ia2-position-control");
+  const scope = control ?? root;
+  const options = Array.from(scope.querySelectorAll(".ia2-position-option"));
   for (const option of options) {
     const selected = option.dataset.position === position;
     option.setAttribute("aria-checked", String(selected));
     option.tabIndex = selected ? 0 : -1;
     if (selected && focus) option.focus();
   }
+  const trigger = control?.querySelector(".ia2-position-trigger");
+  const group = control?.querySelector(".ia2-position-switch");
+  const definition = WINDOW_POSITIONS.find((candidate) => candidate.position === position);
+  if (trigger && group && definition) {
+    trigger.dataset.position = position;
+    trigger.innerHTML = definition.icon;
+    trigger.setAttribute(
+      "aria-label",
+      `${group.getAttribute("aria-label") ?? "Window position"}: ${definition.label}. Choose another position`
+    );
+    trigger.title = definition.label;
+  }
 }
 function bindWindowPositionControls(root, applyPosition) {
   const group = root instanceof HTMLElement && root.matches(".ia2-position-switch") ? root : root.querySelector(".ia2-position-switch");
-  const options = Array.from(root.querySelectorAll(".ia2-position-option"));
+  const control = group?.closest(".ia2-position-control") ?? null;
+  const trigger = control?.querySelector(".ia2-position-trigger") ?? null;
+  const options = Array.from((control ?? root).querySelectorAll(".ia2-position-option"));
   const cleanups = [];
+  const setExpanded = (expanded, focusOption = false) => {
+    if (!control || !trigger) return;
+    control.dataset.expanded = String(expanded);
+    trigger.setAttribute("aria-expanded", String(expanded));
+    if (expanded && focusOption) {
+      options.find((option) => option.getAttribute("aria-checked") === "true")?.focus();
+    }
+  };
+  if (trigger) {
+    const click = () => setExpanded(control?.dataset.expanded !== "true", true);
+    const keydown2 = (event) => {
+      if (!["ArrowDown", "ArrowUp"].includes(event.key)) return;
+      event.preventDefault();
+      setExpanded(true, true);
+    };
+    trigger.addEventListener("click", click);
+    trigger.addEventListener("keydown", keydown2);
+    cleanups.push(() => trigger.removeEventListener("click", click));
+    cleanups.push(() => trigger.removeEventListener("keydown", keydown2));
+  }
   for (const option of options) {
     const click = () => {
       if (!isWindowPosition(option.dataset.position)) return;
       if (applyPosition(option.dataset.position, false) !== false) {
         updateWindowPositionControls(root, option.dataset.position);
+        setExpanded(false);
       }
     };
     option.addEventListener("click", click);
@@ -1888,6 +1927,21 @@ function bindWindowPositionControls(root, applyPosition) {
   };
   group?.addEventListener("keydown", keydown);
   cleanups.push(() => group?.removeEventListener("keydown", keydown));
+  const escape = (event) => {
+    if (event.key !== "Escape" || control?.dataset.expanded !== "true") return;
+    event.preventDefault();
+    event.stopPropagation();
+    setExpanded(false);
+    trigger?.focus();
+  };
+  control?.addEventListener("keydown", escape);
+  cleanups.push(() => control?.removeEventListener("keydown", escape));
+  const dismiss = (event) => {
+    if (control?.dataset.expanded !== "true" || event.composedPath().includes(control)) return;
+    setExpanded(false);
+  };
+  control?.ownerDocument.addEventListener("pointerdown", dismiss);
+  cleanups.push(() => control?.ownerDocument.removeEventListener("pointerdown", dismiss));
   return () => {
     for (const cleanup of cleanups) cleanup();
   };
@@ -6776,6 +6830,7 @@ ${subject}`;
         }
         .how-link:hover { text-decoration-color: currentColor; }
         .head-actions { align-items: center; display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
+        .ia2-position-trigger, .ia2-position-label { display: none; }
         .editor-position-switch {
           align-items: center;
           border: 1px solid transparent;

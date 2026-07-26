@@ -500,13 +500,16 @@ export function positionControlsMarkup({
   const safeGroupClass = escapeMarkup(groupClass);
   const safeOptionClass = escapeMarkup(optionClass);
   const allowedSet = new Set(allowed);
+  const currentDefinition = WINDOW_POSITIONS.find(({ position }) => position === current)
+    ?? WINDOW_POSITIONS[0]!;
   const options = WINDOW_POSITIONS
     .filter(({ position }) => allowedSet.has(position))
     .map(({ icon, label, position }) => (
-      `<button class="ia2-position-option ${safeOptionClass}" type="button" role="radio" data-position="${position}" aria-checked="${current === position}" aria-label="${escapeMarkup(label)}" title="${escapeMarkup(label)}" tabindex="${current === position ? "0" : "-1"}">${icon}</button>`
+      `<button class="ia2-position-option ${safeOptionClass}" type="button" role="radio" data-position="${position}" aria-checked="${current === position}" aria-label="${escapeMarkup(label)}" title="${escapeMarkup(label)}" tabindex="${current === position ? "0" : "-1"}">${icon}<span class="ia2-position-label">${escapeMarkup(label)}</span></button>`
     ))
     .join("");
-  return `<div class="ia2-position-switch ${safeGroupClass}" role="radiogroup" aria-label="${escapeMarkup(ariaLabel)}">${options}</div>`;
+  const triggerLabel = `${ariaLabel}: ${currentDefinition.label}. Choose another position`;
+  return `<div class="ia2-position-control" data-expanded="false"><button class="ia2-position-trigger" type="button" data-position="${current}" aria-expanded="false" aria-label="${escapeMarkup(triggerLabel)}" title="${escapeMarkup(currentDefinition.label)}">${currentDefinition.icon}</button><div class="ia2-position-switch ${safeGroupClass}" role="radiogroup" aria-label="${escapeMarkup(ariaLabel)}">${options}</div></div>`;
 }
 
 export function updateWindowPositionControls(
@@ -514,12 +517,31 @@ export function updateWindowPositionControls(
   position: WindowPosition,
   focus = false,
 ): void {
-  const options = Array.from(root.querySelectorAll<HTMLButtonElement>(".ia2-position-option"));
+  const control = root instanceof Element
+    ? root.matches(".ia2-position-control")
+      ? root
+      : root.closest(".ia2-position-control")
+        ?? root.querySelector<HTMLElement>(".ia2-position-control")
+    : root.querySelector<HTMLElement>(".ia2-position-control");
+  const scope = control ?? root;
+  const options = Array.from(scope.querySelectorAll<HTMLButtonElement>(".ia2-position-option"));
   for (const option of options) {
     const selected = option.dataset.position === position;
     option.setAttribute("aria-checked", String(selected));
     option.tabIndex = selected ? 0 : -1;
     if (selected && focus) option.focus();
+  }
+  const trigger = control?.querySelector<HTMLButtonElement>(".ia2-position-trigger");
+  const group = control?.querySelector<HTMLElement>(".ia2-position-switch");
+  const definition = WINDOW_POSITIONS.find((candidate) => candidate.position === position);
+  if (trigger && group && definition) {
+    trigger.dataset.position = position;
+    trigger.innerHTML = definition.icon;
+    trigger.setAttribute(
+      "aria-label",
+      `${group.getAttribute("aria-label") ?? "Window position"}: ${definition.label}. Choose another position`,
+    );
+    trigger.title = definition.label;
   }
 }
 
@@ -530,14 +552,38 @@ export function bindWindowPositionControls(
   const group = root instanceof HTMLElement && root.matches(".ia2-position-switch")
     ? root
     : root.querySelector<HTMLElement>(".ia2-position-switch");
-  const options = Array.from(root.querySelectorAll<HTMLButtonElement>(".ia2-position-option"));
+  const control = group?.closest<HTMLElement>(".ia2-position-control") ?? null;
+  const trigger = control?.querySelector<HTMLButtonElement>(".ia2-position-trigger") ?? null;
+  const options = Array.from((control ?? root).querySelectorAll<HTMLButtonElement>(".ia2-position-option"));
   const cleanups: Array<() => void> = [];
+  const setExpanded = (expanded: boolean, focusOption = false): void => {
+    if (!control || !trigger) return;
+    control.dataset.expanded = String(expanded);
+    trigger.setAttribute("aria-expanded", String(expanded));
+    if (expanded && focusOption) {
+      options.find((option) => option.getAttribute("aria-checked") === "true")?.focus();
+    }
+  };
+
+  if (trigger) {
+    const click = (): void => setExpanded(control?.dataset.expanded !== "true", true);
+    const keydown = (event: KeyboardEvent): void => {
+      if (!["ArrowDown", "ArrowUp"].includes(event.key)) return;
+      event.preventDefault();
+      setExpanded(true, true);
+    };
+    trigger.addEventListener("click", click);
+    trigger.addEventListener("keydown", keydown);
+    cleanups.push(() => trigger.removeEventListener("click", click));
+    cleanups.push(() => trigger.removeEventListener("keydown", keydown));
+  }
 
   for (const option of options) {
     const click = (): void => {
       if (!isWindowPosition(option.dataset.position)) return;
       if (applyPosition(option.dataset.position, false) !== false) {
         updateWindowPositionControls(root, option.dataset.position);
+        setExpanded(false);
       }
     };
     option.addEventListener("click", click);
@@ -565,6 +611,23 @@ export function bindWindowPositionControls(
   };
   group?.addEventListener("keydown", keydown);
   cleanups.push(() => group?.removeEventListener("keydown", keydown));
+
+  const escape = (event: KeyboardEvent): void => {
+    if (event.key !== "Escape" || control?.dataset.expanded !== "true") return;
+    event.preventDefault();
+    event.stopPropagation();
+    setExpanded(false);
+    trigger?.focus();
+  };
+  control?.addEventListener("keydown", escape);
+  cleanups.push(() => control?.removeEventListener("keydown", escape));
+
+  const dismiss = (event: PointerEvent): void => {
+    if (control?.dataset.expanded !== "true" || event.composedPath().includes(control)) return;
+    setExpanded(false);
+  };
+  control?.ownerDocument.addEventListener("pointerdown", dismiss);
+  cleanups.push(() => control?.ownerDocument.removeEventListener("pointerdown", dismiss));
 
   return () => {
     for (const cleanup of cleanups) cleanup();

@@ -20,6 +20,12 @@ import {
 
 The shared position vocabulary is `right`, `right-top`, `right-bottom`,
 `bottom`, `floating`, `top`, `left`, `left-bottom`, and `left-top`.
+Position-control markup includes both the accessible radiogroup and a disclosure
+trigger showing the current position. A consumer can keep the radiogroup inline
+on roomy surfaces, then reveal the trigger and present the same options as a
+vertical list when its toolbar is horizontally constrained. The shared binding
+keeps both forms synchronized and handles disclosure focus, Escape, and outside
+dismissal.
 `WINDOW_PLACEMENT_CSS` supplies the shared geometry for an
 `.ia2-window-surface`; components retain their theme, internal layout,
 persistence, and content. Shared drag and eight-direction resize helpers keep

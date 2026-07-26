@@ -104,7 +104,7 @@ describe("shared IA² window primitives", () => {
     expect(WINDOW_PLACEMENT_CSS).toContain("@media (prefers-reduced-motion: reduce)");
   });
 
-  it("renders and operates an accessible position radiogroup", () => {
+  it("renders and operates an accessible position disclosure and radiogroup", () => {
     document.body.innerHTML = positionControlsMarkup({
       allowed: ["right", "floating", "left"],
       ariaLabel: "Window position",
@@ -115,16 +115,32 @@ describe("shared IA² window primitives", () => {
       applied.push(position);
     });
 
-    const right = document.querySelector<HTMLButtonElement>('[data-position="right"]')!;
-    const floating = document.querySelector<HTMLButtonElement>('[data-position="floating"]')!;
+    const right = document.querySelector<HTMLButtonElement>('.ia2-position-option[data-position="right"]')!;
+    const floating = document.querySelector<HTMLButtonElement>('.ia2-position-option[data-position="floating"]')!;
+    const control = document.querySelector<HTMLElement>(".ia2-position-control")!;
+    const trigger = document.querySelector<HTMLButtonElement>(".ia2-position-trigger")!;
     expect(document.querySelectorAll('[role="radio"]')).toHaveLength(3);
     expect(right.getAttribute("aria-checked")).toBe("true");
+    expect(trigger.dataset.position).toBe("right");
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(trigger.getAttribute("aria-label")).toContain("Right, full height");
 
     right.focus();
     right.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowRight" }));
     expect(applied).toEqual(["floating"]);
     expect(floating.getAttribute("aria-checked")).toBe("true");
     expect(document.activeElement).toBe(floating);
+    expect(trigger.dataset.position).toBe("floating");
+
+    trigger.click();
+    expect(control.dataset.expanded).toBe("true");
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(document.activeElement).toBe(floating);
+
+    right.click();
+    expect(applied).toEqual(["floating", "right"]);
+    expect(control.dataset.expanded).toBe("false");
+    expect(trigger.dataset.position).toBe("right");
   });
 
   it("renders and applies bounded floating resize handles", () => {

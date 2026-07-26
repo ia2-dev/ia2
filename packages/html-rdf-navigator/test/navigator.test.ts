@@ -1160,7 +1160,17 @@ describe("Ia2RdfNavigator", () => {
     const viewport = drawer.shadowRoot?.querySelector<HTMLElement>(".viewport")!;
     viewport.scrollTop = 84;
     expect(options.every((option) => option.querySelector(".position-icon"))).toBe(true);
-    expect(options.map((option) => option.textContent?.trim())).toEqual(["", "", "", "", "", "", "", "", ""]);
+    expect(options.map((option) => option.textContent?.trim())).toEqual([
+      "Right, full height",
+      "Right, top half",
+      "Right, bottom half",
+      "Bottom, full width",
+      "Floating, centered",
+      "Top, full width",
+      "Left, full height",
+      "Left, bottom half",
+      "Left, top half",
+    ]);
     expect(options.map((option) => option.getAttribute("aria-label"))).toEqual([
       "Right, full height",
       "Right, top half",
@@ -1175,11 +1185,18 @@ describe("Ia2RdfNavigator", () => {
     expect(options.map((option) => option.getAttribute("aria-checked"))).toEqual(["true", "false", "false", "false", "false", "false", "false", "false", "false"]);
     expect(options.map((option) => option.tabIndex)).toEqual([0, -1, -1, -1, -1, -1, -1, -1, -1]);
     expect(drawer.shadowRoot?.querySelector<HTMLElement>(".panel")?.dataset.position).toBe("right");
+    const positionControl = drawer.shadowRoot?.querySelector<HTMLElement>(".ia2-position-control")!;
+    const positionTrigger = drawer.shadowRoot?.querySelector<HTMLButtonElement>(".ia2-position-trigger")!;
+    positionTrigger.click();
+    expect(positionControl.dataset.expanded).toBe("true");
+    expect(positionTrigger.getAttribute("aria-expanded")).toBe("true");
+    expect(drawer.shadowRoot?.activeElement).toBe(options[0]);
 
     options[0]!.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowRight" }));
     expect(drawer.shadowRoot?.querySelector<HTMLElement>(".panel")?.dataset.position).toBe("right-top");
     expect(options[1]!.getAttribute("aria-checked")).toBe("true");
     expect(options[1]!.tabIndex).toBe(0);
+    expect(positionTrigger.dataset.position).toBe("right-top");
     expect(drawer.shadowRoot?.querySelector(".viewport")).toBe(viewport);
     expect(viewport.scrollTop).toBe(84);
 
