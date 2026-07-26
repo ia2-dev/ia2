@@ -62,6 +62,9 @@ import {
   type VocabularyKind,
 } from "./vocabulary.js";
 
+// Resource previews are dialogs, so keep them above shared window surfaces and launchers.
+const LINK_PREVIEW_LAYER_BASE = 2_147_483_040;
+
 const CSS = String.raw`
   :host {
     --ink: oklch(27% 0.018 286);
@@ -473,7 +476,7 @@ const CSS = String.raw`
   .term-link { color: inherit; text-decoration-color: color-mix(in oklch, currentColor, transparent 55%); text-underline-offset: 3px; }
   .term-link:hover { text-decoration-color: currentColor; }
   .term-link.local-term { text-decoration-style: dotted; }
-  .resource-preview { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 18px 64px oklch(20% 0.03 286 / 28%); display: grid; grid-template-rows: 32px minmax(0, 1fr); overflow: hidden; position: fixed; z-index: 20; }
+  .resource-preview { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 18px 64px oklch(20% 0.03 286 / 28%); display: grid; grid-template-rows: 32px minmax(0, 1fr); overflow: hidden; position: fixed; z-index: ${LINK_PREVIEW_LAYER_BASE + 1}; }
   .resource-preview-bar { align-items: center; background: var(--layer); border-bottom: 1px solid var(--line); cursor: grab; display: flex; gap: 4px; min-width: 0; padding: 0 5px 0 10px; user-select: none; }
   .resource-preview.is-dragging .resource-preview-bar { cursor: grabbing; }
   .resource-preview-url { color: var(--muted); flex: 1 1 auto; font: 11px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1514,7 +1517,7 @@ export class Ia2RdfNavigator extends HTMLElement {
   #linkPreviews = new Map<HTMLElement, LinkPreviewState>();
   #activeLinkPreview: HTMLElement | null = null;
   #sparqlLinkPreview: HTMLElement | null = null;
-  #linkPreviewZIndex = 20;
+  #linkPreviewZIndex = LINK_PREVIEW_LAYER_BASE;
   #locateAnimation: Animation | null = null;
   #syncCleanup: (() => void) | null = null;
   #resetSyncControl: (() => void) | null = null;
@@ -1628,7 +1631,7 @@ export class Ia2RdfNavigator extends HTMLElement {
   #clearLinkPreviews(): void {
     for (const preview of Array.from(this.#linkPreviews.keys())) this.#clearLinkPreview(preview);
     this.#activeLinkPreview = null;
-    this.#linkPreviewZIndex = 20;
+    this.#linkPreviewZIndex = LINK_PREVIEW_LAYER_BASE;
   }
 
   #linkPreviewRect(preview: HTMLElement): FloatingRect {

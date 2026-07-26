@@ -917,7 +917,7 @@ describe("Ia2RdfNavigator", () => {
     expect(drawer.shadowRoot?.querySelector(".resource-preview")).toBeNull();
   });
 
-  it("opens predicates in a movable, eight-way resizable definition window", () => {
+  it("opens predicates above shared surfaces in a movable, eight-way resizable definition window", () => {
     const drawer = mountRdfNavigator();
     const predicate = drawer.shadowRoot?.querySelector<HTMLAnchorElement>('.navigator .predicate a[href="https://schema.org/name"]')!;
     predicate.click();
@@ -930,6 +930,7 @@ describe("Ia2RdfNavigator", () => {
     const close = preview.querySelector<HTMLButtonElement>(".resource-preview-close")!;
     expect(preview.getAttribute("role")).toBe("dialog");
     expect(preview.dataset.previewKind).toBe("definition");
+    expect(Number.parseInt(preview.style.zIndex, 10)).toBeGreaterThan(2_147_483_000);
     expect(Number.parseFloat(preview.style.width)).toBe(620);
     expect(Number.parseFloat(preview.style.height)).toBe(520);
     expect(frame.tabIndex).toBe(0);
