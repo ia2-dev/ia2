@@ -2772,34 +2772,58 @@ export class Ia2RdfNavigator extends HTMLElement {
       activeAnimation = null;
     };
 
-    sourceRows.forEach((matchingRows, source) => {
-      listen(source, "pointerenter", () => {
+    const sourceAncestors = (target: EventTarget | null): Element[] => {
+      const found: Element[] = [];
+      let element = target instanceof Element ? target : null;
+      while (element) {
+        if (sourceRows.has(element)) found.push(element);
+        element = element.parentElement;
+      }
+      return found;
+    };
+    const handleSourcePointerOver = (event: PointerEvent): void => {
+      for (const source of sourceAncestors(event.target)) {
+        if (event.relatedTarget instanceof Node && source.contains(event.relatedTarget)) continue;
         setHoveredSource(source);
-        matchingRows.forEach(({ item }) => {
+        sourceRows.get(source)?.forEach(({ item }) => {
           item.classList.add("is-corresponding");
           item.scrollIntoView?.({ block: "nearest" });
         });
-      });
-      listen(source, "pointerleave", () => {
-        matchingRows.forEach(({ item }) => item.classList.remove("is-corresponding"));
+      }
+    };
+    const handleSourcePointerOut = (event: PointerEvent): void => {
+      for (const source of sourceAncestors(event.target)) {
+        if (event.relatedTarget instanceof Node && source.contains(event.relatedTarget)) continue;
+        sourceRows.get(source)?.forEach(({ item }) => item.classList.remove("is-corresponding"));
         setHoveredSource(null);
-      });
-    });
-
-    rows.forEach(({ item, quad }) => {
-      const source = quad.source as HTMLElement;
-      listen(item, "pointerenter", () => {
-        item.classList.add("is-corresponding");
-        emphasizeSource(source);
-        if (this.#syncMode === "panel") {
-          source.scrollIntoView({ behavior: view.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
-        }
-      });
-      listen(item, "pointerleave", () => {
-        item.classList.remove("is-corresponding");
-        clearEmphasis();
-      });
-    });
+      }
+    };
+    const rowsByItem = new WeakMap<Element, NavigatorRow>(rows.map((row) => [row.item, row]));
+    const rowForTarget = (target: EventTarget | null): NavigatorRow | null => {
+      if (!(target instanceof Element)) return null;
+      const item = target.closest(".quad");
+      return item ? rowsByItem.get(item) ?? null : null;
+    };
+    const handleRowPointerOver = (event: PointerEvent): void => {
+      const row = rowForTarget(event.target);
+      if (!row || (event.relatedTarget instanceof Node && row.item.contains(event.relatedTarget))) return;
+      const source = row.quad.source as HTMLElement;
+      row.item.classList.add("is-corresponding");
+      emphasizeSource(source);
+      if (this.#syncMode === "panel") {
+        source.scrollIntoView({ behavior: view.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+      }
+    };
+    const handleRowPointerOut = (event: PointerEvent): void => {
+      const row = rowForTarget(event.target);
+      if (!row || (event.relatedTarget instanceof Node && row.item.contains(event.relatedTarget))) return;
+      row.item.classList.remove("is-corresponding");
+      clearEmphasis();
+    };
+    listen(this.ownerDocument, "pointerover", handleSourcePointerOver as EventListener);
+    listen(this.ownerDocument, "pointerout", handleSourcePointerOut as EventListener);
+    listen(viewport, "pointerover", handleRowPointerOver as EventListener);
+    listen(viewport, "pointerout", handleRowPointerOut as EventListener);
 
     if (this.#syncMode === "page") {
       const update = (): void => schedule(applyFilter);

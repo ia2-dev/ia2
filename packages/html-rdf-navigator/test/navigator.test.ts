@@ -1398,11 +1398,11 @@ describe("Ia2RdfNavigator", () => {
     expect(rows.map((row) => row.hidden)).toEqual([false, true]);
     expect(drawer.shadowRoot?.querySelector(".filter-count")?.textContent).toBe("1 of 2");
     expect(syncOptions[1]!.getAttribute("aria-checked")).toBe("true");
-    sources[1]!.dispatchEvent(new Event("pointerenter"));
+    sources[1]!.dispatchEvent(new MouseEvent("pointerover", { bubbles: true }));
     expect(rows[1]?.hidden).toBe(false);
     expect(rows[1]?.classList.contains("is-corresponding")).toBe(true);
     expect(rows[1]?.scrollIntoView).toHaveBeenCalledOnce();
-    sources[1]!.dispatchEvent(new Event("pointerleave"));
+    sources[1]!.dispatchEvent(new MouseEvent("pointerout", { bubbles: true, relatedTarget: document.body }));
     expect(rows[1]?.hidden).toBe(true);
 
     viewport.getBoundingClientRect = () => makeRect(0, 300);
@@ -1414,7 +1414,7 @@ describe("Ia2RdfNavigator", () => {
     expect(drawer.shadowRoot?.activeElement).toBe(syncOptions[2]);
     await new Promise((resolve) => window.setTimeout(resolve, 60));
     expect(sources[1]?.scrollIntoView).toHaveBeenCalled();
-    rows[0]!.dispatchEvent(new Event("pointerenter"));
+    rows[0]!.dispatchEvent(new MouseEvent("pointerover", { bubbles: true }));
     expect(sources[0]?.scrollIntoView).toHaveBeenCalled();
     expect(sources[0]?.animate).toHaveBeenCalled();
   });
@@ -1465,7 +1465,7 @@ describe("Ia2RdfNavigator", () => {
     sources.forEach((source) => vi.mocked(source.scrollIntoView).mockClear());
     drawer.shadowRoot?.querySelector<HTMLButtonElement>(".close")?.click();
     viewport.dispatchEvent(new Event("scroll"));
-    sources[0]!.dispatchEvent(new Event("pointerenter"));
+    sources[0]!.dispatchEvent(new MouseEvent("pointerover", { bubbles: true }));
     await new Promise((resolve) => window.setTimeout(resolve, 60));
     expect(sources.every((source) => vi.mocked(source.scrollIntoView).mock.calls.length === 0)).toBe(true);
     expect(rows.every((row) => !row.classList.contains("is-corresponding"))).toBe(true);
