@@ -182,7 +182,7 @@ async function operationSample(browser) {
     });
     const measure = async (action) => {
       const started = performance.now();
-      action();
+      await action();
       await paint();
       return performance.now() - started;
     };
@@ -195,6 +195,10 @@ async function operationSample(browser) {
     const result = {};
     result.open = await measure(() => host.open());
     result.syncPage = await measure(() => click('.sync-option[data-sync-mode="page"]'));
+    result.pageScroll = await measure(async () => {
+      window.scrollTo(0, Math.min(window.scrollY + 2_000, document.documentElement.scrollHeight));
+      await new Promise((resolvePromise) => setTimeout(resolvePromise, 80));
+    });
     result.syncOffFromPage = await measure(() => click('.sync-option[data-sync-mode="off"]'));
     result.syncPanel = await measure(() => click('.sync-option[data-sync-mode="panel"]'));
     result.syncOffFromPanel = await measure(() => click('.sync-option[data-sync-mode="off"]'));
@@ -232,7 +236,11 @@ async function operationSample(browser) {
   const domCounters = await cdp.send("Memory.getDOMCounters");
   const extra = await page.evaluate(() => ({
     heap: performance.memory?.usedJSHeapSize ?? 0,
+    navigatorButtons: document.querySelector("ia2-rdf-navigator")?.shadowRoot?.querySelectorAll("button").length ?? 0,
     navigatorNodes: document.querySelector("ia2-rdf-navigator")?.shadowRoot?.querySelectorAll("*").length ?? 0,
+    sourceToggles: document.querySelector("ia2-rdf-navigator")?.shadowRoot?.querySelectorAll(".source-toggle").length ?? 0,
+    termLinks: document.querySelector("ia2-rdf-navigator")?.shadowRoot?.querySelectorAll(".term-link").length ?? 0,
+    termLocateButtons: document.querySelector("ia2-rdf-navigator")?.shadowRoot?.querySelectorAll(".term-locate-button").length ?? 0,
   }));
   await context.close();
   return { ...durations, ...extra, jsEventListeners: domCounters.jsEventListeners, nodes: domCounters.nodes };
