@@ -68,9 +68,10 @@
     "sparqljs": "^3.7.4"
   },
   "devDependencies": {
+    "@types/n3": "^1.26.1",
+    "@types/sparqljs": "^3.1.12",
     "esbuild": "^0.25.0",
     "jsdom": "^26.0.0",
-    "@types/sparqljs": "^3.1.12",
     "typescript": "^5.8.0",
     "vitest": "^3.0.0"
   }
