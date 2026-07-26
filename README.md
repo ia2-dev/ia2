@@ -171,9 +171,19 @@ and inspected while the document is inert or changing at runtime.
 
 ### Packages
 
-- [`@ia2-dev/html-rdf-navigator`](packages/html-rdf-navigator/) — a dependency-free browser
-  component and TypeScript library for extracting, navigating, and serializing
-  the RDF expressed by an IA² HTML document.
+- [`@ia2-dev/html-rdf`](packages/html-rdf/) provides the dependency-free
+  live-DOM extractor, RDF 1.2 term model, source correlations, and dataset
+  serializers shared by UI components.
+- [`@ia2-dev/ui-primitives`](packages/ui-primitives/) provides the shared window
+  position vocabulary, accessible position controls, keyboard behavior, and
+  floating-window dragging used across IA² components.
+- [`@ia2-dev/html-rdf-navigator`](packages/html-rdf-navigator/) is a
+  dependency-free browser component for navigating the RDF expressed by an IA²
+  HTML document.
+- [`@ia2-dev/rdf-value-editor`](packages/rdf-value-editor/) discovers
+  document-defined fillables and SHACL constraints, renders a reusable
+  completion experience, follows Web Annotations to update visible value
+  targets, and publishes accepted values into an HTML/RDF runtime graph.
 - [`@ia2-dev/rdf-html`](packages/rdf-html/) parses Turtle and TriG descriptions
   of DOM nodes, validates strict child ordering, renders direct HTML or inert
   workspaces, describes parsed HTML as RDF/HTML, and preserves every unconsumed

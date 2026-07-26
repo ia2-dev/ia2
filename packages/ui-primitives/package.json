@@ -1,0 +1,51 @@
+{
+  "name": "@ia2-dev/ui-primitives",
+  "version": "0.1.0",
+  "description": "Shared accessible UI vocabulary and interaction primitives for IA² components.",
+  "author": "Yurii Rashkovskii",
+  "homepage": "https://ia2.dev/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ia2-dev/ia2.git",
+    "directory": "packages/ui-primitives"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && tsc -p tsconfig.build.json && esbuild src/index.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/index.js --sourcemap",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "check": "tsc -p tsconfig.json --noEmit"
+  },
+  "keywords": [
+    "ia2",
+    "web-component",
+    "accessibility",
+    "window",
+    "drawer"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "jsdom": "^26.0.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
+  }
+}

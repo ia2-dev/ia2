@@ -1,0 +1,35 @@
+1
+00:00:00,000 --> 00:00:04,500
+One customer-facing contract, with its semantic source and separate legal review linked at the top.
+
+2
+00:00:04,500 --> 00:00:09,000
+Counsel comments live in a related review document, so review material does not ship inside the contract.
+
+3
+00:00:09,000 --> 00:00:14,500
+Complete document discovers fields and constraints from the contract's RDF and SHACL declarations.
+
+4
+00:00:14,500 --> 00:00:19,000
+Accepted values immediately update every connected HTML placeholder and the runtime RDF graph.
+
+5
+00:00:19,000 --> 00:00:23,500
+Schema.org choices select alternative legal content and reveal only the controls that now apply.
+
+6
+00:00:23,500 --> 00:00:28,000
+Nested choices project their selected wording into the operative clause without field-specific JavaScript.
+
+7
+00:00:28,000 --> 00:00:34,500
+The component is generic: ontologies name the concepts, SHACL supplies the rules, and one connector correlates values.
+
+8
+00:00:34,500 --> 00:00:39,000
+Completion state can be saved separately as HTML/RDF or Turtle, then loaded through the same validation pipeline.
+
+9
+00:00:39,000 --> 00:00:45,000
+The RDF Navigator exposes the resulting dataset, including authored values and selected choices, as they change.

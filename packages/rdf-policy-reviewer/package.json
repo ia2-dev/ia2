@@ -1,0 +1,73 @@
+{
+  "name": "@ia2-dev/rdf-policy-reviewer",
+  "version": "0.1.0",
+  "description": "A live SHACL policy report and semantic-diff web component for HTML/RDF documents.",
+  "author": "Yurii Rashkovskii",
+  "homepage": "https://ia2.dev/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ia2-dev/ia2.git",
+    "directory": "packages/rdf-policy-reviewer"
+  },
+  "type": "module",
+  "sideEffects": [
+    "./dist/rdf-policy-reviewer.js"
+  ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/rdf-policy-reviewer.js",
+      "default": "./dist/rdf-policy-reviewer.js"
+    },
+    "./validation": {
+      "types": "./dist/validation.d.ts",
+      "import": "./dist/validation.js",
+      "default": "./dist/validation.js"
+    },
+    "./diff": {
+      "types": "./dist/diff.d.ts",
+      "import": "./dist/diff.js",
+      "default": "./dist/diff.js"
+    }
+  },
+  "main": "./dist/rdf-policy-reviewer.js",
+  "module": "./dist/rdf-policy-reviewer.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && tsc -p tsconfig.build.json && esbuild src/index.ts --bundle --splitting --format=esm --platform=browser --target=es2022 --outdir=dist --entry-names=rdf-policy-reviewer --chunk-names=chunks/[name]-[hash] --minify --sourcemap=external && esbuild src/validation.ts --bundle --format=esm --platform=neutral --packages=external --target=es2022 --outfile=dist/validation.js --minify --sourcemap=external && esbuild src/diff.ts --bundle --format=esm --platform=neutral --packages=external --target=es2022 --outfile=dist/diff.js --minify --sourcemap=external",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "check": "tsc -p tsconfig.json --noEmit"
+  },
+  "keywords": [
+    "rdf",
+    "shacl",
+    "sparql",
+    "html",
+    "linked-data",
+    "ia2",
+    "web-component",
+    "policy"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@ia2-dev/html-rdf": "^0.1.0",
+    "@rdfjs/data-model": "^2.1.2",
+    "@rdfjs/dataset": "^2.0.3",
+    "@rdfjs/types": "^2.0.1",
+    "shacl-engine": "^1.1.2"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "jsdom": "^26.0.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
+  }
+}

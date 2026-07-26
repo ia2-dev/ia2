@@ -1,13 +1,11 @@
+import { labelFor } from "@ia2-dev/html-rdf";
 import type { ExtractionResult, NamedNode } from "./model.js";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const RDF_PROPERTY = "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property";
 const RDFS_CLASS = "http://www.w3.org/2000/01/rdf-schema#Class";
-const RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
 const RDFS_SUBCLASS_OF = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
 const RDFS_SUBPROPERTY_OF = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
-const SKOS_PREF_LABEL = "http://www.w3.org/2004/02/skos/core#prefLabel";
-const DCTERMS_TITLE = "http://purl.org/dc/terms/title";
 
 const CLASS_TYPES = new Set([
   RDFS_CLASS,
@@ -31,12 +29,6 @@ const PROPERTY_TYPES = new Set([
   "http://www.w3.org/2002/07/owl#OntologyProperty",
 ]);
 
-const LABEL_PRIORITIES = new Map([
-  [RDFS_LABEL, 0],
-  [SKOS_PREF_LABEL, 1],
-  [DCTERMS_TITLE, 2],
-]);
-
 export type VocabularyKind = "class" | "property";
 
 export interface VocabularyDefinition {
@@ -56,9 +48,7 @@ export interface DocumentVocabulary {
   properties: VocabularyDefinition[];
 }
 
-interface DefinitionBuilder extends VocabularyDefinition {
-  labelPriority: number;
-}
+type DefinitionBuilder = VocabularyDefinition;
 
 function pushNamed(values: NamedNode[], term: NamedNode): void {
   if (!values.some((value) => value.value === term.value)) values.push(term);
@@ -85,7 +75,6 @@ export function extractDocumentVocabulary(result: ExtractionResult): DocumentVoc
       builder = {
         classParents: [],
         kinds: [],
-        labelPriority: Number.POSITIVE_INFINITY,
         propertyParents: [],
         sources: [],
         term,
@@ -124,18 +113,11 @@ export function extractDocumentVocabulary(result: ExtractionResult): DocumentVoc
     }
   }
 
-  for (const quad of result.quads) {
-    if (quad.subject.termType !== "NamedNode" || quad.object.termType !== "Literal") continue;
-    const priority = LABEL_PRIORITIES.get(quad.predicate.value);
-    const builder = builders.get(quad.subject.value);
-    if (priority === undefined || !builder || priority >= builder.labelPriority) continue;
-    builder.label = quad.object.value;
-    builder.labelPriority = priority;
-    pushSource(builder.sources, quad.source);
-  }
-
   const definitions = Array.from(builders.values())
-    .map(({ labelPriority: _labelPriority, ...definition }) => definition)
+    .map((definition) => {
+      const label = labelFor(result.quads, definition.term);
+      return { ...definition, ...(label ? { label } : {}) };
+    })
     .sort((left, right) => (left.label ?? left.term.value).localeCompare(right.label ?? right.term.value));
   const classes = definitions.filter((definition) => definition.kinds.includes("class"));
   const properties = definitions.filter((definition) => definition.kinds.includes("property"));

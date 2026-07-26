@@ -20,7 +20,7 @@ describe("Ia2RdfNavigator", () => {
   it("opens with Navigator first and links vocabulary terms in new tabs", () => {
     const drawer = mountRdfNavigator();
     const tabs = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ?? []);
-    expect(tabs.map((tab) => tab.textContent)).toEqual(["Navigator", "Turtle", "JSON-LD"]);
+    expect(tabs.map((tab) => tab.textContent)).toEqual(["Navigator", "SPARQL", "Turtle", "JSON-LD"]);
     expect(tabs[0]?.getAttribute("aria-selected")).toBe("true");
     const toolbar = drawer.shadowRoot?.querySelector<HTMLElement>(".toolbar");
     const tools = drawer.shadowRoot?.querySelector<HTMLElement>(".navigator-tools");
@@ -64,6 +64,341 @@ describe("Ia2RdfNavigator", () => {
     expect(vocabulary?.previousElementSibling?.textContent).toContain("odrl");
   });
 
+  it("runs editable SPARQL locally against the extracted dataset", async () => {
+    const drawer = mountRdfNavigator();
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="sparql"]')?.click();
+    const editor = drawer.shadowRoot?.querySelector<HTMLTextAreaElement>(".sparql-editor")!;
+    expect(editor.value).toContain("SELECT ?subject ?predicate ?object ?graph");
+    expect(drawer.shadowRoot?.querySelector(".sparql-safety")?.textContent).toContain("Read-only");
+
+    editor.value = "SELECT ?person ?name WHERE { ?person <https://schema.org/name> ?name }";
+    editor.dispatchEvent(new Event("input", { bubbles: true }));
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>(".sparql-run")?.click();
+
+    await vi.waitFor(() => {
+      expect(drawer.shadowRoot?.querySelector(".sparql-output")?.textContent).toContain("Alice");
+    }, { timeout: 10_000 });
+    expect(drawer.shadowRoot?.querySelectorAll(".sparql-table tbody tr")).toHaveLength(1);
+  });
+
+  it("presents labeled SPARQL resources readably while retaining their linked IRIs", async () => {
+    document.body.innerHTML = `
+      <span rdf-subject="https://example.com/right" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Readable contractual right</span>
+    `;
+    const drawer = mountRdfNavigator();
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="sparql"]')?.click();
+    const editor = drawer.shadowRoot?.querySelector<HTMLTextAreaElement>(".sparql-editor")!;
+    editor.value = "SELECT ?right ?label WHERE { ?right <http://www.w3.org/2000/01/rdf-schema#label> ?label }";
+    editor.dispatchEvent(new Event("input", { bubbles: true }));
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>(".sparql-run")?.click();
+
+    await vi.waitFor(() => {
+      expect(drawer.shadowRoot?.querySelector(".sparql-resource-label")?.textContent)
+        .toBe("Readable contractual right");
+    }, { timeout: 10_000 });
+    const root = drawer.shadowRoot!;
+    const resourceLink = root.querySelector<HTMLAnchorElement>(".sparql-resource-label");
+    expect(resourceLink?.href).toBe("https://example.com/right");
+    expect(resourceLink?.title).toBe("https://example.com/right");
+    expect(resourceLink?.getAttribute("aria-label")).toContain("Readable contractual right");
+    expect(root.querySelectorAll(".sparql-table tbody td")[1]?.textContent)
+      .toBe("Readable contractual right");
+    expect(root.querySelector(".sparql-table")?.textContent).not.toContain("https://example.com/right");
+    expect(root.querySelector(".sparql-table")?.textContent).not.toContain("XMLSchema#string");
+  });
+
+  it("routes canonical document SPARQL links through the current retrieval URL", async () => {
+    const canonicalIri = "https://ia2.dev/example/assignment.html";
+    const canonical = document.createElement("link");
+    canonical.rel = "canonical";
+    canonical.href = canonicalIri;
+    document.head.append(canonical);
+    document.body.innerHTML = `
+      <span rdf-subject="" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Assignment agreement</span>
+      <span id="parties" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">Parties</span>
+    `;
+    const drawer = mountRdfNavigator();
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="sparql"]')?.click();
+    const editor = drawer.shadowRoot?.querySelector<HTMLTextAreaElement>(".sparql-editor")!;
+    editor.value = "SELECT ?resource WHERE { ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label } ORDER BY ?resource";
+    editor.dispatchEvent(new Event("input", { bubbles: true }));
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>(".sparql-run")?.click();
+
+    await vi.waitFor(() => {
+      expect(drawer.shadowRoot?.querySelectorAll(".sparql-resource-label")).toHaveLength(2);
+    }, { timeout: 10_000 });
+    const links = Array.from(
+      drawer.shadowRoot?.querySelectorAll<HTMLAnchorElement>(".sparql-resource-label") ?? [],
+    );
+    const parties = document.getElementById("parties")!;
+    parties.scrollIntoView = vi.fn();
+    const retrievalIri = new URL(document.URL);
+    retrievalIri.hash = "";
+    expect(links.map((link) => link.href)).toEqual([
+      retrievalIri.href,
+      `${retrievalIri.href}#parties`,
+    ]);
+    expect(links.map((link) => link.title)).toEqual([
+      canonicalIri,
+      `${canonicalIri}#parties`,
+    ]);
+    expect(links.every((link) => link.dataset.semanticIri?.startsWith(canonicalIri))).toBe(true);
+
+    links[1]?.click();
+    expect(parties.scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "center" });
+    expect(window.location.hash).toBe("#parties");
+    expect(drawer.shadowRoot?.querySelector(".resource-preview")).toBeNull();
+    window.history.replaceState(null, "", retrievalIri.href);
+  });
+
+  it("reuses one embedded resource window for external SPARQL links", async () => {
+    document.body.innerHTML = `
+      <span rdf-subject="https://example.com/alice" rdf-predicate="https://schema.org/name">Alice</span>
+      <span rdf-subject="https://example.com/bob" rdf-predicate="https://schema.org/name">Bob</span>
+    `;
+    const drawer = mountRdfNavigator();
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="sparql"]')?.click();
+    const editor = drawer.shadowRoot?.querySelector<HTMLTextAreaElement>(".sparql-editor")!;
+    editor.value = "SELECT ?person WHERE { ?person <https://schema.org/name> ?name } ORDER BY ?person";
+    editor.dispatchEvent(new Event("input", { bubbles: true }));
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>(".sparql-run")?.click();
+
+    await vi.waitFor(() => {
+      expect(drawer.shadowRoot?.querySelectorAll(".sparql-resource-label")).toHaveLength(2);
+    }, { timeout: 10_000 });
+    const links = Array.from(
+      drawer.shadowRoot?.querySelectorAll<HTMLAnchorElement>(".sparql-resource-label") ?? [],
+    );
+    links[0]?.click();
+    const firstPreview = drawer.shadowRoot?.querySelector<HTMLElement>(".resource-preview");
+    expect(firstPreview).not.toBeNull();
+    expect(firstPreview?.querySelector<HTMLAnchorElement>(".resource-preview-open")?.href)
+      .toBe("https://example.com/alice");
+
+    links[1]?.click();
+    const previews = drawer.shadowRoot?.querySelectorAll<HTMLElement>(".resource-preview");
+    expect(previews).toHaveLength(1);
+    expect(previews?.[0]).toBe(firstPreview);
+    expect(firstPreview?.querySelector<HTMLAnchorElement>(".resource-preview-open")?.href)
+      .toBe("https://example.com/bob");
+    expect(firstPreview?.querySelector(".resource-preview-url")?.textContent)
+      .toBe("https://example.com/bob");
+  });
+
+  it("derives linked labels for unlabeled IRIs and renders plain strings without RDF punctuation", async () => {
+    document.body.innerHTML = `
+      <h1 rdf-subject="https://example.com/agreement" rdf-predicate="http://purl.org/dc/terms/title">Assignment agreement</h1>
+      <p rdf-subject="https://example.com/agreement" rdf-predicate="http://purl.org/dc/terms/description">A customer-distributable contract.</p>
+    `;
+    const drawer = mountRdfNavigator();
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="sparql"]')?.click();
+    const editor = drawer.shadowRoot?.querySelector<HTMLTextAreaElement>(".sparql-editor")!;
+    editor.value = `SELECT ?subject ?predicate ?object WHERE {
+      ?subject ?predicate ?object
+      VALUES ?predicate { <http://purl.org/dc/terms/description> }
+    }`;
+    editor.dispatchEvent(new Event("input", { bubbles: true }));
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>(".sparql-run")?.click();
+
+    await vi.waitFor(() => {
+      expect(drawer.shadowRoot?.querySelector(".sparql-summary")?.textContent).toBe("1 result");
+    }, { timeout: 10_000 });
+    const cells = drawer.shadowRoot?.querySelectorAll<HTMLTableCellElement>(".sparql-table tbody td")!;
+    const subject = cells[0]?.querySelector<HTMLAnchorElement>(".sparql-resource-label");
+    const predicate = cells[1]?.querySelector<HTMLAnchorElement>(".sparql-resource-label");
+    expect(subject?.textContent).toBe("Assignment agreement");
+    expect(subject?.href).toBe("https://example.com/agreement");
+    expect(predicate?.textContent).toBe("Description");
+    expect(predicate?.href).toBe("http://purl.org/dc/terms/description");
+    expect(cells[2]?.querySelector(".sparql-literal-value")?.textContent)
+      .toBe("A customer-distributable contract.");
+    expect(cells[2]?.textContent).toBe("A customer-distributable contract.");
+    expect(cells[2]?.textContent).not.toContain('"');
+    expect(cells[2]?.textContent).not.toContain("XMLSchema#string");
+  });
+
+  it("paginates SPARQL binding results and lets the reader choose a page size", async () => {
+    document.body.innerHTML = Array.from({ length: 30 }, (_, index) => {
+      const ordinal = String(index + 1).padStart(2, "0");
+      return `<span rdf-subject="https://example.com/person-${ordinal}" rdf-predicate="https://schema.org/name">Person ${ordinal}</span>`;
+    }).join("");
+    const drawer = mountRdfNavigator();
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="sparql"]')?.click();
+    const editor = drawer.shadowRoot?.querySelector<HTMLTextAreaElement>(".sparql-editor")!;
+    editor.value = "SELECT ?person ?name WHERE { ?person <https://schema.org/name> ?name } ORDER BY ?name";
+    editor.dispatchEvent(new Event("input", { bubbles: true }));
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>(".sparql-run")?.click();
+
+    await vi.waitFor(() => {
+      expect(drawer.shadowRoot?.querySelector(".sparql-summary")?.textContent)
+        .toBe("Showing 1 to 25 of 30 results");
+    }, { timeout: 10_000 });
+    const root = drawer.shadowRoot!;
+    expect(root.querySelector(".sparql-safety")?.textContent).toBe("Local dataset · Read-only");
+    expect(root.querySelectorAll(".sparql-table tbody tr")).toHaveLength(25);
+    expect(root.querySelector(".sparql-page-status")?.textContent).toBe("Page 1 of 2");
+    expect(root.querySelector<HTMLButtonElement>(".sparql-page-button:first-of-type")?.disabled).toBe(true);
+
+    const buttons = root.querySelectorAll<HTMLButtonElement>(".sparql-page-button");
+    buttons[1]?.click();
+    expect(root.querySelector(".sparql-summary")?.textContent).toBe("Showing 26 to 30 of 30 results");
+    expect(root.querySelectorAll(".sparql-table tbody tr")).toHaveLength(5);
+    expect(root.querySelector(".sparql-page-status")?.textContent).toBe("Page 2 of 2");
+    expect(buttons[1]?.disabled).toBe(true);
+
+    const pageSize = root.querySelector<HTMLSelectElement>(".sparql-page-size")!;
+    pageSize.value = "10";
+    pageSize.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(root.querySelector(".sparql-summary")?.textContent).toBe("Showing 21 to 30 of 30 results");
+    expect(root.querySelectorAll(".sparql-table tbody tr")).toHaveLength(10);
+    expect(root.querySelector(".sparql-page-status")?.textContent).toBe("Page 3 of 3");
+  });
+
+  it("observes semantic document changes and replaces only changed query results by default", async () => {
+    const drawer = mountRdfNavigator();
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="sparql"]')?.click();
+    const editor = drawer.shadowRoot?.querySelector<HTMLTextAreaElement>(".sparql-editor")!;
+    editor.value = "SELECT ?person ?name WHERE { ?person <https://schema.org/name> ?name }";
+    editor.dispatchEvent(new Event("input", { bubbles: true }));
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>(".sparql-run")?.click();
+
+    await vi.waitFor(() => {
+      expect(drawer.shadowRoot?.querySelector(".sparql-output")?.textContent).toContain("Alice");
+    }, { timeout: 10_000 });
+    const root = drawer.shadowRoot!;
+    const observe = root.querySelector<HTMLInputElement>(".sparql-observe-input")!;
+    const output = root.querySelector<HTMLElement>(".sparql-output")!;
+    const initialTable = output.querySelector("table");
+    expect(observe.checked).toBe(true);
+
+    const unrelated = document.createElement("data");
+    unrelated.value = "42";
+    unrelated.setAttribute("rdf-subject", "https://example.com/bob");
+    unrelated.setAttribute("rdf-predicate", "https://schema.org/age");
+    unrelated.setAttribute("rdf-datatype", "http://www.w3.org/2001/XMLSchema#integer");
+    document.body.append(unrelated);
+    await vi.waitFor(() => {
+      expect(root.querySelector(".launcher .count")?.textContent).toBe("2");
+    });
+    expect(root.querySelector(".sparql-output")).toBe(output);
+    expect(output.querySelector("table")).toBe(initialTable);
+
+    document.body.querySelector("span")!.textContent = "Alicia";
+    await vi.waitFor(() => {
+      expect(output.textContent).toContain("Alicia");
+    }, { timeout: 10_000 });
+    expect(root.querySelector(".sparql-output")).toBe(output);
+    expect(output.querySelector("table")).not.toBe(initialTable);
+
+    observe.checked = false;
+    observe.dispatchEvent(new Event("change", { bubbles: true }));
+    document.body.querySelector("span")!.textContent = "Alina";
+    const anotherUnrelated = document.createElement("data");
+    anotherUnrelated.value = "true";
+    anotherUnrelated.setAttribute("rdf-subject", "https://example.com/bob");
+    anotherUnrelated.setAttribute("rdf-predicate", "https://schema.org/active");
+    anotherUnrelated.setAttribute("rdf-datatype", "http://www.w3.org/2001/XMLSchema#boolean");
+    document.body.append(anotherUnrelated);
+    await vi.waitFor(() => {
+      expect(root.querySelector(".launcher .count")?.textContent).toBe("3");
+    });
+    expect(output.textContent).toContain("Alicia");
+    expect(output.textContent).not.toContain("Alina");
+
+    observe.checked = true;
+    observe.dispatchEvent(new Event("change", { bubbles: true }));
+    await vi.waitFor(() => {
+      expect(output.textContent).toContain("Alina");
+    }, { timeout: 10_000 });
+  }, 15_000);
+
+  it("syntax-highlights SPARQL while keeping the native editor softly wrapped", () => {
+    const drawer = mountRdfNavigator();
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="sparql"]')?.click();
+    const root = drawer.shadowRoot!;
+    const editor = root.querySelector<HTMLTextAreaElement>(".sparql-editor")!;
+    const highlight = root.querySelector<HTMLElement>(".sparql-highlight")!;
+
+    expect(root.querySelector(".sparql-editor-shell")).not.toBeNull();
+    expect(editor.wrap).toBe("soft");
+    expect(highlight.getAttribute("aria-hidden")).toBe("true");
+    expect(highlight.querySelector(".tok.keyword")?.textContent).toBe("SELECT");
+    expect(highlight.querySelector(".tok.variable")?.textContent).toBe("?subject");
+    expect(highlight.querySelector("a")).toBeNull();
+
+    editor.value = [
+      "PREFIX schema: <https://schema.org/>",
+      "SELECT ?person WHERE {",
+      "  ?person schema:name \"A deliberately long value that must remain inside the editor surface\" .",
+      "  # A query comment",
+      "}",
+    ].join("\n");
+    editor.dispatchEvent(new Event("input", { bubbles: true }));
+
+    expect(highlight.textContent).toBe(editor.value);
+    expect(highlight.querySelector(".tok.name")?.textContent).toBe("schema:");
+    expect(highlight.querySelector(".tok.iri")?.textContent).toBe("<https://schema.org/>");
+    expect(highlight.querySelector(".tok.string")?.textContent).toContain("deliberately long value");
+    expect(highlight.querySelector(".tok.comment")?.textContent).toBe("# A query comment");
+
+    editor.scrollTop = 24;
+    editor.scrollLeft = 18;
+    editor.dispatchEvent(new Event("scroll"));
+    expect(highlight.scrollTop).toBe(24);
+    expect(editor.scrollLeft).toBe(0);
+
+    const css = root.querySelector("style")?.textContent ?? "";
+    expect(css).toContain("caret-color: var(--ink)");
+    expect(css).toContain(".sparql-highlight code { font: inherit; }");
+    expect(css).toContain("overflow-x: hidden");
+    expect(css).toContain("position: relative");
+    expect(css).toContain("white-space: pre-wrap");
+    expect(css).toContain("z-index: 1");
+  });
+
+  it("discovers SHACL-described suggested queries without document-specific configuration", async () => {
+    document.body.insertAdjacentHTML("beforeend", `
+      <div hidden>
+        <a rdf-subject="#people-query" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" href="http://www.w3.org/ns/shacl#SPARQLExecutable"></a>
+        <a rdf-subject="#people-query" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" href="http://www.w3.org/ns/shacl#SPARQLSelectExecutable"></a>
+        <span rdf-subject="#people-query" rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label">People and names</span>
+        <span rdf-subject="#people-query" rdf-predicate="http://purl.org/dc/terms/description">Find named people in the current dataset.</span>
+        <code rdf-subject="#people-query" rdf-predicate="http://www.w3.org/ns/shacl#select">SELECT ?person ?name WHERE { ?person &lt;https://schema.org/name&gt; ?name }</code>
+      </div>`);
+    const drawer = mountRdfNavigator();
+    expect(drawer.shadowRoot?.querySelector('[data-view="sparql"]')?.textContent).toBe("SPARQL (1)");
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="sparql"]')?.click();
+
+    const select = drawer.shadowRoot?.querySelector<HTMLSelectElement>(".sparql-suggestion")!;
+    expect(Array.from(select.options).map(({ textContent }) => textContent)).toEqual(["Custom query", "People and names"]);
+    expect(select.labels?.[0]?.textContent).toBe("Suggested query");
+    expect(select.labels?.[0]?.contains(drawer.shadowRoot?.querySelector(".sparql-description") ?? null)).toBe(false);
+    select.value = Array.from(select.options).find(({ textContent }) => textContent === "People and names")!.value;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(drawer.shadowRoot?.querySelector<HTMLTextAreaElement>(".sparql-editor")?.value).toContain("SELECT ?person ?name");
+    expect(drawer.shadowRoot?.querySelector(".sparql-description")?.textContent).toContain("current dataset");
+
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>(".sparql-run")?.click();
+    await vi.waitFor(() => {
+      expect(drawer.shadowRoot?.querySelector(".sparql-output")?.textContent).toContain("Alice");
+    }, { timeout: 10_000 });
+  });
+
+  it("refuses SPARQL Update before it can mutate the document dataset", async () => {
+    const drawer = mountRdfNavigator();
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="sparql"]')?.click();
+    const editor = drawer.shadowRoot?.querySelector<HTMLTextAreaElement>(".sparql-editor")!;
+    editor.value = 'INSERT DATA { <https://example.com/alice> <https://schema.org/name> "Changed" }';
+    editor.dispatchEvent(new Event("input", { bubbles: true }));
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>(".sparql-run")?.click();
+
+    await vi.waitFor(() => {
+      expect(drawer.shadowRoot?.querySelector(".sparql-status")?.textContent).toContain("SPARQL Update is disabled");
+    }, { timeout: 10_000 });
+    expect(document.body.textContent).toContain("Alice");
+    expect(document.body.textContent).not.toContain("Changed");
+  });
+
   it("shows Discovery only when candidates exist and explicitly loads HTML/RDF contributions", async () => {
     const canonical = document.createElement("link");
     canonical.rel = "canonical";
@@ -82,7 +417,7 @@ describe("Ia2RdfNavigator", () => {
     try {
       const drawer = mountRdfNavigator();
       const tabs = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ?? []);
-      expect(tabs.map((tab) => tab.textContent)).toEqual(["Navigator", "Discovery (1)", "Turtle", "JSON-LD"]);
+      expect(tabs.map((tab) => tab.textContent)).toEqual(["Navigator", "Discovery (1)", "SPARQL", "Turtle", "JSON-LD"]);
 
       drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="discovery"]')?.click();
       const target = drawer.shadowRoot?.querySelector<HTMLAnchorElement>('.discovery-target');
@@ -128,7 +463,7 @@ describe("Ia2RdfNavigator", () => {
 
     const drawer = mountRdfNavigator();
     const tabs = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ?? []);
-    expect(tabs.map((tab) => tab.textContent)).toEqual(["Navigator", "Vocabulary (3)", "Turtle", "JSON-LD"]);
+    expect(tabs.map((tab) => tab.textContent)).toEqual(["Navigator", "Vocabulary (3)", "SPARQL", "Turtle", "JSON-LD"]);
     drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="vocabulary"]')?.click();
 
     const sections = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLElement>(".ontology-section") ?? []);
@@ -622,18 +957,20 @@ describe("Ia2RdfNavigator", () => {
     const viewport = drawer.shadowRoot?.querySelector<HTMLElement>(".viewport")!;
     viewport.scrollTop = 84;
     expect(options.every((option) => option.querySelector(".position-icon"))).toBe(true);
-    expect(options.map((option) => option.textContent?.trim())).toEqual(["", "", "", "", "", "", ""]);
+    expect(options.map((option) => option.textContent?.trim())).toEqual(["", "", "", "", "", "", "", "", ""]);
     expect(options.map((option) => option.getAttribute("aria-label"))).toEqual([
       "Right, full height",
       "Right, top half",
       "Right, bottom half",
+      "Bottom, full width",
       "Floating, centered",
+      "Top, full width",
       "Left, full height",
       "Left, bottom half",
       "Left, top half",
     ]);
-    expect(options.map((option) => option.getAttribute("aria-checked"))).toEqual(["true", "false", "false", "false", "false", "false", "false"]);
-    expect(options.map((option) => option.tabIndex)).toEqual([0, -1, -1, -1, -1, -1, -1]);
+    expect(options.map((option) => option.getAttribute("aria-checked"))).toEqual(["true", "false", "false", "false", "false", "false", "false", "false", "false"]);
+    expect(options.map((option) => option.tabIndex)).toEqual([0, -1, -1, -1, -1, -1, -1, -1, -1]);
     expect(drawer.shadowRoot?.querySelector<HTMLElement>(".panel")?.dataset.position).toBe("right");
 
     options[0]!.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowRight" }));
@@ -643,7 +980,7 @@ describe("Ia2RdfNavigator", () => {
     expect(drawer.shadowRoot?.querySelector(".viewport")).toBe(viewport);
     expect(viewport.scrollTop).toBe(84);
 
-    options[3]!.click();
+    options[4]!.click();
     const panel = drawer.shadowRoot?.querySelector<HTMLElement>(".panel")!;
     expect(panel.dataset.position).toBe("floating");
     expect(drawer.shadowRoot?.querySelector<HTMLElement>(".launcher")?.dataset.position).toBe("floating");
@@ -677,11 +1014,11 @@ describe("Ia2RdfNavigator", () => {
     expect(Number.parseFloat(panel.style.width)).toBeGreaterThan(draggedWidth);
     expect(Number.parseFloat(panel.style.height)).toBeGreaterThan(draggedHeight);
 
-    options[5]!.click();
+    options[7]!.click();
     expect(drawer.shadowRoot?.querySelector<HTMLElement>(".launcher")?.dataset.position).toBe("left-bottom");
     positionSwitch.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "End" }));
     expect(drawer.shadowRoot?.querySelector<HTMLElement>(".panel")?.dataset.position).toBe("left-top");
-    options[5]!.click();
+    options[7]!.click();
     drawer.refresh();
     expect(drawer.shadowRoot?.querySelector<HTMLButtonElement>('.position-option[aria-checked="true"]')?.dataset.position).toBe("left-bottom");
   });

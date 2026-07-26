@@ -1,967 +1,230 @@
-// src/model.ts
-var namedNode = (value) => ({ termType: "NamedNode", value });
-var blankNode = (value) => ({ termType: "BlankNode", value });
-var XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
-var RDF_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
-var RDF_DIR_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString";
-
-// src/extract.ts
-var CORE_ATTRIBUTES = /* @__PURE__ */ new Set([
-  "rdf-version",
-  "rdf-subject",
-  "rdf-subject-key",
-  "rdf-predicate",
-  "rdf-object-key",
-  "rdf-datatype",
-  "rdf-graph",
-  "rdf-graph-key"
-]);
-var IRI_CARRIERS = {
-  a: ["href"],
-  area: ["href"],
-  link: ["href"],
-  audio: ["src"],
-  embed: ["src"],
-  iframe: ["src"],
-  img: ["src"],
-  input: ["src", "formaction"],
-  script: ["src"],
-  source: ["src"],
-  track: ["src"],
-  video: ["src", "poster"],
-  blockquote: ["cite"],
-  del: ["cite"],
-  ins: ["cite"],
-  q: ["cite"],
-  form: ["action"],
-  button: ["formaction"],
-  object: ["data"]
-};
-var InvalidStatement = class extends Error {
-  constructor(code, message) {
-    super(message);
-    this.code = code;
+import{c as Re,d as Te,e as oe,f as Me,g as Be,h as se,i as ce,j as Ce,k as H,l as me,m as ne,n as We}from"./chunks/chunk-74HIOZ7W.js";var Lt="http://www.w3.org/2000/01/rdf-schema#seeAlso",Rt="http://www.w3.org/2000/01/rdf-schema#isDefinedBy",Tt="http://purl.org/dc/terms/requires",Mt="http://purl.org/dc/terms/source",Ct="http://www.w3.org/ns/prov#wasDerivedFrom",Dt="http://www.w3.org/2002/07/owl#imports",Nt="http://www.w3.org/ns/dcat#qualifiedRelation",qt="http://purl.org/dc/terms/relation",At="http://www.w3.org/ns/dcat#hadRole",Ge=new Set([Lt,Rt,Tt,Mt,Ct,Dt]);function Q(n){return n?`${n.termType}:${n.value}`:"default"}function Ke(n,e){return Q(n)===Q(e)}function Ye(n){try{let e=new URL(n);return e.hash="",e.href}catch{return n.replace(/#.*$/s,"")}}function It(n){let e=2166136261;for(let t=0;t<n.length;t+=1)e^=n.charCodeAt(t),e=Math.imul(e,16777619);return`discovery-${(e>>>0).toString(36)}`}function Qe(n,e){n.some(t=>t.value===e.value)||n.push(e)}function zt(n,e){n.some(t=>Q(t)===Q(e))||n.push(e)}function fe(n,e){n.includes(e)||n.push(e)}function De(n){let e=new Map,t=Ye(n.sourceDocumentIri),o=(r,i,a)=>{if(Ye(i.value)===t)return null;let s=`${Q(r)}|${Q(a)}|${i.value}`,c=e.get(s);return c||(c={context:r,graph:a,id:It(s),predicates:[],qualifiedRelationships:[],roles:[],sources:[],target:i},e.set(s,c)),c};for(let r of n.quads){if(!Ge.has(r.predicate.value)||r.object.termType!=="NamedNode")continue;let i=o(r.subject,r.object,r.graph);i&&(Qe(i.predicates,r.predicate),fe(i.sources,r.source))}for(let r of n.quads){if(r.predicate.value!==Nt||r.object.termType!=="NamedNode"&&r.object.termType!=="BlankNode")continue;let i=r.object,a=n.quads.filter(l=>Ke(l.subject,i)&&Ke(l.graph,r.graph)),s=a.filter(l=>l.predicate.value===qt&&l.object.termType==="NamedNode"),c=a.filter(l=>l.predicate.value===At&&l.object.termType==="NamedNode");for(let l of s){if(l.object.termType!=="NamedNode")continue;let d=o(r.subject,l.object,r.graph);if(d){zt(d.qualifiedRelationships,i),fe(d.sources,r.source),fe(d.sources,l.source);for(let u of c)u.object.termType==="NamedNode"&&(Qe(d.roles,u.object),fe(d.sources,u.source))}}}return Array.from(e.values()).sort((r,i)=>r.target.value.localeCompare(i.target.value))}function Ne(n,e){let t=[...n.quads],o=new Map(n.graphs.map(i=>[Q(i),i])),r=[...n.diagnostics];for(let i of e){let a=Re(i.result.sourceDocumentIri);for(let s of i.result.quads){let c=s.graph??a;t.push({...s,graph:c}),o.set(Q(c),c)}for(let s of i.result.graphs)o.set(Q(s),s);r.push(...i.result.diagnostics.map(s=>({...s,message:`Contribution ${i.result.sourceDocumentIri}: ${s.message}`})))}return{...n,diagnostics:r,graphs:Array.from(o.values()),quads:t}}function O(n){return n.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}var qe=[{position:"right",label:"Right, full height",icon:'<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M13 2h5v12h-5z"/></svg>'},{position:"right-top",label:"Right, top half",icon:'<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M13 2h5v5.5h-5z"/></svg>'},{position:"right-bottom",label:"Right, bottom half",icon:'<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M13 8.5h5V14h-5z"/></svg>'},{position:"bottom",label:"Bottom, full width",icon:'<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M2 9h16v5H2z"/></svg>'},{position:"floating",label:"Floating, centered",icon:'<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><rect class="position-region" x="5" y="4.5" width="10" height="7" rx="1"/></svg>'},{position:"top",label:"Top, full width",icon:'<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M2 2h16v5H2z"/></svg>'},{position:"left",label:"Left, full height",icon:'<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M2 2h5v12H2z"/></svg>'},{position:"left-bottom",label:"Left, bottom half",icon:'<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M2 8.5h5V14H2z"/></svg>'},{position:"left-top",label:"Left, top half",icon:'<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M2 2h5v5.5H2z"/></svg>'}],Ze=`
+  .ia2-window-surface {
+    border-left: 1px solid var(--ia2-window-rule, currentColor);
+    bottom: 0;
+    box-shadow: -12px 0 48px oklch(20% 0.03 286 / 18%);
+    max-width: 100vw;
+    position: fixed;
+    right: 0;
+    top: 0;
+    transform: translateX(105%);
+    transition:
+      opacity 180ms ease,
+      transform var(--ia2-window-transition-duration, 220ms) cubic-bezier(.22, 1, .36, 1),
+      visibility var(--ia2-window-transition-duration, 220ms);
+    visibility: hidden;
+    width: var(--ia2-window-width, min(760px, 72vw));
   }
-};
-function ownerDocument(root) {
-  if (root.nodeType === Node.DOCUMENT_NODE) return root;
-  const document2 = root.ownerDocument;
-  if (!document2) throw new Error("The extraction root has no owner document.");
-  return document2;
-}
-function hasLinkRelation(element, relation) {
-  return (element.getAttribute("rel") ?? "").split(/[\t\n\f\r ]+/).some((token) => token.toLowerCase() === relation);
-}
-function establishDocumentIris(doc, diagnostics) {
-  const retrievalDocumentIri = doc.URL || doc.baseURI;
-  const htmlBaseIri = doc.baseURI || retrievalDocumentIri;
-  const canonicalLinks = Array.from(doc.head?.querySelectorAll("link[rel][href]") ?? []).filter((link) => hasLinkRelation(link, "canonical"));
-  let sourceDocumentIri = retrievalDocumentIri;
-  if (canonicalLinks.length > 1) {
-    diagnostics.push({
-      severity: "warning",
-      code: "multiple-canonical-links",
-      message: "More than one canonical link was declared; the retrieval IRI remains the source document IRI.",
-      source: canonicalLinks[0]
-    });
-  } else if (canonicalLinks.length === 1) {
-    const canonicalLink = canonicalLinks[0];
-    try {
-      const canonicalIri = new URL(canonicalLink.getAttribute("href") ?? "", htmlBaseIri).href;
-      if (canonicalIri.includes("#")) {
-        diagnostics.push({
-          severity: "warning",
-          code: "canonical-iri-has-fragment",
-          message: "The canonical document IRI cannot contain a fragment; the retrieval IRI remains the source document IRI.",
-          source: canonicalLink
-        });
-      } else {
-        sourceDocumentIri = canonicalIri;
-      }
-    } catch {
-      diagnostics.push({
-        severity: "warning",
-        code: "invalid-canonical-iri",
-        message: "The canonical link does not resolve to an absolute IRI; the retrieval IRI remains the source document IRI.",
-        source: canonicalLink
-      });
+  .ia2-window-surface[data-open=""],
+  .ia2-window-surface[data-open="true"] {
+    transform: translateX(0);
+    visibility: visible;
+  }
+  .ia2-window-surface[data-position^="left"] {
+    border-left: 0;
+    border-right: 1px solid var(--ia2-window-rule, currentColor);
+    box-shadow: 12px 0 48px oklch(20% 0.03 286 / 18%);
+    left: 0;
+    right: auto;
+    transform: translateX(-105%);
+  }
+  .ia2-window-surface[data-position^="left"][data-open=""],
+  .ia2-window-surface[data-position^="left"][data-open="true"] {
+    transform: translateX(0);
+  }
+  .ia2-window-surface[data-position$="-top"] {
+    bottom: auto;
+    border-bottom: 1px solid var(--ia2-window-rule, currentColor);
+    height: var(--ia2-window-half-height, 50vh);
+    top: 0;
+  }
+  .ia2-window-surface[data-position$="-bottom"] {
+    border-top: 1px solid var(--ia2-window-rule, currentColor);
+    bottom: 0;
+    height: var(--ia2-window-half-height, 50vh);
+    top: auto;
+  }
+  .ia2-window-surface[data-position="top"],
+  .ia2-window-surface[data-position="bottom"] {
+    border: 0;
+    height: var(--ia2-window-horizontal-height, 50vh);
+    left: 0;
+    max-width: none;
+    right: 0;
+    width: 100vw;
+  }
+  .ia2-window-surface[data-position="top"] {
+    border-bottom: 1px solid var(--ia2-window-rule, currentColor);
+    bottom: auto;
+    box-shadow: 0 12px 48px oklch(20% 0.03 286 / 18%);
+    top: 0;
+    transform: translateY(-105%);
+  }
+  .ia2-window-surface[data-position="bottom"] {
+    border-top: 1px solid var(--ia2-window-rule, currentColor);
+    bottom: 0;
+    box-shadow: 0 -12px 48px oklch(20% 0.03 286 / 18%);
+    top: auto;
+    transform: translateY(105%);
+  }
+  .ia2-window-surface[data-position="top"][data-open=""],
+  .ia2-window-surface[data-position="top"][data-open="true"],
+  .ia2-window-surface[data-position="bottom"][data-open=""],
+  .ia2-window-surface[data-position="bottom"][data-open="true"] {
+    transform: translateY(0);
+  }
+  .ia2-window-surface[data-position="floating"] {
+    border: 1px solid var(--ia2-window-rule, currentColor);
+    border-radius: var(--ia2-window-floating-radius, 14px);
+    bottom: auto;
+    box-shadow: 0 18px 64px oklch(20% 0.03 286 / 24%);
+    height: var(--ia2-window-floating-height, min(860px, calc(100vh - 48px)));
+    left: var(--ia2-window-floating-left, 50%);
+    opacity: 0;
+    overflow: hidden;
+    right: auto;
+    top: var(--ia2-window-floating-top, 50%);
+    transform: var(--ia2-window-floating-closed-transform, translate(-50%, -48%) scale(.985));
+    width: var(--ia2-window-floating-width, min(760px, calc(100vw - 48px)));
+  }
+  .ia2-window-surface[data-position="floating"][data-open=""],
+  .ia2-window-surface[data-position="floating"][data-open="true"] {
+    opacity: 1;
+    transform: var(--ia2-window-floating-open-transform, translate(-50%, -50%) scale(1));
+  }
+  .ia2-window-surface[data-position="floating"][data-dragged="true"] {
+    transform: none;
+  }
+  .ia2-window-resize-handles {
+    display: none;
+  }
+  .ia2-window-surface[data-position="floating"] .ia2-window-resize-handles {
+    display: contents;
+  }
+  .ia2-window-resize-handle {
+    position: absolute;
+    touch-action: none;
+    z-index: 12;
+  }
+  .ia2-window-resize-handle[data-resize="n"],
+  .ia2-window-resize-handle[data-resize="s"] {
+    height: 10px;
+    left: 18px;
+    right: 18px;
+  }
+  .ia2-window-resize-handle[data-resize="n"] {
+    cursor: ns-resize;
+    top: 0;
+  }
+  .ia2-window-resize-handle[data-resize="s"] {
+    bottom: 0;
+    cursor: ns-resize;
+  }
+  .ia2-window-resize-handle[data-resize="e"],
+  .ia2-window-resize-handle[data-resize="w"] {
+    bottom: 18px;
+    top: 18px;
+    width: 10px;
+  }
+  .ia2-window-resize-handle[data-resize="e"] {
+    cursor: ew-resize;
+    right: 0;
+  }
+  .ia2-window-resize-handle[data-resize="w"] {
+    cursor: ew-resize;
+    left: 0;
+  }
+  .ia2-window-resize-handle[data-resize="ne"],
+  .ia2-window-resize-handle[data-resize="nw"],
+  .ia2-window-resize-handle[data-resize="se"],
+  .ia2-window-resize-handle[data-resize="sw"] {
+    height: 20px;
+    width: 20px;
+  }
+  .ia2-window-resize-handle[data-resize="ne"] {
+    cursor: nesw-resize;
+    right: 0;
+    top: 0;
+  }
+  .ia2-window-resize-handle[data-resize="nw"] {
+    cursor: nwse-resize;
+    left: 0;
+    top: 0;
+  }
+  .ia2-window-resize-handle[data-resize="se"] {
+    bottom: 0;
+    cursor: nwse-resize;
+    right: 0;
+  }
+  .ia2-window-resize-handle[data-resize="sw"] {
+    bottom: 0;
+    cursor: nesw-resize;
+    left: 0;
+  }
+  .ia2-window-resize-handle[data-resize="se"]::after {
+    border-bottom: 2px solid color-mix(in oklch, currentColor, transparent 68%);
+    border-right: 2px solid color-mix(in oklch, currentColor, transparent 68%);
+    bottom: 5px;
+    content: "";
+    height: 6px;
+    position: absolute;
+    right: 5px;
+    width: 6px;
+  }
+  .ia2-window-surface.is-resizing {
+    transition: none;
+    user-select: none;
+  }
+  @media (max-width: 760px) {
+    .ia2-window-surface,
+    .ia2-window-surface[data-position] {
+      border: 0;
+      border-radius: 0;
+      bottom: 0;
+      height: 100vh;
+      left: auto;
+      max-width: none;
+      opacity: 1;
+      right: 0;
+      top: 0;
+      transform: translateX(105%);
+      width: 100%;
+    }
+    .ia2-window-surface[data-position][data-open=""],
+    .ia2-window-surface[data-position][data-open="true"] {
+      transform: translateX(0);
+    }
+    .ia2-window-surface[data-position^="left"] {
+      left: 0;
+      right: auto;
+      transform: translateX(-105%);
+    }
+    .ia2-window-surface[data-position="floating"] .ia2-window-resize-handles {
+      display: none;
     }
   }
-  const hasExplicitBase = Boolean(doc.head?.querySelector("base[href]"));
-  return {
-    retrievalDocumentIri,
-    sourceDocumentIri,
-    baseIri: hasExplicitBase ? htmlBaseIri : sourceDocumentIri
-  };
-}
-function resolveIri(reference, ctx, subjectFragment = false) {
-  try {
-    const base = subjectFragment && reference.startsWith("#") ? ctx.sourceDocumentIri : ctx.baseIri;
-    const iri2 = new URL(reference, base).href;
-    if (!/^[A-Za-z][A-Za-z0-9+.-]*:/.test(iri2)) {
-      throw new Error("The result is not absolute.");
-    }
-    return iri2;
-  } catch {
-    throw new InvalidStatement("invalid-iri", `Cannot resolve IRI reference \u201C${reference}\u201D.`);
+  @media (prefers-reduced-motion: reduce) {
+    .ia2-window-surface { transition: none; }
   }
-}
-function keyNode(key, ctx) {
-  if (!key || /[\t\n\f\r ]/.test(key)) {
-    throw new InvalidStatement("invalid-key", "Local RDF keys must be non-empty and contain no ASCII whitespace.");
-  }
-  let node = ctx.keys.get(key);
-  if (!node) {
-    node = blankNode(`b${ctx.nextBlank++}`);
-    ctx.keys.set(key, node);
-  }
-  return node;
-}
-function elementNode(element, ctx) {
-  let node = ctx.elementNodes.get(element);
-  if (!node) {
-    node = blankNode(`b${ctx.nextBlank++}`);
-    ctx.elementNodes.set(element, node);
-  }
-  return node;
-}
-function encodeFragment(value) {
-  return Array.from(value, (character) => {
-    if (character === "%") return "%25";
-    return encodeURIComponent(character).replace(/%[0-9a-f]{2}/gi, (octet) => octet.toUpperCase());
-  }).join("");
-}
-function subjectFor(element, ctx) {
-  const hasIri = element.hasAttribute("rdf-subject");
-  const hasKey = element.hasAttribute("rdf-subject-key");
-  if (hasIri && hasKey) {
-    throw new InvalidStatement("competing-subjects", "A statement cannot carry both rdf-subject and rdf-subject-key.");
-  }
-  if (hasIri) {
-    const value = element.getAttribute("rdf-subject") ?? "";
-    return namedNode(resolveIri(value, ctx, true));
-  }
-  if (hasKey) return keyNode(element.getAttribute("rdf-subject-key") ?? "", ctx);
-  const id = element.getAttribute("id");
-  if (id) {
-    const withoutFragment = ctx.sourceDocumentIri.replace(/#.*$/s, "");
-    return namedNode(`${withoutFragment}#${encodeFragment(id)}`);
-  }
-  return elementNode(element, ctx);
-}
-function directTemplates(element) {
-  return Array.from(element.children).filter(
-    (child) => child.localName === "template"
-  );
-}
-function iriCarriers(element) {
-  const attributes = IRI_CARRIERS[element.localName] ?? [];
-  return attributes.flatMap((attribute) => {
-    const value = element.getAttribute(attribute);
-    return value === null ? [] : [{ attribute, value }];
-  });
-}
-function textWithoutTemplates(element) {
-  const chunks = [];
-  const visit = (node) => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      chunks.push(node.nodeValue ?? "");
-      return;
-    }
-    if (node.nodeType !== Node.ELEMENT_NODE) return;
-    const child = node;
-    if (child.localName === "template") return;
-    child.childNodes.forEach(visit);
-  };
-  element.childNodes.forEach(visit);
-  return chunks.join("").replace(/[\t\n\f\r ]+/g, " ").replace(/^ | $/g, "");
-}
-function isLanguageTag(value) {
-  if (!/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(value)) return false;
-  try {
-    new Intl.Locale(value);
-    return true;
-  } catch {
-    return false;
-  }
-}
-function literalFor(element, lexical, ctx) {
-  const datatype = element.getAttribute("rdf-datatype");
-  const language = element.getAttribute("lang") ?? "";
-  const directionSource = element.getAttribute("dir");
-  const direction = directionSource?.toLowerCase();
-  if (datatype !== null) {
-    const datatypeIri = resolveIri(datatype, ctx);
-    if (datatypeIri === RDF_LANG_STRING || datatypeIri === RDF_DIR_LANG_STRING) {
-      throw new InvalidStatement("invalid-literal-metadata", "rdf-datatype cannot explicitly select an RDF language-string datatype.");
-    }
-    if (language || direction === "ltr" || direction === "rtl") {
-      throw new InvalidStatement("competing-literal-metadata", "A typed literal cannot also carry RDF language or direction.");
-    }
-    return { termType: "Literal", value: lexical, datatype: namedNode(datatypeIri), language: "" };
-  }
-  if (directionSource !== null && direction !== "ltr" && direction !== "rtl" && direction !== "auto") {
-    throw new InvalidStatement("invalid-direction", `Unsupported RDF base direction \u201C${directionSource}\u201D.`);
-  }
-  const rdfDirection = direction === "ltr" || direction === "rtl" ? direction : void 0;
-  if (rdfDirection && !language) {
-    throw new InvalidStatement("direction-without-language", "RDF base direction requires a non-empty language tag.");
-  }
-  if (language && !isLanguageTag(language)) {
-    throw new InvalidStatement("invalid-language", `\u201C${language}\u201D is not a supported BCP 47 language tag.`);
-  }
-  if (language && rdfDirection) {
-    return {
-      termType: "Literal",
-      value: lexical,
-      datatype: namedNode(RDF_DIR_LANG_STRING),
-      language,
-      direction: rdfDirection
-    };
-  }
-  if (language) {
-    return { termType: "Literal", value: lexical, datatype: namedNode(RDF_LANG_STRING), language };
-  }
-  return { termType: "Literal", value: lexical, datatype: namedNode(XSD_STRING), language: "" };
-}
-function parseTermTemplate(template, ctx) {
-  if (Array.from(template.attributes).some((attribute) => CORE_ATTRIBUTES.has(attribute.name))) {
-    throw new InvalidStatement("annotated-term-template", "An object-position template cannot carry Core rdf-* attributes.");
-  }
-  const elementChildren = Array.from(template.content.children);
-  const nonWhitespaceText = Array.from(template.content.childNodes).some(
-    (node) => node.nodeType === Node.TEXT_NODE && /\S/.test(node.nodeValue ?? "")
-  );
-  const statements = template.content.querySelectorAll("[rdf-predicate]");
-  if (elementChildren.length !== 1 || nonWhitespaceText || statements.length !== 1) {
-    throw new InvalidStatement("invalid-term-fragment", "A triple-term template must contain exactly one statement element and no other non-whitespace content.");
-  }
-  const inner = statements[0];
-  if (!inner || inner !== elementChildren[0]) {
-    throw new InvalidStatement("nested-term-statement", "The triple-term statement must be the template's sole top-level element.");
-  }
-  if (inner.hasAttribute("rdf-graph") || inner.hasAttribute("rdf-graph-key")) {
-    throw new InvalidStatement("graphed-triple-term", "A triple term cannot carry graph membership.");
-  }
-  const parsed = parseStatement(inner, ctx);
-  return { termType: "Triple", subject: parsed.subject, predicate: parsed.predicate, object: parsed.object };
-}
-function objectFor(element, ctx) {
-  const templates = directTemplates(element);
-  const hasKey = element.hasAttribute("rdf-object-key");
-  const iris = iriCarriers(element);
-  const literalCarrier = element.localName === "meta" && element.hasAttribute("content") || element.localName === "data" && element.hasAttribute("value") || element.localName === "time" && element.hasAttribute("datetime");
-  const carrierCount = (templates.length ? 1 : 0) + (hasKey ? 1 : 0) + iris.length + (literalCarrier ? 1 : 0);
-  if (templates.length > 1 || carrierCount > 1) {
-    throw new InvalidStatement("competing-objects", "A statement must have exactly one unambiguous object carrier.");
-  }
-  if (templates.length === 1) {
-    if (element.hasAttribute("rdf-datatype") || element.hasAttribute("lang") || element.hasAttribute("dir")) {
-      throw new InvalidStatement("metadata-on-nonliteral", "Literal metadata cannot be applied to a triple-term object.");
-    }
-    return parseTermTemplate(templates[0], ctx);
-  }
-  if (hasKey) {
-    if (element.hasAttribute("rdf-datatype") || element.hasAttribute("lang") || element.hasAttribute("dir")) {
-      throw new InvalidStatement("metadata-on-nonliteral", "Literal metadata cannot be applied to a blank-node object.");
-    }
-    return keyNode(element.getAttribute("rdf-object-key") ?? "", ctx);
-  }
-  if (iris.length === 1) {
-    if (element.hasAttribute("rdf-datatype") || element.hasAttribute("lang") || element.hasAttribute("dir")) {
-      throw new InvalidStatement("metadata-on-nonliteral", "Literal metadata cannot be applied to an IRI object.");
-    }
-    return namedNode(resolveIri(iris[0].value, ctx));
-  }
-  let lexical;
-  if (element.localName === "meta" && element.hasAttribute("content")) lexical = element.getAttribute("content") ?? "";
-  else if (element.localName === "data" && element.hasAttribute("value")) lexical = element.getAttribute("value") ?? "";
-  else if (element.localName === "time" && element.hasAttribute("datetime")) lexical = element.getAttribute("datetime") ?? "";
-  else {
-    if (element.querySelector("[rdf-predicate]")) {
-      throw new InvalidStatement("nested-statement-in-literal", "A text literal carrier cannot contain another asserted statement.");
-    }
-    lexical = textWithoutTemplates(element);
-  }
-  return literalFor(element, lexical, ctx);
-}
-function parseStatement(element, ctx) {
-  const predicateValue = element.getAttribute("rdf-predicate");
-  if (predicateValue === null) throw new InvalidStatement("missing-predicate", "The statement has no rdf-predicate.");
-  return {
-    subject: subjectFor(element, ctx),
-    predicate: namedNode(resolveIri(predicateValue, ctx)),
-    object: objectFor(element, ctx)
-  };
-}
-function graphFor(element, ctx) {
-  const iri2 = element.getAttribute("rdf-graph");
-  const key = element.getAttribute("rdf-graph-key");
-  if (iri2 !== null && key !== null) {
-    throw new InvalidStatement("competing-graphs", "An RDF statement cannot carry both rdf-graph and rdf-graph-key.");
-  }
-  if (iri2 !== null) return namedNode(resolveIri(iri2, ctx));
-  if (key !== null) return keyNode(key, ctx);
-  return null;
-}
-function report(ctx, error, source) {
-  const invalid = error instanceof InvalidStatement ? error : new InvalidStatement("extractor-error", String(error));
-  ctx.diagnostics.push({ severity: "error", code: invalid.code, message: invalid.message, source });
-}
-function graphKey(graph) {
-  return `${graph.termType}:${graph.value}`;
-}
-function extractDataset(root = document) {
-  const doc = ownerDocument(root);
-  const diagnostics = [];
-  const { retrievalDocumentIri, sourceDocumentIri, baseIri } = establishDocumentIris(doc, diagnostics);
-  const ctx = {
-    document: doc,
-    sourceDocumentIri,
-    baseIri,
-    diagnostics,
-    keys: /* @__PURE__ */ new Map(),
-    elementNodes: /* @__PURE__ */ new WeakMap(),
-    nextBlank: 0
-  };
-  const html = doc.documentElement;
-  const version = html?.getAttribute("rdf-version");
-  if (version === null) {
-    ctx.diagnostics.push({ severity: "warning", code: "missing-version", message: "No rdf-version was declared; IA2 Core 0.1 defaults to RDF 1.2." });
-  } else if (version !== "1.2") {
-    ctx.diagnostics.push({ severity: "error", code: "unsupported-version", message: `Unsupported rdf-version \u201C${version}\u201D.` });
-    return { version: "1.2", quads: [], graphs: [], diagnostics: ctx.diagnostics, retrievalDocumentIri, sourceDocumentIri, baseIri };
-  }
-  const quads = [];
-  const graphs = /* @__PURE__ */ new Map();
-  root.querySelectorAll("[rdf-predicate]").forEach((element) => {
-    try {
-      const parsed = parseStatement(element, ctx);
-      const graph = graphFor(element, ctx);
-      quads.push({ ...parsed, graph, source: element });
-      if (graph) graphs.set(graphKey(graph), graph);
-    } catch (error) {
-      report(ctx, error, element);
-    }
-  });
-  root.querySelectorAll("[rdf-graph]:not([rdf-predicate]), [rdf-graph-key]:not([rdf-predicate])").forEach((element) => {
-    const parent = element.parentElement;
-    if (element.localName === "template" && parent?.hasAttribute("rdf-predicate") && directTemplates(parent).includes(element)) return;
-    try {
-      const coreAttributes = Array.from(element.attributes).filter((attribute) => CORE_ATTRIBUTES.has(attribute.name));
-      if (coreAttributes.length !== 1) {
-        throw new InvalidStatement("invalid-graph-declaration", "A graph declaration can carry exactly one graph attribute and no other Core rdf-* attribute.");
-      }
-      const graph = graphFor(element, ctx);
-      if (!graph) throw new InvalidStatement("missing-graph", "The graph declaration has no graph name.");
-      graphs.set(graphKey(graph), graph);
-    } catch (error) {
-      report(ctx, error, element);
-    }
-  });
-  doc.querySelectorAll("[rdf-version]:not(html)").forEach((source) => {
-    ctx.diagnostics.push({ severity: "warning", code: "misplaced-version", message: "rdf-version only has processing effect on the html element.", source });
-  });
-  return {
-    version: "1.2",
-    quads,
-    graphs: Array.from(graphs.values()),
-    diagnostics: ctx.diagnostics,
-    retrievalDocumentIri,
-    sourceDocumentIri,
-    baseIri
-  };
-}
-
-// src/discovery.ts
-var RDFS_SEE_ALSO = "http://www.w3.org/2000/01/rdf-schema#seeAlso";
-var RDFS_IS_DEFINED_BY = "http://www.w3.org/2000/01/rdf-schema#isDefinedBy";
-var DCTERMS_REQUIRES = "http://purl.org/dc/terms/requires";
-var DCTERMS_SOURCE = "http://purl.org/dc/terms/source";
-var PROV_WAS_DERIVED_FROM = "http://www.w3.org/ns/prov#wasDerivedFrom";
-var OWL_IMPORTS = "http://www.w3.org/2002/07/owl#imports";
-var DCAT_QUALIFIED_RELATION = "http://www.w3.org/ns/dcat#qualifiedRelation";
-var DCTERMS_RELATION = "http://purl.org/dc/terms/relation";
-var DCAT_HAD_ROLE = "http://www.w3.org/ns/dcat#hadRole";
-var DISCOVERY_PREDICATES = /* @__PURE__ */ new Set([
-  RDFS_SEE_ALSO,
-  RDFS_IS_DEFINED_BY,
-  DCTERMS_REQUIRES,
-  DCTERMS_SOURCE,
-  PROV_WAS_DERIVED_FROM,
-  OWL_IMPORTS
-]);
-function termKey(term) {
-  if (!term) return "default";
-  return `${term.termType}:${term.value}`;
-}
-function sameTerm(left, right) {
-  return termKey(left) === termKey(right);
-}
-function documentIri(value) {
-  try {
-    const url = new URL(value);
-    url.hash = "";
-    return url.href;
-  } catch {
-    return value.replace(/#.*$/s, "");
-  }
-}
-function candidateId(key) {
-  let hash = 2166136261;
-  for (let index = 0; index < key.length; index += 1) {
-    hash ^= key.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return `discovery-${(hash >>> 0).toString(36)}`;
-}
-function pushNamed(values, term) {
-  if (!values.some((value) => value.value === term.value)) values.push(term);
-}
-function pushSubject(values, term) {
-  if (!values.some((value) => termKey(value) === termKey(term))) values.push(term);
-}
-function pushSource(values, source) {
-  if (!values.includes(source)) values.push(source);
-}
-function detectDiscoveryCandidates(result) {
-  const candidates = /* @__PURE__ */ new Map();
-  const sourceDocument = documentIri(result.sourceDocumentIri);
-  const candidateFor = (context, target, graph) => {
-    if (documentIri(target.value) === sourceDocument) return null;
-    const key = `${termKey(context)}|${termKey(graph)}|${target.value}`;
-    let candidate = candidates.get(key);
-    if (!candidate) {
-      candidate = {
-        context,
-        graph,
-        id: candidateId(key),
-        predicates: [],
-        qualifiedRelationships: [],
-        roles: [],
-        sources: [],
-        target
-      };
-      candidates.set(key, candidate);
-    }
-    return candidate;
-  };
-  for (const quad of result.quads) {
-    if (!DISCOVERY_PREDICATES.has(quad.predicate.value) || quad.object.termType !== "NamedNode") continue;
-    const candidate = candidateFor(quad.subject, quad.object, quad.graph);
-    if (!candidate) continue;
-    pushNamed(candidate.predicates, quad.predicate);
-    pushSource(candidate.sources, quad.source);
-  }
-  for (const relationQuad of result.quads) {
-    if (relationQuad.predicate.value !== DCAT_QUALIFIED_RELATION) continue;
-    if (relationQuad.object.termType !== "NamedNode" && relationQuad.object.termType !== "BlankNode") continue;
-    const relationship = relationQuad.object;
-    const details = result.quads.filter((quad) => sameTerm(quad.subject, relationship) && sameTerm(quad.graph, relationQuad.graph));
-    const targets = details.filter((quad) => quad.predicate.value === DCTERMS_RELATION && quad.object.termType === "NamedNode");
-    const roles = details.filter((quad) => quad.predicate.value === DCAT_HAD_ROLE && quad.object.termType === "NamedNode");
-    for (const targetQuad of targets) {
-      if (targetQuad.object.termType !== "NamedNode") continue;
-      const candidate = candidateFor(relationQuad.subject, targetQuad.object, relationQuad.graph);
-      if (!candidate) continue;
-      pushSubject(candidate.qualifiedRelationships, relationship);
-      pushSource(candidate.sources, relationQuad.source);
-      pushSource(candidate.sources, targetQuad.source);
-      for (const roleQuad of roles) {
-        if (roleQuad.object.termType !== "NamedNode") continue;
-        pushNamed(candidate.roles, roleQuad.object);
-        pushSource(candidate.sources, roleQuad.source);
-      }
-    }
-  }
-  return Array.from(candidates.values()).sort((left, right) => left.target.value.localeCompare(right.target.value));
-}
-function mergeDiscoveryContributions(source, contributions) {
-  const quads = [...source.quads];
-  const graphs = new Map(source.graphs.map((graph) => [termKey(graph), graph]));
-  const diagnostics = [...source.diagnostics];
-  for (const contribution of contributions) {
-    const contributionGraph = namedNode(contribution.result.sourceDocumentIri);
-    for (const quad of contribution.result.quads) {
-      const graph = quad.graph ?? contributionGraph;
-      quads.push({ ...quad, graph });
-      graphs.set(termKey(graph), graph);
-    }
-    for (const graph of contribution.result.graphs) graphs.set(termKey(graph), graph);
-    diagnostics.push(...contribution.result.diagnostics.map((diagnostic) => ({
-      ...diagnostic,
-      message: `Contribution ${contribution.result.sourceDocumentIri}: ${diagnostic.message}`
-    })));
-  }
-  return {
-    ...source,
-    diagnostics,
-    graphs: Array.from(graphs.values()),
-    quads
-  };
-}
-
-// src/highlight.ts
-var TURTLE_TOKENS = /(<https?:\/\/[^>]+>)|("(?:\\.|[^"\\])*"(?:@[A-Za-z0-9-]+(?:--(?:ltr|rtl))?|\^\^(?:<[^>]+>|[A-Za-z][\w-]*:[\w.-]+))?)|(^|\s)(@[a-z]+|[A-Za-z][\w-]*:[\w.-]+)|(_:[A-Za-z][\w-]*)|(#[^\n]*)/gim;
-var JSON_TOKENS = /("(?:\\.|[^"\\])*")\s*(?=:)|("(?:\\.|[^"\\])*")|\b(true|false|null)\b|\b(-?\d+(?:\.\d+)?)\b/g;
-function spanToken(parent, value, className, document2) {
-  const span = document2.createElement("span");
-  span.className = `tok ${className}`;
-  span.textContent = value;
-  parent.appendChild(span);
-}
-function appendToken(parent, value, className, document2) {
-  if (className === "iri") {
-    const iri2 = value.slice(1, -1);
-    const anchor = document2.createElement("a");
-    anchor.className = "tok iri";
-    anchor.textContent = value;
-    anchor.href = iri2;
-    anchor.target = "_blank";
-    anchor.rel = "noopener noreferrer";
-    parent.appendChild(anchor);
-    return;
-  }
-  spanToken(parent, value, className, document2);
-}
-function turtleClass(match) {
-  if (match[1]) return "iri";
-  if (match[2]) return "string";
-  if (match[4]) return "keyword";
-  if (match[5]) return "blank";
-  if (match[6]) return "comment";
-  return "name";
-}
-function jsonClass(match) {
-  if (match[1]) return "key";
-  if (match[2]) {
-    try {
-      const value = JSON.parse(match[2]);
-      if (/^https?:\/\//.test(value)) return "json-iri";
-    } catch {
-    }
-    return "string";
-  }
-  if (match[3]) return "keyword";
-  return "number";
-}
-function appendHtmlTag(parent, source, document2) {
-  if (source.startsWith("<!--")) {
-    spanToken(parent, source, "comment", document2);
-    return;
-  }
-  if (/^<!doctype/i.test(source)) {
-    spanToken(parent, source, "keyword", document2);
-    return;
-  }
-  const tag = /^(<\/?)([^\s/>]+)([\s\S]*?)(\/?>)$/.exec(source);
-  if (!tag) {
-    parent.appendChild(document2.createTextNode(source));
-    return;
-  }
-  spanToken(parent, tag[1], "punctuation", document2);
-  spanToken(parent, tag[2], "name", document2);
-  const attributes = tag[3] ?? "";
-  const pattern = /(\s+)([^\s=]+)(?:(\s*=\s*)("[^"]*"|'[^']*'|[^\s]+))?/g;
-  let cursor = 0;
-  let match;
-  while (match = pattern.exec(attributes)) {
-    parent.appendChild(document2.createTextNode(attributes.slice(cursor, match.index) + match[1]));
-    spanToken(parent, match[2], "key", document2);
-    if (match[3]) parent.appendChild(document2.createTextNode(match[3]));
-    if (match[4]) spanToken(parent, match[4], "string", document2);
-    cursor = pattern.lastIndex;
-  }
-  parent.appendChild(document2.createTextNode(attributes.slice(cursor)));
-  spanToken(parent, tag[4], "punctuation", document2);
-}
-function highlightHtml(source, parent, document2) {
-  let cursor = 0;
-  while (cursor < source.length) {
-    const start = source.indexOf("<", cursor);
-    if (start < 0) {
-      parent.appendChild(document2.createTextNode(source.slice(cursor)));
-      return;
-    }
-    parent.appendChild(document2.createTextNode(source.slice(cursor, start)));
-    if (source.startsWith("<!--", start)) {
-      const commentEnd = source.indexOf("-->", start + 4);
-      const end2 = commentEnd < 0 ? source.length : commentEnd + 3;
-      appendHtmlTag(parent, source.slice(start, end2), document2);
-      cursor = end2;
-      continue;
-    }
-    let quote = "";
-    let end = start + 1;
-    for (; end < source.length; end += 1) {
-      const character = source[end];
-      if (quote) {
-        if (character === quote) quote = "";
-      } else if (character === '"' || character === "'") {
-        quote = character;
-      } else if (character === ">") {
-        end += 1;
-        break;
-      }
-    }
-    appendHtmlTag(parent, source.slice(start, end), document2);
-    cursor = end;
-  }
-}
-function highlightedCode(source, syntax, document2) {
-  const pre = document2.createElement("pre");
-  const code = document2.createElement("code");
-  pre.append(code);
-  if (syntax === "html") {
-    highlightHtml(source, code, document2);
-    return pre;
-  }
-  const pattern = syntax === "turtle" ? new RegExp(TURTLE_TOKENS) : new RegExp(JSON_TOKENS);
-  let cursor = 0;
-  let match;
-  while (match = pattern.exec(source)) {
-    code.append(document2.createTextNode(source.slice(cursor, match.index)));
-    const className = syntax === "turtle" ? turtleClass(match) : jsonClass(match);
-    if (className === "json-iri") {
-      const anchor = document2.createElement("a");
-      anchor.className = "tok iri";
-      anchor.textContent = match[0];
-      anchor.href = JSON.parse(match[0]);
-      anchor.target = "_blank";
-      anchor.rel = "noopener noreferrer";
-      code.append(anchor);
-    } else {
-      appendToken(code, match[0], className, document2);
-    }
-    cursor = pattern.lastIndex;
-  }
-  code.append(document2.createTextNode(source.slice(cursor)));
-  return pre;
-}
-
-// src/serialize.ts
-var PREFIXES = {
-  rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-  rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-  owl: "http://www.w3.org/2002/07/owl#",
-  xsd: "http://www.w3.org/2001/XMLSchema#",
-  schema: "https://schema.org/",
-  dcterms: "http://purl.org/dc/terms/",
-  dcat: "http://www.w3.org/ns/dcat#",
-  skos: "http://www.w3.org/2004/02/skos/core#",
-  prov: "http://www.w3.org/ns/prov#",
-  odrl: "http://www.w3.org/ns/odrl/2/",
-  sh: "http://www.w3.org/ns/shacl#",
-  c4o: "http://purl.org/spar/c4o/",
-  cito: "http://purl.org/spar/cito/",
-  deo: "http://purl.org/spar/deo/",
-  doco: "http://purl.org/spar/doco/",
-  pattern: "http://www.essepuntato.it/2008/12/pattern#",
-  decision: "https://ontology.inferal.com/modules/decision/",
-  ord: "https://ontology.inferal.com/modules/ordering/",
-  htmlrdf: "https://ia2.dev/spec/html-rdf#",
-  rdfhtml: "https://ia2.dev/spec/rdf-html#",
-  de: "https://ia2.dev/spec/discovery-enrichment#"
-};
-function escaped(value) {
-  return value.replace(/\\/g, "\\\\").replace(/\"/g, '\\"').replace(/\r/g, "\\r").replace(/\n/g, "\\n").replace(/\t/g, "\\t");
-}
-function prefixed(iri2) {
-  for (const [prefix, namespace] of Object.entries(PREFIXES)) {
-    if (!iri2.startsWith(namespace)) continue;
-    const local = iri2.slice(namespace.length);
-    if (/^[A-Za-z_][A-Za-z0-9._-]*$/.test(local)) return `${prefix}:${local}`;
-  }
-  return null;
-}
-function iri(iriValue) {
-  return prefixed(iriValue) ?? `<${iriValue.replace(/>/g, "\\>")}>`;
-}
-function literal(term) {
-  const lexical = `"${escaped(term.value)}"`;
-  if (term.language && term.direction) return `${lexical}@${term.language}--${term.direction}`;
-  if (term.language) return `${lexical}@${term.language}`;
-  if (term.datatype.value !== XSD_STRING && term.datatype.value !== RDF_LANG_STRING && term.datatype.value !== RDF_DIR_LANG_STRING) {
-    return `${lexical}^^${iri(term.datatype.value)}`;
-  }
-  return lexical;
-}
-function termToTurtle(term) {
-  switch (term.termType) {
-    case "NamedNode":
-      return iri(term.value);
-    case "BlankNode":
-      return `_:${term.value}`;
-    case "Literal":
-      return literal(term);
-    case "Triple":
-      return `<<( ${termToTurtle(term.subject)} ${termToTurtle(term.predicate)} ${termToTurtle(term.object)} )>>`;
-  }
-}
-function graphId(graph) {
-  return graph ? `${graph.termType}:${graph.value}` : "default";
-}
-function serializeTurtle(result) {
-  const body = [];
-  const defaults = result.quads.filter((quad) => quad.graph === null);
-  body.push(...defaults.map((quad) => `${termToTurtle(quad.subject)} ${termToTurtle(quad.predicate)} ${termToTurtle(quad.object)} .`));
-  const namedGraphs = /* @__PURE__ */ new Map();
-  for (const graph of result.graphs) namedGraphs.set(graphId(graph), { graph, quads: [] });
-  for (const quad of result.quads) {
-    if (!quad.graph) continue;
-    const entry = namedGraphs.get(graphId(quad.graph)) ?? { graph: quad.graph, quads: [] };
-    entry.quads.push(quad);
-    namedGraphs.set(graphId(quad.graph), entry);
-  }
-  for (const { graph, quads } of namedGraphs.values()) {
-    if (body.length && body.at(-1) !== "") body.push("");
-    body.push(`${termToTurtle(graph)} {`);
-    body.push(...quads.map((quad) => `  ${termToTurtle(quad.subject)} ${termToTurtle(quad.predicate)} ${termToTurtle(quad.object)} .`));
-    body.push("}");
-  }
-  const usedPrefixes = Object.entries(PREFIXES).filter(([prefix]) => body.some((line) => line.includes(`${prefix}:`)));
-  const output = usedPrefixes.map(([prefix, namespace]) => `@prefix ${prefix}: <${namespace}> .`);
-  if (output.length && body.length) output.push("");
-  output.push(...body);
-  return `${output.join("\n").trim()}
-`;
-}
-function jsonTerm(term) {
-  if (term.termType === "NamedNode") return { "@id": term.value };
-  if (term.termType === "BlankNode") return { "@id": `_:${term.value}` };
-  if (term.termType === "Literal") {
-    const value = { "@value": term.value };
-    if (term.language) value["@language"] = term.language;
-    if (term.direction) value["@direction"] = term.direction;
-    if (!term.language && term.datatype.value !== XSD_STRING) value["@type"] = term.datatype.value;
-    return value;
-  }
-  return {
-    "@type": "@json",
-    "@value": {
-      type: "RDF12TripleTerm",
-      subject: jsonTerm(term.subject),
-      predicate: term.predicate.value,
-      object: jsonTerm(term.object)
-    }
-  };
-}
-function subjectId(subject) {
-  return subject.termType === "NamedNode" ? subject.value : `_:${subject.value}`;
-}
-function graphJson(quads) {
-  const nodes = /* @__PURE__ */ new Map();
-  for (const quad of quads) {
-    const id = subjectId(quad.subject);
-    const node = nodes.get(id) ?? { "@id": id };
-    const values = node[quad.predicate.value] ?? [];
-    values.push(jsonTerm(quad.object));
-    node[quad.predicate.value] = values;
-    nodes.set(id, node);
-  }
-  return Array.from(nodes.values());
-}
-function serializeJsonLd(result) {
-  const output = graphJson(result.quads.filter((quad) => quad.graph === null));
-  const graphs = /* @__PURE__ */ new Map();
-  for (const graph of result.graphs) graphs.set(graphId(graph), { graph, quads: [] });
-  for (const quad of result.quads) {
-    if (!quad.graph) continue;
-    const entry = graphs.get(graphId(quad.graph)) ?? { graph: quad.graph, quads: [] };
-    entry.quads.push(quad);
-    graphs.set(graphId(quad.graph), entry);
-  }
-  for (const { graph, quads } of graphs.values()) {
-    output.push({
-      "@id": graph.termType === "NamedNode" ? graph.value : `_:${graph.value}`,
-      "@graph": graphJson(quads)
-    });
-  }
-  return `${JSON.stringify(output, null, 2)}
-`;
-}
-function containsTripleTerms(result) {
-  return result.quads.some((quad) => quad.object.termType === "Triple");
-}
-function compactTerm(term) {
-  const turtle = termToTurtle(term);
-  return turtle.length > 76 ? `${turtle.slice(0, 73)}\u2026` : turtle;
-}
-
-// src/sources.ts
-function sourceIdFor(source, ids, sources) {
-  const existing = ids.get(source);
-  if (existing) return existing;
-  const id = `source-${ids.size + 1}`;
-  ids.set(source, id);
-  sources.push({ id, markup: source.outerHTML });
-  return id;
-}
-function toPortableExtractionResult(result) {
-  const ids = /* @__PURE__ */ new Map();
-  const sources = [];
-  return {
-    baseIri: result.baseIri,
-    diagnostics: result.diagnostics.map((diagnostic) => ({
-      code: diagnostic.code,
-      message: diagnostic.message,
-      severity: diagnostic.severity,
-      ...diagnostic.source ? { sourceId: sourceIdFor(diagnostic.source, ids, sources) } : {}
-    })),
-    graphs: result.graphs,
-    portableVersion: 1,
-    quads: result.quads.map((quad) => ({
-      graph: quad.graph,
-      object: quad.object,
-      predicate: quad.predicate,
-      sourceId: sourceIdFor(quad.source, ids, sources),
-      subject: quad.subject
-    })),
-    retrievalDocumentIri: result.retrievalDocumentIri,
-    sourceDocumentIri: result.sourceDocumentIri,
-    sources,
-    version: "1.2"
-  };
-}
-function inertSourceElement(markup, ownerDocument2) {
-  const inertDocument = ownerDocument2.implementation.createHTMLDocument("");
-  const template = inertDocument.createElement("template");
-  template.innerHTML = markup;
-  return template.content.firstElementChild ?? inertDocument.createElement("span");
-}
-function fromPortableExtractionResult(result, ownerDocument2) {
-  if (result.portableVersion !== 1 || result.version !== "1.2") {
-    throw new Error("Unsupported portable Navigator source version.");
-  }
-  const elements = new Map(result.sources.map((source) => [source.id, inertSourceElement(source.markup, ownerDocument2)]));
-  const sourceFor = (sourceId) => elements.get(sourceId) ?? inertSourceElement("<span></span>", ownerDocument2);
-  return {
-    baseIri: result.baseIri,
-    diagnostics: result.diagnostics.map((diagnostic) => ({
-      code: diagnostic.code,
-      message: diagnostic.message,
-      severity: diagnostic.severity,
-      ...diagnostic.sourceId ? { source: sourceFor(diagnostic.sourceId) } : {}
-    })),
-    graphs: result.graphs,
-    quads: result.quads.map((quad) => ({
-      graph: quad.graph,
-      object: quad.object,
-      predicate: quad.predicate,
-      source: sourceFor(quad.sourceId),
-      subject: quad.subject
-    })),
-    retrievalDocumentIri: result.retrievalDocumentIri,
-    sourceDocumentIri: result.sourceDocumentIri,
-    version: "1.2"
-  };
-}
-
-// src/vocabulary.ts
-var RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-var RDF_PROPERTY = "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property";
-var RDFS_CLASS = "http://www.w3.org/2000/01/rdf-schema#Class";
-var RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
-var RDFS_SUBCLASS_OF = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
-var RDFS_SUBPROPERTY_OF = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
-var SKOS_PREF_LABEL = "http://www.w3.org/2004/02/skos/core#prefLabel";
-var DCTERMS_TITLE = "http://purl.org/dc/terms/title";
-var CLASS_TYPES = /* @__PURE__ */ new Set([
-  RDFS_CLASS,
-  "http://www.w3.org/2002/07/owl#Class",
-  "http://www.w3.org/2002/07/owl#DeprecatedClass"
-]);
-var PROPERTY_TYPES = /* @__PURE__ */ new Set([
-  RDF_PROPERTY,
-  "http://www.w3.org/2002/07/owl#ObjectProperty",
-  "http://www.w3.org/2002/07/owl#DatatypeProperty",
-  "http://www.w3.org/2002/07/owl#AnnotationProperty",
-  "http://www.w3.org/2002/07/owl#FunctionalProperty",
-  "http://www.w3.org/2002/07/owl#InverseFunctionalProperty",
-  "http://www.w3.org/2002/07/owl#TransitiveProperty",
-  "http://www.w3.org/2002/07/owl#SymmetricProperty",
-  "http://www.w3.org/2002/07/owl#AsymmetricProperty",
-  "http://www.w3.org/2002/07/owl#ReflexiveProperty",
-  "http://www.w3.org/2002/07/owl#IrreflexiveProperty",
-  "http://www.w3.org/2002/07/owl#DeprecatedProperty",
-  "http://www.w3.org/2002/07/owl#OntologyProperty"
-]);
-var LABEL_PRIORITIES = /* @__PURE__ */ new Map([
-  [RDFS_LABEL, 0],
-  [SKOS_PREF_LABEL, 1],
-  [DCTERMS_TITLE, 2]
-]);
-function pushNamed2(values, term) {
-  if (!values.some((value) => value.value === term.value)) values.push(term);
-}
-function pushSource2(values, source) {
-  if (!values.includes(source)) values.push(source);
-}
-function pushKind(values, kind) {
-  if (!values.includes(kind)) values.push(kind);
-}
-function extractDocumentVocabulary(result) {
-  const builders = /* @__PURE__ */ new Map();
-  const builderFor = (term) => {
-    let builder = builders.get(term.value);
-    if (!builder) {
-      builder = {
-        classParents: [],
-        kinds: [],
-        labelPriority: Number.POSITIVE_INFINITY,
-        propertyParents: [],
-        sources: [],
-        term,
-        types: []
-      };
-      builders.set(term.value, builder);
-    }
-    return builder;
-  };
-  for (const quad of result.quads) {
-    if (quad.subject.termType !== "NamedNode") continue;
-    if (quad.predicate.value === RDF_TYPE && quad.object.termType === "NamedNode") {
-      const isClass = CLASS_TYPES.has(quad.object.value);
-      const isProperty = PROPERTY_TYPES.has(quad.object.value);
-      if (!isClass && !isProperty) continue;
-      const builder = builderFor(quad.subject);
-      if (isClass) pushKind(builder.kinds, "class");
-      if (isProperty) pushKind(builder.kinds, "property");
-      pushNamed2(builder.types, quad.object);
-      pushSource2(builder.sources, quad.source);
-      continue;
-    }
-    if (quad.predicate.value === RDFS_SUBCLASS_OF) {
-      const builder = builderFor(quad.subject);
-      pushKind(builder.kinds, "class");
-      if (quad.object.termType === "NamedNode") pushNamed2(builder.classParents, quad.object);
-      pushSource2(builder.sources, quad.source);
-      continue;
-    }
-    if (quad.predicate.value === RDFS_SUBPROPERTY_OF) {
-      const builder = builderFor(quad.subject);
-      pushKind(builder.kinds, "property");
-      if (quad.object.termType === "NamedNode") pushNamed2(builder.propertyParents, quad.object);
-      pushSource2(builder.sources, quad.source);
-    }
-  }
-  for (const quad of result.quads) {
-    if (quad.subject.termType !== "NamedNode" || quad.object.termType !== "Literal") continue;
-    const priority = LABEL_PRIORITIES.get(quad.predicate.value);
-    const builder = builders.get(quad.subject.value);
-    if (priority === void 0 || !builder || priority >= builder.labelPriority) continue;
-    builder.label = quad.object.value;
-    builder.labelPriority = priority;
-    pushSource2(builder.sources, quad.source);
-  }
-  const definitions = Array.from(builders.values()).map(({ labelPriority: _labelPriority, ...definition }) => definition).sort((left, right) => (left.label ?? left.term.value).localeCompare(right.label ?? right.term.value));
-  const classes = definitions.filter((definition) => definition.kinds.includes("class"));
-  const properties = definitions.filter((definition) => definition.kinds.includes("property"));
-  return { classes, count: definitions.length, definitions, properties };
-}
-
-// src/navigator.ts
-var CSS = String.raw`
+`;function ge(n){return typeof n=="string"&&qe.some(({position:e})=>e===n)}function et({allowed:n=qe.map(({position:i})=>i),ariaLabel:e,current:t,groupClass:o="",optionClass:r=""}){let i=O(o),a=O(r),s=new Set(n),c=qe.filter(({position:l})=>s.has(l)).map(({icon:l,label:d,position:u})=>`<button class="ia2-position-option ${a}" type="button" role="radio" data-position="${u}" aria-checked="${t===u}" aria-label="${O(d)}" title="${O(d)}" tabindex="${t===u?"0":"-1"}">${l}</button>`).join("");return`<div class="ia2-position-switch ${i}" role="radiogroup" aria-label="${O(e)}">${c}</div>`}function Xe(n,e,t=!1){let o=Array.from(n.querySelectorAll(".ia2-position-option"));for(let r of o){let i=r.dataset.position===e;r.setAttribute("aria-checked",String(i)),r.tabIndex=i?0:-1,i&&t&&r.focus()}}function tt(n,e){let t=n instanceof HTMLElement&&n.matches(".ia2-position-switch")?n:n.querySelector(".ia2-position-switch"),o=Array.from(n.querySelectorAll(".ia2-position-option")),r=[];for(let a of o){let s=()=>{ge(a.dataset.position)&&e(a.dataset.position,!1)!==!1&&Xe(n,a.dataset.position)};a.addEventListener("click",s),r.push(()=>a.removeEventListener("click",s))}let i=a=>{if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End"].includes(a.key))return;a.preventDefault();let s=a.target instanceof HTMLButtonElement?o.indexOf(a.target):o.findIndex(d=>d.getAttribute("aria-checked")==="true"),c=s;a.key==="Home"&&(c=0),a.key==="End"&&(c=o.length-1),(a.key==="ArrowRight"||a.key==="ArrowDown")&&(c=(s+1)%o.length),(a.key==="ArrowLeft"||a.key==="ArrowUp")&&(c=(s-1+o.length)%o.length);let l=o[c]?.dataset.position;ge(l)&&e(l,!0)!==!1&&Xe(n,l,!0)};return t?.addEventListener("keydown",i),r.push(()=>t?.removeEventListener("keydown",i)),()=>{for(let a of r)a()}}var ot=[{mode:"off",label:"Scroll synchronization off",icon:`<svg class="sync-icon" viewBox="0 0 32 16" aria-hidden="true" focusable="false">
+      <path d="M16 2v5" />
+      <path d="M11.7 4.4a6 6 0 1 0 8.6 0" />
+    </svg>`},{mode:"page",label:"Follow page viewport in panel",icon:`<svg class="sync-icon" viewBox="0 0 34 16" aria-hidden="true" focusable="false">
+      <rect x="1" y="2" width="8" height="12" rx="1.5" />
+      <path d="M3.5 5h3M3.5 8h3M3.5 11h3M11.5 8h9m-3-3 3 3-3 3" />
+      <circle cx="24" cy="4" r=".8" fill="currentColor" stroke="none" />
+      <circle cx="24" cy="8" r=".8" fill="currentColor" stroke="none" />
+      <circle cx="24" cy="12" r=".8" fill="currentColor" stroke="none" />
+      <path d="M27 4h6M27 8h6M27 12h6" />
+    </svg>`},{mode:"panel",label:"Follow panel in page",icon:`<svg class="sync-icon" viewBox="0 0 34 16" aria-hidden="true" focusable="false">
+      <circle cx="2" cy="4" r=".8" fill="currentColor" stroke="none" />
+      <circle cx="2" cy="8" r=".8" fill="currentColor" stroke="none" />
+      <circle cx="2" cy="12" r=".8" fill="currentColor" stroke="none" />
+      <path d="M5 4h6M5 8h6M5 12h6M22.5 8h-9m3-3-3 3 3 3" />
+      <rect x="25" y="2" width="8" height="12" rx="1.5" />
+      <path d="M27.5 5h3M27.5 8h3M27.5 11h3" />
+    </svg>`}];function Je(n){return typeof n=="string"&&ot.some(({mode:e})=>e===n)}function nt({ariaLabel:n="Scroll synchronization",controlClass:e="",current:t,label:o="Sync",labels:r={},optionClass:i="",switchClass:a=""}){let s=O(e),c=O(i),l=O(a),d=ot.map(({icon:u,label:g,mode:h})=>{let p=r[h]??g;return`<button class="ia2-sync-option ${c}" type="button" role="radio" data-sync-mode="${h}" aria-checked="${t===h}" aria-label="${O(p)}" title="${O(p)}" tabindex="${t===h?"0":"-1"}">${u}</button>`}).join("");return`<div class="ia2-sync-control ${s}"><span class="ia2-sync-label sync-label">${O(o)}</span><div class="ia2-sync-switch ${l}" role="radiogroup" aria-label="${O(n)}">${d}</div></div>`}function ve(n,e,t=!1){let o=Array.from(n.querySelectorAll(".ia2-sync-option"));for(let r of o){let i=r.dataset.syncMode===e;r.setAttribute("aria-checked",String(i)),r.tabIndex=i?0:-1,i&&t&&r.focus()}}function rt(n,e){let t=n instanceof HTMLElement&&n.matches(".ia2-sync-switch")?n:n.querySelector(".ia2-sync-switch"),o=Array.from(n.querySelectorAll(".ia2-sync-option")),r=[];for(let a of o){let s=()=>{Je(a.dataset.syncMode)&&e(a.dataset.syncMode,!1)!==!1&&ve(n,a.dataset.syncMode)};a.addEventListener("click",s),r.push(()=>a.removeEventListener("click",s))}let i=a=>{if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End"].includes(a.key))return;a.preventDefault();let s=a.target instanceof HTMLButtonElement?o.indexOf(a.target):o.findIndex(d=>d.getAttribute("aria-checked")==="true"),c=s;a.key==="Home"&&(c=0),a.key==="End"&&(c=o.length-1),(a.key==="ArrowRight"||a.key==="ArrowDown")&&(c=(s+1)%o.length),(a.key==="ArrowLeft"||a.key==="ArrowUp")&&(c=(s-1+o.length)%o.length);let l=o[c]?.dataset.syncMode;Je(l)&&e(l,!0)!==!1&&ve(n,l,!0)};return t?.addEventListener("keydown",i),r.push(()=>t?.removeEventListener("keydown",i)),()=>{for(let a of r)a()}}var $t=/(<https?:\/\/[^>]+>)|("(?:\\.|[^"\\])*"(?:@[A-Za-z0-9-]+(?:--(?:ltr|rtl))?|\^\^(?:<[^>]+>|[A-Za-z][\w-]*:[\w.-]+))?)|(^|\s)(@[a-z]+|[A-Za-z][\w-]*:[\w.-]+)|(_:[A-Za-z][\w-]*)|(#[^\n]*)/gim,Pt=/("(?:\\.|[^"\\])*")\s*(?=:)|("(?:\\.|[^"\\])*")|\b(true|false|null)\b|\b(-?\d+(?:\.\d+)?)\b/g,Ht=/(#[^\n\r]*)|("""(?:\\.|[\s\S])*?"""|'''(?:\\.|[\s\S])*?'''|"(?:\\.|[^"\\])*"(?:@[A-Za-z0-9-]+|\^\^(?:<[^>]+>|[A-Za-z][\w-]*:[\w.-]+))?|'(?:\\.|[^'\\])*'(?:@[A-Za-z0-9-]+|\^\^(?:<[^>]+>|[A-Za-z][\w-]*:[\w.-]+))?)|(<[^<>"{}|^`\\\u0000-\u0020]*>)|([?$][A-Za-z_][\w-]*)|\b(ADD|ALL|AS|ASC|ASK|BASE|BIND|BY|CLEAR|CONSTRUCT|COPY|CREATE|DATA|DEFAULT|DELETE|DESC|DESCRIBE|DISTINCT|DROP|EXISTS|FILTER|FROM|GRAPH|GROUP|HAVING|IN|INSERT|LIMIT|LOAD|MINUS|MOVE|NAMED|NOT|OFFSET|OPTIONAL|ORDER|PREFIX|REDUCED|SELECT|SERVICE|SILENT|TO|UNDEF|UNION|USING|VALUES|WHERE|WITH|TRUE|FALSE|A)\b|(\b-?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?\b)|((?:[A-Za-z_][\w-]*)?:[\w.-]*)|([{}()[\];,.])/gim;function G(n,e,t,o){let r=o.createElement("span");r.className=`tok ${t}`,r.textContent=e,n.appendChild(r)}function _t(n,e,t,o){if(t==="iri"){let r=e.slice(1,-1),i=o.createElement("a");i.className="tok iri",i.textContent=e,i.href=r,i.target="_blank",i.rel="noopener noreferrer",n.appendChild(i);return}G(n,e,t,o)}function jt(n){return n[1]?"iri":n[2]?"string":n[4]?"keyword":n[5]?"blank":n[6]?"comment":"name"}function Ot(n){if(n[1])return"key";if(n[2]){try{let e=JSON.parse(n[2]);if(/^https?:\/\//.test(e))return"json-iri"}catch{}return"string"}return n[3]?"keyword":"number"}function Ft(n){return n[1]?"comment":n[2]?"string":n[3]?"iri":n[4]?"variable":n[5]?"keyword":n[6]?"number":n[7]?"name":"punctuation"}function it(n,e,t){if(e.startsWith("<!--")){G(n,e,"comment",t);return}if(/^<!doctype/i.test(e)){G(n,e,"keyword",t);return}let o=/^(<\/?)([^\s/>]+)([\s\S]*?)(\/?>)$/.exec(e);if(!o){n.appendChild(t.createTextNode(e));return}G(n,o[1],"punctuation",t),G(n,o[2],"name",t);let r=o[3]??"",i=/(\s+)([^\s=]+)(?:(\s*=\s*)("[^"]*"|'[^']*'|[^\s]+))?/g,a=0,s;for(;s=i.exec(r);)n.appendChild(t.createTextNode(r.slice(a,s.index)+s[1])),G(n,s[2],"key",t),s[3]&&n.appendChild(t.createTextNode(s[3])),s[4]&&G(n,s[4],"string",t),a=i.lastIndex;n.appendChild(t.createTextNode(r.slice(a))),G(n,o[4],"punctuation",t)}function Ut(n,e,t){let o=0;for(;o<n.length;){let r=n.indexOf("<",o);if(r<0){e.appendChild(t.createTextNode(n.slice(o)));return}if(e.appendChild(t.createTextNode(n.slice(o,r))),n.startsWith("<!--",r)){let s=n.indexOf("-->",r+4),c=s<0?n.length:s+3;it(e,n.slice(r,c),t),o=c;continue}let i="",a=r+1;for(;a<n.length;a+=1){let s=n[a];if(i)s===i&&(i="");else if(s==='"'||s==="'")i=s;else if(s===">"){a+=1;break}}it(e,n.slice(r,a),t),o=a}}function re(n,e,t){let o=t.createElement("pre"),r=t.createElement("code");if(o.append(r),e==="html")return Ut(n,r,t),o;let i=e==="turtle"?new RegExp($t):e==="sparql"?new RegExp(Ht):new RegExp(Pt),a=0,s;for(;s=i.exec(n);){r.append(t.createTextNode(n.slice(a,s.index)));let c=e==="turtle"?jt(s):e==="sparql"?Ft(s):Ot(s);if(c==="json-iri"){let l=t.createElement("a");l.className="tok iri",l.textContent=s[0],l.href=JSON.parse(s[0]),l.target="_blank",l.rel="noopener noreferrer",r.append(l)}else e==="sparql"&&c==="iri"?G(r,s[0],c,t):_t(r,s[0],c,t);a=i.lastIndex}return r.append(t.createTextNode(n.slice(a))),o}function at(n,e,t){let o=e.get(n);if(o)return o;let r=`source-${e.size+1}`;return e.set(n,r),t.push({id:r,markup:n.outerHTML}),r}function Vt(n){let e=new Map,t=[];return{baseIri:n.baseIri,diagnostics:n.diagnostics.map(o=>({code:o.code,message:o.message,severity:o.severity,...o.source?{sourceId:at(o.source,e,t)}:{}})),graphs:n.graphs,portableVersion:1,quads:n.quads.map(o=>({graph:o.graph,object:o.object,predicate:o.predicate,sourceId:at(o.source,e,t),subject:o.subject})),retrievalDocumentIri:n.retrievalDocumentIri,sourceDocumentIri:n.sourceDocumentIri,sources:t,version:"1.2"}}function st(n,e){let t=e.implementation.createHTMLDocument(""),o=t.createElement("template");return o.innerHTML=n,o.content.firstElementChild??t.createElement("span")}function Ae(n,e){if(n.portableVersion!==1||n.version!=="1.2")throw new Error("Unsupported portable Navigator source version.");let t=new Map(n.sources.map(r=>[r.id,st(r.markup,e)])),o=r=>t.get(r)??st("<span></span>",e);return{baseIri:n.baseIri,diagnostics:n.diagnostics.map(r=>({code:r.code,message:r.message,severity:r.severity,...r.sourceId?{source:o(r.sourceId)}:{}})),graphs:n.graphs,quads:n.quads.map(r=>({graph:r.graph,object:r.object,predicate:r.predicate,source:o(r.sourceId),subject:r.subject})),retrievalDocumentIri:n.retrievalDocumentIri,sourceDocumentIri:n.sourceDocumentIri,version:"1.2"}}var Bt="http://www.w3.org/1999/02/22-rdf-syntax-ns#type",Wt="http://www.w3.org/2000/01/rdf-schema#comment",Kt="http://purl.org/dc/terms/description",B="http://www.w3.org/ns/shacl#",Yt=new Set([`${B}SPARQLExecutable`,`${B}SPARQLSelectExecutable`,`${B}SPARQLAskExecutable`,`${B}SPARQLConstructExecutable`]),ct=[{iri:`${B}select`,kind:"select"},{iri:`${B}ask`,kind:"ask"},{iri:`${B}construct`,kind:"construct"}];function dt(n){return`${n.termType}:${n.value}`}function lt(n){if(n.termType==="BlankNode")return`Query ${n.value}`;let e=n.value.match(/[#/]([^#/]+)$/)?.[1];return e?decodeURIComponent(e).replace(/[-_]+/g," ").replace(/\b\w/g,t=>t.toUpperCase()):n.value}function Qt(n,e,t){if(n.termType==="NamedNode")return dt(n);let o=2166136261;for(let r of`${e}
+${t}`)o^=r.codePointAt(0)??0,o=Math.imul(o,16777619);return`BlankNodeQuery:${(o>>>0).toString(16)}`}function be(n){let e=new Map,t=i=>{let a=dt(i),s=e.get(a);return s||(s={executable:!1,queries:{},subject:i},e.set(a,s)),s};for(let i of n.quads){let a=t(i.subject);if(i.predicate.value===Bt&&i.object.termType==="NamedNode"&&Yt.has(i.object.value)&&(a.executable=!0),i.object.termType!=="Literal")continue;let s=ct.find(({iri:c})=>c===i.predicate.value);if(s&&(a.queries[s.kind]=i.object.value.trim()),[Kt,Wt,`${B}description`].includes(i.predicate.value)&&(a.description??=i.object.value.trim()),i.predicate.value===`${B}order`){let c=Number(i.object.value);Number.isFinite(c)&&(a.order=c)}}let o=[],r=Array.from(e.values()).flatMap(i=>{if(!i.executable)return[];let a=ct.map(({kind:c})=>({kind:c,query:i.queries[c]})).filter(c=>!!c.query);if(a.length!==1)return o.push(`${lt(i.subject)} must declare exactly one sh:select, sh:ask, or sh:construct query.`),[];let s=a[0];return[{description:i.description??"",id:Qt(i.subject,s.kind,s.query),kind:s.kind,label:ne(n.quads,i.subject,{predicates:[...me,`${B}name`]})?.trim()||lt(i.subject),order:i.order??Number.POSITIVE_INFINITY,query:s.query}]}).sort((i,a)=>i.order-a.order||i.label.localeCompare(a.label));return{diagnostics:o,queries:r}}function Gt(n){return be(n).queries}var Xt="http://www.w3.org/1999/02/22-rdf-syntax-ns#type",Jt="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",Zt="http://www.w3.org/2000/01/rdf-schema#Class",eo="http://www.w3.org/2000/01/rdf-schema#subClassOf",to="http://www.w3.org/2000/01/rdf-schema#subPropertyOf",oo=new Set([Zt,"http://www.w3.org/2002/07/owl#Class","http://www.w3.org/2002/07/owl#DeprecatedClass"]),no=new Set([Jt,"http://www.w3.org/2002/07/owl#ObjectProperty","http://www.w3.org/2002/07/owl#DatatypeProperty","http://www.w3.org/2002/07/owl#AnnotationProperty","http://www.w3.org/2002/07/owl#FunctionalProperty","http://www.w3.org/2002/07/owl#InverseFunctionalProperty","http://www.w3.org/2002/07/owl#TransitiveProperty","http://www.w3.org/2002/07/owl#SymmetricProperty","http://www.w3.org/2002/07/owl#AsymmetricProperty","http://www.w3.org/2002/07/owl#ReflexiveProperty","http://www.w3.org/2002/07/owl#IrreflexiveProperty","http://www.w3.org/2002/07/owl#DeprecatedProperty","http://www.w3.org/2002/07/owl#OntologyProperty"]);function Ie(n,e){n.some(t=>t.value===e.value)||n.push(e)}function ze(n,e){n.includes(e)||n.push(e)}function we(n,e){n.includes(e)||n.push(e)}function $e(n){let e=new Map,t=a=>{let s=e.get(a.value);return s||(s={classParents:[],kinds:[],propertyParents:[],sources:[],term:a,types:[]},e.set(a.value,s)),s};for(let a of n.quads)if(a.subject.termType==="NamedNode"){if(a.predicate.value===Xt&&a.object.termType==="NamedNode"){let s=oo.has(a.object.value),c=no.has(a.object.value);if(!s&&!c)continue;let l=t(a.subject);s&&we(l.kinds,"class"),c&&we(l.kinds,"property"),Ie(l.types,a.object),ze(l.sources,a.source);continue}if(a.predicate.value===eo){let s=t(a.subject);we(s.kinds,"class"),a.object.termType==="NamedNode"&&Ie(s.classParents,a.object),ze(s.sources,a.source);continue}if(a.predicate.value===to){let s=t(a.subject);we(s.kinds,"property"),a.object.termType==="NamedNode"&&Ie(s.propertyParents,a.object),ze(s.sources,a.source)}}let o=Array.from(e.values()).map(a=>{let s=ne(n.quads,a.term);return{...a,...s?{label:s}:{}}}).sort((a,s)=>(a.label??a.term.value).localeCompare(s.label??s.term.value)),r=o.filter(a=>a.kinds.includes("class")),i=o.filter(a=>a.kinds.includes("property"));return{classes:r,count:o.length,definitions:o,properties:i}}var ro=String.raw`
   :host {
     --ink: oklch(27% 0.018 286);
     --muted: oklch(52% 0.018 286);
@@ -1006,28 +269,18 @@ var CSS = String.raw`
   .mark svg { height: 100%; width: 100%; }
   .count { background: var(--accent); border-radius: 999px; color: var(--paper); font-size: 11px; font-variant-numeric: tabular-nums; font-weight: 700; min-width: 20px; padding: 1px 6px; text-align: center; }
   .panel {
+    --ia2-window-floating-closed-transform: translateY(14px) scale(.985);
+    --ia2-window-floating-left: 24px;
+    --ia2-window-floating-open-transform: translateY(0) scale(1);
+    --ia2-window-floating-top: 24px;
+    --ia2-window-rule: var(--line);
+    --ia2-window-transition-duration: 240ms;
+    --ia2-window-width: min(760px, 72vw);
     background: var(--paper);
-    border-left: 1px solid var(--line);
-    bottom: 0;
-    box-shadow: -12px 0 48px oklch(20% 0.03 286 / 18%);
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
-    max-width: 100vw;
-    position: fixed;
-    right: 0;
-    top: 0;
-    transform: translateX(102%);
-    transition: opacity 180ms ease, transform 240ms cubic-bezier(.22,1,.36,1), visibility 240ms;
-    visibility: hidden;
-    width: min(760px, 72vw);
   }
   .panel:focus { outline: none; }
-  .panel[data-position^="left"] { border-left: 0; border-right: 1px solid var(--line); box-shadow: 12px 0 48px oklch(20% 0.03 286 / 18%); left: 0; right: auto; transform: translateX(-102%); }
-  .panel[data-position$="-top"] { bottom: auto; border-bottom: 1px solid var(--line); height: 50vh; top: 0; }
-  .panel[data-position$="-bottom"] { border-top: 1px solid var(--line); bottom: 0; height: 50vh; top: auto; }
-  .panel[data-position="floating"] { border: 1px solid var(--line); border-radius: 14px; bottom: auto; box-shadow: 0 18px 64px oklch(20% 0.03 286 / 24%); height: min(860px, calc(100vh - 48px)); left: 24px; opacity: 0; overflow: hidden; right: auto; top: 24px; transform: translateY(14px) scale(.985); width: min(760px, calc(100vw - 48px)); }
-  .panel[data-open="true"] { transform: translateX(0); visibility: visible; }
-  .panel[data-position="floating"][data-open="true"] { opacity: 1; transform: translateY(0) scale(1); }
   .toolbar { align-items: center; border-bottom: 1px solid var(--line); display: flex; gap: 8px; min-width: 0; padding: 0 8px 0 12px; }
   .drag-grip { color: var(--muted); display: none; flex: 0 0 30px; height: 36px; place-items: center; touch-action: none; user-select: none; }
   .panel[data-position="floating"] .drag-grip { cursor: grab; display: grid; }
@@ -1035,7 +288,7 @@ var CSS = String.raw`
   .panel[data-position="floating"].is-dragging .drag-grip, .panel[data-position="floating"].is-dragging .tabs { cursor: grabbing; }
   .drag-grip svg { fill: currentColor; height: 18px; opacity: .68; width: 10px; }
   .header-actions { align-items: center; display: flex; flex: 0 0 auto; gap: 4px; }
-  .position-switch { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 7px; display: inline-flex; flex: 0 0 198px; overflow: hidden; transition: background 140ms ease, border-color 140ms ease; width: 198px; }
+  .position-switch { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 7px; display: inline-flex; flex: 0 0 auto; overflow: hidden; transition: background 140ms ease, border-color 140ms ease; width: auto; }
   .position-switch:hover, .position-switch:focus-within { background: var(--layer); border-color: var(--line); }
   .position-switch:focus-within { border-color: var(--accent); }
   .position-option { align-items: center; background: transparent; border: 0; border-right: 1px solid transparent; color: var(--muted); cursor: pointer; display: inline-flex; flex: 0 0 28px; height: 32px; justify-content: center; opacity: .26; padding: 0; pointer-events: none; transition: background 140ms ease, border-color 140ms ease, color 140ms ease, opacity 110ms ease; visibility: visible; width: 28px; }
@@ -1126,8 +379,148 @@ var CSS = String.raw`
   .ontology-actions { opacity: 0; pointer-events: none; }
   .ontology-term-row:hover .ontology-actions, .ontology-term-row:focus-within .ontology-actions { opacity: 1; pointer-events: auto; }
   .ontology-actions .locate-button { opacity: 1; }
+  .sparql-workbench { display: grid; gap: 15px; margin: 0 auto; max-width: 920px; min-width: 0; }
+  .sparql-intro { color: var(--muted); font-size: 12px; margin: 0; max-width: 72ch; }
+  .sparql-catalog { display: grid; gap: 6px; min-width: 0; }
+  .sparql-label { color: var(--ink); font-size: 12px; font-weight: 700; }
+  .sparql-select, .sparql-editor-shell {
+    background: var(--layer);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: var(--ink);
+    width: 100%;
+  }
+  .sparql-select { font: inherit; min-height: 38px; padding: 7px 10px; }
+  .sparql-editor-shell {
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .sparql-highlight, .sparql-editor {
+    box-sizing: border-box;
+    font: 12.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    min-height: 230px;
+    overflow-wrap: anywhere;
+    padding: 13px 14px;
+    tab-size: 2;
+    white-space: pre-wrap;
+    width: 100%;
+  }
+  .sparql-highlight {
+    border: 0;
+    inset: 0;
+    margin: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    z-index: 0;
+  }
+  .sparql-highlight code { font: inherit; }
+  .sparql-highlight code::after { content: " "; }
+  .sparql-editor {
+    -webkit-text-fill-color: transparent;
+    background: transparent;
+    border: 0;
+    caret-color: var(--ink);
+    color: transparent;
+    display: block;
+    overflow-x: hidden;
+    position: relative;
+    resize: vertical;
+    z-index: 1;
+  }
+  .sparql-editor::selection {
+    background: color-mix(in oklch, var(--accent), transparent 72%);
+  }
+  .sparql-select:hover, .sparql-editor-shell:hover { border-color: color-mix(in oklch, var(--accent), var(--line) 55%); }
+  .sparql-select:focus, .sparql-editor-shell:focus-within {
+    border-color: var(--accent);
+    outline: 3px solid color-mix(in oklch, var(--accent), transparent 78%);
+    outline-offset: 1px;
+  }
+  .sparql-description { color: var(--muted); font-size: 11px; margin: 0; min-height: 1.5em; }
+  .sparql-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 9px; }
+  .sparql-run, .sparql-reset {
+    border: 1px solid var(--accent);
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    min-height: 36px;
+    padding: 7px 13px;
+  }
+  .sparql-run { background: var(--accent); color: var(--paper); }
+  .sparql-run:hover { background: color-mix(in oklch, var(--accent), var(--ink) 12%); }
+  .sparql-run:disabled { cursor: wait; opacity: .62; }
+  .sparql-reset { background: transparent; border-color: var(--line); color: var(--muted); }
+  .sparql-reset:hover { background: var(--layer); color: var(--ink); }
+  .sparql-observe {
+    align-items: center;
+    color: var(--muted);
+    display: inline-flex;
+    font-size: 11px;
+    gap: 6px;
+    min-height: 36px;
+  }
+  .sparql-observe input { accent-color: var(--accent); height: 16px; margin: 0; width: 16px; }
+  .sparql-safety { color: var(--muted); flex: 1 1 240px; font-size: 10.5px; margin: 0; text-align: right; }
+  .sparql-output { border-top: 1px solid var(--line); min-height: 56px; padding-top: 14px; }
+  .sparql-status { color: var(--muted); font-size: 12px; margin: 0; }
+  .sparql-status[data-state="error"] {
+    background: color-mix(in oklch, var(--warning), transparent 88%);
+    border: 1px solid color-mix(in oklch, var(--warning), var(--line) 30%);
+    border-radius: 8px;
+    color: var(--ink);
+    padding: 10px 11px;
+  }
+  .sparql-summary { color: var(--muted); font-size: 11px; margin: 0 0 8px; }
+  .sparql-boolean { color: var(--accent); font: 750 28px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 4px 0; }
+  .sparql-table-wrap { border: 1px solid var(--line); border-radius: 8px; overflow: auto; }
+  .sparql-table { border-collapse: collapse; font-size: 11.5px; min-width: 100%; text-align: left; }
+  .sparql-table th { background: var(--layer); color: var(--muted); font-size: 10px; letter-spacing: .045em; padding: 8px 10px; position: sticky; text-transform: uppercase; top: 0; white-space: nowrap; }
+  .sparql-table td { border-top: 1px solid var(--line); max-width: 480px; padding: 8px 10px; vertical-align: top; }
+  .sparql-table code, .sparql-table a { color: var(--ink); font: 11.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+  .sparql-table a { color: var(--accent); text-decoration-color: color-mix(in oklch, currentColor, transparent 60%); text-underline-offset: 2px; }
+  .sparql-resource-term { display: block; min-width: 13ch; }
+  .sparql-table .sparql-resource-label {
+    color: var(--ink);
+    font: 650 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  .sparql-table .sparql-resource-label:hover { color: var(--accent); }
+  .sparql-literal-value { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; line-height: 1.5; }
+  .sparql-literal-qualifier { color: var(--muted); display: inline-block; font-size: 10.5px; margin-left: 5px; }
+  .sparql-unbound { color: var(--muted); }
+  .sparql-pagination { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .sparql-page-size-label { align-items: center; color: var(--muted); display: inline-flex; font-size: 11px; gap: 7px; }
+  .sparql-page-size {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    color: var(--ink);
+    font: inherit;
+    min-height: 32px;
+    padding: 4px 25px 4px 8px;
+  }
+  .sparql-page-size:hover { border-color: color-mix(in oklch, var(--accent), var(--line) 55%); }
+  .sparql-page-size:focus { border-color: var(--accent); outline: 3px solid color-mix(in oklch, var(--accent), transparent 78%); outline-offset: 1px; }
+  .sparql-page-status { color: var(--muted); flex: 1 1 auto; font-size: 11px; font-variant-numeric: tabular-nums; margin: 0; min-width: max-content; text-align: right; }
+  .sparql-page-button {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    color: var(--ink);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    min-height: 32px;
+    padding: 5px 10px;
+  }
+  .sparql-page-button:hover:not(:disabled) { background: var(--layer); border-color: color-mix(in oklch, var(--accent), var(--line) 55%); }
+  .sparql-page-button:disabled { color: var(--muted); cursor: default; opacity: .52; }
   pre { background: var(--layer); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); font: 12.5px/1.65 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; min-height: 100%; overflow: auto; padding: 16px 17px; tab-size: 2; white-space: pre; }
   .tok.iri, .tok.name { color: oklch(49% 0.17 290); }
+  .tok.variable { color: oklch(45% 0.13 235); }
   .tok.iri { text-decoration-color: color-mix(in oklch, currentColor, transparent 55%); text-underline-offset: 3px; }
   .tok.string { color: oklch(45% 0.12 145); }
   .tok.key, .tok.keyword { color: oklch(50% 0.15 32); }
@@ -1227,11 +620,8 @@ var CSS = String.raw`
   .copy { background: transparent; border: 0; color: var(--accent); cursor: pointer; font-size: 12px; font-weight: 700; padding: 4px 5px; }
   .sr-only { height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; clip: rect(0,0,0,0); }
   @media (max-width: 760px) {
-    .panel { border-left: 0; width: 100vw; }
     .launcher { bottom: var(--ia2-rdf-launcher-bottom, 14px); right: 14px; }
     .launcher[data-position^="left"] { left: 14px; right: auto; }
-    .panel[data-position^="left"] { border-right: 0; }
-    .panel[data-position="floating"] { border: 1px solid var(--line); border-radius: 12px; bottom: auto; height: calc(100vh - 20px); left: 10px; right: auto; top: 10px; width: calc(100vw - 20px); }
     .toolbar { flex-wrap: wrap; padding: 8px 10px 0; }
     .drag-grip { order: 1; }
     .header-actions { margin-left: auto; order: 2; }
@@ -1245,6 +635,13 @@ var CSS = String.raw`
     .discovery-item { grid-template-columns: minmax(0, 1fr); }
     .discovery-state { align-items: flex-start; min-width: 0; }
     .discovery-status { text-align: left; }
+    .sparql-safety { flex-basis: 100%; text-align: left; }
+    .sparql-highlight, .sparql-editor { min-height: 190px; }
+    .sparql-pagination { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+    .sparql-page-status { grid-column: 2; grid-row: 1; }
+    .sparql-page-button { min-width: 76px; }
+    .sparql-page-previous { grid-column: 1; grid-row: 2; justify-self: end; }
+    .sparql-page-next { grid-column: 2; grid-row: 2; }
   }
   @media (hover: none) {
     .preview-actions { opacity: 1; pointer-events: auto; }
@@ -1257,230 +654,40 @@ var CSS = String.raw`
     :host { --ink: oklch(92% 0.012 286); --muted: oklch(70% 0.018 286); --paper: oklch(20% 0.016 286); --layer: oklch(24% 0.019 286); --line: oklch(34% 0.022 286); --accent: oklch(73% 0.15 294); --accent-soft: oklch(29% 0.05 294); }
     .launcher { background: var(--accent); color: oklch(18% 0.02 286); }
     .tok.iri, .tok.name { color: oklch(77% 0.13 290); }
+    .tok.variable { color: oklch(77% 0.1 235); }
     .tok.string { color: oklch(75% 0.11 145); }
     .tok.key, .tok.keyword { color: oklch(75% 0.12 42); }
     .tok.blank, .tok.number { color: oklch(77% 0.1 235); }
   }
-  @media (prefers-reduced-motion: reduce) { .launcher, .panel { transition: none; } }
-`;
-var TAB_ICONS = {
-  navigator: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="3" cy="5" r=".8" fill="currentColor" stroke="none"/><circle cx="3" cy="9" r=".8" fill="currentColor" stroke="none"/><circle cx="3" cy="13" r=".8" fill="currentColor" stroke="none"/><path d="M6 5h9M6 9h9M6 13h9"/></svg>',
-  sources: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><rect x="2.5" y="3" width="13" height="9" rx="1.5"/><path d="M6 15h6M9 12v3"/></svg>',
-  vocabulary: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="3.5" r="2"/><circle cx="4" cy="14" r="2"/><circle cx="14" cy="14" r="2"/><path d="M9 5.5v3M4 12V9h10v3"/></svg>',
-  discovery: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="9" r="6.5"/><path d="m11.7 6.3-1.5 3.9-3.9 1.5 1.5-3.9z"/></svg>',
-  turtle: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="m6.5 4.5-4 4.5 4 4.5M11.5 4.5l4 4.5-4 4.5"/></svg>',
-  json: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M7 3.5H5.5c-1 0-1.5.5-1.5 1.5v2c0 1-.5 1.5-1.5 2 1 .5 1.5 1 1.5 2v2c0 1 .5 1.5 1.5 1.5H7M11 3.5h1.5c1 0 1.5.5 1.5 1.5v2c0 1 .5 1.5 1.5 2-1 .5-1.5 1-1.5 2v2c0 1-.5 1.5-1.5 1.5H11"/></svg>',
-  diagnostics: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M8 3.2 2.3 13a1.2 1.2 0 0 0 1 1.8h11.4a1.2 1.2 0 0 0 1-1.8L10 3.2a1.15 1.15 0 0 0-2 0Z"/><path d="M9 6.8v3.4M9 13h.01"/></svg>'
-};
-function tabMarkup(view, selected, label, shortLabel, count, countNoun) {
-  const displayLabel = count === void 0 ? label : `${label} (${count})`;
-  const title = count === void 0 || !countNoun ? label : `${label}, ${count} ${countNoun}${count === 1 ? "" : "s"}`;
-  return `<button class="tab" role="tab" data-view="${view}" aria-selected="${selected}" aria-label="${displayLabel}" title="${title}"><span class="tab-icon" aria-hidden="true">${TAB_ICONS[view]}</span><span class="tab-label" data-short="${shortLabel}">${label}</span>${count === void 0 ? "" : `<span class="tab-count"> (${count})</span>`}</button>`;
-}
-var SESSION_STATE_KEY = "ia2:rdf-navigator:state:v1";
-var LAUNCHER_DRAG_THRESHOLD = 4;
-var LAUNCHER_EDGE_SNAP_DISTANCE = 28;
-var DISCOVERY_MAX_HTML_LENGTH = 2e6;
-var DISCOVERY_FETCH_TIMEOUT_MS = 1e4;
-var DISCOVERY_ACCEPT = "text/html, application/xhtml+xml;q=0.95";
-var RESOURCE_PREVIEW_MAX_HTML_LENGTH = 2e6;
-var RESOURCE_PREVIEW_CACHE_LIMIT = 4;
-var RESOURCE_PREVIEW_FETCH_ATTEMPTS = 2;
-var RESOURCE_PREVIEW_FETCH_TIMEOUT_MS = 3e3;
-var RESOURCE_PREVIEW_FETCHED_SANDBOX = "allow-forms allow-popups allow-popups-to-escape-sandbox allow-scripts";
-var RESOURCE_PREVIEW_DIRECT_SANDBOX = `${RESOURCE_PREVIEW_FETCHED_SANDBOX} allow-same-origin`;
-var RESOURCE_PREVIEW_DOCUMENT_CACHE = /* @__PURE__ */ new Map();
-var HTTPS_PREVIEW_HOSTS = /* @__PURE__ */ new Set([
-  "ontology.inferal.com",
-  "purl.archive.org",
-  "purl.org",
-  "schema.org",
-  "www.schema.org",
-  "www.w3.org"
-]);
-var RDF_SCHEMA_SECTIONS = {
-  Alt: "ch_alt",
-  Bag: "ch_bag",
-  first: "ch_first",
-  HTML: "ch_html",
-  JSON: "ch_json",
-  langString: "ch_langstring",
-  List: "ch_list",
-  nil: "ch_nil",
-  object: "ch_object",
-  predicate: "ch_predicate",
-  Property: "ch_property",
-  reifies: "ch_reifies",
-  rest: "ch_rest",
-  Seq: "ch_seq",
-  Statement: "ch_statement",
-  subject: "ch_subject",
-  type: "ch_type",
-  value: "ch_value",
-  XMLLiteral: "ch_xmlliteral"
-};
-var RDFS_SCHEMA_SECTIONS = {
-  Class: "ch_class",
-  comment: "ch_comment",
-  Container: "ch_container",
-  ContainerMembershipProperty: "ch_containermembershipproperty",
-  Datatype: "ch_datatype",
-  domain: "ch_domain",
-  isDefinedBy: "ch_isdefinedby",
-  label: "ch_label",
-  Literal: "ch_literal",
-  member: "ch_member",
-  Proposition: "ch_proposition",
-  range: "ch_range",
-  Resource: "ch_resource",
-  seeAlso: "ch_seealso",
-  subClassOf: "ch_subclassof",
-  subPropertyOf: "ch_subpropertyof"
-};
-var DRAWER_POSITIONS = [
-  { position: "right", label: "Right, full height", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M13 2h5v12h-5z"/></svg>' },
-  { position: "right-top", label: "Right, top half", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M13 2h5v5.5h-5z"/></svg>' },
-  { position: "right-bottom", label: "Right, bottom half", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M13 8.5h5V14h-5z"/></svg>' },
-  { position: "floating", label: "Floating, centered", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><rect class="position-region" x="5" y="4.5" width="10" height="7" rx="1"/></svg>' },
-  { position: "left", label: "Left, full height", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M2 2h5v12H2z"/></svg>' },
-  { position: "left-bottom", label: "Left, bottom half", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M2 8.5h5V14H2z"/></svg>' },
-  { position: "left-top", label: "Left, top half", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M2 2h5v5.5H2z"/></svg>' }
-];
-function isDrawerPosition(value) {
-  return typeof value === "string" && DRAWER_POSITIONS.some(({ position }) => position === value);
-}
-function isFloatingRect(value) {
-  if (!value || typeof value !== "object") return false;
-  const rect = value;
-  return typeof rect.height === "number" && Number.isFinite(rect.height) && rect.height > 0 && typeof rect.width === "number" && Number.isFinite(rect.width) && rect.width > 0 && typeof rect.x === "number" && Number.isFinite(rect.x) && typeof rect.y === "number" && Number.isFinite(rect.y);
-}
-function isLauncherPosition(value) {
-  if (!value || typeof value !== "object") return false;
-  const position = value;
-  return typeof position.x === "number" && Number.isFinite(position.x) && typeof position.y === "number" && Number.isFinite(position.y);
-}
-var RDF_TYPE_IRI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-var RDFS_LABEL_IRI = "http://www.w3.org/2000/01/rdf-schema#label";
-var RDFS_DOMAIN_IRI = "http://www.w3.org/2000/01/rdf-schema#domain";
-var RDFS_RANGE_IRI = "http://www.w3.org/2000/01/rdf-schema#range";
-var SKOS_PREF_LABEL_IRI = "http://www.w3.org/2004/02/skos/core#prefLabel";
-var DCTERMS_TITLE_IRI = "http://purl.org/dc/terms/title";
-var SCHEMA_NAME_IRI = "https://schema.org/name";
-var TYPEAHEAD_LIMIT = 8;
-var TYPE_LABELS = {
-  "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property": "RDF property",
-  "http://www.w3.org/2000/01/rdf-schema#Class": "RDFS class",
-  "http://www.w3.org/2002/07/owl#AnnotationProperty": "Annotation property",
-  "http://www.w3.org/2002/07/owl#Class": "OWL class",
-  "http://www.w3.org/2002/07/owl#DatatypeProperty": "Datatype property",
-  "http://www.w3.org/2002/07/owl#ObjectProperty": "Object property",
-  "http://www.w3.org/2002/07/owl#Ontology": "OWL ontology"
-};
-var NON_RENDERED_ELEMENTS = /* @__PURE__ */ new Set([
-  "area",
-  "base",
-  "head",
-  "link",
-  "meta",
-  "noscript",
-  "script",
-  "source",
-  "style",
-  "template",
-  "title",
-  "track"
-]);
-function elementLabel(element) {
-  const id = element.id ? `#${element.id}` : "";
-  return `<${element.localName}${id}>`;
-}
-function isWebIri(value) {
-  return /^https?:\/\//i.test(value);
-}
-function resourcePreviewUrl(value) {
-  const url = new URL(value);
-  const rdfTerm = url.hostname === "www.w3.org" && url.pathname === "/1999/02/22-rdf-syntax-ns" ? decodeURIComponent(url.hash.slice(1)) : "";
-  if (rdfTerm) {
-    return new URL(`https://www.w3.org/TR/rdf12-schema/#${RDF_SCHEMA_SECTIONS[rdfTerm] ?? "rdf-namespace"}`);
+  @media (forced-colors: active) {
+    .sparql-highlight { display: none; }
+    .sparql-editor {
+      -webkit-text-fill-color: CanvasText;
+      color: CanvasText;
+    }
   }
-  const rdfsTerm = url.hostname === "www.w3.org" && url.pathname === "/2000/01/rdf-schema" ? decodeURIComponent(url.hash.slice(1)) : "";
-  if (rdfsTerm) {
-    return new URL(`https://www.w3.org/TR/rdf12-schema/#${RDFS_SCHEMA_SECTIONS[rdfsTerm] ?? "rdfs-namespace"}`);
+  @media (prefers-reduced-motion: reduce) { .launcher { transition: none; } }
+  ${Ze}
+`,io={navigator:'<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="3" cy="5" r=".8" fill="currentColor" stroke="none"/><circle cx="3" cy="9" r=".8" fill="currentColor" stroke="none"/><circle cx="3" cy="13" r=".8" fill="currentColor" stroke="none"/><path d="M6 5h9M6 9h9M6 13h9"/></svg>',sources:'<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><rect x="2.5" y="3" width="13" height="9" rx="1.5"/><path d="M6 15h6M9 12v3"/></svg>',vocabulary:'<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="3.5" r="2"/><circle cx="4" cy="14" r="2"/><circle cx="14" cy="14" r="2"/><path d="M9 5.5v3M4 12V9h10v3"/></svg>',discovery:'<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="9" r="6.5"/><path d="m11.7 6.3-1.5 3.9-3.9 1.5 1.5-3.9z"/></svg>',sparql:'<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M3 4.5h8M3 9h6M3 13.5h5"/><circle cx="13" cy="12" r="3"/><path d="m15.2 14.2 1.5 1.5"/></svg>',turtle:'<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="m6.5 4.5-4 4.5 4 4.5M11.5 4.5l4 4.5-4 4.5"/></svg>',json:'<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M7 3.5H5.5c-1 0-1.5.5-1.5 1.5v2c0 1-.5 1.5-1.5 2 1 .5 1.5 1 1.5 2v2c0 1 .5 1.5 1.5 1.5H7M11 3.5h1.5c1 0 1.5.5 1.5 1.5v2c0 1 .5 1.5 1.5 2-1 .5-1.5 1-1.5 2v2c0 1-.5 1.5-1.5 1.5H11"/></svg>',diagnostics:'<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M8 3.2 2.3 13a1.2 1.2 0 0 0 1 1.8h11.4a1.2 1.2 0 0 0 1-1.8L10 3.2a1.15 1.15 0 0 0-2 0Z"/><path d="M9 6.8v3.4M9 13h.01"/></svg>'};function J(n,e,t,o,r,i){let a=r===void 0?t:`${t} (${r})`,s=r===void 0||!i?t:`${t}, ${r} ${i}${r===1?"":"s"}`;return`<button class="tab" role="tab" data-view="${n}" aria-selected="${e}" aria-label="${a}" title="${s}"><span class="tab-icon" aria-hidden="true">${io[n]}</span><span class="tab-label" data-short="${o}">${t}</span>${r===void 0?"":`<span class="tab-count"> (${r})</span>`}</button>`}var ut="ia2:rdf-navigator:state:v1",Pe=`SELECT ?subject ?predicate ?object ?graph
+WHERE {
+  {
+    ?subject ?predicate ?object
+    BIND("default graph" AS ?graph)
   }
-  const dcTerm = url.hostname === "purl.org" ? url.pathname.match(/^\/dc\/terms\/([^/]+)$/) : null;
-  if (dcTerm) {
-    return new URL(`https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#${encodeURIComponent(dcTerm[1])}`);
-  }
-  if (url.hostname === "purl.org" && url.pathname === "/dc/terms/") {
-    return new URL("https://www.dublincore.org/specifications/dublin-core/dcmi-terms/");
-  }
-  if (url.protocol === "http:" && HTTPS_PREVIEW_HOSTS.has(url.hostname)) url.protocol = "https:";
-  return url;
-}
-function resourcePreviewFetchFirst(url) {
-  return url.hostname === "www.dublincore.org" && url.pathname === "/specifications/dublin-core/dcmi-terms/" || url.hostname === "www.w3.org" && url.pathname.startsWith("/TR/");
-}
-function resourcePreviewDocumentKey(url) {
-  const key = new URL(url.href);
-  key.hash = "";
-  return key.href;
-}
-function cacheResourcePreviewDocument(key, document2) {
-  RESOURCE_PREVIEW_DOCUMENT_CACHE.delete(key);
-  RESOURCE_PREVIEW_DOCUMENT_CACHE.set(key, document2);
-  while (RESOURCE_PREVIEW_DOCUMENT_CACHE.size > RESOURCE_PREVIEW_CACHE_LIMIT) {
-    const oldest = RESOURCE_PREVIEW_DOCUMENT_CACHE.keys().next().value;
-    if (!oldest) break;
-    RESOURCE_PREVIEW_DOCUMENT_CACHE.delete(oldest);
+  UNION
+  {
+    GRAPH ?graph {
+      ?subject ?predicate ?object
+    }
   }
 }
-function resourcePreviewStatusDocument(message) {
-  return `<!doctype html><meta charset="utf-8"><meta name="color-scheme" content="light dark"><style>
+LIMIT 100`,pt=25,ht=[10,25,50,100],ao=[...me,"http://www.w3.org/ns/shacl#name"],so=4,ye=28,mt=2e6,co=1e4,lo="text/html, application/xhtml+xml;q=0.95",uo=2e6,po=4,ho=2,mo=3e3,xe="allow-forms allow-popups allow-popups-to-escape-sandbox allow-scripts",ft=`${xe} allow-same-origin`,ae=new Map,fo=new Set(["ontology.inferal.com","purl.archive.org","purl.org","schema.org","www.schema.org","www.w3.org"]),go={Alt:"ch_alt",Bag:"ch_bag",first:"ch_first",HTML:"ch_html",JSON:"ch_json",langString:"ch_langstring",List:"ch_list",nil:"ch_nil",object:"ch_object",predicate:"ch_predicate",Property:"ch_property",reifies:"ch_reifies",rest:"ch_rest",Seq:"ch_seq",Statement:"ch_statement",subject:"ch_subject",type:"ch_type",value:"ch_value",XMLLiteral:"ch_xmlliteral"},vo={Class:"ch_class",comment:"ch_comment",Container:"ch_container",ContainerMembershipProperty:"ch_containermembershipproperty",Datatype:"ch_datatype",domain:"ch_domain",isDefinedBy:"ch_isdefinedby",label:"ch_label",Literal:"ch_literal",member:"ch_member",Proposition:"ch_proposition",range:"ch_range",Resource:"ch_resource",seeAlso:"ch_seealso",subClassOf:"ch_subclassof",subPropertyOf:"ch_subpropertyof"};function bo(n){if(!n||typeof n!="object")return!1;let e=n;return typeof e.height=="number"&&Number.isFinite(e.height)&&e.height>0&&typeof e.width=="number"&&Number.isFinite(e.width)&&e.width>0&&typeof e.x=="number"&&Number.isFinite(e.x)&&typeof e.y=="number"&&Number.isFinite(e.y)}function wo(n){if(!n||typeof n!="object")return!1;let e=n;return typeof e.x=="number"&&Number.isFinite(e.x)&&typeof e.y=="number"&&Number.isFinite(e.y)}var yo="http://www.w3.org/1999/02/22-rdf-syntax-ns#type",xo="http://www.w3.org/2000/01/rdf-schema#domain",Eo="http://www.w3.org/2000/01/rdf-schema#range",So=8,ko={"http://www.w3.org/1999/02/22-rdf-syntax-ns#Property":"RDF property","http://www.w3.org/2000/01/rdf-schema#Class":"RDFS class","http://www.w3.org/2002/07/owl#AnnotationProperty":"Annotation property","http://www.w3.org/2002/07/owl#Class":"OWL class","http://www.w3.org/2002/07/owl#DatatypeProperty":"Datatype property","http://www.w3.org/2002/07/owl#ObjectProperty":"Object property","http://www.w3.org/2002/07/owl#Ontology":"OWL ontology"},Lo=new Set(["area","base","head","link","meta","noscript","script","source","style","template","title","track"]);function W(n){let e=n.id?`#${n.id}`:"";return`<${n.localName}${e}>`}function Se(n){return/^https?:\/\//i.test(n)}function gt(n){let e=new URL(n),t=e.hostname==="www.w3.org"&&e.pathname==="/1999/02/22-rdf-syntax-ns"?decodeURIComponent(e.hash.slice(1)):"";if(t)return new URL(`https://www.w3.org/TR/rdf12-schema/#${go[t]??"rdf-namespace"}`);let o=e.hostname==="www.w3.org"&&e.pathname==="/2000/01/rdf-schema"?decodeURIComponent(e.hash.slice(1)):"";if(o)return new URL(`https://www.w3.org/TR/rdf12-schema/#${vo[o]??"rdfs-namespace"}`);let r=e.hostname==="purl.org"?e.pathname.match(/^\/dc\/terms\/([^/]+)$/):null;return r?new URL(`https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#${encodeURIComponent(r[1])}`):e.hostname==="purl.org"&&e.pathname==="/dc/terms/"?new URL("https://www.dublincore.org/specifications/dublin-core/dcmi-terms/"):(e.protocol==="http:"&&fo.has(e.hostname)&&(e.protocol="https:"),e)}function vt(n){return n.hostname==="www.dublincore.org"&&n.pathname==="/specifications/dublin-core/dcmi-terms/"||n.hostname==="www.w3.org"&&n.pathname.startsWith("/TR/")}function Ro(n){let e=new URL(n.href);return e.hash="",e.href}function To(n,e){for(ae.delete(n),ae.set(n,e);ae.size>po;){let t=ae.keys().next().value;if(!t)break;ae.delete(t)}}function ie(n){return`<!doctype html><meta charset="utf-8"><meta name="color-scheme" content="light dark"><style>
     :root { color: oklch(34% 0.015 286); font: 13px/1.45 ui-sans-serif, system-ui, sans-serif; }
     body { align-items: center; display: flex; justify-content: center; margin: 0; min-height: 100vh; }
     p { color: oklch(54% 0.018 286); margin: 24px; text-align: center; }
-  </style><p role="status">${message}</p>`;
-}
-function fetchResourcePreviewDocument(view, url, requestController) {
-  return new Promise((resolve, reject) => {
-    const attemptController = new view.AbortController();
-    let settled = false;
-    let timeout = 0;
-    const finish = (callback) => {
-      if (settled) return;
-      settled = true;
-      view.clearTimeout(timeout);
-      requestController.signal.removeEventListener("abort", abort);
-      callback();
-    };
-    const abort = () => {
-      attemptController.abort();
-      finish(() => reject(new Error("Resource preview request was cancelled.")));
-    };
-    requestController.signal.addEventListener("abort", abort, { once: true });
-    timeout = view.setTimeout(() => {
-      attemptController.abort();
-      finish(() => reject(new Error("Resource preview request timed out.")));
-    }, RESOURCE_PREVIEW_FETCH_TIMEOUT_MS);
-    void view.fetch(url, {
-      credentials: "omit",
-      redirect: "follow",
-      referrerPolicy: "no-referrer",
-      signal: attemptController.signal
-    }).then(async (response) => {
-      const html = await response.text();
-      finish(() => resolve({ html, response }));
-    }).catch((error) => finish(() => reject(error)));
-  });
-}
-function htmlWithDocumentBase(html, baseUrl, fragment = "") {
-  const escapedBase = baseUrl.replaceAll("&", "&amp;").replaceAll('"', "&quot;");
-  const base = `<base href="${escapedBase}">`;
-  const serializedBaseUrl = JSON.stringify(baseUrl).replaceAll("<", "\\u003c");
-  const serializedFragment = JSON.stringify(fragment).replaceAll("<", "\\u003c");
-  const bridge = `<script data-ia2-preview-bridge>(() => {
-    const baseUrl = new URL(${serializedBaseUrl});
-    const fragment = ${serializedFragment};
+  </style><p role="status">${n}</p>`}function Mo(n,e,t){return new Promise((o,r)=>{let i=new n.AbortController,a=!1,s=0,c=d=>{a||(a=!0,n.clearTimeout(s),t.signal.removeEventListener("abort",l),d())},l=()=>{i.abort(),c(()=>r(new Error("Resource preview request was cancelled.")))};t.signal.addEventListener("abort",l,{once:!0}),s=n.setTimeout(()=>{i.abort(),c(()=>r(new Error("Resource preview request timed out.")))},mo),n.fetch(e,{credentials:"omit",redirect:"follow",referrerPolicy:"no-referrer",signal:i.signal}).then(async d=>{let u=await d.text();c(()=>o({html:u,response:d}))}).catch(d=>c(()=>r(d)))})}function bt(n,e,t=""){let r=`<base href="${e.replaceAll("&","&amp;").replaceAll('"',"&quot;")}">`,i=JSON.stringify(e).replaceAll("<","\\u003c"),a=JSON.stringify(t).replaceAll("<","\\u003c"),s=`<script data-ia2-preview-bridge>(() => {
+    const baseUrl = new URL(${i});
+    const fragment = ${a};
     const revealFragment = () => fragment && document.getElementById(fragment)?.scrollIntoView({ block: "start" });
     if (document.readyState === "loading") addEventListener("DOMContentLoaded", revealFragment, { once: true });
     else revealFragment();
@@ -1495,2376 +702,34 @@ function htmlWithDocumentBase(html, baseUrl, fragment = "") {
       event.preventDefault();
       parent.postMessage({ type: "ia2-rdf-preview-navigate", href: next.href }, "*");
     }, true);
-  })();<\/script>`;
-  const injection = `${base}${bridge}`;
-  const head = /<head(?:\s[^>]*)?>/i.exec(html);
-  if (!head) return `${injection}${html}`;
-  const insertion = head.index + head[0].length;
-  return `${html.slice(0, insertion)}${injection}${html.slice(insertion)}`;
-}
-function isLocatableSource(element) {
-  const view = element.ownerDocument.defaultView;
-  if (!view || !(element instanceof view.HTMLElement) || !element.isConnected) return false;
-  if (NON_RENDERED_ELEMENTS.has(element.localName) || element.closest("head, template, [hidden]")) return false;
-  if (element.localName === "input" && element.getAttribute("type")?.toLowerCase() === "hidden") return false;
-  const style = view.getComputedStyle(element);
-  return style.display !== "none" && style.visibility !== "hidden" && style.visibility !== "collapse";
-}
-function hasSerializableChildren(element) {
-  if (element.localName === "template" && "content" in element) {
-    return element.content.childNodes.length > 0;
-  }
-  return element.childNodes.length > 0;
-}
-function rdfCarrierDepth(element, carriers) {
-  let depth = 0;
-  let ancestor = element.parentElement;
-  while (ancestor) {
-    if (carriers.has(ancestor)) depth += 1;
-    ancestor = ancestor.parentElement;
-  }
-  return depth;
-}
-function isInPageViewport(element) {
-  const view = element.ownerDocument.defaultView;
-  if (!view || !isLocatableSource(element)) return false;
-  const rect = element.getBoundingClientRect();
-  return rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.right > 0 && rect.top < view.innerHeight && rect.left < view.innerWidth;
-}
-function termSearchText(term) {
-  if (term.termType === "Triple") {
-    return [compactTerm(term), termSearchText(term.subject), termSearchText(term.predicate), termSearchText(term.object)].join(" ");
-  }
-  const metadata = term.termType === "Literal" ? `${term.datatype.value} ${term.language} ${term.direction ?? ""}` : "";
-  return `${compactTerm(term)} ${term.value} ${metadata}`;
-}
-function quadSearchText(quad) {
-  return [
-    termSearchText(quad.subject),
-    termSearchText(quad.predicate),
-    termSearchText(quad.object),
-    quad.graph ? termSearchText(quad.graph) : "",
-    elementLabel(quad.source)
-  ].join(" ").toLocaleLowerCase();
-}
-function localDocumentUrl(document2, value, sourceDocumentIri = document2.URL) {
-  try {
-    const termUrl = new URL(value);
-    const documentUrl = new URL(sourceDocumentIri);
-    const termDocument = new URL(termUrl);
-    const currentDocument = new URL(documentUrl);
-    termDocument.hash = "";
-    currentDocument.hash = "";
-    return termDocument.href === currentDocument.href ? termUrl : null;
-  } catch {
-    return null;
-  }
-}
-function navigateLocalDocument(document2, url, event) {
-  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-  event.preventDefault();
-  const view = document2.defaultView;
-  if (!view) return;
-  const currentUrl = new URL(document2.URL);
-  currentUrl.hash = url.hash;
-  view.history.pushState(null, "", currentUrl.href);
-  const target = url.hash ? locatableElementForUrl(document2, url) : document2.documentElement;
-  target?.scrollIntoView({
-    behavior: view.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-    block: "start"
-  });
-}
-function locatableElementForUrl(document2, localUrl) {
-  let target = document2.documentElement;
-  if (localUrl.hash) {
-    const encodedId = localUrl.hash.slice(1);
-    try {
-      target = document2.getElementById(decodeURIComponent(encodedId));
-    } catch {
-      target = document2.getElementById(encodedId);
-    }
-  }
-  return target && isLocatableSource(target) ? target : null;
-}
-function locatableElementForTerm(document2, term, sourceDocumentIri = document2.URL) {
-  if (term.termType !== "NamedNode" || !isWebIri(term.value)) return null;
-  const localUrl = localDocumentUrl(document2, term.value, sourceDocumentIri);
-  return localUrl ? locatableElementForUrl(document2, localUrl) : null;
-}
-function definitionTarget(document2, definition, sourceDocumentIri) {
-  const termTarget = locatableElementForTerm(document2, definition.term, sourceDocumentIri);
-  if (termTarget) return termTarget;
-  for (const source of definition.sources) {
-    const identifiedContainer = source.closest("[id]");
-    if (identifiedContainer && isLocatableSource(identifiedContainer)) return identifiedContainer;
-    if (isLocatableSource(source)) return source;
-  }
-  return null;
-}
-function locateButton(document2, target, className, onLocate) {
-  const button = document2.createElement("button");
-  button.className = `row-action-button locate-button ${className}`;
-  button.type = "button";
-  button.setAttribute("aria-label", `Locate ${elementLabel(target)}`);
-  button.title = button.getAttribute("aria-label");
-  const glyph = document2.createElement("span");
-  glyph.className = "locate-glyph";
-  glyph.setAttribute("aria-hidden", "true");
-  glyph.textContent = "\u2316";
-  button.append(glyph);
-  button.addEventListener("click", () => onLocate(target));
-  return button;
-}
-function termCode(document2, term, prefix = "", className = "", onLocate, sourceDocumentIri = document2.URL) {
-  const code = document2.createElement("code");
-  if (className) code.className = className;
-  if (prefix) code.append(document2.createTextNode(prefix));
-  const label = compactTerm(term);
-  if (term.termType !== "NamedNode" || !isWebIri(term.value)) {
-    code.append(document2.createTextNode(label));
-    return code;
-  }
-  const anchor = document2.createElement("a");
-  anchor.className = "term-link";
-  anchor.href = term.value;
-  const localUrl = localDocumentUrl(document2, term.value, sourceDocumentIri);
-  if (localUrl) {
-    anchor.classList.add("local-term");
-    anchor.title = localUrl.hash ? `Scroll to ${localUrl.hash} in this document` : "Scroll to the start of this document";
-    anchor.addEventListener("click", (event) => navigateLocalDocument(document2, localUrl, event));
-  } else {
-    anchor.target = "_blank";
-    anchor.rel = "noopener noreferrer";
-    anchor.title = `Open ${term.value} in a new tab`;
-  }
-  anchor.textContent = label;
-  code.append(anchor);
-  const target = locatableElementForTerm(document2, term, sourceDocumentIri);
-  if (target && onLocate) code.append(locateButton(document2, target, "term-locate-button", onLocate));
-  return code;
-}
-function namespaceFor(iri2) {
-  for (const [label, namespace2] of Object.entries(PREFIXES)) {
-    if (iri2.startsWith(namespace2)) return { label, namespace: namespace2 };
-  }
-  if (!isWebIri(iri2)) return null;
-  const hash = iri2.lastIndexOf("#");
-  const slash = iri2.lastIndexOf("/");
-  const boundary = Math.max(hash, slash);
-  if (boundary < 8) return null;
-  const namespace = iri2.slice(0, boundary + 1);
-  try {
-    const url = new URL(namespace);
-    const path = url.pathname.replace(/\/$/, "");
-    const suffix = namespace.endsWith("#") ? "#" : "";
-    return { label: `${url.host}${path}${suffix}`, namespace };
-  } catch {
-    return null;
-  }
-}
-function termIris(term) {
-  if (term.termType === "NamedNode") return [term.value];
-  if (term.termType === "BlankNode") return [];
-  if (term.termType === "Literal") return compactTerm(term).includes("^^") ? [term.datatype.value] : [];
-  return [...termIris(term.subject), ...termIris(term.predicate), ...termIris(term.object)];
-}
-function compactIri(iri2) {
-  return compactTerm({ termType: "NamedNode", value: iri2 });
-}
-function localNameForIri(iri2) {
-  const trimmed = iri2.replace(/[\/#]+$/, "");
-  const boundary = Math.max(trimmed.lastIndexOf("#"), trimmed.lastIndexOf("/"));
-  const local = boundary >= 0 ? trimmed.slice(boundary + 1) : trimmed;
-  try {
-    return decodeURIComponent(local);
-  } catch {
-    return local;
-  }
-}
-function semanticSuggestionsIn(result) {
-  const builders = /* @__PURE__ */ new Map();
-  const ensure = (iri2) => {
-    const existing = builders.get(iri2);
-    if (existing) return existing;
-    const created = {
-      domains: /* @__PURE__ */ new Set(),
-      iri: iri2,
-      labels: /* @__PURE__ */ new Map(),
-      ranges: /* @__PURE__ */ new Set(),
-      statementCount: 0,
-      types: /* @__PURE__ */ new Set()
-    };
-    builders.set(iri2, created);
-    return created;
-  };
-  for (const quad of result.quads) {
-    const iris = /* @__PURE__ */ new Set([
-      ...termIris(quad.subject),
-      ...termIris(quad.predicate),
-      ...termIris(quad.object),
-      ...quad.graph ? termIris(quad.graph) : []
-    ]);
-    for (const iri2 of iris) ensure(iri2).statementCount += 1;
-    if (quad.subject.termType !== "NamedNode") continue;
-    const subject = ensure(quad.subject.value);
-    if (quad.object.termType === "Literal" && [RDFS_LABEL_IRI, SKOS_PREF_LABEL_IRI, DCTERMS_TITLE_IRI, SCHEMA_NAME_IRI].includes(quad.predicate.value)) {
-      subject.labels.set(quad.predicate.value, quad.object.value);
-    }
-    if (quad.predicate.value === RDF_TYPE_IRI && quad.object.termType === "NamedNode") subject.types.add(quad.object.value);
-    if (quad.predicate.value === RDFS_DOMAIN_IRI) subject.domains.add(compactTerm(quad.object));
-    if (quad.predicate.value === RDFS_RANGE_IRI) subject.ranges.add(compactTerm(quad.object));
-  }
-  const labelPriority = [RDFS_LABEL_IRI, SKOS_PREF_LABEL_IRI, DCTERMS_TITLE_IRI, SCHEMA_NAME_IRI];
-  return Array.from(builders.values()).map((builder) => {
-    const display = compactIri(builder.iri);
-    const localName = localNameForIri(builder.iri);
-    const label = labelPriority.map((predicate) => builder.labels.get(predicate)).find(Boolean) ?? "";
-    const kinds = Array.from(builder.types, (type) => TYPE_LABELS[type] ?? `type ${compactIri(type)}`).sort();
-    const domains = Array.from(builder.domains).sort();
-    const ranges = Array.from(builder.ranges).sort();
-    const searchText = [
-      display,
-      builder.iri,
-      localName,
-      label,
-      ...kinds,
-      ...domains.flatMap((domain) => ["domain", domain, `domain ${domain}`]),
-      ...ranges.flatMap((range) => ["range", range, `range ${range}`])
-    ].join(" ").toLocaleLowerCase();
-    return {
-      display,
-      domains,
-      iri: builder.iri,
-      kinds,
-      label,
-      localName,
-      ranges,
-      searchText,
-      statementCount: builder.statementCount
-    };
-  });
-}
-function matchingSemanticSuggestions(suggestions, value, limit = TYPEAHEAD_LIMIT) {
-  const query = value.trim().toLocaleLowerCase();
-  if (!query) return [];
-  const tokens = query.split(/\s+/).filter(Boolean);
-  return suggestions.map((suggestion) => {
-    if (!tokens.every((token) => suggestion.searchText.includes(token))) return null;
-    const primary = [suggestion.display, suggestion.localName, suggestion.label].join(" ").toLocaleLowerCase();
-    let score = 60;
-    if ([suggestion.display, suggestion.localName, suggestion.label].some((field) => field.toLocaleLowerCase() === query)) score = 0;
-    else if ([suggestion.display, suggestion.localName, suggestion.label].some((field) => field.toLocaleLowerCase().startsWith(query))) score = 10;
-    else if (primary.includes(query)) score = 20;
-    else if (tokens.every((token) => primary.includes(token))) score = 35;
-    return { score: score - Math.min(suggestion.statementCount, 20) / 100, suggestion };
-  }).filter((entry) => entry !== null).sort((a, b) => a.score - b.score || a.suggestion.display.localeCompare(b.suggestion.display)).slice(0, limit).map(({ suggestion }) => suggestion);
-}
-function semanticSuggestionDetails(suggestion) {
-  const details = [
-    ...suggestion.kinds,
-    ...suggestion.domains.map((domain) => `domain ${domain}`),
-    ...suggestion.ranges.map((range) => `range ${range}`)
-  ];
-  const count = `${suggestion.statementCount} statement${suggestion.statementCount === 1 ? "" : "s"}`;
-  return [...details, count];
-}
-function namespacesInQuad(quad) {
-  const iris = [
-    ...termIris(quad.subject),
-    ...termIris(quad.predicate),
-    ...termIris(quad.object),
-    ...quad.graph ? termIris(quad.graph) : []
-  ];
-  const found = /* @__PURE__ */ new Map();
-  for (const iri2 of iris) {
-    const vocabulary = namespaceFor(iri2);
-    if (vocabulary) found.set(vocabulary.namespace, vocabulary);
-  }
-  return Array.from(found.values());
-}
-function vocabulariesIn(result) {
-  const found = /* @__PURE__ */ new Map();
-  for (const quad of result.quads) {
-    for (const vocabulary of namespacesInQuad(quad)) {
-      const existing = found.get(vocabulary.namespace);
-      if (existing) existing.count += 1;
-      else found.set(vocabulary.namespace, { ...vocabulary, count: 1 });
-    }
-  }
-  return Array.from(found.values()).sort((a, b) => a.label.localeCompare(b.label));
-}
-var NATIVE_RDF_VALUE_ATTRIBUTES = /* @__PURE__ */ new Set(["content", "datetime", "dir", "href", "lang", "src", "value"]);
-var RDF_ELEMENT_SELECTOR = "[rdf-predicate], [rdf-graph], [rdf-graph-key], base[href], link[rel]";
-function mutationAffectsExtraction(record) {
-  if (record.type === "characterData") {
-    return record.target.parentElement?.closest("[rdf-predicate]") !== null;
-  }
-  if (record.type === "attributes") {
-    const element = record.target instanceof Element ? record.target : null;
-    const name = record.attributeName ?? "";
-    if (!element) return false;
-    if (name.startsWith("rdf-")) return true;
-    if (element.localName === "base" && name === "href") return true;
-    if (element.localName === "link" && (name === "href" || name === "rel")) return true;
-    if (!element.hasAttribute("rdf-predicate")) return false;
-    return name === "id" || NATIVE_RDF_VALUE_ATTRIBUTES.has(name);
-  }
-  const target = record.target instanceof Element ? record.target : null;
-  if (target?.closest("[rdf-predicate]")) return true;
-  return [...record.addedNodes, ...record.removedNodes].some((node) => {
-    if (!(node instanceof Element)) return false;
-    return node.matches(RDF_ELEMENT_SELECTOR) || node.querySelector(RDF_ELEMENT_SELECTOR) !== null;
-  });
-}
-function retrievalIriForCandidate(targetIri, source) {
-  const target = new URL(targetIri);
-  const canonicalSource = new URL(source.sourceDocumentIri);
-  const retrievalSource = new URL(source.retrievalDocumentIri);
-  if (target.origin !== canonicalSource.origin || canonicalSource.origin === retrievalSource.origin) return target.href;
-  return new URL(`${target.pathname}${target.search}${target.hash}`, retrievalSource.origin).href;
-}
-function prepareRetrievedDocument(document2, retrievalIri) {
-  try {
-    Object.defineProperty(document2, "URL", { configurable: true, value: retrievalIri });
-  } catch {
-  }
-  const base = document2.head?.querySelector("base[href]");
-  if (base) base.href = new URL(base.getAttribute("href") ?? "", retrievalIri).href;
-  document2.head?.querySelectorAll('link[rel~="canonical"][href]').forEach((link) => {
-    link.href = new URL(link.getAttribute("href") ?? "", retrievalIri).href;
-  });
-}
-function discoveryErrorMessage(error) {
-  if (error instanceof DOMException && error.name === "AbortError") return "Retrieval timed out.";
-  if (error instanceof TypeError) return "Retrieval was blocked by CORS or network policy.";
-  if (error instanceof Error) return error.message;
-  return "The contribution could not be loaded.";
-}
-var Ia2RdfNavigator = class extends HTMLElement {
-  #result = null;
-  #sourceResult = null;
-  #topSourceResult = null;
-  #directFrameSources = [];
-  #externalSources = [];
-  #sources = [];
-  #selectedSourceId = "top-document";
-  #frameSourceIds = /* @__PURE__ */ new WeakMap();
-  #nextFrameSourceId = 1;
-  #discoveryCandidates = [];
-  #discoveryLoads = /* @__PURE__ */ new Map();
-  #documentVocabulary = { classes: [], count: 0, definitions: [], properties: [] };
-  #view = "navigator";
-  #open = false;
-  #status = "";
-  #navigatorQuery = "";
-  #disabledNamespaces = /* @__PURE__ */ new Set();
-  #syncMode = "off";
-  #position = "right";
-  #floatingRect = null;
-  #floatingInteractionCleanup = null;
-  #launcherPosition = null;
-  #launcherInteractionCleanup = null;
-  #suppressLauncherClick = false;
-  #linkPreviews = /* @__PURE__ */ new Map();
-  #activeLinkPreview = null;
-  #linkPreviewZIndex = 20;
-  #locateAnimation = null;
-  #syncCleanup = null;
-  #resetSyncControl = null;
-  #vocabularyTreeCleanup = null;
-  #vocabularyResizeObserver = null;
-  #tabResizeObserver = null;
-  #observer = null;
-  #refreshTimer = null;
-  #navigatorRows = [];
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
-  }
-  connectedCallback() {
-    this.#restoreSessionState();
-    this.refresh();
-    this.addEventListener("keydown", this.#onKeydown);
-    this.addEventListener("keyup", this.#onKeyup);
-    this.ownerDocument.defaultView?.addEventListener("resize", this.#onWindowResize, { passive: true });
-    this.#observeDocument();
-  }
-  disconnectedCallback() {
-    this.removeEventListener("keydown", this.#onKeydown);
-    this.removeEventListener("keyup", this.#onKeyup);
-    this.ownerDocument.defaultView?.removeEventListener("resize", this.#onWindowResize);
-    this.#observer?.disconnect();
-    this.#observer = null;
-    for (const state of this.#discoveryLoads.values()) state.controller?.abort();
-    this.#discoveryLoads.clear();
-    this.#vocabularyResizeObserver?.disconnect();
-    this.#vocabularyResizeObserver = null;
-    this.#tabResizeObserver?.disconnect();
-    this.#tabResizeObserver = null;
-    if (this.#refreshTimer !== null) window.clearTimeout(this.#refreshTimer);
-    this.#stopFloatingInteraction();
-    this.#stopLauncherInteraction();
-    this.#clearLinkPreviews();
-    this.#clearLocateEmphasis();
-    this.#clearNavigatorSync();
-    this.#clearVocabularyTreeInteractions();
-  }
-  #clearNavigatorSync() {
-    this.#syncCleanup?.();
-    this.#syncCleanup = null;
-  }
-  #turnOffNavigatorSync() {
-    if (this.#resetSyncControl) {
-      this.#resetSyncControl();
-      return;
-    }
-    this.#syncMode = "off";
-    this.#clearNavigatorSync();
-  }
-  #clearVocabularyTreeInteractions() {
-    this.#vocabularyTreeCleanup?.();
-    this.#vocabularyTreeCleanup = null;
-  }
-  #configureTabCompaction(tabs) {
-    this.#tabResizeObserver?.disconnect();
-    this.#tabResizeObserver = null;
-    if (!tabs) return;
-    const update = () => {
-      tabs.dataset.compact = "0";
-      if (tabs.clientWidth <= 0) return;
-      for (let level = 0; level <= 3; level += 1) {
-        tabs.dataset.compact = String(level);
-        if (tabs.scrollWidth <= tabs.clientWidth + 1) return;
-      }
-    };
-    update();
-    const ResizeObserverConstructor = this.ownerDocument.defaultView?.ResizeObserver;
-    if (!ResizeObserverConstructor) return;
-    this.#tabResizeObserver = new ResizeObserverConstructor(update);
-    this.#tabResizeObserver.observe(tabs);
-  }
-  #activateLinkPreview(preview) {
-    if (!this.#linkPreviews.has(preview)) return;
-    this.#activeLinkPreview = preview;
-    preview.style.zIndex = String(++this.#linkPreviewZIndex);
-  }
-  #clearLinkPreview(preview) {
-    const state = this.#linkPreviews.get(preview);
-    if (!state) return;
-    state.abortController?.abort();
-    state.interactionCleanup?.();
-    state.navigationCleanup?.();
-    preview.remove();
-    this.#linkPreviews.delete(preview);
-    if (this.#activeLinkPreview !== preview) return;
-    const remaining = Array.from(this.#linkPreviews.keys()).at(-1) ?? null;
-    this.#activeLinkPreview = null;
-    if (remaining) this.#activateLinkPreview(remaining);
-  }
-  #clearLinkPreviews() {
-    for (const preview of Array.from(this.#linkPreviews.keys())) this.#clearLinkPreview(preview);
-    this.#activeLinkPreview = null;
-    this.#linkPreviewZIndex = 20;
-  }
-  #linkPreviewRect(preview) {
-    const rect = preview.getBoundingClientRect();
-    return {
-      height: Number.parseFloat(preview.style.height) || rect.height,
-      width: Number.parseFloat(preview.style.width) || rect.width,
-      x: Number.parseFloat(preview.style.left) || rect.left,
-      y: Number.parseFloat(preview.style.top) || rect.top
-    };
-  }
-  #applyLinkPreviewGeometry(preview, rect) {
-    const constrained = this.#constrainFloatingRect(rect);
-    preview.style.height = `${constrained.height}px`;
-    preview.style.left = `${constrained.x}px`;
-    preview.style.top = `${constrained.y}px`;
-    preview.style.width = `${constrained.width}px`;
-  }
-  #constrainLinkPreview(preview) {
-    this.#applyLinkPreviewGeometry(preview, this.#linkPreviewRect(preview));
-  }
-  #startLinkPreviewInteraction(event, preview, resize) {
-    if (event.button !== 0) return;
-    const view = this.ownerDocument.defaultView;
-    const state = this.#linkPreviews.get(preview);
-    if (!view || !state) return;
-    event.preventDefault();
-    this.#activateLinkPreview(preview);
-    state.interactionCleanup?.();
-    state.interactionCleanup = null;
-    this.#constrainLinkPreview(preview);
-    const startRect = this.#linkPreviewRect(preview);
-    const startX = event.clientX;
-    const startY = event.clientY;
-    preview.classList.add(resize ? "is-resizing" : "is-dragging");
-    const update = (moveEvent) => {
-      const deltaX = moveEvent.clientX - startX;
-      const deltaY = moveEvent.clientY - startY;
-      const limits = this.#floatingLimits();
-      const next = { ...startRect };
-      if (!resize) {
-        next.x = startRect.x + deltaX;
-        next.y = startRect.y + deltaY;
-      } else {
-        if (resize.includes("e")) next.width = Math.min(Math.max(startRect.width + deltaX, limits.minWidth), limits.width - limits.margin - startRect.x);
-        if (resize.includes("s")) next.height = Math.min(Math.max(startRect.height + deltaY, limits.minHeight), limits.height - limits.margin - startRect.y);
-        if (resize.includes("w")) {
-          next.x = Math.min(Math.max(startRect.x + deltaX, limits.margin), startRect.x + startRect.width - limits.minWidth);
-          next.width = startRect.x + startRect.width - next.x;
-        }
-        if (resize.includes("n")) {
-          next.y = Math.min(Math.max(startRect.y + deltaY, limits.margin), startRect.y + startRect.height - limits.minHeight);
-          next.height = startRect.y + startRect.height - next.y;
-        }
-      }
-      this.#applyLinkPreviewGeometry(preview, next);
-    };
-    const stop = () => {
-      view.removeEventListener("pointermove", update);
-      view.removeEventListener("pointerup", stop);
-      view.removeEventListener("pointercancel", stop);
-      preview.classList.remove("is-dragging", "is-resizing");
-      if (state.interactionCleanup === stop) state.interactionCleanup = null;
-    };
-    view.addEventListener("pointermove", update);
-    view.addEventListener("pointerup", stop);
-    view.addEventListener("pointercancel", stop);
-    state.interactionCleanup = stop;
-  }
-  #loadLinkPreviewFrame(preview, frame, href) {
-    const view = this.ownerDocument.defaultView;
-    const state = this.#linkPreviews.get(preview);
-    if (!view || !state) return;
-    state.abortController?.abort();
-    state.abortController = null;
-    const previewUrl = resourcePreviewUrl(href);
-    const fetchFirst = resourcePreviewFetchFirst(previewUrl);
-    const documentKey = resourcePreviewDocumentKey(previewUrl);
-    const fragment = previewUrl.hash ? decodeURIComponent(previewUrl.hash.slice(1)) : "";
-    frame.removeAttribute("srcdoc");
-    if (fetchFirst) {
-      frame.removeAttribute("src");
-      frame.setAttribute("sandbox", RESOURCE_PREVIEW_FETCHED_SANDBOX);
-      const cached = RESOURCE_PREVIEW_DOCUMENT_CACHE.get(documentKey);
-      if (cached) {
-        frame.srcdoc = htmlWithDocumentBase(cached.html, cached.baseUrl, fragment);
-        return;
-      }
-      frame.srcdoc = resourcePreviewStatusDocument("Loading definition\u2026");
-    } else {
-      frame.setAttribute("sandbox", RESOURCE_PREVIEW_DIRECT_SANDBOX);
-      frame.src = previewUrl.href;
-    }
-    if (typeof view.fetch !== "function" || typeof view.AbortController !== "function") {
-      if (fetchFirst) frame.srcdoc = resourcePreviewStatusDocument("Preview unavailable. Use the open button above.");
-      return;
-    }
-    const controller = new view.AbortController();
-    state.abortController = controller;
-    const attempts = fetchFirst ? RESOURCE_PREVIEW_FETCH_ATTEMPTS : 1;
-    const fetchDocument = async () => {
-      let error;
-      for (let attempt = 0; attempt < attempts; attempt += 1) {
-        try {
-          return await fetchResourcePreviewDocument(view, previewUrl.href, controller);
-        } catch (caught) {
-          error = caught;
-          if (controller.signal.aborted || attempt + 1 >= attempts) throw caught;
-          if (fetchFirst && frame.isConnected) frame.srcdoc = resourcePreviewStatusDocument("Still loading; retrying\u2026");
-        }
-      }
-      throw error;
-    };
-    void fetchDocument().then(({ html, response }) => {
-      const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
-      if (!response.ok || !contentType.includes("text/html") && !contentType.includes("application/xhtml+xml")) {
-        if (fetchFirst && frame.isConnected) frame.srcdoc = resourcePreviewStatusDocument("Preview unavailable. Use the open button above.");
-        return;
-      }
-      if (html.length > RESOURCE_PREVIEW_MAX_HTML_LENGTH || controller.signal.aborted || !frame.isConnected) {
-        if (fetchFirst && !controller.signal.aborted && frame.isConnected) frame.srcdoc = resourcePreviewStatusDocument("Preview is too large. Use the open button above.");
-        return;
-      }
-      const responseUrl = new URL(response.url || previewUrl.href);
-      responseUrl.hash = "";
-      cacheResourcePreviewDocument(documentKey, { baseUrl: responseUrl.href, html });
-      frame.setAttribute("sandbox", RESOURCE_PREVIEW_FETCHED_SANDBOX);
-      frame.srcdoc = htmlWithDocumentBase(html, responseUrl.href, fragment);
-    }).catch(() => {
-      if (fetchFirst && frame.isConnected && !controller.signal.aborted) {
-        frame.srcdoc = resourcePreviewStatusDocument("Preview unavailable. Use the open button above.");
-      }
-    }).finally(() => {
-      if (state.abortController === controller) state.abortController = null;
-    });
-  }
-  #showLinkPreview(anchor, x, y) {
-    const view = this.ownerDocument.defaultView;
-    if (!view || !this.shadowRoot || !anchor.isConnected) return;
-    const document2 = this.ownerDocument;
-    const preview = document2.createElement("section");
-    preview.className = "resource-preview";
-    const previewKind = anchor.closest(".predicate") ? "definition" : "resource";
-    preview.dataset.previewKind = previewKind;
-    preview.setAttribute("role", "dialog");
-    preview.setAttribute("aria-label", `${previewKind === "definition" ? "Definition" : "Resource"} preview of ${anchor.href}`);
-    const { height: viewportHeight, margin, width: viewportWidth } = this.#floatingLimits();
-    const availableWidth = Math.max(1, viewportWidth - margin * 2);
-    const availableHeight = Math.max(1, viewportHeight - margin * 2);
-    const preferredWidth = previewKind === "definition" ? 620 : Math.max(760, Math.round(viewportWidth * 0.72));
-    const preferredHeight = previewKind === "definition" ? 520 : Math.min(760, Math.max(560, Math.round(viewportHeight * 0.82)));
-    const width = Math.min(preferredWidth, availableWidth);
-    const height = Math.min(preferredHeight, availableHeight);
-    const cascade = this.#linkPreviews.size % 6 * 24;
-    const initialRect = this.#constrainFloatingRect({
-      height,
-      width,
-      x: previewKind === "definition" ? x - 24 : Math.round((viewportWidth - width) / 2),
-      y: previewKind === "definition" ? y - 40 : Math.round((viewportHeight - height) / 2)
-    });
-    this.#applyLinkPreviewGeometry(preview, {
-      ...initialRect,
-      x: initialRect.x + cascade,
-      y: initialRect.y + cascade
-    });
-    const bar = document2.createElement("header");
-    bar.className = "resource-preview-bar";
-    const url = document2.createElement("span");
-    url.className = "resource-preview-url";
-    url.title = anchor.href;
-    url.textContent = anchor.href;
-    const open = document2.createElement("a");
-    open.className = "resource-preview-action resource-preview-open";
-    open.href = anchor.href;
-    open.target = "_blank";
-    open.rel = "noopener noreferrer";
-    open.setAttribute("aria-label", `Open ${anchor.href} in a new tab`);
-    open.title = open.getAttribute("aria-label");
-    open.textContent = "\u2197";
-    bar.append(url, open);
-    const close = document2.createElement("button");
-    close.className = "resource-preview-action resource-preview-close";
-    close.type = "button";
-    close.setAttribute("aria-label", "Close resource preview");
-    close.title = close.getAttribute("aria-label");
-    close.textContent = "\xD7";
-    close.addEventListener("click", () => this.#clearLinkPreview(preview));
-    bar.append(close);
-    bar.addEventListener("pointerdown", (event) => {
-      const target = event.target instanceof Element ? event.target : null;
-      if (target?.closest("a, button")) return;
-      this.#startLinkPreviewInteraction(event, preview);
-    });
-    const frame = document2.createElement("iframe");
-    frame.className = "resource-preview-frame";
-    frame.title = `${previewKind === "definition" ? "Definition" : "Resource"} preview of ${anchor.href}`;
-    frame.setAttribute("sandbox", resourcePreviewFetchFirst(resourcePreviewUrl(anchor.href)) ? RESOURCE_PREVIEW_FETCHED_SANDBOX : RESOURCE_PREVIEW_DIRECT_SANDBOX);
-    frame.referrerPolicy = "no-referrer";
-    frame.tabIndex = 0;
-    preview.append(bar, frame);
-    const resizeHandles = document2.createElement("div");
-    resizeHandles.className = "resource-preview-resize-handles";
-    resizeHandles.setAttribute("aria-hidden", "true");
-    for (const direction of ["n", "ne", "e", "se", "s", "sw", "w", "nw"]) {
-      const handle = document2.createElement("span");
-      handle.className = "resize-handle";
-      handle.dataset.resize = direction;
-      handle.addEventListener("pointerdown", (event) => this.#startLinkPreviewInteraction(event, preview, direction));
-      resizeHandles.append(handle);
-    }
-    preview.append(resizeHandles);
-    this.shadowRoot.append(preview);
-    const state = { abortController: null, interactionCleanup: null, navigationCleanup: null };
-    this.#linkPreviews.set(preview, state);
-    preview.addEventListener("pointerdown", () => this.#activateLinkPreview(preview), { capture: true });
-    this.#activateLinkPreview(preview);
-    const handlePreviewNavigation = (event) => {
-      const data = event.data;
-      if (event.source !== frame.contentWindow || data?.type !== "ia2-rdf-preview-navigate" || typeof data.href !== "string" || !isWebIri(data.href)) return;
-      url.textContent = data.href;
-      url.title = data.href;
-      open.href = data.href;
-      this.#loadLinkPreviewFrame(preview, frame, data.href);
-    };
-    view.addEventListener("message", handlePreviewNavigation);
-    state.navigationCleanup = () => view.removeEventListener("message", handlePreviewNavigation);
-    this.#loadLinkPreviewFrame(preview, frame, anchor.href);
-  }
-  #openLinkPreview(anchor, event) {
-    const rect = anchor.getBoundingClientRect();
-    const x = event.clientX || rect.left + Math.min(rect.width / 2, 24);
-    const y = event.clientY || rect.top + Math.min(rect.height / 2, 12);
-    this.#showLinkPreview(anchor, x, y);
-  }
-  #resourceAnchorForTarget(target) {
-    if (!(target instanceof Element)) return null;
-    const anchor = target.closest("a.term-link[href], a.vocabulary-link[href], a.tok.iri[href]");
-    if (!anchor || !this.shadowRoot?.contains(anchor)) return null;
-    const sourceDocumentIri = this.#result?.sourceDocumentIri ?? this.ownerDocument.URL;
-    return localDocumentUrl(this.ownerDocument, anchor.href, sourceDocumentIri) ? null : anchor;
-  }
-  #configureLinkClicks() {
-    if (!this.shadowRoot) return;
-    const viewport = this.shadowRoot.querySelector(".viewport");
-    if (!viewport) return;
-    viewport.addEventListener("click", (event) => {
-      const anchor = this.#resourceAnchorForTarget(event.target);
-      if (!anchor || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      event.preventDefault();
-      this.#openLinkPreview(anchor, event);
-    });
-  }
-  #restoreSessionState() {
-    try {
-      const serialized = this.ownerDocument.defaultView?.sessionStorage.getItem(SESSION_STATE_KEY);
-      if (!serialized) return;
-      const state = JSON.parse(serialized);
-      if (isDrawerPosition(state.position)) this.#position = state.position;
-      if (isFloatingRect(state.floatingRect)) this.#floatingRect = this.#constrainFloatingRect(state.floatingRect);
-      if (isLauncherPosition(state.launcherPosition)) this.#launcherPosition = state.launcherPosition;
-    } catch {
-    }
-  }
-  #persistSessionState() {
-    try {
-      const state = {
-        floatingRect: this.#floatingRect,
-        launcherPosition: this.#launcherPosition,
-        position: this.#position
-      };
-      this.ownerDocument.defaultView?.sessionStorage.setItem(SESSION_STATE_KEY, JSON.stringify(state));
-    } catch {
-    }
-  }
-  #captureFocus() {
-    const active = this.shadowRoot?.activeElement;
-    if (!(active instanceof HTMLElement)) return null;
-    if (active.classList.contains("navigator-search")) {
-      const input = active;
-      return { kind: "search", start: input.selectionStart, end: input.selectionEnd };
-    }
-    if (active.classList.contains("vocabulary-toggle") && active.dataset.namespace) return { kind: "namespace", key: active.dataset.namespace };
-    if (active.classList.contains("sync-option") && active.dataset.syncMode) return { kind: "sync", key: active.dataset.syncMode };
-    if (active.classList.contains("position-option") && active.dataset.position) return { kind: "position", key: active.dataset.position };
-    if (active.classList.contains("discovery-action") && active.dataset.candidateId) return { kind: "discovery-action", key: active.dataset.candidateId };
-    if (active.classList.contains("source-input") && active.dataset.sourceId) return { kind: "source", key: active.dataset.sourceId };
-    if (active.classList.contains("tab") && active.dataset.view) return { kind: "tab", key: active.dataset.view };
-    if (active.classList.contains("launcher")) return { kind: "launcher" };
-    if (active.classList.contains("refresh")) return { kind: "refresh" };
-    if (active.classList.contains("close")) return { kind: "close" };
-    if (active.classList.contains("copy")) return { kind: "copy" };
-    if (active.classList.contains("viewport")) return { kind: "viewport" };
-    return this.shadowRoot?.querySelector(".panel")?.contains(active) ? { kind: "fallback" } : null;
-  }
-  #restoreFocus(snapshot) {
-    if (!this.shadowRoot) return;
-    let target = null;
-    if (snapshot.kind === "search") target = this.shadowRoot.querySelector(".navigator-search");
-    if (snapshot.kind === "namespace") {
-      target = Array.from(this.shadowRoot.querySelectorAll(".vocabulary-toggle")).find((button) => button.dataset.namespace === snapshot.key) ?? null;
-    }
-    if (snapshot.kind === "sync") target = Array.from(this.shadowRoot.querySelectorAll(".sync-option")).find((button) => button.dataset.syncMode === snapshot.key) ?? null;
-    if (snapshot.kind === "position") target = Array.from(this.shadowRoot.querySelectorAll(".position-option")).find((button) => button.dataset.position === snapshot.key) ?? null;
-    if (snapshot.kind === "discovery-action") target = Array.from(this.shadowRoot.querySelectorAll(".discovery-action")).find((button) => button.dataset.candidateId === snapshot.key) ?? null;
-    if (snapshot.kind === "source") target = Array.from(this.shadowRoot.querySelectorAll(".source-input")).find((input) => input.dataset.sourceId === snapshot.key) ?? null;
-    if (snapshot.kind === "tab") target = Array.from(this.shadowRoot.querySelectorAll(".tab")).find((button) => button.dataset.view === snapshot.key) ?? null;
-    if (snapshot.kind === "launcher") target = this.shadowRoot.querySelector(".launcher");
-    if (snapshot.kind === "refresh") target = this.shadowRoot.querySelector(".refresh");
-    if (snapshot.kind === "close") target = this.shadowRoot.querySelector(".close");
-    if (snapshot.kind === "copy") target = this.shadowRoot.querySelector(".copy");
-    if (snapshot.kind === "viewport") target = this.shadowRoot.querySelector(".viewport");
-    if (!target && snapshot.kind === "fallback") target = this.shadowRoot.querySelector('[role="tab"][aria-selected="true"]');
-    target?.focus({ preventScroll: true });
-    if (snapshot.kind === "search" && target instanceof HTMLInputElement) {
-      target.setSelectionRange(snapshot.start ?? target.value.length, snapshot.end ?? target.value.length);
-    }
-  }
-  #panelFocusables() {
-    const panel = this.shadowRoot?.querySelector(".panel");
-    if (!panel) return [];
-    const scopes = [panel, ...this.#linkPreviews.keys()];
-    return scopes.flatMap((scope) => Array.from(scope.querySelectorAll("a[href], button, input, select, textarea, [tabindex]"))).filter((element) => element.tabIndex >= 0 && !element.hasAttribute("disabled") && !element.closest("[hidden]") && element.getAttribute("aria-hidden") !== "true");
-  }
-  #observeDocument() {
-    this.#observer?.disconnect();
-    this.#observer = new MutationObserver((records) => {
-      if (!records.some((record) => record.target !== this && mutationAffectsExtraction(record))) return;
-      if (this.#refreshTimer !== null) window.clearTimeout(this.#refreshTimer);
-      this.#refreshTimer = window.setTimeout(() => {
-        this.#refreshTimer = null;
-        this.refresh();
-      }, 120);
-    });
-    this.#observer.observe(this.ownerDocument.documentElement, {
-      attributes: true,
-      characterData: true,
-      childList: true,
-      subtree: true
-    });
-  }
-  #rebuildResult() {
-    if (!this.#sourceResult) return;
-    const contributions = Array.from(this.#discoveryLoads.values()).flatMap((state) => state.status === "loaded" && state.contribution ? [state.contribution] : []);
-    this.#result = mergeDiscoveryContributions(this.#sourceResult, contributions);
-  }
-  #renderDiscoveryState(candidateId2) {
-    this.#rebuildResult();
-    this.#render();
-    queueMicrotask(() => {
-      Array.from(this.shadowRoot?.querySelectorAll(".discovery-action") ?? []).find((button) => button.dataset.candidateId === candidateId2)?.focus({ preventScroll: true });
-    });
-  }
-  #removeDiscoveryContribution(candidateId2) {
-    this.#discoveryLoads.get(candidateId2)?.controller?.abort();
-    this.#discoveryLoads.delete(candidateId2);
-    this.#renderDiscoveryState(candidateId2);
-  }
-  async #loadDiscoveryContribution(candidate) {
-    const source = this.#sourceResult;
-    const view = this.ownerDocument.defaultView;
-    if (!source || !view) return;
-    const existing = this.#discoveryLoads.get(candidate.id);
-    if (existing?.status === "loading" || existing?.status === "loaded") {
-      this.#removeDiscoveryContribution(candidate.id);
-      return;
-    }
-    const controller = new AbortController();
-    this.#discoveryLoads.set(candidate.id, { controller, status: "loading" });
-    this.#renderDiscoveryState(candidate.id);
-    const timeout = view.setTimeout(() => controller.abort(), DISCOVERY_FETCH_TIMEOUT_MS);
-    try {
-      const retrievalIri = retrievalIriForCandidate(candidate.target.value, source);
-      const protocol = new URL(retrievalIri).protocol;
-      if (protocol !== "http:" && protocol !== "https:") throw new Error(`Unsupported retrieval protocol: ${protocol}`);
-      const response = await view.fetch(retrievalIri, {
-        credentials: "omit",
-        headers: { Accept: DISCOVERY_ACCEPT },
-        redirect: "follow",
-        referrerPolicy: "no-referrer",
-        signal: controller.signal
-      });
-      if (!response.ok) throw new Error(`Retrieval failed with HTTP ${response.status}.`);
-      const declaredLength = Number.parseInt(response.headers.get("content-length") ?? "", 10);
-      if (Number.isFinite(declaredLength) && declaredLength > DISCOVERY_MAX_HTML_LENGTH) {
-        throw new Error("The representation is larger than the 2 MB enrichment limit.");
-      }
-      const mediaType = (response.headers.get("content-type") ?? "").split(";", 1)[0].trim().toLowerCase();
-      const text = await response.text();
-      if (text.length > DISCOVERY_MAX_HTML_LENGTH) throw new Error("The representation is larger than the 2 MB enrichment limit.");
-      const looksLikeHtml = /<!doctype\s+html|<html[\s>]/i.test(text);
-      if (mediaType && mediaType !== "text/html" && mediaType !== "application/xhtml+xml") {
-        throw new Error(`Unsupported enrichment representation: ${mediaType}. This preview currently extracts HTML/RDF.`);
-      }
-      if (!mediaType && !looksLikeHtml) throw new Error("The target did not return an identifiable HTML representation.");
-      const retrievedDocument = new view.DOMParser().parseFromString(text, "text/html");
-      const finalRetrievalIri = response.url || retrievalIri;
-      prepareRetrievedDocument(retrievedDocument, finalRetrievalIri);
-      const contributionResult = extractDataset(retrievedDocument);
-      if (!contributionResult.quads.length && !contributionResult.graphs.length) {
-        throw new Error("The retrieved HTML contained no extractable RDF.");
-      }
-      const current = this.#discoveryLoads.get(candidate.id);
-      if (current?.controller !== controller) return;
-      this.#discoveryLoads.set(candidate.id, {
-        contribution: { candidateId: candidate.id, result: contributionResult, retrievalIri: finalRetrievalIri },
-        status: "loaded"
-      });
-    } catch (error) {
-      const current = this.#discoveryLoads.get(candidate.id);
-      if (current?.controller !== controller) return;
-      this.#discoveryLoads.set(candidate.id, { message: discoveryErrorMessage(error), status: "error" });
-    } finally {
-      view.clearTimeout(timeout);
-    }
-    this.#renderDiscoveryState(candidate.id);
-  }
-  #sourceIdForFrame(frame) {
-    let id = this.#frameSourceIds.get(frame);
-    if (!id) {
-      id = `document-frame-${this.#nextFrameSourceId++}`;
-      this.#frameSourceIds.set(frame, id);
-    }
-    return id;
-  }
-  #extractDirectFrameSources() {
-    const frames = Array.from(this.ownerDocument.querySelectorAll("iframe, frame"));
-    return frames.flatMap((frame, index) => {
-      let frameDocument = null;
-      try {
-        frameDocument = frame.contentDocument;
-        if (!frameDocument?.documentElement) return [];
-        void frameDocument.documentElement.localName;
-      } catch {
-        return [];
-      }
-      const url = frameDocument.URL || frameDocument.baseURI;
-      let origin = "Opaque origin";
-      try {
-        origin = new URL(url).origin;
-      } catch {
-      }
-      const title = frame.getAttribute("title")?.trim() || frameDocument.title.trim() || `Embedded document ${index + 1}`;
-      return [{
-        access: "direct",
-        id: this.#sourceIdForFrame(frame),
-        label: title,
-        origin,
-        result: extractDataset(frameDocument),
-        url
-      }];
-    });
-  }
-  #applySelectedSource(preserveDiscovery) {
-    const source = this.#sources.find((candidate) => candidate.id === this.#selectedSourceId) ?? this.#sources[0];
-    if (!source) return;
-    const sourceChanged = this.#sourceResult !== source.result;
-    this.#selectedSourceId = source.id;
-    this.#sourceResult = source.result;
-    if (sourceChanged && !preserveDiscovery) {
-      for (const state of this.#discoveryLoads.values()) state.controller?.abort();
-      this.#discoveryLoads.clear();
-    }
-    this.#discoveryCandidates = detectDiscoveryCandidates(this.#sourceResult);
-    this.#documentVocabulary = extractDocumentVocabulary(this.#sourceResult);
-    const candidateIds = new Set(this.#discoveryCandidates.map((candidate) => candidate.id));
-    for (const [candidateId2, state] of this.#discoveryLoads) {
-      if (candidateIds.has(candidateId2)) continue;
-      state.controller?.abort();
-      this.#discoveryLoads.delete(candidateId2);
-    }
-    this.#rebuildResult();
-  }
-  #rebuildSources(preserveDiscovery) {
-    if (!this.#topSourceResult) return;
-    const topUrl = this.ownerDocument.URL || this.ownerDocument.baseURI;
-    let topOrigin = "Opaque origin";
-    try {
-      topOrigin = new URL(topUrl).origin;
-    } catch {
-    }
-    const seen = /* @__PURE__ */ new Set();
-    const candidates = [
-      {
-        access: "direct",
-        id: "top-document",
-        label: "Top document",
-        origin: topOrigin,
-        result: this.#topSourceResult,
-        url: topUrl
-      },
-      ...this.#directFrameSources,
-      ...this.#externalSources
-    ];
-    this.#sources = candidates.filter((source) => {
-      if (seen.has(source.id)) return false;
-      seen.add(source.id);
-      return true;
-    });
-    if (!this.#sources.some((source) => source.id === this.#selectedSourceId)) this.#selectedSourceId = "top-document";
-    const top = this.#sources[0];
-    const rdfChildren = this.#sources.slice(1).filter((source) => source.result.quads.length > 0);
-    if (this.#selectedSourceId === top.id && top.result.quads.length === 0 && rdfChildren.length === 1) {
-      this.#selectedSourceId = rdfChildren[0].id;
-    }
-    this.#applySelectedSource(preserveDiscovery);
-  }
-  #selectSource(sourceId) {
-    if (sourceId === this.#selectedSourceId || !this.#sources.some((source) => source.id === sourceId)) return;
-    this.#selectedSourceId = sourceId;
-    this.#applySelectedSource(false);
-    this.#view = "navigator";
-    this.#navigatorQuery = "";
-    this.#disabledNamespaces.clear();
-    this.#syncMode = "off";
-    this.#render();
-  }
-  /** Supply structured-clone-safe document sources collected by an extension. */
-  setSources(sources) {
-    this.#externalSources = sources.flatMap((source) => {
-      if (!source || source.access !== "portable" || !source.id || source.id === "top-document") return [];
-      try {
-        return [{
-          access: "portable",
-          id: source.id,
-          label: source.label || "Embedded document",
-          origin: source.origin || "Opaque origin",
-          result: fromPortableExtractionResult(source.result, this.ownerDocument),
-          url: source.url || source.result.retrievalDocumentIri
-        }];
-      } catch {
-        return [];
-      }
-    });
-    if (!this.#topSourceResult) return;
-    const focus = this.#captureFocus();
-    this.#rebuildSources(true);
-    this.#render();
-    if (focus) queueMicrotask(() => this.#restoreFocus(focus));
-  }
-  /** Re-extract the current owner document and redraw every view. */
-  refresh() {
-    const focus = this.#captureFocus();
-    this.#topSourceResult = extractDataset(this.ownerDocument);
-    this.#directFrameSources = this.#extractDirectFrameSources();
-    this.#rebuildSources(true);
-    this.#render();
-    if (focus) queueMicrotask(() => this.#restoreFocus(focus));
-  }
-  open(focusTarget = "tab") {
-    this.#open = true;
-    this.shadowRoot?.querySelector(".launcher")?.setAttribute("aria-expanded", "true");
-    const panel = this.shadowRoot?.querySelector(".panel");
-    if (panel) panel.dataset.open = "true";
-    queueMicrotask(() => {
-      const target = focusTarget === "tab" ? this.shadowRoot?.querySelector('[role="tab"][aria-selected="true"]') : this.shadowRoot?.querySelector(".panel");
-      target?.focus({ preventScroll: true });
-    });
-  }
-  close() {
-    this.#open = false;
-    this.#stopFloatingInteraction();
-    this.#clearLinkPreviews();
-    this.#clearLocateEmphasis();
-    this.#turnOffNavigatorSync();
-    this.shadowRoot?.querySelector(".launcher")?.setAttribute("aria-expanded", "false");
-    const panel = this.shadowRoot?.querySelector(".panel");
-    if (panel) panel.dataset.open = "false";
-    queueMicrotask(() => {
-      const launcher = this.shadowRoot?.querySelector(".launcher");
-      if (launcher?.hidden) {
-        this.shadowRoot?.activeElement?.blur();
-        return;
-      }
-      launcher?.focus();
-    });
-  }
-  toggle(focusTarget = "tab") {
-    if (this.#open) this.close();
-    else this.open(focusTarget);
-  }
-  /** Open the Navigator at the statement carriers produced by one document element. */
-  revealSource(source, position = "left") {
-    const represented = this.#sourceResult?.quads.some((quad) => quad.source === source) ?? false;
-    if (!represented || source.ownerDocument !== this.ownerDocument) return false;
-    this.#position = position;
-    this.#view = "navigator";
-    this.#navigatorQuery = "";
-    this.#disabledNamespaces.clear();
-    this.#syncMode = "off";
-    this.#render();
-    this.#persistSessionState();
-    this.open("panel");
-    queueMicrotask(() => {
-      const matchingRows = this.#navigatorRows.filter(({ quad }) => quad.source === source);
-      const primary = matchingRows[0]?.item;
-      if (!primary) return;
-      this.#navigatorRows.forEach(({ item }) => item.classList.remove("is-corresponding"));
-      matchingRows.forEach(({ item }) => {
-        item.hidden = false;
-        item.classList.add("is-corresponding");
-      });
-      primary.tabIndex = -1;
-      primary.scrollIntoView?.({ block: "center" });
-      primary.focus({ preventScroll: true });
-      this.#status = `Showing statements carried by ${elementLabel(source)}`;
-      const status = this.shadowRoot?.querySelector(".sr-only");
-      if (status) status.textContent = this.#status;
-    });
-    return true;
-  }
-  #floatingLimits() {
-    const view = this.ownerDocument.defaultView;
-    const width = Math.max(view?.innerWidth ?? 1024, 1);
-    const height = Math.max(view?.innerHeight ?? 768, 1);
-    const margin = width <= 760 ? 10 : 24;
-    return {
-      height,
-      margin,
-      minHeight: Math.min(280, Math.max(height - margin * 2, 1)),
-      minWidth: Math.min(360, Math.max(width - margin * 2, 1)),
-      width
-    };
-  }
-  #constrainFloatingRect(rect) {
-    const { height: viewportHeight, margin, minHeight, minWidth, width: viewportWidth } = this.#floatingLimits();
-    const availableWidth = Math.max(viewportWidth - margin * 2, 1);
-    const availableHeight = Math.max(viewportHeight - margin * 2, 1);
-    const width = Math.min(Math.max(rect.width, minWidth), availableWidth);
-    const height = Math.min(Math.max(rect.height, minHeight), availableHeight);
-    return {
-      height,
-      width,
-      x: Math.min(Math.max(rect.x, margin), viewportWidth - margin - width),
-      y: Math.min(Math.max(rect.y, margin), viewportHeight - margin - height)
-    };
-  }
-  #defaultFloatingRect() {
-    const { height, margin, width } = this.#floatingLimits();
-    const floatingWidth = Math.min(760, Math.max(width - margin * 2, 1));
-    const floatingHeight = Math.min(860, Math.max(height - margin * 2, 1), Math.max(360, Math.round(height * 0.82)));
-    return {
-      height: floatingHeight,
-      width: floatingWidth,
-      x: Math.round((width - floatingWidth) / 2),
-      y: Math.round((height - floatingHeight) / 2)
-    };
-  }
-  #applyFloatingGeometry(panel) {
-    this.#floatingRect = this.#constrainFloatingRect(this.#floatingRect ?? this.#defaultFloatingRect());
-    panel.style.height = `${this.#floatingRect.height}px`;
-    panel.style.left = `${this.#floatingRect.x}px`;
-    panel.style.top = `${this.#floatingRect.y}px`;
-    panel.style.width = `${this.#floatingRect.width}px`;
-  }
-  #clearFloatingGeometry(panel) {
-    panel.style.height = "";
-    panel.style.left = "";
-    panel.style.top = "";
-    panel.style.width = "";
-  }
-  #launcherLimits(launcher) {
-    const view = this.ownerDocument.defaultView;
-    const viewportWidth = Math.max(view?.innerWidth ?? 1024, 1);
-    const viewportHeight = Math.max(view?.innerHeight ?? 768, 1);
-    const margin = viewportWidth <= 760 ? 14 : 20;
-    const rect = launcher.getBoundingClientRect();
-    const width = rect.width || launcher.offsetWidth;
-    const height = rect.height || launcher.offsetHeight || 44;
-    return {
-      margin,
-      maxX: Math.max(margin, viewportWidth - margin - width),
-      maxY: Math.max(margin, viewportHeight - margin - height)
-    };
-  }
-  #constrainLauncherPosition(launcher, position) {
-    const { margin, maxX, maxY } = this.#launcherLimits(launcher);
-    return {
-      x: Math.min(Math.max(position.x, margin), maxX),
-      y: Math.min(Math.max(position.y, margin), maxY)
-    };
-  }
-  #snapLauncherPosition(launcher, position) {
-    const { margin, maxX, maxY } = this.#launcherLimits(launcher);
-    const snapped = this.#constrainLauncherPosition(launcher, position);
-    if (snapped.x - margin <= LAUNCHER_EDGE_SNAP_DISTANCE) snapped.x = margin;
-    if (maxX - snapped.x <= LAUNCHER_EDGE_SNAP_DISTANCE) snapped.x = maxX;
-    if (snapped.y - margin <= LAUNCHER_EDGE_SNAP_DISTANCE) snapped.y = margin;
-    if (maxY - snapped.y <= LAUNCHER_EDGE_SNAP_DISTANCE) snapped.y = maxY;
-    return snapped;
-  }
-  #applyLauncherGeometry(launcher) {
-    if (!this.#launcherPosition) return;
-    this.#launcherPosition = this.#constrainLauncherPosition(launcher, this.#launcherPosition);
-    launcher.style.bottom = "auto";
-    launcher.style.left = `${this.#launcherPosition.x}px`;
-    launcher.style.right = "auto";
-    launcher.style.top = `${this.#launcherPosition.y}px`;
-  }
-  #stopLauncherInteraction() {
-    this.#launcherInteractionCleanup?.();
-    this.#launcherInteractionCleanup = null;
-  }
-  #startLauncherInteraction(event, launcher) {
-    if (event.button !== 0) return;
-    const view = this.ownerDocument.defaultView;
-    if (!view) return;
-    this.#stopLauncherInteraction();
-    const rect = launcher.getBoundingClientRect();
-    const startPosition = { x: rect.left, y: rect.top };
-    const startX = event.clientX;
-    const startY = event.clientY;
-    let dragged = false;
-    const update = (moveEvent) => {
-      const deltaX = moveEvent.clientX - startX;
-      const deltaY = moveEvent.clientY - startY;
-      if (!dragged && Math.hypot(deltaX, deltaY) < LAUNCHER_DRAG_THRESHOLD) return;
-      if (!dragged) {
-        dragged = true;
-        event.preventDefault();
-        launcher.classList.add("is-dragging");
-      }
-      this.#launcherPosition = this.#constrainLauncherPosition(launcher, {
-        x: startPosition.x + deltaX,
-        y: startPosition.y + deltaY
-      });
-      this.#applyLauncherGeometry(launcher);
-    };
-    const stop = () => {
-      view.removeEventListener("pointermove", update);
-      view.removeEventListener("pointerup", stop);
-      view.removeEventListener("pointercancel", stop);
-      launcher.classList.remove("is-dragging");
-      if (dragged && this.#launcherPosition) {
-        this.#launcherPosition = this.#snapLauncherPosition(launcher, this.#launcherPosition);
-        this.#applyLauncherGeometry(launcher);
-        this.#persistSessionState();
-        this.#suppressLauncherClick = true;
-        view.setTimeout(() => {
-          this.#suppressLauncherClick = false;
-        }, 0);
-      }
-      if (this.#launcherInteractionCleanup === stop) this.#launcherInteractionCleanup = null;
-    };
-    view.addEventListener("pointermove", update);
-    view.addEventListener("pointerup", stop);
-    view.addEventListener("pointercancel", stop);
-    this.#launcherInteractionCleanup = stop;
-  }
-  #stopFloatingInteraction() {
-    this.#floatingInteractionCleanup?.();
-    this.#floatingInteractionCleanup = null;
-  }
-  #startFloatingInteraction(event, panel, resize) {
-    if (this.#position !== "floating" || event.button !== 0) return;
-    const view = this.ownerDocument.defaultView;
-    if (!view) return;
-    event.preventDefault();
-    this.#stopFloatingInteraction();
-    this.#applyFloatingGeometry(panel);
-    const startRect = { ...this.#floatingRect };
-    const startX = event.clientX;
-    const startY = event.clientY;
-    panel.classList.add(resize ? "is-resizing" : "is-dragging");
-    const update = (moveEvent) => {
-      const deltaX = moveEvent.clientX - startX;
-      const deltaY = moveEvent.clientY - startY;
-      const limits = this.#floatingLimits();
-      const next = { ...startRect };
-      if (!resize) {
-        next.x = startRect.x + deltaX;
-        next.y = startRect.y + deltaY;
-      } else {
-        if (resize.includes("e")) next.width = Math.min(Math.max(startRect.width + deltaX, limits.minWidth), limits.width - limits.margin - startRect.x);
-        if (resize.includes("s")) next.height = Math.min(Math.max(startRect.height + deltaY, limits.minHeight), limits.height - limits.margin - startRect.y);
-        if (resize.includes("w")) {
-          next.x = Math.min(Math.max(startRect.x + deltaX, limits.margin), startRect.x + startRect.width - limits.minWidth);
-          next.width = startRect.x + startRect.width - next.x;
-        }
-        if (resize.includes("n")) {
-          next.y = Math.min(Math.max(startRect.y + deltaY, limits.margin), startRect.y + startRect.height - limits.minHeight);
-          next.height = startRect.y + startRect.height - next.y;
-        }
-      }
-      this.#floatingRect = this.#constrainFloatingRect(next);
-      this.#applyFloatingGeometry(panel);
-    };
-    const stop = () => {
-      view.removeEventListener("pointermove", update);
-      view.removeEventListener("pointerup", stop);
-      view.removeEventListener("pointercancel", stop);
-      panel.classList.remove("is-dragging", "is-resizing");
-      this.#persistSessionState();
-      if (this.#floatingInteractionCleanup === stop) this.#floatingInteractionCleanup = null;
-    };
-    view.addEventListener("pointermove", update);
-    view.addEventListener("pointerup", stop);
-    view.addEventListener("pointercancel", stop);
-    this.#floatingInteractionCleanup = stop;
-  }
-  #onWindowResize = () => {
-    for (const preview of this.#linkPreviews.keys()) this.#constrainLinkPreview(preview);
-    const launcher = this.shadowRoot?.querySelector(".launcher");
-    if (launcher && this.#launcherPosition) {
-      this.#applyLauncherGeometry(launcher);
-      this.#persistSessionState();
-    }
-    if (this.#position !== "floating") return;
-    const panel = this.shadowRoot?.querySelector(".panel");
-    if (panel) {
-      this.#applyFloatingGeometry(panel);
-      this.#persistSessionState();
-    }
-  };
-  #onKeydown = (event) => {
-    event.stopPropagation();
-    if (!this.#open) return;
-    if (event.key === "Escape") {
-      event.preventDefault();
-      if (this.#activeLinkPreview) {
-        this.#clearLinkPreview(this.#activeLinkPreview);
-        return;
-      }
-      this.close();
-      return;
-    }
-    if (event.key === "Tab") {
-      const focusables = this.#panelFocusables();
-      if (!focusables.length) return;
-      const active = this.shadowRoot?.activeElement;
-      const first = focusables[0];
-      const last = focusables.at(-1);
-      if (event.shiftKey && (active === first || !focusables.includes(active))) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && (active === last || !focusables.includes(active))) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-  };
-  #onKeyup = (event) => {
-    event.stopPropagation();
-  };
-  #setView(view) {
-    this.#view = view;
-    this.#render();
-    queueMicrotask(() => this.shadowRoot?.querySelector(`[data-view="${view}"]`)?.focus());
-  }
-  async #copyCurrent() {
-    if (!this.#result) return;
-    const text = this.#view === "json" ? serializeJsonLd(this.#result) : serializeTurtle(this.#result);
-    try {
-      await navigator.clipboard.writeText(text);
-      this.#status = "Copied to clipboard";
-    } catch {
-      this.#status = "Clipboard access was not available";
-    }
-    const status = this.shadowRoot?.querySelector(".sr-only");
-    if (status) status.textContent = this.#status;
-  }
-  #locateElement(target) {
-    this.#clearLocateEmphasis();
-    const element = target;
-    const reducedMotion = element.ownerDocument.defaultView?.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    element.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
-    if (!reducedMotion) {
-      this.#locateAnimation = element.animate?.(
-        [
-          { outline: "3px solid transparent", outlineOffset: "8px" },
-          { outline: "3px solid oklch(62% 0.18 294)", outlineOffset: "4px", offset: 0.16 },
-          { outline: "3px solid transparent", outlineOffset: "8px" }
-        ],
-        { duration: 1800, easing: "cubic-bezier(.22,1,.36,1)" }
-      ) ?? null;
-    }
-  }
-  #clearLocateEmphasis() {
-    this.#locateAnimation?.cancel();
-    this.#locateAnimation = null;
-  }
-  #configureNavigatorSync(viewport, rows, applyFilter, setHoveredSource) {
-    this.#clearNavigatorSync();
-    if (this.#syncMode === "off") return;
-    const view = this.ownerDocument.defaultView;
-    if (!view) return;
-    const cleanups = [];
-    let timer = null;
-    let activeAnimation = null;
-    let lastFollowedSource = null;
-    const listen = (target, type, listener, options) => {
-      target.addEventListener(type, listener, options);
-      cleanups.push(() => target.removeEventListener(type, listener, options));
-    };
-    const schedule = (callback) => {
-      if (timer !== null) view.clearTimeout(timer);
-      timer = view.setTimeout(() => {
-        timer = null;
-        callback();
-      }, 32);
-    };
-    const sourceRows = /* @__PURE__ */ new Map();
-    for (const row of rows) {
-      const entries = sourceRows.get(row.quad.source) ?? [];
-      entries.push(row);
-      sourceRows.set(row.quad.source, entries);
-    }
-    const emphasizeSource = (source) => {
-      activeAnimation?.cancel();
-      if (view.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-      activeAnimation = source.animate?.(
-        [
-          { outline: "2px solid transparent", outlineOffset: "7px" },
-          { outline: "2px solid oklch(62% 0.18 294)", outlineOffset: "4px" }
-        ],
-        { direction: "alternate", duration: 520, easing: "cubic-bezier(.22,1,.36,1)", iterations: Infinity }
-      ) ?? null;
-    };
-    const clearEmphasis = () => {
-      activeAnimation?.cancel();
-      activeAnimation = null;
-    };
-    sourceRows.forEach((matchingRows, source) => {
-      listen(source, "pointerenter", () => {
-        setHoveredSource(source);
-        matchingRows.forEach(({ item }) => {
-          item.classList.add("is-corresponding");
-          item.scrollIntoView?.({ block: "nearest" });
-        });
-      });
-      listen(source, "pointerleave", () => {
-        matchingRows.forEach(({ item }) => item.classList.remove("is-corresponding"));
-        setHoveredSource(null);
-      });
-    });
-    rows.forEach(({ item, quad }) => {
-      const source = quad.source;
-      listen(item, "pointerenter", () => {
-        item.classList.add("is-corresponding");
-        emphasizeSource(source);
-        if (this.#syncMode === "navigator") {
-          source.scrollIntoView({ behavior: view.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
-        }
-      });
-      listen(item, "pointerleave", () => {
-        item.classList.remove("is-corresponding");
-        clearEmphasis();
-      });
-    });
-    if (this.#syncMode === "page") {
-      const update = () => schedule(applyFilter);
-      listen(view, "scroll", update, { passive: true });
-      listen(view, "resize", update, { passive: true });
-    } else {
-      const followNavigator = () => {
-        const viewportRect = viewport.getBoundingClientRect();
-        const readingLine = viewportRect.top + Math.min(viewportRect.height * 0.35, 140);
-        let closest = null;
-        let closestDistance = Number.POSITIVE_INFINITY;
-        for (const row of rows) {
-          if (row.item.hidden) continue;
-          const rect = row.item.getBoundingClientRect();
-          if (rect.bottom <= viewportRect.top || rect.top >= viewportRect.bottom) continue;
-          const distance = Math.abs(rect.top - readingLine);
-          if (distance < closestDistance) {
-            closest = row;
-            closestDistance = distance;
-          }
-        }
-        const source = closest?.quad.source;
-        if (!source || source === lastFollowedSource || !isLocatableSource(source)) return;
-        lastFollowedSource = source;
-        source.scrollIntoView({ behavior: "auto", block: "center" });
-        emphasizeSource(source);
-      };
-      listen(viewport, "scroll", () => schedule(followNavigator), { passive: true });
-      schedule(followNavigator);
-    }
-    this.#syncCleanup = () => {
-      cleanups.forEach((cleanup) => cleanup());
-      if (timer !== null) view.clearTimeout(timer);
-      clearEmphasis();
-    };
-  }
-  #toggleSource(item, button, source, includeChildren, sourceId, equivalentOutput = false) {
-    const openViewer = item.querySelector(".source-code");
-    const wasExpanded = openViewer?.dataset.children === String(includeChildren);
-    item.querySelectorAll(".source-toggle").forEach((toggle) => {
-      toggle.setAttribute("aria-expanded", "false");
-      const showLabel = toggle.dataset.showLabel;
-      if (showLabel) {
-        toggle.setAttribute("aria-label", showLabel);
-        toggle.title = showLabel;
-      }
-    });
-    item.querySelector(".source-code")?.remove();
-    item.classList.remove("source-open");
-    if (wasExpanded) return;
-    item.classList.add("source-open");
-    button.setAttribute("aria-expanded", "true");
-    const hideLabel = button.dataset.hideLabel;
-    if (hideLabel) {
-      button.setAttribute("aria-label", hideLabel);
-      button.title = hideLabel;
-    }
-    const viewer = this.ownerDocument.createElement("section");
-    viewer.className = "source-code";
-    viewer.id = sourceId;
-    viewer.dataset.children = String(includeChildren);
-    viewer.setAttribute("aria-label", equivalentOutput ? "Element HTML" : includeChildren ? "Element HTML with children" : "Element HTML without children");
-    const label = this.ownerDocument.createElement("p");
-    label.className = "source-code-label";
-    label.textContent = equivalentOutput ? elementLabel(source) : includeChildren ? `${elementLabel(source)} with children` : `${elementLabel(source)} without children`;
-    const clone = source.cloneNode(includeChildren);
-    viewer.append(label, highlightedCode(clone.outerHTML, "html", this.ownerDocument));
-    item.append(viewer);
-  }
-  #renderNavigator(container, result) {
-    if (!result.quads.length) {
-      const empty = document.createElement("p");
-      empty.className = "empty";
-      empty.textContent = "No asserted IA2 statements were found in the document light tree.";
-      container.append(empty);
-      return;
-    }
-    const tools = document.createElement("div");
-    tools.className = "navigator-tools";
-    const filter = document.createElement("div");
-    filter.className = "navigator-filter";
-    const filterLabel = document.createElement("label");
-    filterLabel.className = "sr-only";
-    filterLabel.htmlFor = "ia2-navigator-search";
-    filterLabel.textContent = "Filter RDF statements";
-    const search = document.createElement("input");
-    search.className = "navigator-search";
-    search.id = "ia2-navigator-search";
-    search.type = "search";
-    search.placeholder = "Filter statements";
-    search.autocomplete = "off";
-    search.spellcheck = false;
-    search.value = this.#navigatorQuery;
-    search.setAttribute("role", "combobox");
-    search.setAttribute("aria-autocomplete", "list");
-    search.setAttribute("aria-controls", "ia2-navigator-suggestions");
-    search.setAttribute("aria-expanded", "false");
-    const searchGroup = document.createElement("div");
-    searchGroup.className = "navigator-search-group";
-    const typeahead = document.createElement("ul");
-    typeahead.className = "typeahead";
-    typeahead.id = "ia2-navigator-suggestions";
-    typeahead.setAttribute("role", "listbox");
-    typeahead.setAttribute("aria-label", "Semantic term suggestions");
-    typeahead.hidden = true;
-    const typeaheadStatus = document.createElement("span");
-    typeaheadStatus.className = "sr-only typeahead-status";
-    typeaheadStatus.setAttribute("role", "status");
-    typeaheadStatus.setAttribute("aria-live", "polite");
-    const filterCount = document.createElement("output");
-    filterCount.className = "filter-count";
-    filterCount.setAttribute("for", search.id);
-    filterCount.setAttribute("aria-live", "polite");
-    const syncControl = document.createElement("div");
-    syncControl.className = "sync-control";
-    const syncLabel = document.createElement("span");
-    syncLabel.className = "sync-label";
-    syncLabel.textContent = "Sync";
-    const syncSwitch = document.createElement("div");
-    syncSwitch.className = "sync-switch";
-    syncSwitch.setAttribute("role", "radiogroup");
-    syncSwitch.setAttribute("aria-label", "Scroll synchronization");
-    const syncOptions = [];
-    for (const [mode, icon, accessibleLabel] of [
-      ["off", `<svg class="sync-icon" viewBox="0 0 32 16" aria-hidden="true" focusable="false">
-        <path d="M16 2v5" />
-        <path d="M11.7 4.4a6 6 0 1 0 8.6 0" />
-      </svg>`, "Scroll synchronization off"],
-      ["page", `<svg class="sync-icon" viewBox="0 0 34 16" aria-hidden="true" focusable="false">
-        <rect x="1" y="2" width="8" height="12" rx="1.5" />
-        <path d="M3.5 5h3M3.5 8h3M3.5 11h3M11.5 8h9m-3-3 3 3-3 3" />
-        <circle cx="24" cy="4" r=".8" fill="currentColor" stroke="none" />
-        <circle cx="24" cy="8" r=".8" fill="currentColor" stroke="none" />
-        <circle cx="24" cy="12" r=".8" fill="currentColor" stroke="none" />
-        <path d="M27 4h6M27 8h6M27 12h6" />
-      </svg>`, "Follow page viewport in Navigator"],
-      ["navigator", `<svg class="sync-icon" viewBox="0 0 34 16" aria-hidden="true" focusable="false">
-        <circle cx="2" cy="4" r=".8" fill="currentColor" stroke="none" />
-        <circle cx="2" cy="8" r=".8" fill="currentColor" stroke="none" />
-        <circle cx="2" cy="12" r=".8" fill="currentColor" stroke="none" />
-        <path d="M5 4h6M5 8h6M5 12h6M22.5 8h-9m3-3-3 3 3 3" />
-        <rect x="25" y="2" width="8" height="12" rx="1.5" />
-        <path d="M27.5 5h3M27.5 8h3M27.5 11h3" />
-      </svg>`, "Follow Navigator in page"]
-    ]) {
-      const option = document.createElement("button");
-      option.className = "sync-option";
-      option.type = "button";
-      option.dataset.syncMode = mode;
-      option.setAttribute("role", "radio");
-      option.setAttribute("aria-checked", String(this.#syncMode === mode));
-      option.setAttribute("aria-label", accessibleLabel);
-      option.title = accessibleLabel;
-      option.tabIndex = this.#syncMode === mode ? 0 : -1;
-      option.innerHTML = icon;
-      syncOptions.push(option);
-      syncSwitch.append(option);
-    }
-    syncControl.append(syncLabel, syncSwitch);
-    searchGroup.append(search, typeahead, filterCount, typeaheadStatus);
-    filter.append(filterLabel, searchGroup, syncControl);
-    tools.append(filter);
-    container.append(tools);
-    const vocabularies = vocabulariesIn(result);
-    const semanticSuggestions = semanticSuggestionsIn(result);
-    const namespaceButtons = /* @__PURE__ */ new Map();
-    let applyFilter = () => {
-    };
-    if (vocabularies.length) {
-      const navigation = document.createElement("nav");
-      navigation.className = "vocabularies";
-      navigation.setAttribute("aria-label", "Namespaces used in this document");
-      const label = document.createElement("p");
-      label.className = "vocabularies-label";
-      label.textContent = "Namespaces";
-      const links = document.createElement("div");
-      links.className = "vocabulary-links";
-      for (const vocabulary of vocabularies) {
-        const control = document.createElement("span");
-        control.className = "vocabulary-control";
-        const toggle = document.createElement("button");
-        toggle.className = "vocabulary-toggle";
-        toggle.type = "button";
-        toggle.dataset.namespace = vocabulary.namespace;
-        const vocabularyLabel = document.createElement("span");
-        vocabularyLabel.className = "vocabulary-name";
-        vocabularyLabel.textContent = vocabulary.label;
-        const vocabularyCount = document.createElement("span");
-        vocabularyCount.className = "vocabulary-count";
-        vocabularyCount.setAttribute("aria-hidden", "true");
-        vocabularyCount.textContent = String(vocabulary.count);
-        toggle.append(vocabularyLabel, vocabularyCount);
-        toggle.addEventListener("click", () => {
-          if (this.#disabledNamespaces.has(vocabulary.namespace)) this.#disabledNamespaces.delete(vocabulary.namespace);
-          else this.#disabledNamespaces.add(vocabulary.namespace);
-          applyFilter();
-        });
-        namespaceButtons.set(vocabulary.namespace, toggle);
-        const anchor = document.createElement("a");
-        anchor.className = "vocabulary-link";
-        anchor.href = vocabulary.namespace;
-        anchor.target = "_blank";
-        anchor.rel = "noopener noreferrer";
-        anchor.title = `Open ${vocabulary.namespace} in a new tab`;
-        anchor.setAttribute("aria-label", `Open ${vocabulary.namespace} in a new tab`);
-        const external = document.createElement("span");
-        external.className = "external-mark";
-        external.setAttribute("aria-hidden", "true");
-        external.textContent = "\u2197";
-        anchor.append(external);
-        control.append(toggle, anchor);
-        links.append(control);
-      }
-      navigation.append(label, links);
-      tools.append(navigation);
-      const updateOverflow = () => {
-        const maxScroll = Math.max(links.scrollWidth - links.clientWidth, 0);
-        navigation.dataset.overflowLeft = String(links.scrollLeft > 1);
-        navigation.dataset.overflowRight = String(links.scrollLeft < maxScroll - 1);
-      };
-      links.addEventListener("scroll", updateOverflow, { passive: true });
-      links.addEventListener("pointerenter", updateOverflow);
-      links.addEventListener("focusin", updateOverflow);
-      const ResizeObserverConstructor = this.ownerDocument.defaultView?.ResizeObserver;
-      if (ResizeObserverConstructor) {
-        this.#vocabularyResizeObserver = new ResizeObserverConstructor(() => updateOverflow());
-        this.#vocabularyResizeObserver.observe(links);
-      }
-      queueMicrotask(updateOverflow);
-    }
-    const list = document.createElement("ol");
-    list.className = "navigator";
-    const carriers = new Set(result.quads.map((quad) => quad.source));
-    const rows = [];
-    result.quads.forEach((quad, index) => {
-      const item = document.createElement("li");
-      item.className = "quad";
-      const depth = rdfCarrierDepth(quad.source, carriers);
-      const visualDepth = Math.min(depth, 6);
-      item.dataset.depth = String(depth);
-      item.style.setProperty("--rdf-indent", `${visualDepth * 16}px`);
-      if (depth > 0) {
-        const marker = document.createElement("span");
-        marker.className = "structure-marker";
-        marker.setAttribute("aria-hidden", "true");
-        marker.textContent = "\u21B3";
-        item.append(marker);
-      }
-      const terms = document.createElement("div");
-      terms.className = "quad-terms";
-      const onLocate = (target) => this.#locateElement(target);
-      const subject = termCode(document, quad.subject, "", "subject", onLocate, result.sourceDocumentIri);
-      const predicate = termCode(document, quad.predicate, "   ", "predicate", onLocate, result.sourceDocumentIri);
-      const object = termCode(document, quad.object, "   ", "object", onLocate, result.sourceDocumentIri);
-      terms.append(subject, predicate, object);
-      if (quad.graph) {
-        const graph = document.createElement("div");
-        graph.className = "graph";
-        graph.append("Graph: ", termCode(document, quad.graph, "", "", onLocate, result.sourceDocumentIri));
-        terms.append(graph);
-      }
-      const termTargets = new Set(
-        [quad.subject, quad.predicate, quad.object, quad.graph].filter((term) => term !== null).map((term) => locatableElementForTerm(document, term, result.sourceDocumentIri)).filter((target) => target !== null)
-      );
-      const sourceId = `ia2-source-${index}`;
-      const previewActions = document.createElement("div");
-      previewActions.className = "preview-actions";
-      previewActions.setAttribute("role", "group");
-      previewActions.setAttribute("aria-label", `Actions for ${elementLabel(quad.source)}`);
-      if (isLocatableSource(quad.source) && !termTargets.has(quad.source)) {
-        previewActions.append(locateButton(document, quad.source, "carrier-locate-button", onLocate));
-      }
-      const hasChildren = hasSerializableChildren(quad.source);
-      const createToggle = (includeChildren, equivalentOutput = false) => {
-        const button = document.createElement("button");
-        button.className = "row-action-button source-toggle";
-        button.type = "button";
-        button.dataset.children = String(includeChildren);
-        button.setAttribute("aria-expanded", "false");
-        button.setAttribute("aria-controls", sourceId);
-        const mode = equivalentOutput ? "" : includeChildren ? " with child content" : " without child content";
-        const showLabel = `Show HTML for ${elementLabel(quad.source)}${mode}`;
-        const hideLabel = `Hide HTML for ${elementLabel(quad.source)}${mode}`;
-        button.dataset.showLabel = showLabel;
-        button.dataset.hideLabel = hideLabel;
-        button.setAttribute("aria-label", showLabel);
-        button.title = showLabel;
-        const glyph = document.createElement("span");
-        glyph.className = "source-glyph";
-        glyph.setAttribute("aria-hidden", "true");
-        glyph.textContent = includeChildren ? "</>+" : "</>";
-        button.append(glyph);
-        button.addEventListener("click", () => this.#toggleSource(item, button, quad.source, includeChildren, sourceId, equivalentOutput));
-        return button;
-      };
-      previewActions.append(createToggle(false, !hasChildren));
-      if (hasChildren) previewActions.append(createToggle(true));
-      item.append(terms);
-      const actions = document.createElement("div");
-      actions.className = "quad-actions";
-      actions.append(previewActions);
-      item.append(actions);
-      item.addEventListener("pointerleave", () => this.#clearLocateEmphasis());
-      list.append(item);
-      rows.push({ item, namespaces: new Set(namespacesInQuad(quad).map((entry) => entry.namespace)), quad, searchText: quadSearchText(quad) });
-    });
-    container.append(list);
-    this.#navigatorRows = rows;
-    const noMatches = document.createElement("p");
-    noMatches.className = "empty filter-empty";
-    noMatches.textContent = "No statements match the active filters.";
-    noMatches.hidden = true;
-    container.append(noMatches);
-    let hoveredSource = null;
-    applyFilter = () => {
-      this.#navigatorQuery = search.value;
-      const query = search.value.trim().toLocaleLowerCase();
-      let matchCount = 0;
-      rows.forEach(({ item, namespaces, quad, searchText }) => {
-        const matchesNamespace = Array.from(namespaces).every((namespace) => !this.#disabledNamespaces.has(namespace));
-        const matchesViewport = this.#syncMode !== "page" || isInPageViewport(quad.source);
-        const matches = quad.source === hoveredSource || matchesNamespace && matchesViewport && (!query || searchText.includes(query));
-        item.hidden = !matches;
-        if (matches) matchCount += 1;
-      });
-      namespaceButtons.forEach((button, namespace) => {
-        const active = !this.#disabledNamespaces.has(namespace);
-        const count = vocabularies.find((vocabulary) => vocabulary.namespace === namespace)?.count ?? 0;
-        const statementLabel = `${count} statement${count === 1 ? "" : "s"}`;
-        button.setAttribute("aria-pressed", String(active));
-        button.setAttribute("aria-label", `${active ? "Hide" : "Show"} ${statementLabel} using ${namespace}`);
-        button.title = button.getAttribute("aria-label");
-      });
-      const hasNamespaceFilter = vocabularies.some((vocabulary) => this.#disabledNamespaces.has(vocabulary.namespace));
-      const filtering = Boolean(query) || hasNamespaceFilter || this.#syncMode === "page";
-      filterCount.textContent = filtering && matchCount !== rows.length ? `${matchCount} of ${rows.length}` : "";
-      noMatches.hidden = !filtering || matchCount > 0;
-      list.hidden = filtering && matchCount === 0;
-    };
-    let visibleSuggestions = [];
-    let activeSuggestion = -1;
-    const closeTypeahead = () => {
-      visibleSuggestions = [];
-      activeSuggestion = -1;
-      typeahead.hidden = true;
-      typeahead.replaceChildren();
-      search.setAttribute("aria-expanded", "false");
-      search.removeAttribute("aria-activedescendant");
-      typeaheadStatus.textContent = "";
-    };
-    const setActiveSuggestion = (index) => {
-      if (!visibleSuggestions.length) return;
-      activeSuggestion = (index + visibleSuggestions.length) % visibleSuggestions.length;
-      const options = Array.from(typeahead.querySelectorAll('[role="option"]'));
-      options.forEach((option, optionIndex) => option.setAttribute("aria-selected", String(optionIndex === activeSuggestion)));
-      const active = options[activeSuggestion];
-      if (!active) return;
-      search.setAttribute("aria-activedescendant", active.id);
-      active.scrollIntoView?.({ block: "nearest" });
-    };
-    const selectSuggestion = (suggestion) => {
-      search.value = suggestion.display;
-      this.#navigatorQuery = search.value;
-      applyFilter();
-      closeTypeahead();
-    };
-    const renderTypeahead = () => {
-      visibleSuggestions = matchingSemanticSuggestions(semanticSuggestions, search.value);
-      activeSuggestion = -1;
-      typeahead.replaceChildren();
-      search.removeAttribute("aria-activedescendant");
-      if (!visibleSuggestions.length || this.shadowRoot?.activeElement !== search) {
-        typeahead.hidden = true;
-        search.setAttribute("aria-expanded", "false");
-        typeaheadStatus.textContent = "";
-        return;
-      }
-      visibleSuggestions.forEach((suggestion, index) => {
-        const option = document.createElement("li");
-        option.className = "typeahead-option";
-        option.id = `ia2-navigator-suggestion-${index}`;
-        option.setAttribute("role", "option");
-        option.setAttribute("aria-selected", "false");
-        const primary = document.createElement("span");
-        primary.className = "typeahead-primary";
-        const term = document.createElement("span");
-        term.className = "typeahead-term";
-        term.textContent = suggestion.display;
-        primary.append(term);
-        if (suggestion.label && suggestion.label !== suggestion.display) {
-          const label = document.createElement("span");
-          label.className = "typeahead-label";
-          label.textContent = suggestion.label;
-          primary.append(label);
-        }
-        const details = semanticSuggestionDetails(suggestion);
-        const metadata = document.createElement("span");
-        metadata.className = "typeahead-meta";
-        metadata.textContent = details.join(" \xB7 ");
-        option.setAttribute("aria-label", [suggestion.display, suggestion.label, ...details].filter(Boolean).join(", "));
-        option.append(primary, metadata);
-        option.addEventListener("pointerdown", (event) => event.preventDefault());
-        option.addEventListener("pointermove", () => setActiveSuggestion(index));
-        option.addEventListener("click", () => selectSuggestion(suggestion));
-        typeahead.append(option);
-      });
-      typeahead.hidden = false;
-      search.setAttribute("aria-expanded", "true");
-      typeaheadStatus.textContent = `${visibleSuggestions.length} semantic suggestion${visibleSuggestions.length === 1 ? "" : "s"} available.`;
-    };
-    search.addEventListener("input", () => {
-      applyFilter();
-      renderTypeahead();
-    });
-    search.addEventListener("focus", renderTypeahead);
-    search.addEventListener("blur", () => {
-      this.ownerDocument.defaultView?.setTimeout(() => {
-        if (this.shadowRoot?.activeElement !== search) closeTypeahead();
-      }, 0);
-    });
-    search.addEventListener("keydown", (event) => {
-      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-        if (typeahead.hidden) renderTypeahead();
-        if (!visibleSuggestions.length) return;
-        event.preventDefault();
-        event.stopPropagation();
-        setActiveSuggestion(activeSuggestion + (event.key === "ArrowDown" ? 1 : -1));
-        return;
-      }
-      if (event.key === "Enter" && activeSuggestion >= 0) {
-        event.preventDefault();
-        event.stopPropagation();
-        selectSuggestion(visibleSuggestions[activeSuggestion]);
-        return;
-      }
-      if (event.key === "Escape" && !typeahead.hidden) {
-        event.preventDefault();
-        event.stopPropagation();
-        closeTypeahead();
-        return;
-      }
-      if (event.key === "Tab") closeTypeahead();
-    });
-    const configureSync = () => {
-      this.#configureNavigatorSync(container, rows, applyFilter, (source) => {
-        hoveredSource = source;
-        applyFilter();
-      });
-    };
-    const setSyncMode = (mode, focus = false) => {
-      this.#syncMode = mode;
-      hoveredSource = null;
-      for (const option of syncOptions) {
-        const selected = option.dataset.syncMode === mode;
-        option.setAttribute("aria-checked", String(selected));
-        option.tabIndex = selected ? 0 : -1;
-        if (selected && focus) option.focus();
-      }
-      applyFilter();
-      configureSync();
-    };
-    this.#resetSyncControl = () => setSyncMode("off");
-    for (const option of syncOptions) {
-      option.addEventListener("click", () => setSyncMode(option.dataset.syncMode));
-    }
-    syncSwitch.addEventListener("keydown", (event) => {
-      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
-      event.preventDefault();
-      const current = event.target instanceof HTMLButtonElement ? syncOptions.indexOf(event.target) : syncOptions.findIndex((option) => option.getAttribute("aria-checked") === "true");
-      let next = current;
-      if (event.key === "Home") next = 0;
-      if (event.key === "End") next = syncOptions.length - 1;
-      if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (current + 1) % syncOptions.length;
-      if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (current - 1 + syncOptions.length) % syncOptions.length;
-      setSyncMode(syncOptions[next].dataset.syncMode, true);
-    });
-    applyFilter();
-    configureSync();
-  }
-  #renderDiagnostics(container, diagnostics) {
-    if (!diagnostics.length) {
-      const empty = document.createElement("p");
-      empty.className = "empty";
-      empty.textContent = "No extraction diagnostics. The document passed the checks implemented by this preview extractor.";
-      container.append(empty);
-      return;
-    }
-    const list = document.createElement("ul");
-    list.className = "diagnostics";
-    for (const diagnostic of diagnostics) {
-      const item = document.createElement("li");
-      item.className = "diagnostic";
-      const heading = document.createElement("strong");
-      heading.textContent = `${diagnostic.severity.toUpperCase()} \xB7 ${diagnostic.code}`;
-      const message = document.createElement("p");
-      message.textContent = diagnostic.source ? `${diagnostic.message} Source: ${elementLabel(diagnostic.source)}` : diagnostic.message;
-      item.append(heading, message);
-      list.append(item);
-    }
-    container.append(list);
-  }
-  #configureVocabularyTreeInteractions(bindings) {
-    this.#clearVocabularyTreeInteractions();
-    const view = this.ownerDocument.defaultView;
-    if (!view || !bindings.length) return;
-    const cleanups = [];
-    const rowsByTarget = /* @__PURE__ */ new Map();
-    let activeAnimation = null;
-    const listen = (target, type, listener) => {
-      target.addEventListener(type, listener);
-      cleanups.push(() => target.removeEventListener(type, listener));
-    };
-    const emphasize = (target) => {
-      activeAnimation?.cancel();
-      if (view.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-      activeAnimation = target.animate?.(
-        [
-          { outline: "2px solid transparent", outlineOffset: "7px" },
-          { outline: "2px solid oklch(62% 0.18 294)", outlineOffset: "4px" }
-        ],
-        { direction: "alternate", duration: 520, easing: "cubic-bezier(.22,1,.36,1)", iterations: Infinity }
-      ) ?? null;
-    };
-    const clearEmphasis = () => {
-      activeAnimation?.cancel();
-      activeAnimation = null;
-    };
-    for (const binding of bindings) {
-      const matchingRows = rowsByTarget.get(binding.target) ?? [];
-      matchingRows.push(binding.item);
-      rowsByTarget.set(binding.target, matchingRows);
-      listen(binding.item, "pointerenter", () => emphasize(binding.target));
-      listen(binding.item, "pointerleave", clearEmphasis);
-    }
-    rowsByTarget.forEach((rows, target) => {
-      listen(target, "pointerenter", () => {
-        rows.forEach((row) => {
-          row.classList.add("is-corresponding");
-          row.scrollIntoView?.({ block: "nearest" });
-        });
-      });
-      listen(target, "pointerleave", () => rows.forEach((row) => row.classList.remove("is-corresponding")));
-    });
-    this.#vocabularyTreeCleanup = () => {
-      cleanups.forEach((cleanup) => cleanup());
-      clearEmphasis();
-    };
-  }
-  #renderVocabulary(container) {
-    const document2 = this.ownerDocument;
-    const sourceDocumentIri = this.#sourceResult?.sourceDocumentIri ?? document2.URL;
-    const bindings = [];
-    const intro = document2.createElement("p");
-    intro.className = "ontology-intro";
-    intro.textContent = "Classes and properties defined by this document. The trees follow RDFS hierarchy statements; muted parent terms provide external context.";
-    container.append(intro);
-    const renderGroup = (title, definitions, kind) => {
-      if (!definitions.length) return;
-      const section = document2.createElement("section");
-      section.className = "ontology-section";
-      section.setAttribute("aria-label", title);
-      const heading = document2.createElement("div");
-      heading.className = "ontology-heading";
-      const headingText = document2.createElement("h3");
-      headingText.textContent = title;
-      const count = document2.createElement("span");
-      count.className = "ontology-count";
-      count.textContent = `${definitions.length} defined`;
-      heading.append(headingText, count);
-      section.append(heading);
-      const byIri = new Map(definitions.map((definition) => [definition.term.value, definition]));
-      const children = /* @__PURE__ */ new Map();
-      const parentsFor = (definition) => kind === "class" ? definition.classParents : definition.propertyParents;
-      for (const definition of definitions) {
-        for (const parent of parentsFor(definition)) {
-          const entries = children.get(parent.value) ?? [];
-          if (!entries.some((entry) => entry.term.value === definition.term.value)) entries.push(definition);
-          children.set(parent.value, entries);
-        }
-      }
-      const sortDefinitions = (values) => [...values].sort((left, right) => (left.label ?? left.term.value).localeCompare(right.label ?? right.term.value));
-      children.forEach((values, parent) => children.set(parent, sortDefinitions(values)));
-      const presented = /* @__PURE__ */ new Set();
-      const onLocate = (target) => this.#locateElement(target);
-      const renderNode = (term, definition, path, cycle = false) => {
-        const item = document2.createElement("li");
-        item.className = "ontology-node";
-        const row = document2.createElement("div");
-        row.className = `ontology-term-row${definition ? "" : " ontology-context"}`;
-        row.dataset.term = term.value;
-        const copy = document2.createElement("div");
-        copy.className = "ontology-term-copy";
-        copy.append(termCode(document2, term, "", "", void 0, sourceDocumentIri));
-        if (definition?.label) {
-          const label = document2.createElement("div");
-          label.className = "ontology-label";
-          label.textContent = definition.label;
-          copy.append(label);
-        }
-        const metadata = document2.createElement("div");
-        metadata.className = "ontology-meta";
-        if (!definition) metadata.textContent = "External parent";
-        else if (cycle) metadata.textContent = "Cycle reference";
-        else if (definition.types.length) metadata.textContent = definition.types.map((type) => compactTerm(type)).join(" \xB7 ");
-        if (metadata.textContent) copy.append(metadata);
-        row.append(copy);
-        if (definition) {
-          presented.add(definition.term.value);
-          const target = definitionTarget(document2, definition, sourceDocumentIri);
-          if (target) {
-            const actions = document2.createElement("div");
-            actions.className = "ontology-actions";
-            actions.append(locateButton(document2, target, "ontology-locate-button", onLocate));
-            row.append(actions);
-            bindings.push({ item: row, target });
-          }
-        }
-        item.append(row);
-        if (cycle) return item;
-        const descendants = children.get(term.value) ?? [];
-        if (descendants.length) {
-          const subtree = document2.createElement("ul");
-          subtree.className = "ontology-children";
-          const nextPath = new Set(path);
-          nextPath.add(term.value);
-          for (const child of descendants) {
-            subtree.append(renderNode(child.term, child, nextPath, nextPath.has(child.term.value)));
-          }
-          item.append(subtree);
-        }
-        return item;
-      };
-      const tree = document2.createElement("ul");
-      tree.className = "ontology-tree";
-      const externalParents = /* @__PURE__ */ new Map();
-      for (const definition of definitions) {
-        for (const parent of parentsFor(definition)) {
-          if (!byIri.has(parent.value)) externalParents.set(parent.value, parent);
-        }
-      }
-      for (const parent of Array.from(externalParents.values()).sort((left, right) => left.value.localeCompare(right.value))) {
-        tree.append(renderNode(parent, null, /* @__PURE__ */ new Set()));
-      }
-      const roots = sortDefinitions(definitions.filter((definition) => parentsFor(definition).length === 0));
-      for (const root of roots) tree.append(renderNode(root.term, root, /* @__PURE__ */ new Set()));
-      for (const definition of definitions) {
-        if (!presented.has(definition.term.value)) tree.append(renderNode(definition.term, definition, /* @__PURE__ */ new Set()));
-      }
-      section.append(tree);
-      container.append(section);
-    };
-    renderGroup("Classes", this.#documentVocabulary.classes, "class");
-    renderGroup("Properties", this.#documentVocabulary.properties, "property");
-    this.#configureVocabularyTreeInteractions(bindings);
-  }
-  #renderDiscovery(container) {
-    const document2 = this.ownerDocument;
-    const intro = document2.createElement("p");
-    intro.className = "discovery-intro";
-    intro.textContent = "Additional knowledge advertised by this document. Loading is explicit, sends no credentials or referrer, does not run scripts, and keeps the retrieved contribution in a separate named graph.";
-    container.append(intro);
-    const list = document2.createElement("ul");
-    list.className = "discovery-list";
-    for (const candidate of this.#discoveryCandidates) {
-      const state = this.#discoveryLoads.get(candidate.id);
-      const stateName = state?.status ?? "available";
-      const item = document2.createElement("li");
-      item.className = "discovery-item";
-      item.dataset.candidateId = candidate.id;
-      const copy = document2.createElement("div");
-      copy.className = "discovery-copy";
-      const target = document2.createElement("a");
-      target.className = "discovery-target";
-      target.href = candidate.target.value;
-      target.target = "_blank";
-      target.rel = "noopener noreferrer";
-      target.textContent = candidate.target.value;
-      target.title = `Open ${candidate.target.value} in a new tab`;
-      const context = document2.createElement("p");
-      context.className = "discovery-context";
-      context.textContent = `About ${compactTerm(candidate.context)}`;
-      copy.append(target, context);
-      const metadata = document2.createElement("div");
-      metadata.className = "discovery-meta";
-      for (const predicate of candidate.predicates) {
-        const chip = document2.createElement("span");
-        chip.className = "discovery-chip";
-        chip.textContent = compactTerm(predicate);
-        chip.title = predicate.value;
-        metadata.append(chip);
-      }
-      for (const role of candidate.roles) {
-        const chip = document2.createElement("span");
-        chip.className = "discovery-chip role";
-        chip.textContent = compactTerm(role);
-        chip.title = role.value;
-        metadata.append(chip);
-      }
-      if (candidate.graph) {
-        const chip = document2.createElement("span");
-        chip.className = "discovery-chip";
-        chip.textContent = `graph ${compactTerm(candidate.graph)}`;
-        metadata.append(chip);
-      }
-      if (metadata.childElementCount) copy.append(metadata);
-      const controls = document2.createElement("div");
-      controls.className = "discovery-state";
-      const status = document2.createElement("span");
-      status.className = "discovery-status";
-      status.dataset.state = stateName;
-      if (!state) status.textContent = "Available";
-      if (state?.status === "loading") status.textContent = "Retrieving HTML/RDF\u2026";
-      if (state?.status === "error") status.textContent = state.message ?? "Retrieval failed.";
-      if (state?.status === "loaded") {
-        const count = state.contribution?.result.quads.length ?? 0;
-        status.textContent = `${count} statement${count === 1 ? "" : "s"} loaded`;
-      }
-      const action = document2.createElement("button");
-      action.className = "discovery-action";
-      action.type = "button";
-      action.dataset.candidateId = candidate.id;
-      action.dataset.state = stateName;
-      if (!state) action.textContent = "Load";
-      if (state?.status === "loading") action.textContent = "Cancel";
-      if (state?.status === "error") action.textContent = "Retry";
-      if (state?.status === "loaded") action.textContent = "Remove";
-      action.setAttribute("aria-describedby", `${candidate.id}-status`);
-      status.id = `${candidate.id}-status`;
-      action.addEventListener("click", () => void this.#loadDiscoveryContribution(candidate));
-      controls.append(status, action);
-      item.append(copy, controls);
-      list.append(item);
-    }
-    container.append(list);
-  }
-  #renderSources(container) {
-    const intro = this.ownerDocument.createElement("p");
-    intro.className = "sources-intro";
-    intro.textContent = "Inspect one document at a time. Sources remain separate so blank nodes, bases, and document identity are not silently merged.";
-    const list = this.ownerDocument.createElement("ul");
-    list.className = "source-list";
-    for (const source of this.#sources) {
-      const item = this.ownerDocument.createElement("li");
-      item.className = "source-item";
-      const label = this.ownerDocument.createElement("label");
-      label.className = "source-option";
-      const input = this.ownerDocument.createElement("input");
-      input.className = "source-input";
-      input.type = "radio";
-      input.name = "ia2-navigator-source";
-      input.checked = source.id === this.#selectedSourceId;
-      input.dataset.sourceId = source.id;
-      input.addEventListener("change", () => this.#selectSource(source.id));
-      const copy = this.ownerDocument.createElement("span");
-      copy.className = "source-copy";
-      const title = this.ownerDocument.createElement("strong");
-      title.className = "source-title";
-      title.textContent = source.label;
-      const url = this.ownerDocument.createElement("span");
-      url.className = "source-url";
-      url.textContent = source.url;
-      const access = this.ownerDocument.createElement("span");
-      access.className = "source-access";
-      const accessLabel = source.access === "direct" ? "DOM correlation available" : "Collected from an isolated frame; source locations are read-only";
-      access.textContent = `${source.origin} \xB7 ${accessLabel}`;
-      copy.append(title, url, access);
-      const count = this.ownerDocument.createElement("span");
-      count.className = "source-count";
-      count.textContent = `${source.result.quads.length} statement${source.result.quads.length === 1 ? "" : "s"}`;
-      label.append(input, copy, count);
-      item.append(label);
-      list.append(item);
-    }
-    container.append(intro, list);
-  }
-  #render() {
-    this.#stopFloatingInteraction();
-    this.#stopLauncherInteraction();
-    this.#clearLinkPreviews();
-    this.#clearLocateEmphasis();
-    this.#resetSyncControl = null;
-    this.#clearNavigatorSync();
-    this.#clearVocabularyTreeInteractions();
-    this.#vocabularyResizeObserver?.disconnect();
-    this.#vocabularyResizeObserver = null;
-    this.#tabResizeObserver?.disconnect();
-    this.#tabResizeObserver = null;
-    this.#navigatorRows = [];
-    const result = this.#result;
-    if (!result || !this.shadowRoot) return;
-    if (this.#view === "diagnostics" && !result.diagnostics.length) this.#view = "navigator";
-    if (this.#view === "discovery" && !this.#discoveryCandidates.length) this.#view = "navigator";
-    if (this.#view === "vocabulary" && !this.#documentVocabulary.count) this.#view = "navigator";
-    if (this.#view === "sources" && this.#sources.length <= 1) this.#view = "navigator";
-    const activeSource = this.#sources.find((source) => source.id === this.#selectedSourceId) ?? this.#sources[0];
-    const sourceStatements = this.#sources.reduce((sum, source) => sum + source.result.quads.length, 0);
-    const selectedContributions = Math.max(0, result.quads.length - (activeSource?.result.quads.length ?? 0));
-    const totalStatements = sourceStatements + selectedContributions;
-    this.shadowRoot.innerHTML = `
-      <style>${CSS}</style>
-      <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel" title="Open RDF Navigator. Drag to move."${this.hasAttribute("data-ia2-extension") ? " hidden" : ""}>
+  })();<\/script>`,c=`${r}${s}`,l=/<head(?:\s[^>]*)?>/i.exec(n);if(!l)return`${c}${n}`;let d=l.index+l[0].length;return`${n.slice(0,d)}${c}${n.slice(d)}`}function te(n){let e=n.ownerDocument.defaultView;if(!e||!(n instanceof e.HTMLElement)||!n.isConnected||Lo.has(n.localName)||n.closest("head, template, [hidden]")||n.localName==="input"&&n.getAttribute("type")?.toLowerCase()==="hidden")return!1;let t=e.getComputedStyle(n);return t.display!=="none"&&t.visibility!=="hidden"&&t.visibility!=="collapse"}function Co(n){return n.localName==="template"&&"content"in n?n.content.childNodes.length>0:n.childNodes.length>0}function Do(n,e){let t=0,o=n.parentElement;for(;o;)e.has(o)&&(t+=1),o=o.parentElement;return t}function No(n){let e=n.ownerDocument.defaultView;if(!e||!te(n))return!1;let t=n.getBoundingClientRect();return t.width>0&&t.height>0&&t.bottom>0&&t.right>0&&t.top<e.innerHeight&&t.left<e.innerWidth}function ee(n){if(n.termType==="Triple")return[H(n),ee(n.subject),ee(n.predicate),ee(n.object)].join(" ");let e=n.termType==="Literal"?`${n.datatype.value} ${n.language} ${n.direction??""}`:"";return`${H(n)} ${n.value} ${e}`}function qo(n){return[ee(n.subject),ee(n.predicate),ee(n.object),n.graph?ee(n.graph):"",W(n.source)].join(" ").toLocaleLowerCase()}function ue(n,e,t=n.URL){try{let o=new URL(e),r=new URL(t),i=new URL(o),a=new URL(r);return i.hash="",a.hash="",i.href===a.href?o:null}catch{return null}}function Ao(n,e){try{let t=new URL(n),o=new URL(e.sourceDocumentIri),r=new URL(t);if(r.hash="",o.hash="",r.href!==o.href)return t.href;let i=new URL(e.retrievalDocumentIri);return i.hash=t.hash,i.href}catch{return n}}function Io(n,e,t){if(t.metaKey||t.ctrlKey||t.shiftKey||t.altKey)return;t.preventDefault();let o=n.defaultView;if(!o)return;let r=new URL(n.URL);r.hash=e.hash,o.history.pushState(null,"",r.href),(e.hash?_e(n,e):n.documentElement)?.scrollIntoView({behavior:o.matchMedia?.("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"})}function _e(n,e){let t=n.documentElement;if(e.hash){let o=e.hash.slice(1);try{t=n.getElementById(decodeURIComponent(o))}catch{t=n.getElementById(o)}}return t&&te(t)?t:null}function je(n,e,t=n.URL){if(e.termType!=="NamedNode"||!Se(e.value))return null;let o=ue(n,e.value,t);return o?_e(n,o):null}function zo(n,e,t){let o=je(n,e.term,t);if(o)return o;for(let r of e.sources){let i=r.closest("[id]");if(i&&te(i))return i;if(te(r))return r}return null}function He(n,e,t,o){let r=n.createElement("button");r.className=`row-action-button locate-button ${t}`,r.type="button",r.setAttribute("aria-label",`Locate ${W(e)}`),r.title=r.getAttribute("aria-label");let i=n.createElement("span");return i.className="locate-glyph",i.setAttribute("aria-hidden","true"),i.textContent="\u2316",r.append(i),r.addEventListener("click",()=>o(e)),r}function le(n,e,t="",o="",r,i=n.URL){let a=n.createElement("code");o&&(a.className=o),t&&a.append(n.createTextNode(t));let s=H(e);if(e.termType!=="NamedNode"||!Se(e.value))return a.append(n.createTextNode(s)),a;let c=n.createElement("a");c.className="term-link",c.href=e.value;let l=ue(n,e.value,i);l?(c.classList.add("local-term"),c.title=l.hash?`Scroll to ${l.hash} in this document`:"Scroll to the start of this document",c.addEventListener("click",u=>Io(n,l,u))):(c.target="_blank",c.rel="noopener noreferrer",c.title=`Open ${e.value} in a new tab`),c.textContent=s,a.append(c);let d=je(n,e,i);return d&&r&&a.append(He(n,d,"term-locate-button",r)),a}function $o(n){for(let[i,a]of Object.entries(Me))if(n.startsWith(a))return{label:i,namespace:a};if(!Se(n))return null;let e=n.lastIndexOf("#"),t=n.lastIndexOf("/"),o=Math.max(e,t);if(o<8)return null;let r=n.slice(0,o+1);try{let i=new URL(r),a=i.pathname.replace(/\/$/,""),s=r.endsWith("#")?"#":"";return{label:`${i.host}${a}${s}`,namespace:r}}catch{return null}}function U(n){return n.termType==="NamedNode"?[n.value]:n.termType==="BlankNode"?[]:n.termType==="Literal"?H(n).includes("^^")?[n.datatype.value]:[]:[...U(n.subject),...U(n.predicate),...U(n.object)]}function Ee(n){return H({termType:"NamedNode",value:n})}function xt(n){let e=n.replace(/[\/#]+$/,""),t=Math.max(e.lastIndexOf("#"),e.lastIndexOf("/")),o=t>=0?e.slice(t+1):e;try{return decodeURIComponent(o)}catch{return o}}function Po(n){let t=xt(n).replace(/\.[A-Za-z0-9]+$/u,"").replace(/([\p{Ll}\d])(\p{Lu})/gu,"$1 $2").replace(/[_-]+/gu," ").replace(/\s+/gu," ").trim();return t?`${t.charAt(0).toLocaleUpperCase()}${t.slice(1)}`:Ee(n)}function de(n,e){if(!n)return"unbound";let t=n.termType==="NamedNode"||n.termType==="BlankNode"?e.get(`${n.termType}:${n.value}`)??"":"";return JSON.stringify([n.termType,n.value,n.datatype??"",n.language??"",n.direction??"",t])}function wt(n,e){if(n.kind==="ask")return`ask:${String(n.value)}`;if(n.kind==="quads"){let o=n.quads.map(r=>JSON.stringify([de(r.subject,e),de(r.predicate,e),de(r.object,e),de(r.graph,e)])).sort();return JSON.stringify(["quads",o])}let t=n.rows.map(o=>JSON.stringify(n.variables.map(r=>de(o[r],e)))).sort();return JSON.stringify(["bindings",n.variables,t])}function Ho(n){let e=new Map,t=o=>{let r=e.get(o);if(r)return r;let i={domains:new Set,iri:o,ranges:new Set,statementCount:0,types:new Set};return e.set(o,i),i};for(let o of n.quads){let r=new Set([...U(o.subject),...U(o.predicate),...U(o.object),...o.graph?U(o.graph):[]]);for(let a of r)t(a).statementCount+=1;if(o.subject.termType!=="NamedNode")continue;let i=t(o.subject.value);o.predicate.value===yo&&o.object.termType==="NamedNode"&&i.types.add(o.object.value),o.predicate.value===xo&&i.domains.add(H(o.object)),o.predicate.value===Eo&&i.ranges.add(H(o.object))}return Array.from(e.values()).map(o=>{let r=Ee(o.iri),i=xt(o.iri),a=ne(n.quads,o.iri)??"",s=Array.from(o.types,u=>ko[u]??`type ${Ee(u)}`).sort(),c=Array.from(o.domains).sort(),l=Array.from(o.ranges).sort(),d=[r,o.iri,i,a,...s,...c.flatMap(u=>["domain",u,`domain ${u}`]),...l.flatMap(u=>["range",u,`range ${u}`])].join(" ").toLocaleLowerCase();return{display:r,domains:c,iri:o.iri,kinds:s,label:a,localName:i,ranges:l,searchText:d,statementCount:o.statementCount}})}function _o(n,e,t=So){let o=e.trim().toLocaleLowerCase();if(!o)return[];let r=o.split(/\s+/).filter(Boolean);return n.map(i=>{if(!r.every(c=>i.searchText.includes(c)))return null;let a=[i.display,i.localName,i.label].join(" ").toLocaleLowerCase(),s=60;return[i.display,i.localName,i.label].some(c=>c.toLocaleLowerCase()===o)?s=0:[i.display,i.localName,i.label].some(c=>c.toLocaleLowerCase().startsWith(o))?s=10:a.includes(o)?s=20:r.every(c=>a.includes(c))&&(s=35),{score:s-Math.min(i.statementCount,20)/100,suggestion:i}}).filter(i=>i!==null).sort((i,a)=>i.score-a.score||i.suggestion.display.localeCompare(a.suggestion.display)).slice(0,t).map(({suggestion:i})=>i)}function jo(n){let e=[...n.kinds,...n.domains.map(o=>`domain ${o}`),...n.ranges.map(o=>`range ${o}`)],t=`${n.statementCount} statement${n.statementCount===1?"":"s"}`;return[...e,t]}function Et(n){let e=[...U(n.subject),...U(n.predicate),...U(n.object),...n.graph?U(n.graph):[]],t=new Map;for(let o of e){let r=$o(o);r&&t.set(r.namespace,r)}return Array.from(t.values())}function Oo(n){let e=new Map;for(let t of n.quads)for(let o of Et(t)){let r=e.get(o.namespace);r?r.count+=1:e.set(o.namespace,{...o,count:1})}return Array.from(e.values()).sort((t,o)=>t.label.localeCompare(o.label))}var Fo=new Set(["content","datetime","dir","href","lang","src","value"]),yt="[rdf-predicate], [rdf-graph], [rdf-graph-key], base[href], link[rel]";function Uo(n){if(n.type==="characterData")return n.target.parentElement?.closest("[rdf-predicate]")!==null;if(n.type==="attributes"){let t=n.target instanceof Element?n.target:null,o=n.attributeName??"";return t?o.startsWith("rdf-")||t.localName==="base"&&o==="href"||t.localName==="link"&&(o==="href"||o==="rel")?!0:t.hasAttribute("rdf-predicate")?o==="id"||Fo.has(o):!1:!1}return(n.target instanceof Element?n.target:null)?.closest("[rdf-predicate]")?!0:[...n.addedNodes,...n.removedNodes].some(t=>t instanceof Element?t.matches(yt)||t.querySelector(yt)!==null:!1)}function Vo(n,e){let t=new URL(n),o=new URL(e.sourceDocumentIri),r=new URL(e.retrievalDocumentIri);return t.origin!==o.origin||o.origin===r.origin?t.href:new URL(`${t.pathname}${t.search}${t.hash}`,r.origin).href}function Bo(n,e){try{Object.defineProperty(n,"URL",{configurable:!0,value:e})}catch{}let t=n.head?.querySelector("base[href]");t&&(t.href=new URL(t.getAttribute("href")??"",e).href),n.head?.querySelectorAll('link[rel~="canonical"][href]').forEach(o=>{o.href=new URL(o.getAttribute("href")??"",e).href})}function Wo(n){return n instanceof DOMException&&n.name==="AbortError"?"Retrieval timed out.":n instanceof TypeError?"Retrieval was blocked by CORS or network policy.":n instanceof Error?n.message:"The contribution could not be loaded."}var pe=class extends HTMLElement{#o=null;#p=null;#O=null;#ue=[];#pe=[];#n=[];#i="top-document";#he=new WeakMap;#Ie=1;#E=[];#r=new Map;#S={classes:[],count:0,definitions:[],properties:[]};#e="navigator";#k=!1;#L="";#N="";#h=[];#G=[];#v="";#b=Pe;#t={status:"idle"};#F=!0;#m="";#q=new Map;#a=0;#x=pt;#f=0;#w=new Set;#d="off";#s="right";#u=null;#A=null;#c=null;#I=null;#U=!1;#l=new Map;#R=null;#V=null;#me=20;#X=null;#J=null;#B=null;#Z=null;#T=null;#y=null;#M=null;#C=null;#W=[];constructor(){super(),this.attachShadow({mode:"open"})}connectedCallback(){this.#Oe(),this.refresh(),this.addEventListener("keydown",this.#De),this.addEventListener("keyup",this.#Ne),this.ownerDocument.defaultView?.addEventListener("resize",this.#Ce,{passive:!0}),this.#Ue()}disconnectedCallback(){this.removeEventListener("keydown",this.#De),this.removeEventListener("keyup",this.#Ne),this.ownerDocument.defaultView?.removeEventListener("resize",this.#Ce),this.#M?.disconnect(),this.#M=null;for(let e of this.#r.values())e.controller?.abort();this.#r.clear(),this.#T?.disconnect(),this.#T=null,this.#y?.disconnect(),this.#y=null,this.#C!==null&&window.clearTimeout(this.#C),this.#Y(),this.#ce(),this.#oe(),this.#j(),this.#K(),this.#ee()}#K(){this.#J?.(),this.#J=null}#ze(){if(this.#B){this.#B();return}this.#d="off",this.#K()}#ee(){this.#Z?.(),this.#Z=null}#$e(e){if(this.#y?.disconnect(),this.#y=null,!e)return;let t=()=>{if(e.dataset.compact="0",!(e.clientWidth<=0)){for(let r=0;r<=3;r+=1)if(e.dataset.compact=String(r),e.scrollWidth<=e.clientWidth+1)return}};t();let o=this.ownerDocument.defaultView?.ResizeObserver;o&&(this.#y=new o(t),this.#y.observe(e))}#z(e){this.#l.has(e)&&(this.#R=e,e.style.zIndex=String(++this.#me))}#te(e){let t=this.#l.get(e);if(!t||(t.abortController?.abort(),t.interactionCleanup?.(),t.navigationCleanup?.(),e.remove(),this.#l.delete(e),this.#V===e&&(this.#V=null),this.#R!==e))return;let o=Array.from(this.#l.keys()).at(-1)??null;this.#R=null,o&&this.#z(o)}#oe(){for(let e of Array.from(this.#l.keys()))this.#te(e);this.#R=null,this.#me=20}#fe(e){let t=e.getBoundingClientRect();return{height:Number.parseFloat(e.style.height)||t.height,width:Number.parseFloat(e.style.width)||t.width,x:Number.parseFloat(e.style.left)||t.left,y:Number.parseFloat(e.style.top)||t.top}}#ne(e,t){let o=this.#P(t);e.style.height=`${o.height}px`,e.style.left=`${o.x}px`,e.style.top=`${o.y}px`,e.style.width=`${o.width}px`}#ge(e){this.#ne(e,this.#fe(e))}#ve(e,t,o){if(e.button!==0)return;let r=this.ownerDocument.defaultView,i=this.#l.get(t);if(!r||!i)return;e.preventDefault(),this.#z(t),i.interactionCleanup?.(),i.interactionCleanup=null,this.#ge(t);let a=this.#fe(t),s=e.clientX,c=e.clientY;t.classList.add(o?"is-resizing":"is-dragging");let l=u=>{let g=u.clientX-s,h=u.clientY-c,p=this.#$(),m={...a};o?(o.includes("e")&&(m.width=Math.min(Math.max(a.width+g,p.minWidth),p.width-p.margin-a.x)),o.includes("s")&&(m.height=Math.min(Math.max(a.height+h,p.minHeight),p.height-p.margin-a.y)),o.includes("w")&&(m.x=Math.min(Math.max(a.x+g,p.margin),a.x+a.width-p.minWidth),m.width=a.x+a.width-m.x),o.includes("n")&&(m.y=Math.min(Math.max(a.y+h,p.margin),a.y+a.height-p.minHeight),m.height=a.y+a.height-m.y)):(m.x=a.x+g,m.y=a.y+h),this.#ne(t,m)},d=()=>{r.removeEventListener("pointermove",l),r.removeEventListener("pointerup",d),r.removeEventListener("pointercancel",d),t.classList.remove("is-dragging","is-resizing"),i.interactionCleanup===d&&(i.interactionCleanup=null)};r.addEventListener("pointermove",l),r.addEventListener("pointerup",d),r.addEventListener("pointercancel",d),i.interactionCleanup=d}#be(e,t,o){let r=this.ownerDocument.defaultView,i=this.#l.get(e);if(!r||!i)return;i.abortController?.abort(),i.abortController=null;let a=gt(o),s=vt(a),c=Ro(a),l=a.hash?decodeURIComponent(a.hash.slice(1)):"";if(t.removeAttribute("srcdoc"),s){t.removeAttribute("src"),t.setAttribute("sandbox",xe);let h=ae.get(c);if(h){t.srcdoc=bt(h.html,h.baseUrl,l);return}t.srcdoc=ie("Loading definition\u2026")}else t.setAttribute("sandbox",ft),t.src=a.href;if(typeof r.fetch!="function"||typeof r.AbortController!="function"){s&&(t.srcdoc=ie("Preview unavailable. Use the open button above."));return}let d=new r.AbortController;i.abortController=d;let u=s?ho:1;(async()=>{let h;for(let p=0;p<u;p+=1)try{return await Mo(r,a.href,d)}catch(m){if(h=m,d.signal.aborted||p+1>=u)throw m;s&&t.isConnected&&(t.srcdoc=ie("Still loading; retrying\u2026"))}throw h})().then(({html:h,response:p})=>{let m=p.headers.get("content-type")?.toLowerCase()??"";if(!p.ok||!m.includes("text/html")&&!m.includes("application/xhtml+xml")){s&&t.isConnected&&(t.srcdoc=ie("Preview unavailable. Use the open button above."));return}if(h.length>uo||d.signal.aborted||!t.isConnected){s&&!d.signal.aborted&&t.isConnected&&(t.srcdoc=ie("Preview is too large. Use the open button above."));return}let v=new URL(p.url||a.href);v.hash="",To(c,{baseUrl:v.href,html:h}),t.setAttribute("sandbox",xe),t.srcdoc=bt(h,v.href,l)}).catch(()=>{s&&t.isConnected&&!d.signal.aborted&&(t.srcdoc=ie("Preview unavailable. Use the open button above."))}).finally(()=>{i.abortController===d&&(i.abortController=null)})}#we(e,t){let o=e.querySelector(".resource-preview-frame"),r=e.querySelector(".resource-preview-open"),i=e.querySelector(".resource-preview-url");if(!o||!r||!i)return;let s=(e.dataset.previewKind==="definition"?"definition":"resource")==="definition"?"Definition":"Resource";e.setAttribute("aria-label",`${s} preview of ${t}`),i.textContent=t,i.title=t,r.href=t,r.setAttribute("aria-label",`Open ${t} in a new tab`),r.title=r.getAttribute("aria-label"),o.title=`${s} preview of ${t}`,this.#be(e,o,t)}#Pe(e,t,o){let r=this.ownerDocument.defaultView;if(!r||!this.shadowRoot||!e.isConnected)return null;let i=this.ownerDocument,a=i.createElement("section");a.className="resource-preview";let s=e.closest(".predicate")?"definition":"resource";a.dataset.previewKind=s,a.setAttribute("role","dialog"),a.setAttribute("aria-label",`${s==="definition"?"Definition":"Resource"} preview of ${e.href}`);let{height:c,margin:l,width:d}=this.#$(),u=Math.max(1,d-l*2),g=Math.max(1,c-l*2),h=s==="definition"?620:Math.max(760,Math.round(d*.72)),p=s==="definition"?520:Math.min(760,Math.max(560,Math.round(c*.82))),m=Math.min(h,u),v=Math.min(p,g),b=this.#l.size%6*24,E=this.#P({height:v,width:m,x:s==="definition"?t-24:Math.round((d-m)/2),y:s==="definition"?o-40:Math.round((c-v)/2)});this.#ne(a,{...E,x:E.x+b,y:E.y+b});let C=i.createElement("header");C.className="resource-preview-bar";let T=i.createElement("span");T.className="resource-preview-url",T.title=e.href,T.textContent=e.href;let k=i.createElement("a");k.className="resource-preview-action resource-preview-open",k.href=e.href,k.target="_blank",k.rel="noopener noreferrer",k.setAttribute("aria-label",`Open ${e.href} in a new tab`),k.title=k.getAttribute("aria-label"),k.textContent="\u2197",C.append(T,k);let L=i.createElement("button");L.className="resource-preview-action resource-preview-close",L.type="button",L.setAttribute("aria-label","Close resource preview"),L.title=L.getAttribute("aria-label"),L.textContent="\xD7",L.addEventListener("click",()=>this.#te(a)),C.append(L),C.addEventListener("pointerdown",$=>{($.target instanceof Element?$.target:null)?.closest("a, button")||this.#ve($,a)});let x=i.createElement("iframe");x.className="resource-preview-frame",x.title=`${s==="definition"?"Definition":"Resource"} preview of ${e.href}`,x.setAttribute("sandbox",vt(gt(e.href))?xe:ft),x.referrerPolicy="no-referrer",x.tabIndex=0,a.append(C,x);let y=i.createElement("div");y.className="resource-preview-resize-handles",y.setAttribute("aria-hidden","true");for(let $ of["n","ne","e","se","s","sw","w","nw"]){let A=i.createElement("span");A.className="resize-handle",A.dataset.resize=$,A.addEventListener("pointerdown",F=>this.#ve(F,a,$)),y.append(A)}a.append(y),this.shadowRoot.append(a);let S={abortController:null,interactionCleanup:null,navigationCleanup:null};this.#l.set(a,S),a.addEventListener("pointerdown",()=>this.#z(a),{capture:!0}),this.#z(a);let P=$=>{let A=$.data;$.source!==x.contentWindow||A?.type!=="ia2-rdf-preview-navigate"||typeof A.href!="string"||!Se(A.href)||this.#we(a,A.href)};return r.addEventListener("message",P),S.navigationCleanup=()=>r.removeEventListener("message",P),this.#be(a,x,e.href),a}#ye(e,t){let o=e.getBoundingClientRect(),r=t.clientX||o.left+Math.min(o.width/2,24),i=t.clientY||o.top+Math.min(o.height/2,12);return this.#Pe(e,r,i)}#He(e,t){let o=this.#V;if(o?.isConnected&&this.#l.has(o)){this.#z(o),this.#we(o,e.href);return}this.#V=this.#ye(e,t)}#_e(e){if(!(e instanceof Element))return null;let t=e.closest("a.term-link[href], a.vocabulary-link[href], a.tok.iri[href], a.sparql-resource-label[href]");if(!t||!this.shadowRoot?.contains(t))return null;let o=this.#o?.sourceDocumentIri??this.ownerDocument.URL,r=t.dataset.semanticIri??t.href;return ue(this.ownerDocument,r,o)?null:t}#je(){if(!this.shadowRoot)return;let e=this.shadowRoot.querySelector(".viewport");e&&e.addEventListener("click",t=>{let o=this.#_e(t.target);!o||t.button!==0||t.metaKey||t.ctrlKey||t.shiftKey||t.altKey||(t.preventDefault(),o.classList.contains("sparql-resource-label")?this.#He(o,t):this.#ye(o,t))})}#Oe(){try{let e=this.ownerDocument.defaultView?.sessionStorage.getItem(ut);if(!e)return;let t=JSON.parse(e);ge(t.position)&&(this.#s=t.position),bo(t.floatingRect)&&(this.#u=this.#P(t.floatingRect)),wo(t.launcherPosition)&&(this.#c=t.launcherPosition)}catch{}}#D(){try{let e={floatingRect:this.#u,launcherPosition:this.#c,position:this.#s};this.ownerDocument.defaultView?.sessionStorage.setItem(ut,JSON.stringify(e))}catch{}}#re(){let e=this.shadowRoot?.activeElement;if(!(e instanceof HTMLElement))return null;if(e.classList.contains("navigator-search")){let t=e;return{kind:"search",start:t.selectionStart,end:t.selectionEnd}}if(e.classList.contains("sparql-editor")){let t=e;return{kind:"sparql-editor",start:t.selectionStart,end:t.selectionEnd}}return e.classList.contains("sparql-suggestion")?{kind:"sparql-suggestion"}:e.classList.contains("sparql-run")?{kind:"sparql-run"}:e.classList.contains("sparql-reset")?{kind:"sparql-reset"}:e.classList.contains("sparql-observe-input")?{kind:"sparql-observe"}:e.classList.contains("vocabulary-toggle")&&e.dataset.namespace?{kind:"namespace",key:e.dataset.namespace}:e.classList.contains("sync-option")&&e.dataset.syncMode?{kind:"sync",key:e.dataset.syncMode}:e.classList.contains("position-option")&&e.dataset.position?{kind:"position",key:e.dataset.position}:e.classList.contains("discovery-action")&&e.dataset.candidateId?{kind:"discovery-action",key:e.dataset.candidateId}:e.classList.contains("source-input")&&e.dataset.sourceId?{kind:"source",key:e.dataset.sourceId}:e.classList.contains("tab")&&e.dataset.view?{kind:"tab",key:e.dataset.view}:e.classList.contains("launcher")?{kind:"launcher"}:e.classList.contains("refresh")?{kind:"refresh"}:e.classList.contains("close")?{kind:"close"}:e.classList.contains("copy")?{kind:"copy"}:e.classList.contains("viewport")?{kind:"viewport"}:this.shadowRoot?.querySelector(".panel")?.contains(e)?{kind:"fallback"}:null}#ie(e){if(!this.shadowRoot)return;let t=null;e.kind==="search"&&(t=this.shadowRoot.querySelector(".navigator-search")),e.kind==="sparql-editor"&&(t=this.shadowRoot.querySelector(".sparql-editor")),e.kind==="sparql-suggestion"&&(t=this.shadowRoot.querySelector(".sparql-suggestion")),e.kind==="sparql-run"&&(t=this.shadowRoot.querySelector(".sparql-run")),e.kind==="sparql-reset"&&(t=this.shadowRoot.querySelector(".sparql-reset")),e.kind==="sparql-observe"&&(t=this.shadowRoot.querySelector(".sparql-observe-input")),e.kind==="namespace"&&(t=Array.from(this.shadowRoot.querySelectorAll(".vocabulary-toggle")).find(o=>o.dataset.namespace===e.key)??null),e.kind==="sync"&&(t=Array.from(this.shadowRoot.querySelectorAll(".sync-option")).find(o=>o.dataset.syncMode===e.key)??null),e.kind==="position"&&(t=Array.from(this.shadowRoot.querySelectorAll(".position-option")).find(o=>o.dataset.position===e.key)??null),e.kind==="discovery-action"&&(t=Array.from(this.shadowRoot.querySelectorAll(".discovery-action")).find(o=>o.dataset.candidateId===e.key)??null),e.kind==="source"&&(t=Array.from(this.shadowRoot.querySelectorAll(".source-input")).find(o=>o.dataset.sourceId===e.key)??null),e.kind==="tab"&&(t=Array.from(this.shadowRoot.querySelectorAll(".tab")).find(o=>o.dataset.view===e.key)??null),e.kind==="launcher"&&(t=this.shadowRoot.querySelector(".launcher")),e.kind==="refresh"&&(t=this.shadowRoot.querySelector(".refresh")),e.kind==="close"&&(t=this.shadowRoot.querySelector(".close")),e.kind==="copy"&&(t=this.shadowRoot.querySelector(".copy")),e.kind==="viewport"&&(t=this.shadowRoot.querySelector(".viewport")),!t&&e.kind==="fallback"&&(t=this.shadowRoot.querySelector('[role="tab"][aria-selected="true"]')),t?.focus({preventScroll:!0}),e.kind==="search"&&t instanceof HTMLInputElement&&t.setSelectionRange(e.start??t.value.length,e.end??t.value.length),e.kind==="sparql-editor"&&t instanceof HTMLTextAreaElement&&t.setSelectionRange(e.start??t.value.length,e.end??t.value.length)}#Fe(){let e=this.shadowRoot?.querySelector(".panel");return e?[e,...this.#l.keys()].flatMap(o=>Array.from(o.querySelectorAll("a[href], button, input, select, textarea, [tabindex]"))).filter(o=>o.tabIndex>=0&&!o.hasAttribute("disabled")&&!o.closest("[hidden]")&&o.getAttribute("aria-hidden")!=="true"):[]}#Ue(){this.#M?.disconnect();let e=this.ownerDocument.defaultView?.MutationObserver??MutationObserver;this.#M=new e(t=>{t.some(o=>o.target!==this&&Uo(o))&&(this.#C!==null&&window.clearTimeout(this.#C),this.#C=window.setTimeout(()=>{this.#C=null,this.#t.status==="success"?this.#Xe():this.refresh()},120))});try{this.#M.observe(this.ownerDocument.documentElement,{attributes:!0,characterData:!0,childList:!0,subtree:!0})}catch{this.#M=null}}#xe(){if(!this.#p){this.#o=null,this.#q.clear();return}let e=Array.from(this.#r.values()).flatMap(t=>t.status==="loaded"&&t.contribution?[t.contribution]:[]);this.#o=Ne(this.#p,e),this.#q=We(this.#o.quads,{predicates:ao,languages:[this.ownerDocument.documentElement.lang||"en"]})}#ae(e){this.#xe(),this.#g(),queueMicrotask(()=>{Array.from(this.shadowRoot?.querySelectorAll(".discovery-action")??[]).find(t=>t.dataset.candidateId===e)?.focus({preventScroll:!0})})}#Ve(e){this.#r.get(e)?.controller?.abort(),this.#r.delete(e),this.#ae(e)}async#Be(e){let t=this.#p,o=this.ownerDocument.defaultView;if(!t||!o)return;let r=this.#r.get(e.id);if(r?.status==="loading"||r?.status==="loaded"){this.#Ve(e.id);return}let i=new AbortController;this.#r.set(e.id,{controller:i,status:"loading"}),this.#ae(e.id);let a=o.setTimeout(()=>i.abort(),co);try{let s=Vo(e.target.value,t),c=new URL(s).protocol;if(c!=="http:"&&c!=="https:")throw new Error(`Unsupported retrieval protocol: ${c}`);let l=await o.fetch(s,{credentials:"omit",headers:{Accept:lo},redirect:"follow",referrerPolicy:"no-referrer",signal:i.signal});if(!l.ok)throw new Error(`Retrieval failed with HTTP ${l.status}.`);let d=Number.parseInt(l.headers.get("content-length")??"",10);if(Number.isFinite(d)&&d>mt)throw new Error("The representation is larger than the 2 MB enrichment limit.");let u=(l.headers.get("content-type")??"").split(";",1)[0].trim().toLowerCase(),g=await l.text();if(g.length>mt)throw new Error("The representation is larger than the 2 MB enrichment limit.");let h=/<!doctype\s+html|<html[\s>]/i.test(g);if(u&&u!=="text/html"&&u!=="application/xhtml+xml")throw new Error(`Unsupported enrichment representation: ${u}. This preview currently extracts HTML/RDF.`);if(!u&&!h)throw new Error("The target did not return an identifiable HTML representation.");let p=new o.DOMParser().parseFromString(g,"text/html"),m=l.url||s;Bo(p,m);let v=oe(p);if(!v.quads.length&&!v.graphs.length)throw new Error("The retrieved HTML contained no extractable RDF.");if(this.#r.get(e.id)?.controller!==i)return;this.#r.set(e.id,{contribution:{candidateId:e.id,result:v,retrievalIri:m},status:"loaded"})}catch(s){if(this.#r.get(e.id)?.controller!==i)return;this.#r.set(e.id,{message:Wo(s),status:"error"})}finally{o.clearTimeout(a)}this.#ae(e.id)}#We(e){let t=this.#he.get(e);return t||(t=`document-frame-${this.#Ie++}`,this.#he.set(e,t)),t}#Ke(){return Array.from(this.ownerDocument.querySelectorAll("iframe, frame")).flatMap((t,o)=>{let r=null;try{if(r=t.contentDocument,!r?.documentElement)return[];r.documentElement.localName}catch{return[]}let i=r.URL||r.baseURI,a="Opaque origin";try{a=new URL(i).origin}catch{}let s=t.getAttribute("title")?.trim()||r.title.trim()||`Embedded document ${o+1}`;return[{access:"direct",id:this.#We(t),label:s,origin:a,result:oe(r),url:i}]})}#Ee(e,t=!1){let o=this.#n.find(a=>a.id===this.#i)??this.#n[0];if(!o)return;if(this.#i=o.id,this.#p=o.result,!e){for(let a of this.#r.values())a.controller?.abort();this.#r.clear()}this.#E=De(this.#p),this.#S=$e(this.#p);let r=be(this.#p);this.#h=r.queries,this.#G=r.diagnostics,this.#h.some(a=>a.id===this.#v)||(this.#v=""),t||(this.#f+=1,this.#a=0,this.#t={status:"idle"},this.#m="");let i=new Set(this.#E.map(a=>a.id));for(let[a,s]of this.#r)i.has(a)||(s.controller?.abort(),this.#r.delete(a));this.#xe()}#Se(e,t=!1){if(!this.#O)return;let o=this.#i,r=this.ownerDocument.URL||this.ownerDocument.baseURI,i="Opaque origin";try{i=new URL(r).origin}catch{}let a=new Set,s=[{access:"direct",id:"top-document",label:"Top document",origin:i,result:this.#O,url:r},...this.#ue,...this.#pe];this.#n=s.filter(d=>a.has(d.id)?!1:(a.add(d.id),!0)),this.#n.some(d=>d.id===this.#i)||(this.#i="top-document");let c=this.#n[0],l=this.#n.slice(1).filter(d=>d.result.quads.length>0);this.#i===c.id&&c.result.quads.length===0&&l.length===1&&(this.#i=l[0].id),this.#Ee(e,t&&o===this.#i)}#Ye(e){e===this.#i||!this.#n.some(t=>t.id===e)||(this.#i=e,this.#Ee(!1),this.#e="navigator",this.#N="",this.#w.clear(),this.#d="off",this.#g())}setSources(e){if(this.#pe=e.flatMap(o=>{if(!o||o.access!=="portable"||!o.id||o.id==="top-document")return[];try{return[{access:"portable",id:o.id,label:o.label||"Embedded document",origin:o.origin||"Opaque origin",result:Ae(o.result,this.ownerDocument),url:o.url||o.result.retrievalDocumentIri}]}catch{return[]}}),!this.#O)return;let t=this.#re();this.#Se(!0),this.#g(),t&&queueMicrotask(()=>this.#ie(t))}#ke(e){this.#O=oe(this.ownerDocument),this.#ue=this.#Ke(),this.#Se(!0,e)}#Le(){let e=this.#n.find(r=>r.id===this.#i)??this.#n[0],t=this.#n.reduce((r,i)=>r+i.result.quads.length,0),o=Math.max(0,(this.#o?.quads.length??0)-(e?.result.quads.length??0));return t+o}#Qe(){let e=this.shadowRoot?.querySelector(".launcher .count");e&&(e.textContent=String(this.#Le()))}#Ge(){let e=this.shadowRoot?.querySelector(".sparql-output");e&&(e.replaceChildren(),this.#de(e))}async#Re(){let e=this.#b.trim();if(!this.#F||!e||!this.#o||this.#t.status!=="success")return;let t=++this.#f,o=this.#o;try{let{executeSparql:r}=await import("./chunks/sparql-engine-KXGKCH7C.js"),i=await r(e,o);if(t!==this.#f)return;let a=wt(i,this.#q);if(a===this.#m)return;this.#t={result:i,status:"success"},this.#m=a}catch(r){if(t!==this.#f)return;this.#t={error:r instanceof Error?r.message:"The query could not be run.",status:"error"},this.#m=""}this.#e==="sparql"&&this.#Ge()}async#Xe(){let e=this.#i;if(this.#ke(!0),e!==this.#i||this.#t.status!=="success"){this.#g();return}this.#e==="sparql"?this.#Qe():this.#g(),await this.#Re()}refresh(){let e=this.#re();this.#ke(!1),this.#g(),e&&queueMicrotask(()=>this.#ie(e))}open(e="tab"){this.#k=!0,this.shadowRoot?.querySelector(".launcher")?.setAttribute("aria-expanded","true");let t=this.shadowRoot?.querySelector(".panel");t&&(t.dataset.open="true"),queueMicrotask(()=>{(e==="tab"?this.shadowRoot?.querySelector('[role="tab"][aria-selected="true"]'):this.shadowRoot?.querySelector(".panel"))?.focus({preventScroll:!0})})}close(){this.#k=!1,this.#Y(),this.#oe(),this.#j(),this.#ze(),this.shadowRoot?.querySelector(".launcher")?.setAttribute("aria-expanded","false");let e=this.shadowRoot?.querySelector(".panel");e&&(e.dataset.open="false"),queueMicrotask(()=>{let t=this.shadowRoot?.querySelector(".launcher");if(t?.hidden){this.shadowRoot?.activeElement?.blur();return}t?.focus()})}toggle(e="tab"){this.#k?this.close():this.open(e)}revealSource(e,t="left"){return!(this.#p?.quads.some(r=>r.source===e)??!1)||e.ownerDocument!==this.ownerDocument?!1:(this.#s=t,this.#e="navigator",this.#N="",this.#w.clear(),this.#d="off",this.#g(),this.#D(),this.open("panel"),queueMicrotask(()=>{let r=this.#W.filter(({quad:s})=>s.source===e),i=r[0]?.item;if(!i)return;this.#W.forEach(({item:s})=>s.classList.remove("is-corresponding")),r.forEach(({item:s})=>{s.hidden=!1,s.classList.add("is-corresponding")}),i.tabIndex=-1,i.scrollIntoView?.({block:"center"}),i.focus({preventScroll:!0}),this.#L=`Showing statements carried by ${W(e)}`;let a=this.shadowRoot?.querySelector(".sr-only");a&&(a.textContent=this.#L)}),!0)}#$(){let e=this.ownerDocument.defaultView,t=Math.max(e?.innerWidth??1024,1),o=Math.max(e?.innerHeight??768,1),r=t<=760?10:24;return{height:o,margin:r,minHeight:Math.min(280,Math.max(o-r*2,1)),minWidth:Math.min(360,Math.max(t-r*2,1)),width:t}}#P(e){let{height:t,margin:o,minHeight:r,minWidth:i,width:a}=this.#$(),s=Math.max(a-o*2,1),c=Math.max(t-o*2,1),l=Math.min(Math.max(e.width,i),s),d=Math.min(Math.max(e.height,r),c);return{height:d,width:l,x:Math.min(Math.max(e.x,o),a-o-l),y:Math.min(Math.max(e.y,o),t-o-d)}}#Je(){let{height:e,margin:t,width:o}=this.#$(),r=Math.min(760,Math.max(o-t*2,1)),i=Math.min(860,Math.max(e-t*2,1),Math.max(360,Math.round(e*.82)));return{height:i,width:r,x:Math.round((o-r)/2),y:Math.round((e-i)/2)}}#H(e){this.#u=this.#P(this.#u??this.#Je()),e.style.height=`${this.#u.height}px`,e.style.left=`${this.#u.x}px`,e.style.top=`${this.#u.y}px`,e.style.width=`${this.#u.width}px`}#Ze(e){e.style.height="",e.style.left="",e.style.top="",e.style.width=""}#Te(e){let t=this.ownerDocument.defaultView,o=Math.max(t?.innerWidth??1024,1),r=Math.max(t?.innerHeight??768,1),i=o<=760?14:20,a=e.getBoundingClientRect(),s=a.width||e.offsetWidth,c=a.height||e.offsetHeight||44;return{margin:i,maxX:Math.max(i,o-i-s),maxY:Math.max(i,r-i-c)}}#se(e,t){let{margin:o,maxX:r,maxY:i}=this.#Te(e);return{x:Math.min(Math.max(t.x,o),r),y:Math.min(Math.max(t.y,o),i)}}#et(e,t){let{margin:o,maxX:r,maxY:i}=this.#Te(e),a=this.#se(e,t);return a.x-o<=ye&&(a.x=o),r-a.x<=ye&&(a.x=r),a.y-o<=ye&&(a.y=o),i-a.y<=ye&&(a.y=i),a}#_(e){this.#c&&(this.#c=this.#se(e,this.#c),e.style.bottom="auto",e.style.left=`${this.#c.x}px`,e.style.right="auto",e.style.top=`${this.#c.y}px`)}#ce(){this.#I?.(),this.#I=null}#tt(e,t){if(e.button!==0)return;let o=this.ownerDocument.defaultView;if(!o)return;this.#ce();let r=t.getBoundingClientRect(),i={x:r.left,y:r.top},a=e.clientX,s=e.clientY,c=!1,l=u=>{let g=u.clientX-a,h=u.clientY-s;!c&&Math.hypot(g,h)<so||(c||(c=!0,e.preventDefault(),t.classList.add("is-dragging")),this.#c=this.#se(t,{x:i.x+g,y:i.y+h}),this.#_(t))},d=()=>{o.removeEventListener("pointermove",l),o.removeEventListener("pointerup",d),o.removeEventListener("pointercancel",d),t.classList.remove("is-dragging"),c&&this.#c&&(this.#c=this.#et(t,this.#c),this.#_(t),this.#D(),this.#U=!0,o.setTimeout(()=>{this.#U=!1},0)),this.#I===d&&(this.#I=null)};o.addEventListener("pointermove",l),o.addEventListener("pointerup",d),o.addEventListener("pointercancel",d),this.#I=d}#Y(){this.#A?.(),this.#A=null}#Me(e,t,o){if(this.#s!=="floating"||e.button!==0)return;let r=this.ownerDocument.defaultView;if(!r)return;e.preventDefault(),this.#Y(),this.#H(t);let i={...this.#u},a=e.clientX,s=e.clientY;t.classList.add(o?"is-resizing":"is-dragging");let c=d=>{let u=d.clientX-a,g=d.clientY-s,h=this.#$(),p={...i};o?(o.includes("e")&&(p.width=Math.min(Math.max(i.width+u,h.minWidth),h.width-h.margin-i.x)),o.includes("s")&&(p.height=Math.min(Math.max(i.height+g,h.minHeight),h.height-h.margin-i.y)),o.includes("w")&&(p.x=Math.min(Math.max(i.x+u,h.margin),i.x+i.width-h.minWidth),p.width=i.x+i.width-p.x),o.includes("n")&&(p.y=Math.min(Math.max(i.y+g,h.margin),i.y+i.height-h.minHeight),p.height=i.y+i.height-p.y)):(p.x=i.x+u,p.y=i.y+g),this.#u=this.#P(p),this.#H(t)},l=()=>{r.removeEventListener("pointermove",c),r.removeEventListener("pointerup",l),r.removeEventListener("pointercancel",l),t.classList.remove("is-dragging","is-resizing"),this.#D(),this.#A===l&&(this.#A=null)};r.addEventListener("pointermove",c),r.addEventListener("pointerup",l),r.addEventListener("pointercancel",l),this.#A=l}#Ce=()=>{for(let o of this.#l.keys())this.#ge(o);let e=this.shadowRoot?.querySelector(".launcher");if(e&&this.#c&&(this.#_(e),this.#D()),this.#s!=="floating")return;let t=this.shadowRoot?.querySelector(".panel");t&&(this.#H(t),this.#D())};#De=e=>{if(e.stopPropagation(),!!this.#k){if(e.key==="Escape"){if(e.preventDefault(),this.#R){this.#te(this.#R);return}this.close();return}if(e.key==="Tab"){let t=this.#Fe();if(!t.length)return;let o=this.shadowRoot?.activeElement,r=t[0],i=t.at(-1);e.shiftKey&&(o===r||!t.includes(o))?(e.preventDefault(),i.focus()):!e.shiftKey&&(o===i||!t.includes(o))&&(e.preventDefault(),r.focus())}}};#Ne=e=>{e.stopPropagation()};#ot(e){this.#e=e,this.#g(),queueMicrotask(()=>this.shadowRoot?.querySelector(`[data-view="${e}"]`)?.focus())}async#nt(){if(!this.#o)return;let e=this.#e==="json"?ce(this.#o):se(this.#o);try{await navigator.clipboard.writeText(e),this.#L="Copied to clipboard"}catch{this.#L="Clipboard access was not available"}let t=this.shadowRoot?.querySelector(".sr-only");t&&(t.textContent=this.#L)}#le(e){this.#j();let t=e,o=t.ownerDocument.defaultView?.matchMedia?.("(prefers-reduced-motion: reduce)").matches??!1;t.scrollIntoView({behavior:o?"auto":"smooth",block:"center"}),o||(this.#X=t.animate?.([{outline:"3px solid transparent",outlineOffset:"8px"},{outline:"3px solid oklch(62% 0.18 294)",outlineOffset:"4px",offset:.16},{outline:"3px solid transparent",outlineOffset:"8px"}],{duration:1800,easing:"cubic-bezier(.22,1,.36,1)"})??null)}#rt(e,t){if(t.metaKey||t.ctrlKey||t.shiftKey||t.altKey)return;let o=this.#o?.sourceDocumentIri??this.ownerDocument.URL,r=ue(this.ownerDocument,e,o);if(!r)return;let i=_e(this.ownerDocument,r),a=this.#o?.quads.filter(l=>l.subject.termType==="NamedNode"&&l.subject.value===e).map(l=>l.source).find(l=>te(l)),s=i??a;if(!s)return;t.preventDefault();let c=this.ownerDocument.defaultView;if(c){let l=new URL(this.ownerDocument.URL);l.hash=r.hash,c.history.pushState(null,"",l.href)}this.#le(s)}#j(){this.#X?.cancel(),this.#X=null}#it(e,t,o,r){if(this.#K(),this.#d==="off")return;let i=this.ownerDocument.defaultView;if(!i)return;let a=[],s=null,c=null,l=null,d=(m,v,b,E)=>{m.addEventListener(v,b,E),a.push(()=>m.removeEventListener(v,b,E))},u=m=>{s!==null&&i.clearTimeout(s),s=i.setTimeout(()=>{s=null,m()},32)},g=new Map;for(let m of t){let v=g.get(m.quad.source)??[];v.push(m),g.set(m.quad.source,v)}let h=m=>{c?.cancel(),!i.matchMedia?.("(prefers-reduced-motion: reduce)").matches&&(c=m.animate?.([{outline:"2px solid transparent",outlineOffset:"7px"},{outline:"2px solid oklch(62% 0.18 294)",outlineOffset:"4px"}],{direction:"alternate",duration:520,easing:"cubic-bezier(.22,1,.36,1)",iterations:1/0})??null)},p=()=>{c?.cancel(),c=null};if(g.forEach((m,v)=>{d(v,"pointerenter",()=>{r(v),m.forEach(({item:b})=>{b.classList.add("is-corresponding"),b.scrollIntoView?.({block:"nearest"})})}),d(v,"pointerleave",()=>{m.forEach(({item:b})=>b.classList.remove("is-corresponding")),r(null)})}),t.forEach(({item:m,quad:v})=>{let b=v.source;d(m,"pointerenter",()=>{m.classList.add("is-corresponding"),h(b),this.#d==="panel"&&b.scrollIntoView({behavior:i.matchMedia?.("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"})}),d(m,"pointerleave",()=>{m.classList.remove("is-corresponding"),p()})}),this.#d==="page"){let m=()=>u(o);d(i,"scroll",m,{passive:!0}),d(i,"resize",m,{passive:!0})}else{let m=()=>{let v=e.getBoundingClientRect(),b=v.top+Math.min(v.height*.35,140),E=null,C=Number.POSITIVE_INFINITY;for(let k of t){if(k.item.hidden)continue;let L=k.item.getBoundingClientRect();if(L.bottom<=v.top||L.top>=v.bottom)continue;let x=Math.abs(L.top-b);x<C&&(E=k,C=x)}let T=E?.quad.source;!T||T===l||!te(T)||(l=T,T.scrollIntoView({behavior:"auto",block:"center"}),h(T))};d(e,"scroll",()=>u(m),{passive:!0}),u(m)}this.#J=()=>{a.forEach(m=>m()),s!==null&&i.clearTimeout(s),p()}}#at(e,t,o,r,i,a=!1){let c=e.querySelector(".source-code")?.dataset.children===String(r);if(e.querySelectorAll(".source-toggle").forEach(h=>{h.setAttribute("aria-expanded","false");let p=h.dataset.showLabel;p&&(h.setAttribute("aria-label",p),h.title=p)}),e.querySelector(".source-code")?.remove(),e.classList.remove("source-open"),c)return;e.classList.add("source-open"),t.setAttribute("aria-expanded","true");let l=t.dataset.hideLabel;l&&(t.setAttribute("aria-label",l),t.title=l);let d=this.ownerDocument.createElement("section");d.className="source-code",d.id=i,d.dataset.children=String(r),d.setAttribute("aria-label",a?"Element HTML":r?"Element HTML with children":"Element HTML without children");let u=this.ownerDocument.createElement("p");u.className="source-code-label",u.textContent=a?W(o):r?`${W(o)} with children`:`${W(o)} without children`;let g=o.cloneNode(r);d.append(u,re(g.outerHTML,"html",this.ownerDocument)),e.append(d)}#st(e,t){if(!t.quads.length){let f=document.createElement("p");f.className="empty",f.textContent="No asserted IA2 statements were found in the document light tree.",e.append(f);return}let o=document.createElement("div");o.className="navigator-tools";let r=document.createElement("div");r.className="navigator-filter";let i=document.createElement("label");i.className="sr-only",i.htmlFor="ia2-navigator-search",i.textContent="Filter RDF statements";let a=document.createElement("input");a.className="navigator-search",a.id="ia2-navigator-search",a.type="search",a.placeholder="Filter statements",a.autocomplete="off",a.spellcheck=!1,a.value=this.#N,a.setAttribute("role","combobox"),a.setAttribute("aria-autocomplete","list"),a.setAttribute("aria-controls","ia2-navigator-suggestions"),a.setAttribute("aria-expanded","false");let s=document.createElement("div");s.className="navigator-search-group";let c=document.createElement("ul");c.className="typeahead",c.id="ia2-navigator-suggestions",c.setAttribute("role","listbox"),c.setAttribute("aria-label","Semantic term suggestions"),c.hidden=!0;let l=document.createElement("span");l.className="sr-only typeahead-status",l.setAttribute("role","status"),l.setAttribute("aria-live","polite");let d=document.createElement("output");d.className="filter-count",d.setAttribute("for",a.id),d.setAttribute("aria-live","polite");let u=document.createElement("div");u.innerHTML=nt({current:this.#d,controlClass:"sync-control",labels:{page:"Follow page viewport in Navigator",panel:"Follow Navigator in page"},optionClass:"sync-option",switchClass:"sync-switch"});let g=u.firstElementChild,h=g.querySelector(".sync-switch");s.append(a,c,d,l),r.append(i,s,g),o.append(r),e.append(o);let p=Oo(t),m=Ho(t),v=new Map,b=()=>{};if(p.length){let f=document.createElement("nav");f.className="vocabularies",f.setAttribute("aria-label","Namespaces used in this document");let D=document.createElement("p");D.className="vocabularies-label",D.textContent="Namespaces";let w=document.createElement("div");w.className="vocabulary-links";for(let M of p){let z=document.createElement("span");z.className="vocabulary-control";let I=document.createElement("button");I.className="vocabulary-toggle",I.type="button",I.dataset.namespace=M.namespace;let K=document.createElement("span");K.className="vocabulary-name",K.textContent=M.label;let V=document.createElement("span");V.className="vocabulary-count",V.setAttribute("aria-hidden","true"),V.textContent=String(M.count),I.append(K,V),I.addEventListener("click",()=>{this.#w.has(M.namespace)?this.#w.delete(M.namespace):this.#w.add(M.namespace),b()}),v.set(M.namespace,I);let _=document.createElement("a");_.className="vocabulary-link",_.href=M.namespace,_.target="_blank",_.rel="noopener noreferrer",_.title=`Open ${M.namespace} in a new tab`,_.setAttribute("aria-label",`Open ${M.namespace} in a new tab`);let Y=document.createElement("span");Y.className="external-mark",Y.setAttribute("aria-hidden","true"),Y.textContent="\u2197",_.append(Y),z.append(I,_),w.append(z)}f.append(D,w),o.append(f);let R=()=>{let M=Math.max(w.scrollWidth-w.clientWidth,0);f.dataset.overflowLeft=String(w.scrollLeft>1),f.dataset.overflowRight=String(w.scrollLeft<M-1)};w.addEventListener("scroll",R,{passive:!0}),w.addEventListener("pointerenter",R),w.addEventListener("focusin",R);let N=this.ownerDocument.defaultView?.ResizeObserver;N&&(this.#T=new N(()=>R()),this.#T.observe(w)),queueMicrotask(R)}let E=document.createElement("ol");E.className="navigator";let C=new Set(t.quads.map(f=>f.source)),T=[];t.quads.forEach((f,D)=>{let w=document.createElement("li");w.className="quad";let R=Do(f.source,C),N=Math.min(R,6);if(w.dataset.depth=String(R),w.style.setProperty("--rdf-indent",`${N*16}px`),R>0){let q=document.createElement("span");q.className="structure-marker",q.setAttribute("aria-hidden","true"),q.textContent="\u21B3",w.append(q)}let M=document.createElement("div");M.className="quad-terms";let z=q=>this.#le(q),I=le(document,f.subject,"","subject",z,t.sourceDocumentIri),K=le(document,f.predicate,"   ","predicate",z,t.sourceDocumentIri),V=le(document,f.object,"   ","object",z,t.sourceDocumentIri);if(M.append(I,K,V),f.graph){let q=document.createElement("div");q.className="graph",q.append("Graph: ",le(document,f.graph,"","",z,t.sourceDocumentIri)),M.append(q)}let _=new Set([f.subject,f.predicate,f.object,f.graph].filter(q=>q!==null).map(q=>je(document,q,t.sourceDocumentIri)).filter(q=>q!==null)),Y=`ia2-source-${D}`,Z=document.createElement("div");Z.className="preview-actions",Z.setAttribute("role","group"),Z.setAttribute("aria-label",`Actions for ${W(f.source)}`),te(f.source)&&!_.has(f.source)&&Z.append(He(document,f.source,"carrier-locate-button",z));let Oe=Co(f.source),Fe=(q,Ue=!1)=>{let j=document.createElement("button");j.className="row-action-button source-toggle",j.type="button",j.dataset.children=String(q),j.setAttribute("aria-expanded","false"),j.setAttribute("aria-controls",Y);let Ve=Ue?"":q?" with child content":" without child content",Le=`Show HTML for ${W(f.source)}${Ve}`,kt=`Hide HTML for ${W(f.source)}${Ve}`;j.dataset.showLabel=Le,j.dataset.hideLabel=kt,j.setAttribute("aria-label",Le),j.title=Le;let he=document.createElement("span");return he.className="source-glyph",he.setAttribute("aria-hidden","true"),he.textContent=q?"</>+":"</>",j.append(he),j.addEventListener("click",()=>this.#at(w,j,f.source,q,Y,Ue)),j};Z.append(Fe(!1,!Oe)),Oe&&Z.append(Fe(!0)),w.append(M);let ke=document.createElement("div");ke.className="quad-actions",ke.append(Z),w.append(ke),w.addEventListener("pointerleave",()=>this.#j()),E.append(w),T.push({item:w,namespaces:new Set(Et(f).map(q=>q.namespace)),quad:f,searchText:qo(f)})}),e.append(E),this.#W=T;let k=document.createElement("p");k.className="empty filter-empty",k.textContent="No statements match the active filters.",k.hidden=!0,e.append(k);let L=null;b=()=>{this.#N=a.value;let f=a.value.trim().toLocaleLowerCase(),D=0;T.forEach(({item:N,namespaces:M,quad:z,searchText:I})=>{let K=Array.from(M).every(Y=>!this.#w.has(Y)),V=this.#d!=="page"||No(z.source),_=z.source===L||K&&V&&(!f||I.includes(f));N.hidden=!_,_&&(D+=1)}),v.forEach((N,M)=>{let z=!this.#w.has(M),I=p.find(V=>V.namespace===M)?.count??0,K=`${I} statement${I===1?"":"s"}`;N.setAttribute("aria-pressed",String(z)),N.setAttribute("aria-label",`${z?"Hide":"Show"} ${K} using ${M}`),N.title=N.getAttribute("aria-label")});let w=p.some(N=>this.#w.has(N.namespace)),R=!!f||w||this.#d==="page";d.textContent=R&&D!==T.length?`${D} of ${T.length}`:"",k.hidden=!R||D>0,E.hidden=R&&D===0};let x=[],y=-1,S=()=>{x=[],y=-1,c.hidden=!0,c.replaceChildren(),a.setAttribute("aria-expanded","false"),a.removeAttribute("aria-activedescendant"),l.textContent=""},P=f=>{if(!x.length)return;y=(f+x.length)%x.length;let D=Array.from(c.querySelectorAll('[role="option"]'));D.forEach((R,N)=>R.setAttribute("aria-selected",String(N===y)));let w=D[y];w&&(a.setAttribute("aria-activedescendant",w.id),w.scrollIntoView?.({block:"nearest"}))},$=f=>{a.value=f.display,this.#N=a.value,b(),S()},A=()=>{if(x=_o(m,a.value),y=-1,c.replaceChildren(),a.removeAttribute("aria-activedescendant"),!x.length||this.shadowRoot?.activeElement!==a){c.hidden=!0,a.setAttribute("aria-expanded","false"),l.textContent="";return}x.forEach((f,D)=>{let w=document.createElement("li");w.className="typeahead-option",w.id=`ia2-navigator-suggestion-${D}`,w.setAttribute("role","option"),w.setAttribute("aria-selected","false");let R=document.createElement("span");R.className="typeahead-primary";let N=document.createElement("span");if(N.className="typeahead-term",N.textContent=f.display,R.append(N),f.label&&f.label!==f.display){let I=document.createElement("span");I.className="typeahead-label",I.textContent=f.label,R.append(I)}let M=jo(f),z=document.createElement("span");z.className="typeahead-meta",z.textContent=M.join(" \xB7 "),w.setAttribute("aria-label",[f.display,f.label,...M].filter(Boolean).join(", ")),w.append(R,z),w.addEventListener("pointerdown",I=>I.preventDefault()),w.addEventListener("pointermove",()=>P(D)),w.addEventListener("click",()=>$(f)),c.append(w)}),c.hidden=!1,a.setAttribute("aria-expanded","true"),l.textContent=`${x.length} semantic suggestion${x.length===1?"":"s"} available.`};a.addEventListener("input",()=>{b(),A()}),a.addEventListener("focus",A),a.addEventListener("blur",()=>{this.ownerDocument.defaultView?.setTimeout(()=>{this.shadowRoot?.activeElement!==a&&S()},0)}),a.addEventListener("keydown",f=>{if(f.key==="ArrowDown"||f.key==="ArrowUp"){if(c.hidden&&A(),!x.length)return;f.preventDefault(),f.stopPropagation(),P(y+(f.key==="ArrowDown"?1:-1));return}if(f.key==="Enter"&&y>=0){f.preventDefault(),f.stopPropagation(),$(x[y]);return}if(f.key==="Escape"&&!c.hidden){f.preventDefault(),f.stopPropagation(),S();return}f.key==="Tab"&&S()});let F=()=>{this.#it(e,T,b,f=>{L=f,b()})},X=(f,D=!1)=>{this.#d=f,L=null,ve(h,f,D),b(),F()};this.#B=()=>X("off"),rt(h,(f,D)=>X(f,D)),b(),F()}#ct(e,t){if(!t.length){let r=document.createElement("p");r.className="empty",r.textContent="No extraction diagnostics. The document passed the checks implemented by this preview extractor.",e.append(r);return}let o=document.createElement("ul");o.className="diagnostics";for(let r of t){let i=document.createElement("li");i.className="diagnostic";let a=document.createElement("strong");a.textContent=`${r.severity.toUpperCase()} \xB7 ${r.code}`;let s=document.createElement("p");s.textContent=r.source?`${r.message} Source: ${W(r.source)}`:r.message,i.append(a,s),o.append(i)}e.append(o)}#lt(e){this.#ee();let t=this.ownerDocument.defaultView;if(!t||!e.length)return;let o=[],r=new Map,i=null,a=(l,d,u)=>{l.addEventListener(d,u),o.push(()=>l.removeEventListener(d,u))},s=l=>{i?.cancel(),!t.matchMedia?.("(prefers-reduced-motion: reduce)").matches&&(i=l.animate?.([{outline:"2px solid transparent",outlineOffset:"7px"},{outline:"2px solid oklch(62% 0.18 294)",outlineOffset:"4px"}],{direction:"alternate",duration:520,easing:"cubic-bezier(.22,1,.36,1)",iterations:1/0})??null)},c=()=>{i?.cancel(),i=null};for(let l of e){let d=r.get(l.target)??[];d.push(l.item),r.set(l.target,d),a(l.item,"pointerenter",()=>s(l.target)),a(l.item,"pointerleave",c)}r.forEach((l,d)=>{a(d,"pointerenter",()=>{l.forEach(u=>{u.classList.add("is-corresponding"),u.scrollIntoView?.({block:"nearest"})})}),a(d,"pointerleave",()=>l.forEach(u=>u.classList.remove("is-corresponding")))}),this.#Z=()=>{o.forEach(l=>l()),c()}}#dt(e){let t=this.ownerDocument,o=this.#p?.sourceDocumentIri??t.URL,r=[],i=t.createElement("p");i.className="ontology-intro",i.textContent="Classes and properties defined by this document. The trees follow RDFS hierarchy statements; muted parent terms provide external context.",e.append(i);let a=(s,c,l)=>{if(!c.length)return;let d=t.createElement("section");d.className="ontology-section",d.setAttribute("aria-label",s);let u=t.createElement("div");u.className="ontology-heading";let g=t.createElement("h3");g.textContent=s;let h=t.createElement("span");h.className="ontology-count",h.textContent=`${c.length} defined`,u.append(g,h),d.append(u);let p=new Map(c.map(y=>[y.term.value,y])),m=new Map,v=y=>l==="class"?y.classParents:y.propertyParents;for(let y of c)for(let S of v(y)){let P=m.get(S.value)??[];P.some($=>$.term.value===y.term.value)||P.push(y),m.set(S.value,P)}let b=y=>[...y].sort((S,P)=>(S.label??S.term.value).localeCompare(P.label??P.term.value));m.forEach((y,S)=>m.set(S,b(y)));let E=new Set,C=y=>this.#le(y),T=(y,S,P,$=!1)=>{let A=t.createElement("li");A.className="ontology-node";let F=t.createElement("div");F.className=`ontology-term-row${S?"":" ontology-context"}`,F.dataset.term=y.value;let X=t.createElement("div");if(X.className="ontology-term-copy",X.append(le(t,y,"","",void 0,o)),S?.label){let w=t.createElement("div");w.className="ontology-label",w.textContent=S.label,X.append(w)}let f=t.createElement("div");if(f.className="ontology-meta",S?$?f.textContent="Cycle reference":S.types.length&&(f.textContent=S.types.map(w=>H(w)).join(" \xB7 ")):f.textContent="External parent",f.textContent&&X.append(f),F.append(X),S){E.add(S.term.value);let w=zo(t,S,o);if(w){let R=t.createElement("div");R.className="ontology-actions",R.append(He(t,w,"ontology-locate-button",C)),F.append(R),r.push({item:F,target:w})}}if(A.append(F),$)return A;let D=m.get(y.value)??[];if(D.length){let w=t.createElement("ul");w.className="ontology-children";let R=new Set(P);R.add(y.value);for(let N of D)w.append(T(N.term,N,R,R.has(N.term.value)));A.append(w)}return A},k=t.createElement("ul");k.className="ontology-tree";let L=new Map;for(let y of c)for(let S of v(y))p.has(S.value)||L.set(S.value,S);for(let y of Array.from(L.values()).sort((S,P)=>S.value.localeCompare(P.value)))k.append(T(y,null,new Set));let x=b(c.filter(y=>v(y).length===0));for(let y of x)k.append(T(y.term,y,new Set));for(let y of c)E.has(y.term.value)||k.append(T(y.term,y,new Set));d.append(k),e.append(d)};a("Classes",this.#S.classes,"class"),a("Properties",this.#S.properties,"property"),this.#lt(r)}#ut(e){let t=this.ownerDocument,o=t.createElement("p");o.className="discovery-intro",o.textContent="Additional knowledge advertised by this document. Loading is explicit, sends no credentials or referrer, does not run scripts, and keeps the retrieved contribution in a separate named graph.",e.append(o);let r=t.createElement("ul");r.className="discovery-list";for(let i of this.#E){let a=this.#r.get(i.id),s=a?.status??"available",c=t.createElement("li");c.className="discovery-item",c.dataset.candidateId=i.id;let l=t.createElement("div");l.className="discovery-copy";let d=t.createElement("a");d.className="discovery-target",d.href=i.target.value,d.target="_blank",d.rel="noopener noreferrer",d.textContent=i.target.value,d.title=`Open ${i.target.value} in a new tab`;let u=t.createElement("p");u.className="discovery-context",u.textContent=`About ${H(i.context)}`,l.append(d,u);let g=t.createElement("div");g.className="discovery-meta";for(let v of i.predicates){let b=t.createElement("span");b.className="discovery-chip",b.textContent=H(v),b.title=v.value,g.append(b)}for(let v of i.roles){let b=t.createElement("span");b.className="discovery-chip role",b.textContent=H(v),b.title=v.value,g.append(b)}if(i.graph){let v=t.createElement("span");v.className="discovery-chip",v.textContent=`graph ${H(i.graph)}`,g.append(v)}g.childElementCount&&l.append(g);let h=t.createElement("div");h.className="discovery-state";let p=t.createElement("span");if(p.className="discovery-status",p.dataset.state=s,a||(p.textContent="Available"),a?.status==="loading"&&(p.textContent="Retrieving HTML/RDF\u2026"),a?.status==="error"&&(p.textContent=a.message??"Retrieval failed."),a?.status==="loaded"){let v=a.contribution?.result.quads.length??0;p.textContent=`${v} statement${v===1?"":"s"} loaded`}let m=t.createElement("button");m.className="discovery-action",m.type="button",m.dataset.candidateId=i.id,m.dataset.state=s,a||(m.textContent="Load"),a?.status==="loading"&&(m.textContent="Cancel"),a?.status==="error"&&(m.textContent="Retry"),a?.status==="loaded"&&(m.textContent="Remove"),m.setAttribute("aria-describedby",`${i.id}-status`),p.id=`${i.id}-status`,m.addEventListener("click",()=>void this.#Be(i)),h.append(p,m),c.append(l,h),r.append(c)}e.append(r)}#pt(e){let t=this.ownerDocument.createElement("p");t.className="sources-intro",t.textContent="Inspect one document at a time. Sources remain separate so blank nodes, bases, and document identity are not silently merged.";let o=this.ownerDocument.createElement("ul");o.className="source-list";for(let r of this.#n){let i=this.ownerDocument.createElement("li");i.className="source-item";let a=this.ownerDocument.createElement("label");a.className="source-option";let s=this.ownerDocument.createElement("input");s.className="source-input",s.type="radio",s.name="ia2-navigator-source",s.checked=r.id===this.#i,s.dataset.sourceId=r.id,s.addEventListener("change",()=>this.#Ye(r.id));let c=this.ownerDocument.createElement("span");c.className="source-copy";let l=this.ownerDocument.createElement("strong");l.className="source-title",l.textContent=r.label;let d=this.ownerDocument.createElement("span");d.className="source-url",d.textContent=r.url;let u=this.ownerDocument.createElement("span");u.className="source-access";let g=r.access==="direct"?"DOM correlation available":"Collected from an isolated frame; source locations are read-only";u.textContent=`${r.origin} \xB7 ${g}`,c.append(l,d,u);let h=this.ownerDocument.createElement("span");h.className="source-count",h.textContent=`${r.result.quads.length} statement${r.result.quads.length===1?"":"s"}`,a.append(s,c,h),i.append(a),o.append(i)}e.append(t,o)}#Q(){let e=this.#re();this.#g(),e&&queueMicrotask(()=>this.#ie(e))}#ht(e,t){if(!t){let o=this.ownerDocument.createElement("span");o.className="sparql-unbound",o.textContent="\u2014",e.append(o);return}if(t.termType==="NamedNode"||t.termType==="BlankNode"){let o=this.#q.get(`${t.termType}:${t.value}`);if(t.termType==="BlankNode"&&!o){let a=this.ownerDocument.createElement("code");a.textContent=`_:${t.value}`,e.append(a);return}let r=this.ownerDocument.createElement("span");r.className="sparql-resource-term";let i=t.termType==="NamedNode"?this.ownerDocument.createElement("a"):this.ownerDocument.createElement("span");if(i.className="sparql-resource-label",i.textContent=o??Po(t.value),i instanceof HTMLAnchorElement){let a=Ee(t.value),s=this.#o?.sourceDocumentIri??this.ownerDocument.URL,c=ue(this.ownerDocument,t.value,s);i.dataset.semanticIri=t.value,i.href=this.#o?Ao(t.value,this.#o):t.value,c?(i.classList.add("local-term"),i.addEventListener("click",l=>this.#rt(t.value,l))):(i.target="_blank",i.rel="noopener noreferrer"),i.title=t.value,i.setAttribute("aria-label",`${i.textContent} (${a})`)}else i.title=`_:${t.value}`;r.append(i),e.append(r);return}if(t.termType==="DefaultGraph"){let o=this.ownerDocument.createElement("code");o.textContent="default graph",e.append(o)}else if(t.termType==="Literal"){let o=this.ownerDocument.createElement("span");o.className="sparql-literal";let r=this.ownerDocument.createElement("span");r.className="sparql-literal-value",r.textContent=t.value||"Empty string";let i=t.language?`@${t.language}${t.direction?`--${t.direction}`:""}`:t.datatype&&t.datatype!==Te?`^^${H({termType:"NamedNode",value:t.datatype})}`:"";if(o.append(r),i){let a=this.ownerDocument.createElement("code");a.className="sparql-literal-qualifier",a.textContent=i,o.append(a)}e.append(o)}else{let o=this.ownerDocument.createElement("code");o.textContent=t.value,e.append(o)}}#mt(e,t,o){let r=this.ownerDocument.createElement("div");r.className="sparql-table-wrap";let i=this.ownerDocument.createElement("table");i.className="sparql-table";let a=i.createTHead().insertRow();for(let c of t){let l=this.ownerDocument.createElement("th");l.scope="col",l.textContent=`?${c}`,a.append(l)}let s=i.createTBody();for(let c of o){let l=s.insertRow();for(let d of t)this.#ht(l.insertCell(),c[d])}r.append(i),e.append(r)}#qe(e,t,o,r){let i=this.ownerDocument.createElement("p");i.className="sparql-summary";let a=this.ownerDocument.createElement("div");a.className="sparql-result-body",e.append(i,a);let s=o.length>ht[0],c=null,l=null,d=null,u=null;if(s){let h=this.ownerDocument.createElement("nav");h.className="sparql-pagination",h.setAttribute("aria-label","SPARQL result pages");let p=this.ownerDocument.createElement("label");p.className="sparql-page-size-label",p.append("Rows per page"),c=this.ownerDocument.createElement("select"),c.className="sparql-page-size";for(let m of ht){let v=this.ownerDocument.createElement("option");v.value=String(m),v.textContent=String(m),v.selected=m===this.#x,c.append(v)}p.append(c),u=this.ownerDocument.createElement("p"),u.className="sparql-page-status",u.setAttribute("aria-live","polite"),l=this.ownerDocument.createElement("button"),l.className="sparql-page-button sparql-page-previous",l.type="button",l.textContent="Previous",d=this.ownerDocument.createElement("button"),d.className="sparql-page-button sparql-page-next",d.type="button",d.textContent="Next",h.append(p,u,l,d),e.append(h)}let g=()=>{let h=Math.max(1,Math.ceil(o.length/this.#x));this.#a=Math.min(Math.max(0,this.#a),h-1);let p=this.#a*this.#x,m=Math.min(p+this.#x,o.length);i.textContent=s?`Showing ${p+1} to ${m} of ${o.length} ${r}${o.length===1?"":"s"}`:`${o.length} ${r}${o.length===1?"":"s"}`,a.replaceChildren(),o.length&&this.#mt(a,t,o.slice(p,m)),u&&(u.textContent=`Page ${this.#a+1} of ${h}`),l&&(l.disabled=this.#a===0),d&&(d.disabled=this.#a===h-1)};c?.addEventListener("change",()=>{let h=this.#a*this.#x;this.#x=Number(c?.value)||pt,this.#a=Math.floor(h/this.#x),g()}),l?.addEventListener("click",()=>{this.#a-=1,g()}),d?.addEventListener("click",()=>{this.#a+=1,g()}),g()}#de(e){if(e.className="sparql-output",this.#t.status==="idle"){let o=this.ownerDocument.createElement("p");o.className="sparql-status",o.textContent="Run the query to inspect its results.",e.append(o);return}if(this.#t.status==="running"){let o=this.ownerDocument.createElement("p");o.className="sparql-status",o.setAttribute("role","status"),o.textContent="Running locally\u2026",e.append(o);return}if(this.#t.status==="error"){let o=this.ownerDocument.createElement("p");o.className="sparql-status",o.dataset.state="error",o.setAttribute("role","alert"),o.textContent=this.#t.error||"The query could not be run.",e.append(o);return}let t=this.#t.result;if(t){if(t.kind==="ask"){let o=this.ownerDocument.createElement("p");o.className="sparql-summary",o.textContent="ASK result";let r=this.ownerDocument.createElement("p");r.className="sparql-boolean",r.textContent=String(t.value),e.append(o,r);return}if(t.kind==="bindings"){this.#qe(e,t.variables,t.rows,"result");return}this.#qe(e,["subject","predicate","object","graph"],t.quads,"statement")}}async#Ae(){let e=this.#b.trim();if(!e||!this.#o||this.#t.status==="running")return;let t=++this.#f,o=this.#o;this.#a=0,this.#t={status:"running"},this.#Q();try{let{executeSparql:r}=await import("./chunks/sparql-engine-KXGKCH7C.js"),i=await r(e,o);if(t!==this.#f)return;this.#t={result:i,status:"success"},this.#m=wt(i,this.#q)}catch(r){if(t!==this.#f)return;this.#t={error:r instanceof Error?r.message:"The query could not be run.",status:"error"},this.#m=""}this.#Q()}#ft(e){let t=this.ownerDocument.createElement("div");t.className="sparql-workbench";let o=this.ownerDocument.createElement("p");if(o.className="sparql-intro",o.textContent=this.#h.length?"Choose a query suggested by this document or write your own. Suggestions are RDF resources, not Navigator configuration.":"Write a SPARQL query against the RDF currently extracted from this document.",t.append(o),this.#G.length>0){let b=this.ownerDocument.createElement("p");b.className="sparql-status",b.dataset.state="error",b.setAttribute("role","alert"),b.textContent=this.#G.join(" "),t.append(b)}if(this.#h.length){let b=this.ownerDocument.createElement("div");b.className="sparql-catalog";let E=this.ownerDocument.createElement("label");E.className="sparql-label",E.htmlFor="ia2-sparql-suggestion",E.textContent="Suggested query";let C=this.ownerDocument.createElement("select");C.id="ia2-sparql-suggestion",C.className="sparql-select sparql-suggestion";let T=this.ownerDocument.createElement("option");T.value="",T.textContent="Custom query",C.append(T);for(let L of this.#h){let x=this.ownerDocument.createElement("option");x.value=L.id,x.textContent=L.label,x.selected=L.id===this.#v,C.append(x)}C.addEventListener("change",()=>{this.#v=C.value;let L=this.#h.find(({id:x})=>x===C.value);L?this.#b=L.query:this.#b=Pe,this.#a=0,this.#t={status:"idle"},this.#m="",this.#Q()}),b.append(E,C);let k=this.ownerDocument.createElement("p");k.className="sparql-description",k.textContent=this.#h.find(({id:L})=>L===this.#v)?.description??"",b.append(k),t.append(b)}let r=this.ownerDocument.createElement("label");r.className="sparql-catalog";let i=this.ownerDocument.createElement("span");i.className="sparql-label",i.textContent="SPARQL query";let a=this.ownerDocument.createElement("div");a.className="sparql-editor-shell";let s=re(this.#b,"sparql",this.ownerDocument);s.className="sparql-highlight",s.setAttribute("aria-hidden","true");let c=this.ownerDocument.createElement("textarea");c.className="sparql-editor",c.autocapitalize="off",c.autocomplete="off",c.spellcheck=!1,c.wrap="soft",c.value=this.#b,c.setAttribute("aria-keyshortcuts","Control+Enter Meta+Enter");let l=()=>{let b=re(c.value,"sparql",this.ownerDocument);s.replaceChildren(...b.childNodes),s.scrollTop=c.scrollTop};c.addEventListener("input",()=>{if(this.#b=c.value,l(),this.#h.find(({id:E})=>E===this.#v)?.query!==c.value){this.#v="";let E=t.querySelector(".sparql-suggestion");E&&(E.value="");let C=t.querySelector(".sparql-description");C&&(C.textContent="")}if(this.#t.status!=="idle"){this.#f+=1,this.#a=0,this.#t={status:"idle"},this.#m="";let E=t.querySelector(".sparql-output");E&&(E.replaceChildren(),this.#de(E))}}),c.addEventListener("scroll",()=>{s.scrollTop=c.scrollTop,c.scrollLeft=0}),c.addEventListener("keydown",b=>{b.key!=="Enter"||!b.ctrlKey&&!b.metaKey||(b.preventDefault(),this.#Ae())}),a.append(s,c),r.append(i,a),t.append(r);let d=this.ownerDocument.createElement("div");d.className="sparql-actions";let u=this.ownerDocument.createElement("button");u.className="sparql-run",u.type="button",u.disabled=this.#t.status==="running",u.textContent=this.#t.status==="running"?"Running\u2026":"Run query",u.addEventListener("click",()=>void this.#Ae());let g=this.ownerDocument.createElement("button");g.className="sparql-reset",g.type="button",g.textContent="Reset",g.addEventListener("click",()=>{this.#v="",this.#b=Pe,this.#f+=1,this.#a=0,this.#t={status:"idle"},this.#m="",this.#Q()});let h=this.ownerDocument.createElement("label");h.className="sparql-observe";let p=this.ownerDocument.createElement("input");p.className="sparql-observe-input",p.type="checkbox",p.checked=this.#F,p.addEventListener("change",()=>{this.#F=p.checked,this.#F&&this.#Re()}),h.append(p,"Observe changes");let m=this.ownerDocument.createElement("p");m.className="sparql-safety",m.textContent="Local dataset \xB7 Read-only",d.append(u,g,h,m),t.append(d);let v=this.ownerDocument.createElement("section");v.setAttribute("aria-label","SPARQL results"),v.setAttribute("aria-live","polite"),this.#de(v),t.append(v),e.append(t)}#g(){this.#Y(),this.#ce(),this.#oe(),this.#j(),this.#B=null,this.#K(),this.#ee(),this.#T?.disconnect(),this.#T=null,this.#y?.disconnect(),this.#y=null,this.#W=[];let e=this.#o;if(!e||!this.shadowRoot)return;this.#e==="diagnostics"&&!e.diagnostics.length&&(this.#e="navigator"),this.#e==="discovery"&&!this.#E.length&&(this.#e="navigator"),this.#e==="vocabulary"&&!this.#S.count&&(this.#e="navigator"),this.#e==="sources"&&this.#n.length<=1&&(this.#e="navigator");let t=this.#n.find(u=>u.id===this.#i)??this.#n[0],o=this.#Le();this.shadowRoot.innerHTML=`
+      <style>${ro}</style>
+      <button class="launcher" type="button" data-position="${this.#s}" aria-expanded="${this.#k}" aria-controls="ia2-rdf-panel" title="Open RDF Navigator. Drag to move."${this.hasAttribute("data-ia2-extension")?" hidden":""}>
         <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="2.6" fill="currentColor"/><circle cx="18.5" cy="5" r="2.6" fill="currentColor"/><circle cx="18.5" cy="19" r="2.6" fill="currentColor"/><path d="M7.2 10.8 16 6.2M7.2 13.2 16 17.8" stroke="currentColor" stroke-width="1.8"/></svg></span>
-        <span>RDF</span><span class="count">${totalStatements}</span>
+        <span>RDF</span><span class="count">${o}</span>
       </button>
-      <aside class="panel" id="ia2-rdf-panel" data-open="${this.#open}" data-position="${this.#position}" aria-label="Document RDF" tabindex="-1">
+      <aside class="panel ia2-window-surface" id="ia2-rdf-panel" data-open="${this.#k}" data-position="${this.#s}" aria-label="Document RDF" tabindex="-1">
         <header class="toolbar">
           <span class="drag-grip" aria-hidden="true" title="Drag floating navigator"><svg viewBox="0 0 8 18"><circle cx="2" cy="4" r="1.2"/><circle cx="6" cy="4" r="1.2"/><circle cx="2" cy="9" r="1.2"/><circle cx="6" cy="9" r="1.2"/><circle cx="2" cy="14" r="1.2"/><circle cx="6" cy="14" r="1.2"/></svg></span>
           <div class="tabs" role="tablist" aria-label="RDF views" data-compact="0">
-            ${tabMarkup("navigator", this.#view === "navigator", "Navigator", "Nav")}
-            ${this.#sources.length > 1 ? tabMarkup("sources", this.#view === "sources", "Sources", "Sources", this.#sources.length, "document") : ""}
-            ${this.#documentVocabulary.count ? tabMarkup("vocabulary", this.#view === "vocabulary", "Vocabulary", "Vocab", this.#documentVocabulary.count, "definition") : ""}
-            ${this.#discoveryCandidates.length ? tabMarkup("discovery", this.#view === "discovery", "Discovery", "Discover", this.#discoveryCandidates.length, "candidate") : ""}
-            ${tabMarkup("turtle", this.#view === "turtle", "Turtle", "TTL")}
-            ${tabMarkup("json", this.#view === "json", "JSON-LD", "JSON")}
-            ${result.diagnostics.length ? tabMarkup("diagnostics", this.#view === "diagnostics", "Diagnostics", "Issues", result.diagnostics.length, "diagnostic") : ""}
+            ${J("navigator",this.#e==="navigator","Navigator","Nav")}
+            ${this.#n.length>1?J("sources",this.#e==="sources","Sources","Sources",this.#n.length,"document"):""}
+            ${this.#S.count?J("vocabulary",this.#e==="vocabulary","Vocabulary","Vocab",this.#S.count,"definition"):""}
+            ${this.#E.length?J("discovery",this.#e==="discovery","Discovery","Discover",this.#E.length,"candidate"):""}
+            ${J("sparql",this.#e==="sparql","SPARQL","Query",this.#h.length||void 0,"suggested query")}
+            ${J("turtle",this.#e==="turtle","Turtle","TTL")}
+            ${J("json",this.#e==="json","JSON-LD","JSON")}
+            ${e.diagnostics.length?J("diagnostics",this.#e==="diagnostics","Diagnostics","Issues",e.diagnostics.length,"diagnostic"):""}
           </div>
           <div class="header-actions">
-            <div class="position-switch" role="radiogroup" aria-label="Drawer position">
-              ${DRAWER_POSITIONS.map(({ icon, label, position }) => `<button class="position-option" type="button" role="radio" data-position="${position}" aria-checked="${this.#position === position}" aria-label="${label}" title="${label}" tabindex="${this.#position === position ? "0" : "-1"}">${icon}</button>`).join("")}
-            </div>
+            ${et({ariaLabel:"Drawer position",current:this.#s,groupClass:"position-switch",optionClass:"position-option"})}
             <button class="icon-button refresh" type="button" aria-label="Refresh extraction" title="Refresh extraction">\u21BB</button><button class="icon-button close" type="button" aria-label="Close RDF Navigator" title="Close">\xD7</button>
           </div>
         </header>
         <section class="viewport" role="tabpanel" tabindex="0"></section>
-        <footer class="footer"><span>RDF 1.2 \xB7 ${activeSource?.label ?? "Document"}</span>${this.#view === "turtle" || this.#view === "json" ? '<button class="copy" type="button">Copy view</button>' : ""}</footer>
+        <footer class="footer"><span>RDF 1.2 \xB7 ${t?.label??"Document"}</span>${this.#e==="turtle"||this.#e==="json"?'<button class="copy" type="button">Copy view</button>':""}</footer>
         <div class="resize-handles" aria-hidden="true">
-          ${["n", "ne", "e", "se", "s", "sw", "w", "nw"].map((direction) => `<span class="resize-handle" data-resize="${direction}"></span>`).join("")}
+          ${["n","ne","e","se","s","sw","w","nw"].map(u=>`<span class="resize-handle" data-resize="${u}"></span>`).join("")}
         </div>
-        <p class="sr-only" aria-live="polite">${this.#status}</p>
-      </aside>`;
-    const viewport = this.shadowRoot.querySelector(".viewport");
-    const tabs = this.shadowRoot.querySelector(".tabs");
-    this.#configureTabCompaction(tabs);
-    if (!viewport) return;
-    if (this.#view === "turtle") viewport.append(highlightedCode(serializeTurtle(result), "turtle", document));
-    if (this.#view === "json") {
-      if (containsTripleTerms(result)) {
-        const notice = document.createElement("p");
-        notice.className = "notice";
-        notice.textContent = "JSON-LD 1.1 has no native RDF 1.2 triple-term syntax. This view preserves triple terms as typed JSON literals; use Turtle for the semantic form.";
-        viewport.append(notice);
-      }
-      viewport.append(highlightedCode(serializeJsonLd(result), "json", document));
-    }
-    if (this.#view === "navigator") this.#renderNavigator(viewport, result);
-    if (this.#view === "sources") this.#renderSources(viewport);
-    if (this.#view === "vocabulary") this.#renderVocabulary(viewport);
-    if (this.#view === "discovery") this.#renderDiscovery(viewport);
-    if (this.#view === "diagnostics") this.#renderDiagnostics(viewport, result.diagnostics);
-    const launcher = this.shadowRoot.querySelector(".launcher");
-    if (launcher) {
-      this.#applyLauncherGeometry(launcher);
-      launcher.addEventListener("pointerdown", (event) => this.#startLauncherInteraction(event, launcher));
-      launcher.addEventListener("click", (event) => {
-        if (this.#suppressLauncherClick) {
-          event.preventDefault();
-          this.#suppressLauncherClick = false;
-          return;
-        }
-        this.toggle(event instanceof MouseEvent && event.detail !== 0 ? "panel" : "tab");
-      });
-    }
-    this.shadowRoot.querySelector(".close")?.addEventListener("click", () => this.close());
-    this.shadowRoot.querySelector(".refresh")?.addEventListener("click", () => this.refresh());
-    const positionSwitch = this.shadowRoot.querySelector(".position-switch");
-    const positionOptions = Array.from(this.shadowRoot.querySelectorAll(".position-option"));
-    const panel = this.shadowRoot.querySelector(".panel");
-    const applyPosition = (position, focus = false) => {
-      this.#position = position;
-      const launcher2 = this.shadowRoot?.querySelector(".launcher");
-      if (panel) {
-        panel.dataset.position = this.#position;
-        if (position === "floating") this.#applyFloatingGeometry(panel);
-        else this.#clearFloatingGeometry(panel);
-      }
-      if (launcher2) {
-        launcher2.dataset.position = this.#position;
-        this.#applyLauncherGeometry(launcher2);
-      }
-      for (const option of positionOptions) {
-        const selected = option.dataset.position === this.#position;
-        option.setAttribute("aria-checked", String(selected));
-        option.tabIndex = selected ? 0 : -1;
-        if (selected && focus) option.focus();
-      }
-      this.#persistSessionState();
-    };
-    if (panel) {
-      if (this.#position === "floating") this.#applyFloatingGeometry(panel);
-      const toolbar = panel.querySelector(".toolbar");
-      const tabs2 = toolbar?.querySelector(".tabs");
-      toolbar?.addEventListener("pointerdown", (event) => {
-        const target = event.target instanceof Element ? event.target : null;
-        if (target !== toolbar && target !== tabs2 && !target?.closest(".drag-grip")) return;
-        this.#startFloatingInteraction(event, panel);
-      });
-      panel.querySelectorAll(".resize-handle").forEach((handle) => {
-        handle.addEventListener("pointerdown", (event) => {
-          this.#startFloatingInteraction(event, panel, handle.dataset.resize);
-        });
-      });
-    }
-    for (const option of positionOptions) {
-      option.addEventListener("click", () => applyPosition(option.dataset.position));
-    }
-    positionSwitch?.addEventListener("keydown", (event) => {
-      if (!(event instanceof KeyboardEvent) || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
-      event.preventDefault();
-      const current = event.target instanceof HTMLButtonElement ? positionOptions.indexOf(event.target) : positionOptions.findIndex((option) => option.getAttribute("aria-checked") === "true");
-      let next = current;
-      if (event.key === "Home") next = 0;
-      if (event.key === "End") next = positionOptions.length - 1;
-      if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (current + 1) % positionOptions.length;
-      if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (current - 1 + positionOptions.length) % positionOptions.length;
-      applyPosition(positionOptions[next].dataset.position, true);
-    });
-    this.shadowRoot.querySelector(".copy")?.addEventListener("click", () => void this.#copyCurrent());
-    this.shadowRoot.querySelectorAll("[data-view]").forEach((button) => {
-      button.addEventListener("click", () => this.#setView(button.dataset.view));
-    });
-    this.#configureLinkClicks();
-  }
-};
-
-// src/index.ts
-if (!customElements.get("ia2-rdf-navigator")) {
-  customElements.define("ia2-rdf-navigator", Ia2RdfNavigator);
-}
-function mountRdfNavigator(target = document) {
-  const existing = target.querySelector("ia2-rdf-navigator");
-  if (existing) return existing;
-  const navigator2 = target.createElement("ia2-rdf-navigator");
-  target.body.append(navigator2);
-  return navigator2;
-}
-function autoMount() {
-  if (window.__IA2_RDF_NAVIGATOR_NO_AUTO__) return;
-  mountRdfNavigator();
-}
-if (typeof window !== "undefined" && typeof document !== "undefined") {
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", autoMount, { once: true });
-  else autoMount();
-}
-export {
-  DISCOVERY_PREDICATES,
-  Ia2RdfNavigator,
-  detectDiscoveryCandidates,
-  extractDataset,
-  extractDocumentVocabulary,
-  fromPortableExtractionResult,
-  mergeDiscoveryContributions,
-  mountRdfNavigator,
-  serializeJsonLd,
-  serializeTurtle,
-  termToTurtle,
-  toPortableExtractionResult
-};
+        <p class="sr-only" aria-live="polite">${this.#L}</p>
+      </aside>`;let r=this.shadowRoot.querySelector(".viewport"),i=this.shadowRoot.querySelector(".tabs");if(this.#$e(i),!r)return;if(this.#e==="turtle"&&r.append(re(se(e),"turtle",document)),this.#e==="json"){if(Ce(e)){let u=document.createElement("p");u.className="notice",u.textContent="JSON-LD 1.1 has no native RDF 1.2 triple-term syntax. This view preserves triple terms as typed JSON literals; use Turtle for the semantic form.",r.append(u)}r.append(re(ce(e),"json",document))}this.#e==="navigator"&&this.#st(r,e),this.#e==="sources"&&this.#pt(r),this.#e==="vocabulary"&&this.#dt(r),this.#e==="discovery"&&this.#ut(r),this.#e==="sparql"&&this.#ft(r),this.#e==="diagnostics"&&this.#ct(r,e.diagnostics);let a=this.shadowRoot.querySelector(".launcher");a&&(this.#_(a),a.addEventListener("pointerdown",u=>this.#tt(u,a)),a.addEventListener("click",u=>{if(this.#U){u.preventDefault(),this.#U=!1;return}this.toggle(u instanceof MouseEvent&&u.detail!==0?"panel":"tab")})),this.shadowRoot.querySelector(".close")?.addEventListener("click",()=>this.close()),this.shadowRoot.querySelector(".refresh")?.addEventListener("click",()=>this.refresh());let s=this.shadowRoot.querySelector(".position-switch"),c=Array.from(this.shadowRoot.querySelectorAll(".position-option")),l=this.shadowRoot.querySelector(".panel"),d=(u,g=!1)=>{this.#s=u;let h=this.shadowRoot?.querySelector(".launcher");l&&(l.dataset.position=this.#s,u==="floating"?this.#H(l):this.#Ze(l)),h&&(h.dataset.position=this.#s,this.#_(h));for(let p of c){let m=p.dataset.position===this.#s;p.setAttribute("aria-checked",String(m)),p.tabIndex=m?0:-1,m&&g&&p.focus()}this.#D()};if(l){this.#s==="floating"&&this.#H(l);let u=l.querySelector(".toolbar"),g=u?.querySelector(".tabs");u?.addEventListener("pointerdown",h=>{let p=h.target instanceof Element?h.target:null;p!==u&&p!==g&&!p?.closest(".drag-grip")||this.#Me(h,l)}),l.querySelectorAll(".resize-handle").forEach(h=>{h.addEventListener("pointerdown",p=>{this.#Me(p,l,h.dataset.resize)})})}s&&tt(s,(u,g)=>{d(u,g)}),this.shadowRoot.querySelector(".copy")?.addEventListener("click",()=>void this.#nt()),this.shadowRoot.querySelectorAll("[data-view]").forEach(u=>{u.addEventListener("click",()=>this.#ot(u.dataset.view))}),this.#je()}};customElements.get("ia2-rdf-navigator")||customElements.define("ia2-rdf-navigator",pe);function Ko(n=document){let e=n.querySelector("ia2-rdf-navigator");if(e)return e;let t=n.createElement("ia2-rdf-navigator");return n.body.append(t),t}function St(){window.__IA2_RDF_NAVIGATOR_NO_AUTO__||Ko()}typeof window<"u"&&typeof document<"u"&&(document.readyState==="loading"?document.addEventListener("DOMContentLoaded",St,{once:!0}):St());export{Ge as DISCOVERY_PREDICATES,pe as Ia2RdfNavigator,De as detectDiscoveryCandidates,oe as extractDataset,$e as extractDocumentVocabulary,Gt as extractSuggestedSparqlQueries,be as extractSuggestedSparqlQueryCatalog,Ae as fromPortableExtractionResult,Ne as mergeDiscoveryContributions,Ko as mountRdfNavigator,ce as serializeJsonLd,se as serializeTurtle,Be as termToTurtle,Vt as toPortableExtractionResult};

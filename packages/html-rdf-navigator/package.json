@@ -1,6 +1,6 @@
 {
   "name": "@ia2-dev/html-rdf-navigator",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A live RDF dataset navigator and inspector for IA² HTML/RDF documents.",
   "author": "Yurii Rashkovskii",
   "homepage": "https://ia2.dev/",
@@ -27,13 +27,23 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/html-rdf-navigator.js",
       "default": "./dist/html-rdf-navigator.js"
+    },
+    "./extract": {
+      "types": "./dist/extract.d.ts",
+      "import": "./dist/extract.js",
+      "default": "./dist/extract.js"
+    },
+    "./serialize": {
+      "types": "./dist/serialize.d.ts",
+      "import": "./dist/serialize.js",
+      "default": "./dist/serialize.js"
     }
   },
   "main": "./dist/html-rdf-navigator.js",
   "module": "./dist/html-rdf-navigator.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "npm run clean && tsc -p tsconfig.build.json && esbuild src/index.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/html-rdf-navigator.js --sourcemap=external",
+    "build": "npm run clean && tsc -p tsconfig.build.json && esbuild src/index.ts --bundle --splitting --format=esm --platform=browser --target=es2022 --outdir=dist --entry-names=html-rdf-navigator --chunk-names=chunks/[name]-[hash] --minify --sourcemap=external && esbuild src/extract.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/extract.js --sourcemap=external && esbuild src/serialize.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/serialize.js --sourcemap=external",
     "clean": "rm -rf dist",
     "test": "vitest run",
     "check": "tsc -p tsconfig.json --noEmit"
@@ -49,9 +59,18 @@
     "web-component"
   ],
   "license": "MIT",
+  "dependencies": {
+    "@comunica/query-sparql-rdfjs-lite": "^5.3.0",
+    "@ia2-dev/html-rdf": "^0.1.0",
+    "@ia2-dev/ui-primitives": "^0.1.0",
+    "@rdfjs/types": "^2.0.1",
+    "n3": "^2.1.1",
+    "sparqljs": "^3.7.4"
+  },
   "devDependencies": {
     "esbuild": "^0.25.0",
     "jsdom": "^26.0.0",
+    "@types/sparqljs": "^3.1.12",
     "typescript": "^5.8.0",
     "vitest": "^3.0.0"
   }

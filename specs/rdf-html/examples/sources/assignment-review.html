@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta
+    name="description"
+    content="An internal legal-review document whose questions and assessments target the separately distributable Assignment, Assumption, and Consent Agreement."
+    rdf-subject=""
+    rdf-predicate="http://purl.org/dc/terms/description"
+  >
+  <meta
+    name="ia2-format-note"
+    content="This document uses IA² HTML/RDF 0.1. Its review annotations refer to stable resources in a separate contract document and are not part of the customer-distributable contract dataset."
+    rdf-subject=""
+    rdf-predicate="http://purl.org/dc/terms/abstract"
+  >
+  <meta
+    content="Internal legal counsel"
+    rdf-subject=""
+    rdf-predicate="http://purl.org/dc/terms/audience"
+  >
+  <title rdf-subject="" rdf-predicate="http://purl.org/dc/terms/title">Counsel Review · Assignment, Assumption, and Consent Agreement</title>
+  <link rel="canonical" href="https://ia2.dev/spec/rdf-html/examples/sources/assignment-review.html">
+  <link href="https://ia2.dev/spec/html-rdf" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/conformsTo">
+  <link href="assignment.html" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/references">
+  <style>
+    :root {
+      color-scheme: light;
+      --canvas: oklch(94.5% 0.012 65);
+      --paper: oklch(99% 0.006 75);
+      --ink: oklch(20% 0.018 65);
+      --muted: oklch(45% 0.025 55);
+      --rule: oklch(79% 0.025 65);
+      --review: oklch(42% 0.15 28);
+      --review-soft: oklch(96% 0.025 28);
+      --review-rule: oklch(78% 0.07 28);
+      --violet: oklch(39% 0.12 294);
+      --focus: oklch(58% 0.17 294);
+      --signal: oklch(80% 0.14 135);
+      --ui: "Avenir Next", Avenir, "Segoe UI Variable", "Segoe UI", sans-serif;
+      --legal: Georgia, "Times New Roman", Times, serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--canvas); scroll-behavior: smooth; }
+    body { color: var(--ink); margin: 0; }
+    a { color: inherit; }
+    :where(a, button, summary):focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+    [hidden] { display: none !important; }
+
+    .skip-link {
+      background: var(--ink);
+      color: var(--paper);
+      font: 700 .85rem/1 var(--ui);
+      left: 1rem;
+      padding: .8rem 1rem;
+      position: fixed;
+      top: 1rem;
+      transform: translateY(-180%);
+      z-index: 20;
+    }
+    .skip-link:focus { transform: translateY(0); }
+
+    .document-tools {
+      align-items: center;
+      background: oklch(23% 0.04 294);
+      color: oklch(97% 0.01 294);
+      display: flex;
+      font-family: var(--ui);
+      gap: 1.25rem;
+      justify-content: space-between;
+      min-height: 4rem;
+      padding: .7rem clamp(1rem, 4vw, 3rem);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .tool-identity { align-items: baseline; display: flex; gap: .8rem; min-width: 0; }
+    .tool-identity strong { color: var(--signal); font-size: 1.05rem; letter-spacing: -.04em; }
+    .tool-identity span { font-size: .78rem; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tool-actions { align-items: center; display: flex; gap: .5rem; }
+    .tool-link {
+      align-items: center;
+      border: 1px solid oklch(66% 0.04 294);
+      display: inline-flex;
+      font-size: .72rem;
+      font-weight: 700;
+      min-height: 2.5rem;
+      padding: .55rem .8rem;
+      text-decoration: none;
+    }
+    .tool-link:hover { background: oklch(31% 0.06 294); }
+
+    .document-shell { padding: clamp(1rem, 3vw, 3.5rem); }
+    .review-surface {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      box-shadow: 0 18px 50px oklch(28% 0.03 60 / 9%), 0 2px 8px oklch(28% 0.03 60 / 5%);
+      margin: 0 auto;
+      max-width: 92rem;
+      padding: clamp(1.4rem, 5vw, 4.5rem);
+    }
+    .review-header,
+    .relationship,
+    .questions,
+    .annotations,
+    .semantic-sources {
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 62rem;
+    }
+    .review-header {
+      border-bottom: 1px solid var(--review-rule);
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+    }
+    .classification {
+      color: var(--review);
+      font: 800 .7rem/1.2 var(--ui);
+      letter-spacing: .09em;
+      margin: 0 0 1rem;
+      text-transform: uppercase;
+    }
+    .review-header h1 {
+      font: 700 clamp(1.8rem, 5vw, 3.2rem)/1.02 var(--legal);
+      letter-spacing: -.025em;
+      margin: 0;
+      max-width: 18ch;
+    }
+    .review-header .lede {
+      color: var(--muted);
+      font: 1.03rem/1.62 var(--legal);
+      margin: 1.25rem 0 0;
+      max-width: 66ch;
+    }
+
+    .relationship {
+      align-items: start;
+      background: var(--review-soft);
+      border: 1px solid var(--review-rule);
+      display: grid;
+      font-family: var(--ui);
+      gap: 1rem;
+      grid-template-columns: minmax(0, 1fr) auto;
+      margin: 0 0 2.6rem;
+      padding: 1rem 1.1rem;
+    }
+    .relationship strong { color: var(--review); display: block; font-size: .75rem; letter-spacing: .055em; text-transform: uppercase; }
+    .relationship p { font-size: .85rem; line-height: 1.5; margin: .35rem 0 0; }
+    .relationship a {
+      border-bottom: 1px solid currentColor;
+      color: var(--violet);
+      font-size: .78rem;
+      font-weight: 750;
+      padding: .15rem 0;
+      text-decoration: none;
+    }
+
+    .section-title {
+      font: 800 .76rem/1.3 var(--ui);
+      letter-spacing: .08em;
+      margin: 0 0 1rem;
+      text-transform: uppercase;
+    }
+    .questions {
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 2.6rem;
+      padding-bottom: 2.2rem;
+    }
+    .questions ol { margin: 0; padding-left: 1.5rem; }
+    .questions li {
+      font: 1rem/1.55 var(--legal);
+      margin: .65rem 0;
+      padding-left: .35rem;
+    }
+    .questions a { color: var(--violet); text-decoration-thickness: 1px; text-underline-offset: .18em; }
+
+    .policy-workspace {
+      border-bottom: 1px solid var(--rule);
+      margin: 0 0 3rem;
+      padding: 0 0 3rem;
+    }
+    .workspace-header {
+      align-items: end;
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: minmax(0, 1fr) minmax(15rem, 28rem);
+      margin-bottom: 1.2rem;
+    }
+    .workspace-header h2 {
+      font: 700 clamp(1.45rem, 3vw, 2.1rem)/1.1 var(--legal);
+      letter-spacing: -.018em;
+      margin: 0;
+    }
+    .workspace-header p {
+      color: var(--muted);
+      font: .82rem/1.5 var(--ui);
+      margin: 0;
+    }
+    .workspace-grid {
+      align-items: start;
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: minmax(0, 1.1fr) minmax(22rem, .9fr);
+    }
+    .reviewed-document {
+      background: oklch(96% 0.012 65);
+      border: 1px solid var(--rule);
+      min-width: 0;
+    }
+    .pane-heading {
+      align-items: center;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      flex-wrap: wrap;
+      font: 700 .7rem/1.2 var(--ui);
+      gap: .35rem .8rem;
+      justify-content: space-between;
+      letter-spacing: .05em;
+      min-height: 2.8rem;
+      padding: .65rem .85rem;
+      text-transform: uppercase;
+    }
+    .pane-heading a {
+      color: var(--violet);
+      font-size: .66rem;
+      letter-spacing: 0;
+      margin-left: auto;
+      text-transform: none;
+      white-space: nowrap;
+    }
+    .reviewed-document iframe {
+      background: white;
+      border: 0;
+      display: block;
+      height: min(46rem, 75vh);
+      width: 100%;
+    }
+
+    .annotation-list { border-top: 1px solid var(--ink); }
+    .annotation {
+      display: grid;
+      gap: clamp(1rem, 3vw, 2.4rem);
+      grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr);
+      padding: 1.25rem 0 1.4rem;
+    }
+    .annotation + .annotation { border-top: 1px solid var(--rule); }
+    .annotation-target {
+      font-family: var(--ui);
+      min-width: 0;
+    }
+    .annotation-target span {
+      color: var(--review);
+      display: block;
+      font-size: .66rem;
+      font-weight: 800;
+      letter-spacing: .07em;
+      margin-bottom: .35rem;
+      text-transform: uppercase;
+    }
+    .annotation-target a {
+      color: var(--violet);
+      font-size: .83rem;
+      font-weight: 720;
+      line-height: 1.35;
+      text-decoration-thickness: 1px;
+      text-underline-offset: .2em;
+    }
+    .annotation p { font: 1rem/1.58 var(--legal); margin: 0; }
+
+    .semantic-sources {
+      border-top: 1px solid var(--rule);
+      font-family: var(--ui);
+      margin-top: 3rem;
+      padding-top: 1.2rem;
+    }
+    .semantic-sources h2 { font-size: .88rem; margin: 0 0 .55rem; }
+    .semantic-sources p { color: var(--muted); font-size: .72rem; line-height: 1.55; margin: 0; }
+    .semantic-sources a { color: var(--violet); }
+
+    @media (max-width: 720px) {
+      .document-tools { align-items: flex-start; flex-direction: column; gap: .55rem; position: static; }
+      .tool-actions { flex-wrap: wrap; }
+      .tool-link { min-height: 2.75rem; }
+      .document-shell { padding: 0; }
+      .review-surface { border: 0; padding: 1.7rem 1.1rem 3rem; }
+      .relationship,
+      .annotation { grid-template-columns: 1fr; }
+      .relationship a { justify-self: start; }
+      .annotation { gap: .6rem; }
+      .workspace-header,
+      .workspace-grid { grid-template-columns: 1fr; }
+      .reviewed-document iframe { height: 36rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+    @media print {
+      @page { margin: .72in .78in; size: letter; }
+      html,
+      body { background: var(--paper); }
+      .document-tools,
+      .skip-link,
+      .policy-workspace { display: none; }
+      .document-shell { padding: 0; }
+      .review-surface { border: 0; box-shadow: none; max-width: none; padding: 0; }
+      .annotation { break-inside: avoid; }
+      a { text-decoration: none; }
+      .semantic-sources { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#review">Skip to legal review</a>
+  <header class="document-tools">
+    <div class="tool-identity"><strong>IA²</strong><span>Internal legal review</span></div>
+    <nav class="tool-actions" aria-label="Related documents and representations">
+      <a class="tool-link" href="assignment.html">Contract document</a>
+      <a class="tool-link" href="../assignment-review.ttl">RDF/HTML source</a>
+    </nav>
+  </header>
+
+  <div class="document-shell">
+    <main class="review-surface" id="review">
+      <header class="review-header">
+        <p class="classification">Internal · Attorney review requested</p>
+        <h1>Counsel review of contract assignment template</h1>
+        <p
+          class="lede"
+          rdf-subject="#review-request"
+          rdf-predicate="http://www.w3.org/ns/oa#bodyValue"
+          rdf-graph="#review-graph"
+        >This is an internal template drafted with AI assistance and not yet reviewed by an attorney. We are a service provider; clients occasionally change legal entities and assign our contract from the old entity (Assignor) to the new one (Assignee). We are always the Counterparty. The template is deliberately Counterparty-protective. We request review and sign-off by an attorney licensed in New York, since many underlying contracts are New York-governed.</p>
+      </header>
+
+      <aside class="relationship" aria-label="Relationship to the contract">
+        <div>
+          <strong>Separate document boundary</strong>
+          <p>This review refers to the contract by its stable document and clause IRIs. The customer contract contains no counsel questions, drafting rationale, or review graph.</p>
+        </div>
+        <a href="assignment.html">Open customer contract</a>
+      </aside>
+
+      <section class="policy-workspace" aria-labelledby="policy-workspace-title">
+        <header class="workspace-header">
+          <div>
+            <p class="classification">Executable review profile</p>
+            <h2 id="policy-workspace-title">Change the draft. Watch policy and meaning respond.</h2>
+          </div>
+          <p>The document on the left knows only how to publish its current RDF. The reviewer on the right discovers a separate counsel-owned SHACL profile, validates the live dataset, and reports the exact RDF consequences of each edit.</p>
+        </header>
+        <div class="workspace-grid">
+          <div class="reviewed-document">
+            <div class="pane-heading">
+              <span>Customer-distributable document</span>
+              <a href="assignment.html">Open full size</a>
+            </div>
+            <iframe
+              id="contract-under-review"
+              src="assignment.html"
+              title="Assignment contract under live policy review"
+            ></iframe>
+          </div>
+          <ia2-rdf-policy-reviewer
+            source-frame="#contract-under-review"
+            profile-root="#counsel-policy"
+            diff-graphs="assignment.html#runtime-graph"
+            heading="Counsel policy monitor"
+          ></ia2-rdf-policy-reviewer>
+        </div>
+      </section>
+
+      <section class="questions" aria-labelledby="questions-title">
+        <h2 class="section-title" id="questions-title">Questions for counsel</h2>
+        <ol>
+          <li id="question-novation" rdf-subject="#question-novation" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Does the <a href="assignment.html#release-option-a">Option A release</a> clearly effect a novation under New York law, and is the carve-out for pre-Effective-Date acts and omissions enforceable as drafted?</li>
+          <li id="question-clawback" rdf-subject="#question-clawback" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">The <a href="assignment.html#clause-prepaid-balance">Prepaid Balance clause</a> transfers a client's unused prepaid balance to the new entity with a waiver of refund claims. What is our residual exposure to bankruptcy or fraudulent-transfer clawback if the old entity later fails, and can the clause be hardened?</li>
+          <li id="question-records" rdf-subject="#question-records" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Is the “conclusive absent manifest error” records language in the <a href="assignment.html#clause-prepaid-balance">Prepaid Balance clause</a> enforceable against a client under New York law?</li>
+          <li id="question-venue" rdf-subject="#question-venue" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Please confirm the county fill-in in the <a href="assignment.html#clause-governing-law">Governing Law and Venue clause</a> and whether GOL §§ 5-1401 and 5-1402 thresholds matter for our typical deal sizes.</li>
+          <li id="question-elections" rdf-subject="#question-elections" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Please confirm our default bracket elections: the <a href="assignment.html#clause-assumption">Assumption clause</a> first option (post-Effective-Date liabilities only); <a href="assignment.html#release-option-a">Option A release</a> only after outstanding amounts are confirmed paid; and the <a href="assignment.html#clause-prepaid-balance">Prepaid Balance</a> and <a href="assignment.html#clause-indemnification">Indemnification</a> clauses included as needed.</li>
+          <li id="question-general" rdf-subject="#question-general" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Anything a New York practitioner would add, cut, or reword?</li>
+        </ol>
+      </section>
+
+      <section class="annotations" aria-labelledby="annotations-title">
+        <h2 class="section-title" id="annotations-title">Clause-by-clause annotations</h2>
+        <div class="annotation-list">
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#opening">Opening paragraph</a></div>
+            <p id="review-note-0" rdf-subject="#review-note-0" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Three-party structure by design: an assignment signed only by Assignor and Assignee leaves our consent, and its conditions, undocumented. “Made effective as of” lets the Effective Date differ from signing dates, which is common when an entity change closes on a set date.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#recital-a">Recital A</a></div>
+            <p id="review-note-1" rdf-subject="#review-note-1" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Sweeps amendments, order forms, and statements of work into the defined Contract so nothing is left behind with the old entity. The optional Exhibit A attachment removes later dispute about exactly which documents were assigned.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#recital-b">Recital B</a></div>
+            <p id="review-note-2" rdf-subject="#review-note-2" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">The underlying transaction is deliberately not described here. It appears once, as an operative representation in the <a href="assignment.html#clause-assignee-reps">Assignee representations clause</a>, avoiding two fill-ins that could be completed inconsistently.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#consideration">Consideration recital</a></div>
+            <p id="review-note-3" rdf-subject="#review-note-3" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Consideration recital. New York GOL §§ 5-1107 and 5-1103 make signed written assignments and modifications enforceable without consideration, but the recital is kept for versatility in non-New York deals.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#clause-assignment">Assignment clause</a></div>
+            <p id="review-note-4" rdf-subject="#review-note-4" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Precise verbs on purpose: rights are assigned; duties are delegated (they cannot be “assigned”). Courts read these differently. “Irrevocably” forecloses any later argument that the transfer could be unilaterally revoked. This blanket transfer of rights is also what carries a prepaid balance to the Assignee (see the <a href="assignment.html#clause-prepaid-balance">Prepaid Balance clause</a>).</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Election requires confirmation</span><a href="assignment.html#clause-assumption">Assumption clause</a></div>
+            <p id="review-note-5" rdf-subject="#review-note-5" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">The single source of truth for liability allocation; the <a href="assignment.html#clause-conditions">Conditions</a> and <a href="assignment.html#clause-indemnification">Indemnification</a> clauses inherit whatever is elected here. First option (our default): Assignee takes post-Effective-Date obligations only, pre-date obligations stay with Assignor by operation of law. Second option: Assignee takes everything, used when the old entity is dissolving. Question for counsel: confirm the default election.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#clause-consent">Consent clause</a></div>
+            <p id="review-note-6" rdf-subject="#review-note-6" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">The deemed-reference sentence substitutes the new entity throughout the Contract without amending it clause by clause. Notices, licenses, confidentiality, and every other reference follow automatically.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Question for counsel</span><a href="assignment.html#release-option-a">Release, Option A</a></div>
+            <p id="review-note-7" rdf-subject="#review-note-7" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">New York courts do not presume novation. Intent to release must be explicit, which is why Option A says “releases and discharges” in terms. The carve-out uses “acts, omissions, or events occurring prior to” rather than “accrued” so that latent pre-transfer claims discovered later remain preserved. Confirm enforceability of this release scope under New York law.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#release-option-b">Release, Option B</a></div>
+            <p id="review-note-8" rdf-subject="#review-note-8" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Option B is our strong position when the new entity is unknown or thinly capitalized: the old entity stays on the hook. A structural alternative if a client insists on a full release into a weak entity is a short parent guaranty, attached case by case rather than templated.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Operational control</span><a href="assignment.html#clause-conditions">Conditions to Consent clause</a></div>
+            <p id="review-note-9" rdf-subject="#review-note-9" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">The core protections are: paid-up condition so invoices are not orphaned; one-time consent that does not open the door to future assignments or waive the Contract's anti-assignment clause; and reservation of all pre-transfer claims, including latent ones. Verify the account is current before countersigning.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#clause-assignor-reps">Assignor representations clause</a></div>
+            <p id="review-note-10" rdf-subject="#review-note-10" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Standard assignor package: contract alive, no default, no prior assignment or encumbrance (protects against a double transfer), and authority.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#clause-assignee-reps">Assignee representations clause</a></div>
+            <p id="review-note-11" rdf-subject="#review-note-11" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">The capability statement is a representation, and a representation from a shell is only a lawsuit against a shell. Real protection against a weak Assignee is Option B or a guaranty. The affiliate-or-successor statement is deliberately mandatory so unrelated third-party transfers leave the standard template and receive individual negotiation.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#clause-counterparty-reps">Counterparty representations clause</a></div>
+            <p id="review-note-12" rdf-subject="#review-note-12" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Deliberately narrow. An earlier draft had us confirming “no default by Assignor exists.” It was removed because that representation runs against us and could estop claims we did not know we had. Give it only as a negotiated concession, if ever.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#clause-payments">Payments and notices clause</a></div>
+            <p id="review-note-13" rdf-subject="#review-note-13" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">“Accruing on or after” preserves pre-date receivables against whoever owes them under the <a href="assignment.html#clause-assumption">Assumption</a> and <a href="assignment.html#clause-consent">Consent and Release</a> clauses. The bracketed carve-out reconciles prepaid drawdown. Billing details prevent accounts receivable from stalling, and the final sentence blocks repricing during an entity change.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Questions for counsel</span><a href="assignment.html#clause-prepaid-balance">Prepaid Balance clause</a></div>
+            <p id="review-note-14" rdf-subject="#review-note-14" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">The mechanism prevents Assignee from consuming credits while Assignor later demands a refund. Counterparty records govern, a post-closing statement fixes the amount, objections are limited to manifest error, and a reconciliation path remains. Send the statement on time and keep proof of delivery. Assess bankruptcy or fraudulent-transfer clawback exposure and enforceability of the conclusive-records standard.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#clause-further-assurances">Further Assurances clause</a></div>
+            <p id="review-note-15" rdf-subject="#review-note-15" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Catch-all for follow-up paperwork the transfer may require, such as system-access changes, registrations, and replacement purchase orders, without amending this Assignment.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Optional negotiation surface</span><a href="assignment.html#clause-indemnification">Indemnification clause</a></div>
+            <p id="review-note-16" rdf-subject="#review-note-16" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Self-conforming by design: it inherits the allocation established by the <a href="assignment.html#clause-assumption">Assumption</a> and <a href="assignment.html#clause-consent">Consent and Release</a> clauses, so no combination of bracket elections should contradict it. It adds a direct contractual claim path but also negotiation surface, and may be deleted in a minimal version.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#clause-no-other-amendment">No Other Amendment clause</a></div>
+            <p id="review-note-17" rdf-subject="#review-note-17" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Confirms the entity swap changes nothing else, including pricing, term, or scope.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Questions for counsel</span><a href="assignment.html#clause-governing-law">Governing Law and Venue clause</a></div>
+            <p id="review-note-18" rdf-subject="#review-note-18" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">The clause follows the Contract's law, switches on New York-specific venue for New York contracts, and lets the Contract's exclusive forum prevail. Confirm the county fill-in and whether New York GOL §§ 5-1401 and 5-1402 thresholds matter for typical deal sizes.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Drafting rationale</span><a href="assignment.html#clause-entire-agreement">Boilerplate clauses</a></div>
+            <p id="review-note-19" rdf-subject="#review-note-19" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">The short-form boilerplate is deliberate: integration, electronic-signature validity, successors, severability, no third-party beneficiaries, and no waiver. Each costs one sentence and is a candidate to cut in a truly minimal version.</p>
+          </article>
+          <article class="annotation">
+            <div class="annotation-target"><span>Counterparty signing control</span><a href="assignment.html#execution">Execution</a></div>
+            <p id="review-note-20" rdf-subject="#review-note-20" rdf-predicate="http://www.w3.org/ns/oa#bodyValue" rdf-graph="#review-graph">Internal policy: Assignor and Assignee sign first; we verify the account is current and the balance matches our ledger; Counterparty countersigns last. The <a href="assignment.html#clause-conditions">conditions to consent</a> are worth more before our signature than after.</p>
+          </article>
+        </div>
+      </section>
+
+      <footer class="semantic-sources">
+        <h2>Semantic modeling note</h2>
+        <p><a href="https://www.w3.org/TR/annotation-vocab/">Web Annotation</a> models each question and assessment independently of the target contract. <a href="https://www.w3.org/TR/shacl/">SHACL</a> and <a href="https://www.w3.org/TR/shacl/#sparql-constraints">SHACL-SPARQL</a> express the executable counsel policy below. <a href="https://www.w3.org/TR/prov-o/">PROV-O</a> records authorship and derivation. The <a href="https://ontology.inferal.com/modules/artifact-evolution/">Artifact Evolution ontology</a> identifies this review as a versioned artifact. The contract's FIBO semantics remain entirely in the related contract document.</p>
+      </footer>
+
+      <!--
+        Counsel-owned executable policy. The generic reviewer knows no legal
+        vocabulary: every focus node, condition, severity, message, and visible
+        clause target is supplied here with SHACL and Web Annotation terms.
+      -->
+      <div id="counsel-policy" hidden aria-hidden="true">
+        <a href="http://www.w3.org/ns/prov#Entity" rdf-subject="#counsel-policy-profile" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <span rdf-subject="#counsel-policy-profile" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#policy-graph">Counterparty-protective assignment review policy</span>
+        <span rdf-subject="#counsel-policy-profile" rdf-predicate="http://purl.org/dc/terms/description" rdf-graph="#policy-graph">An illustrative, internal review profile. Its constraints encode drafting and operational policy, not universal rules of law.</span>
+        <a href="assignment.html" rdf-subject="#counsel-policy-profile" rdf-predicate="http://purl.org/dc/terms/references" rdf-graph="#policy-graph"></a>
+        <a href="#policy-release-election-shape" rdf-subject="#counsel-policy-profile" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#policy-graph"></a>
+        <a href="#policy-debt-election-shape" rdf-subject="#counsel-policy-profile" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#policy-graph"></a>
+        <a href="#policy-prepaid-election-shape" rdf-subject="#counsel-policy-profile" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#policy-graph"></a>
+        <a href="#policy-indemnification-election-shape" rdf-subject="#counsel-policy-profile" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#policy-graph"></a>
+        <a href="#policy-release-paid-shape" rdf-subject="#counsel-policy-profile" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#policy-graph"></a>
+        <a href="#policy-prepaid-indemnity-shape" rdf-subject="#counsel-policy-profile" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#policy-graph"></a>
+        <a href="#policy-new-york-venue-shape" rdf-subject="#counsel-policy-profile" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#policy-graph"></a>
+        <a href="#policy-signing-order-shape" rdf-subject="#counsel-policy-profile" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#policy-graph"></a>
+
+        <a href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#policy-release-election-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#release-decision" rdf-subject="#policy-release-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetNode" rdf-graph="#policy-graph"></a>
+        <a href="https://schema.org/result" rdf-subject="#policy-release-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#policy-graph"></a>
+        <data value="1" rdf-subject="#policy-release-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#policy-graph"></data>
+        <span rdf-subject="#policy-release-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#name" rdf-graph="#policy-graph">Release election outstanding</span>
+        <span rdf-subject="#policy-release-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#policy-graph">Choose the release structure before sign-off.</span>
+        <a href="http://www.w3.org/ns/shacl#Warning" rdf-subject="#policy-release-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#severity" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#policy-release-election-presentation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#describing" rdf-subject="#policy-release-election-presentation" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#policy-graph"></a>
+        <a href="#policy-release-election-shape" rdf-subject="#policy-release-election-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasBody" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#release-option-a" rdf-subject="#policy-release-election-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#policy-graph"></a>
+
+        <a href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#policy-debt-election-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#debt-condition-decision" rdf-subject="#policy-debt-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetNode" rdf-graph="#policy-graph"></a>
+        <a href="https://schema.org/result" rdf-subject="#policy-debt-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#policy-graph"></a>
+        <data value="1" rdf-subject="#policy-debt-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#policy-graph"></data>
+        <span rdf-subject="#policy-debt-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#name" rdf-graph="#policy-graph">Debt-condition election outstanding</span>
+        <span rdf-subject="#policy-debt-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#policy-graph">Choose how amounts due at the Effective Date are handled before sign-off.</span>
+        <a href="http://www.w3.org/ns/shacl#Warning" rdf-subject="#policy-debt-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#severity" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#policy-debt-election-presentation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#describing" rdf-subject="#policy-debt-election-presentation" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#policy-graph"></a>
+        <a href="#policy-debt-election-shape" rdf-subject="#policy-debt-election-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasBody" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#clause-conditions" rdf-subject="#policy-debt-election-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#policy-graph"></a>
+
+        <a href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#policy-prepaid-election-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#prepaid-clause-decision" rdf-subject="#policy-prepaid-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetNode" rdf-graph="#policy-graph"></a>
+        <a href="https://schema.org/result" rdf-subject="#policy-prepaid-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#policy-graph"></a>
+        <data value="1" rdf-subject="#policy-prepaid-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#policy-graph"></data>
+        <span rdf-subject="#policy-prepaid-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#name" rdf-graph="#policy-graph">Prepaid-balance election outstanding</span>
+        <span rdf-subject="#policy-prepaid-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#policy-graph">Choose whether to include the prepaid-balance mechanics before sign-off.</span>
+        <a href="http://www.w3.org/ns/shacl#Warning" rdf-subject="#policy-prepaid-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#severity" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#policy-prepaid-election-presentation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#describing" rdf-subject="#policy-prepaid-election-presentation" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#policy-graph"></a>
+        <a href="#policy-prepaid-election-shape" rdf-subject="#policy-prepaid-election-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasBody" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#clause-prepaid-balance" rdf-subject="#policy-prepaid-election-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#policy-graph"></a>
+
+        <a href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#policy-indemnification-election-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#indemnification-decision" rdf-subject="#policy-indemnification-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetNode" rdf-graph="#policy-graph"></a>
+        <a href="https://schema.org/result" rdf-subject="#policy-indemnification-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#path" rdf-graph="#policy-graph"></a>
+        <data value="1" rdf-subject="#policy-indemnification-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer" rdf-graph="#policy-graph"></data>
+        <span rdf-subject="#policy-indemnification-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#name" rdf-graph="#policy-graph">Indemnification election outstanding</span>
+        <span rdf-subject="#policy-indemnification-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#policy-graph">Choose whether to include the indemnification clause before sign-off.</span>
+        <a href="http://www.w3.org/ns/shacl#Warning" rdf-subject="#policy-indemnification-election-shape" rdf-predicate="http://www.w3.org/ns/shacl#severity" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#policy-indemnification-election-presentation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#describing" rdf-subject="#policy-indemnification-election-presentation" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#policy-graph"></a>
+        <a href="#policy-indemnification-election-shape" rdf-subject="#policy-indemnification-election-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasBody" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#clause-indemnification" rdf-subject="#policy-indemnification-election-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#policy-graph"></a>
+
+        <a href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#policy-release-paid-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#release-decision" rdf-subject="#policy-release-paid-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetNode" rdf-graph="#policy-graph"></a>
+        <span rdf-subject="#policy-release-paid-shape" rdf-predicate="http://www.w3.org/ns/shacl#name" rdf-graph="#policy-graph">Full release requires a clean account</span>
+        <a href="http://www.w3.org/ns/shacl#Violation" rdf-subject="#policy-release-paid-shape" rdf-predicate="http://www.w3.org/ns/shacl#severity" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#policy-release-paid-presentation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#describing" rdf-subject="#policy-release-paid-presentation" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#policy-graph"></a>
+        <a href="#policy-release-paid-shape" rdf-subject="#policy-release-paid-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasBody" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#clause-conditions" rdf-subject="#policy-release-paid-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#policy-graph"></a>
+        <a href="#policy-release-paid-constraint" rdf-subject="#policy-release-paid-shape" rdf-predicate="http://www.w3.org/ns/shacl#sparql" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/shacl#SPARQLConstraint" rdf-subject="#policy-release-paid-constraint" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <span rdf-subject="#policy-release-paid-constraint" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#policy-graph">The draft grants a full release without selecting “Amounts paid in full.” Internal policy requires the account to be clean before Counterparty releases Assignor.</span>
+        <pre rdf-subject="#policy-release-paid-constraint" rdf-predicate="http://www.w3.org/ns/shacl#select" rdf-graph="#policy-graph">PREFIX schema: &lt;https://schema.org/&gt;
+SELECT $this WHERE {
+  $this schema:result &lt;https://ia2.dev/spec/rdf-html/examples/sources/assignment.html#release-option-a&gt; .
+  FILTER NOT EXISTS {
+    &lt;https://ia2.dev/spec/rdf-html/examples/sources/assignment.html#debt-condition-decision&gt;
+      schema:result
+      &lt;https://ia2.dev/spec/rdf-html/examples/sources/assignment.html#amounts-paid-option&gt; .
+  }
+}</pre>
+
+        <a href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#policy-prepaid-indemnity-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#prepaid-clause-decision" rdf-subject="#policy-prepaid-indemnity-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetNode" rdf-graph="#policy-graph"></a>
+        <span rdf-subject="#policy-prepaid-indemnity-shape" rdf-predicate="http://www.w3.org/ns/shacl#name" rdf-graph="#policy-graph">Prepaid transfer without indemnity</span>
+        <a href="http://www.w3.org/ns/shacl#Warning" rdf-subject="#policy-prepaid-indemnity-shape" rdf-predicate="http://www.w3.org/ns/shacl#severity" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#policy-prepaid-indemnity-presentation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#describing" rdf-subject="#policy-prepaid-indemnity-presentation" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#policy-graph"></a>
+        <a href="#policy-prepaid-indemnity-shape" rdf-subject="#policy-prepaid-indemnity-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasBody" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#clause-indemnification" rdf-subject="#policy-prepaid-indemnity-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#policy-graph"></a>
+        <a href="#policy-prepaid-indemnity-constraint" rdf-subject="#policy-prepaid-indemnity-shape" rdf-predicate="http://www.w3.org/ns/shacl#sparql" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/shacl#SPARQLConstraint" rdf-subject="#policy-prepaid-indemnity-constraint" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <span rdf-subject="#policy-prepaid-indemnity-constraint" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#policy-graph">The draft transfers prepaid-balance mechanics while omitting indemnification. This may be acceptable, but counsel should confirm the residual allocation of refund and clawback risk.</span>
+        <pre rdf-subject="#policy-prepaid-indemnity-constraint" rdf-predicate="http://www.w3.org/ns/shacl#select" rdf-graph="#policy-graph">PREFIX schema: &lt;https://schema.org/&gt;
+SELECT $this WHERE {
+  $this schema:result &lt;https://ia2.dev/spec/rdf-html/examples/sources/assignment.html#include-prepaid-option&gt; .
+  &lt;https://ia2.dev/spec/rdf-html/examples/sources/assignment.html#indemnification-decision&gt;
+    schema:result
+    &lt;https://ia2.dev/spec/rdf-html/examples/sources/assignment.html#omit-indemnification-option&gt; .
+}</pre>
+
+        <a href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#policy-new-york-venue-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#clause-governing-law" rdf-subject="#policy-new-york-venue-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetNode" rdf-graph="#policy-graph"></a>
+        <span rdf-subject="#policy-new-york-venue-shape" rdf-predicate="http://www.w3.org/ns/shacl#name" rdf-graph="#policy-graph">New York venue must be specified</span>
+        <a href="http://www.w3.org/ns/shacl#Violation" rdf-subject="#policy-new-york-venue-shape" rdf-predicate="http://www.w3.org/ns/shacl#severity" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#policy-new-york-venue-presentation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#describing" rdf-subject="#policy-new-york-venue-presentation" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#policy-graph"></a>
+        <a href="#policy-new-york-venue-shape" rdf-subject="#policy-new-york-venue-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasBody" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#clause-governing-law" rdf-subject="#policy-new-york-venue-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#policy-graph"></a>
+        <a href="#policy-new-york-venue-constraint" rdf-subject="#policy-new-york-venue-shape" rdf-predicate="http://www.w3.org/ns/shacl#sparql" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/shacl#SPARQLConstraint" rdf-subject="#policy-new-york-venue-constraint" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <span rdf-subject="#policy-new-york-venue-constraint" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#policy-graph">The fallback governing law names New York, but the exclusive New York venue value is absent.</span>
+        <pre rdf-subject="#policy-new-york-venue-constraint" rdf-predicate="http://www.w3.org/ns/shacl#select" rdf-graph="#policy-graph">SELECT $this WHERE {
+  $this
+    &lt;https://ia2.dev/spec/rdf-html/examples/sources/assignment.html#fallbackGoverningLaw&gt;
+    ?law .
+  FILTER(CONTAINS(LCASE(STR(?law)), "new york"))
+  FILTER NOT EXISTS {
+    $this
+      &lt;https://ia2.dev/spec/rdf-html/examples/sources/assignment.html#exclusiveVenue&gt;
+      ?venue .
+  }
+}</pre>
+
+        <a href="http://www.w3.org/ns/shacl#NodeShape" rdf-subject="#policy-signing-order-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#counterparty-signature" rdf-subject="#policy-signing-order-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetNode" rdf-graph="#policy-graph"></a>
+        <span rdf-subject="#policy-signing-order-shape" rdf-predicate="http://www.w3.org/ns/shacl#name" rdf-graph="#policy-graph">Counterparty must countersign last</span>
+        <a href="http://www.w3.org/ns/shacl#Violation" rdf-subject="#policy-signing-order-shape" rdf-predicate="http://www.w3.org/ns/shacl#severity" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#policy-signing-order-presentation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/oa#describing" rdf-subject="#policy-signing-order-presentation" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#policy-graph"></a>
+        <a href="#policy-signing-order-shape" rdf-subject="#policy-signing-order-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasBody" rdf-graph="#policy-graph"></a>
+        <a href="assignment.html#execution" rdf-subject="#policy-signing-order-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#policy-graph"></a>
+        <a href="#policy-signing-order-constraint" rdf-subject="#policy-signing-order-shape" rdf-predicate="http://www.w3.org/ns/shacl#sparql" rdf-graph="#policy-graph"></a>
+        <a href="http://www.w3.org/ns/shacl#SPARQLConstraint" rdf-subject="#policy-signing-order-constraint" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#policy-graph"></a>
+        <span rdf-subject="#policy-signing-order-constraint" rdf-predicate="http://www.w3.org/ns/shacl#message" rdf-graph="#policy-graph">Counterparty has signed while an Assignor or Assignee signature is absent. Internal procedure requires both customer parties to sign before Counterparty.</span>
+        <pre rdf-subject="#policy-signing-order-constraint" rdf-predicate="http://www.w3.org/ns/shacl#select" rdf-graph="#policy-graph">SELECT $this WHERE {
+  $this
+    &lt;https://ia2.dev/spec/rdf-html/examples/sources/assignment.html#signatureMark&gt;
+    ?counterpartySignature .
+  FILTER(
+    NOT EXISTS {
+      &lt;https://ia2.dev/spec/rdf-html/examples/sources/assignment.html#assignor-signature&gt;
+        &lt;https://ia2.dev/spec/rdf-html/examples/sources/assignment.html#signatureMark&gt;
+        ?assignorSignature .
+    }
+    ||
+    NOT EXISTS {
+      &lt;https://ia2.dev/spec/rdf-html/examples/sources/assignment.html#assignee-signature&gt;
+        &lt;https://ia2.dev/spec/rdf-html/examples/sources/assignment.html#signatureMark&gt;
+        ?assigneeSignature .
+    }
+  )
+}</pre>
+      </div>
+
+      <div hidden aria-hidden="true">
+        <!-- Review artifact and its one-way relationship to the customer document. -->
+        <a href="http://www.w3.org/ns/prov#Entity" rdf-subject="#review-document" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#artifact-graph"></a>
+        <a href="https://ontology.inferal.com/modules/artifact-evolution/ArtifactVersion" rdf-subject="#review-document" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#artifact-graph"></a>
+        <a href="assignment.html" rdf-subject="#review-document" rdf-predicate="http://purl.org/dc/terms/references" rdf-graph="#artifact-graph"></a>
+        <a href="assignment.html" rdf-subject="#review-document" rdf-predicate="http://www.w3.org/ns/prov#wasDerivedFrom" rdf-graph="#artifact-graph"></a>
+        <a href="#review-collection" rdf-subject="#review-document" rdf-predicate="http://purl.org/dc/terms/hasPart" rdf-graph="#artifact-graph"></a>
+        <time datetime="2026-07-24T00:00:00Z" rdf-subject="#review-document" rdf-predicate="http://www.w3.org/ns/prov#generatedAtTime" rdf-datatype="http://www.w3.org/2001/XMLSchema#dateTime" rdf-graph="#artifact-graph"></time>
+
+        <a href="http://www.w3.org/ns/oa#AnnotationCollection" rdf-subject="#review-collection" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <span rdf-subject="#review-collection" rdf-predicate="http://purl.org/dc/terms/title" rdf-graph="#review-graph">Counsel review of contract assignment template</span>
+        <span rdf-subject="#review-collection" rdf-predicate="http://www.w3.org/ns/activitystreams#totalItems" rdf-datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" rdf-graph="#review-graph">28</span>
+        <a href="#review-page-1" rdf-subject="#review-collection" rdf-predicate="http://www.w3.org/ns/activitystreams#first" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#AnnotationPage" rdf-subject="#review-page-1" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="#review-collection" rdf-subject="#review-page-1" rdf-predicate="http://www.w3.org/ns/activitystreams#partOf" rdf-graph="#review-graph"></a>
+        <data value="0" rdf-subject="#review-page-1" rdf-predicate="http://www.w3.org/ns/activitystreams#startIndex" rdf-datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" rdf-graph="#review-graph"></data>
+        <a href="#review-items-0" rdf-subject="#review-page-1" rdf-predicate="http://www.w3.org/ns/activitystreams#items" rdf-graph="#review-graph"></a>
+        <a href="#review-request" rdf-subject="#review-items-0" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-1" rdf-subject="#review-items-0" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#question-novation" rdf-subject="#review-items-1" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-2" rdf-subject="#review-items-1" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#question-clawback" rdf-subject="#review-items-2" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-3" rdf-subject="#review-items-2" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#question-records" rdf-subject="#review-items-3" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-4" rdf-subject="#review-items-3" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#question-venue" rdf-subject="#review-items-4" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-5" rdf-subject="#review-items-4" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#question-elections" rdf-subject="#review-items-5" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-6" rdf-subject="#review-items-5" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#question-general" rdf-subject="#review-items-6" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-7" rdf-subject="#review-items-6" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-0" rdf-subject="#review-items-7" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-8" rdf-subject="#review-items-7" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-1" rdf-subject="#review-items-8" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-9" rdf-subject="#review-items-8" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-2" rdf-subject="#review-items-9" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-10" rdf-subject="#review-items-9" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-3" rdf-subject="#review-items-10" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-11" rdf-subject="#review-items-10" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-4" rdf-subject="#review-items-11" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-12" rdf-subject="#review-items-11" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-5" rdf-subject="#review-items-12" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-13" rdf-subject="#review-items-12" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-6" rdf-subject="#review-items-13" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-14" rdf-subject="#review-items-13" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-7" rdf-subject="#review-items-14" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-15" rdf-subject="#review-items-14" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-8" rdf-subject="#review-items-15" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-16" rdf-subject="#review-items-15" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-9" rdf-subject="#review-items-16" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-17" rdf-subject="#review-items-16" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-10" rdf-subject="#review-items-17" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-18" rdf-subject="#review-items-17" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-11" rdf-subject="#review-items-18" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-19" rdf-subject="#review-items-18" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-12" rdf-subject="#review-items-19" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-20" rdf-subject="#review-items-19" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-13" rdf-subject="#review-items-20" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-21" rdf-subject="#review-items-20" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-14" rdf-subject="#review-items-21" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-22" rdf-subject="#review-items-21" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-15" rdf-subject="#review-items-22" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-23" rdf-subject="#review-items-22" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-16" rdf-subject="#review-items-23" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-24" rdf-subject="#review-items-23" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-17" rdf-subject="#review-items-24" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-25" rdf-subject="#review-items-24" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-18" rdf-subject="#review-items-25" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-26" rdf-subject="#review-items-25" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-19" rdf-subject="#review-items-26" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="#review-items-27" rdf-subject="#review-items-26" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="#review-note-20" rdf-subject="#review-items-27" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#first" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil" rdf-subject="#review-items-27" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/prov#Agent" rdf-subject="#drafting-rationale-agent" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <span rdf-subject="#drafting-rationale-agent" rdf-predicate="https://schema.org/name" rdf-graph="#review-graph">Drafting Rationale</span>
+
+        <!-- Review request. -->
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-request" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-request" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html" rdf-subject="#review-request" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="#drafting-rationale-agent" rdf-subject="#review-request" rdf-predicate="http://purl.org/dc/terms/creator" rdf-graph="#review-graph"></a>
+        <time datetime="2026-07-09T00:00:00Z" rdf-subject="#review-request" rdf-predicate="http://purl.org/dc/terms/created" rdf-datatype="http://www.w3.org/2001/XMLSchema#dateTime" rdf-graph="#review-graph"></time>
+
+        <!-- Counsel questions. -->
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#question-novation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#questioning" rdf-subject="#question-novation" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#release-option-a" rdf-subject="#question-novation" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#question-clawback" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#questioning" rdf-subject="#question-clawback" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-prepaid-balance" rdf-subject="#question-clawback" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#question-records" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#questioning" rdf-subject="#question-records" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-prepaid-balance" rdf-subject="#question-records" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#question-venue" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#questioning" rdf-subject="#question-venue" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-governing-law" rdf-subject="#question-venue" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#question-elections" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#questioning" rdf-subject="#question-elections" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-assumption" rdf-subject="#question-elections" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#question-general" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#questioning" rdf-subject="#question-general" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html" rdf-subject="#question-general" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+
+        <!-- Clause-level assessments. -->
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-0" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-0" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#opening" rdf-subject="#review-note-0" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-1" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-1" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#recital-a" rdf-subject="#review-note-1" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-2" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-2" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#recital-b" rdf-subject="#review-note-2" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-3" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-3" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#consideration" rdf-subject="#review-note-3" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-4" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-4" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-assignment" rdf-subject="#review-note-4" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-5" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-5" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-assumption" rdf-subject="#review-note-5" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-6" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-6" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-consent" rdf-subject="#review-note-6" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-7" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-7" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#release-option-a" rdf-subject="#review-note-7" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-8" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-8" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#release-option-b" rdf-subject="#review-note-8" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-9" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-9" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-conditions" rdf-subject="#review-note-9" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-10" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-10" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-assignor-reps" rdf-subject="#review-note-10" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-11" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-11" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-assignee-reps" rdf-subject="#review-note-11" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-12" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-12" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-counterparty-reps" rdf-subject="#review-note-12" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-13" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-13" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-payments" rdf-subject="#review-note-13" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-14" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-14" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-prepaid-balance" rdf-subject="#review-note-14" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-15" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-15" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-further-assurances" rdf-subject="#review-note-15" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-16" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-16" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-indemnification" rdf-subject="#review-note-16" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-17" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-17" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-no-other-amendment" rdf-subject="#review-note-17" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-18" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-18" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-governing-law" rdf-subject="#review-note-18" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-19" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-19" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#clause-entire-agreement" rdf-subject="#review-note-19" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#review-note-20" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" rdf-graph="#review-graph"></a>
+        <a href="http://www.w3.org/ns/oa#assessing" rdf-subject="#review-note-20" rdf-predicate="http://www.w3.org/ns/oa#motivatedBy" rdf-graph="#review-graph"></a>
+        <a href="assignment.html#execution" rdf-subject="#review-note-20" rdf-predicate="http://www.w3.org/ns/oa#hasTarget" rdf-graph="#review-graph"></a>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/packages/rdf-policy-reviewer/dist/rdf-policy-reviewer.js"></script>
+  <script type="module" src="/packages/html-rdf-navigator/dist/html-rdf-navigator.js"></script>
+</body>
+</html>

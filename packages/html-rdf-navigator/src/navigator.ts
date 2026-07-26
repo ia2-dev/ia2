@@ -1,14 +1,43 @@
 import { extractDataset } from "./extract.js";
 import {
+  DEFAULT_LABEL_PREDICATES,
+  labelFor,
+  termLabelMap,
+} from "@ia2-dev/html-rdf";
+import {
+  WINDOW_PLACEMENT_CSS,
+  bindScrollSyncControls,
+  bindWindowPositionControls,
+  isWindowPosition,
+  positionControlsMarkup,
+  scrollSyncControlsMarkup,
+  updateScrollSyncControls,
+  type ScrollSyncMode,
+  type WindowPosition,
+} from "@ia2-dev/ui-primitives";
+import {
   detectDiscoveryCandidates,
   mergeDiscoveryContributions,
   type DiscoveryCandidate,
   type DiscoveryContribution,
 } from "./discovery.js";
 import { highlightedCode } from "./highlight.js";
-import type { Diagnostic, ExtractionResult, GraphTerm, ObjectTerm, Quad, SubjectTerm } from "./model.js";
+import {
+  XSD_STRING,
+  type Diagnostic,
+  type ExtractionResult,
+  type GraphTerm,
+  type ObjectTerm,
+  type Quad,
+  type SubjectTerm,
+} from "./model.js";
 import { compactTerm, containsTripleTerms, PREFIXES, serializeJsonLd, serializeTurtle } from "./serialize.js";
 import { fromPortableExtractionResult, type NavigatorSource, type PortableNavigatorSource } from "./sources.js";
+import {
+  extractSuggestedSparqlQueryCatalog,
+  type SuggestedSparqlQuery,
+} from "./suggested-queries.js";
+import type { SparqlExecutionResult, SparqlResultTerm } from "./sparql-engine.js";
 import {
   extractDocumentVocabulary,
   type DocumentVocabulary,
@@ -61,28 +90,18 @@ const CSS = String.raw`
   .mark svg { height: 100%; width: 100%; }
   .count { background: var(--accent); border-radius: 999px; color: var(--paper); font-size: 11px; font-variant-numeric: tabular-nums; font-weight: 700; min-width: 20px; padding: 1px 6px; text-align: center; }
   .panel {
+    --ia2-window-floating-closed-transform: translateY(14px) scale(.985);
+    --ia2-window-floating-left: 24px;
+    --ia2-window-floating-open-transform: translateY(0) scale(1);
+    --ia2-window-floating-top: 24px;
+    --ia2-window-rule: var(--line);
+    --ia2-window-transition-duration: 240ms;
+    --ia2-window-width: min(760px, 72vw);
     background: var(--paper);
-    border-left: 1px solid var(--line);
-    bottom: 0;
-    box-shadow: -12px 0 48px oklch(20% 0.03 286 / 18%);
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
-    max-width: 100vw;
-    position: fixed;
-    right: 0;
-    top: 0;
-    transform: translateX(102%);
-    transition: opacity 180ms ease, transform 240ms cubic-bezier(.22,1,.36,1), visibility 240ms;
-    visibility: hidden;
-    width: min(760px, 72vw);
   }
   .panel:focus { outline: none; }
-  .panel[data-position^="left"] { border-left: 0; border-right: 1px solid var(--line); box-shadow: 12px 0 48px oklch(20% 0.03 286 / 18%); left: 0; right: auto; transform: translateX(-102%); }
-  .panel[data-position$="-top"] { bottom: auto; border-bottom: 1px solid var(--line); height: 50vh; top: 0; }
-  .panel[data-position$="-bottom"] { border-top: 1px solid var(--line); bottom: 0; height: 50vh; top: auto; }
-  .panel[data-position="floating"] { border: 1px solid var(--line); border-radius: 14px; bottom: auto; box-shadow: 0 18px 64px oklch(20% 0.03 286 / 24%); height: min(860px, calc(100vh - 48px)); left: 24px; opacity: 0; overflow: hidden; right: auto; top: 24px; transform: translateY(14px) scale(.985); width: min(760px, calc(100vw - 48px)); }
-  .panel[data-open="true"] { transform: translateX(0); visibility: visible; }
-  .panel[data-position="floating"][data-open="true"] { opacity: 1; transform: translateY(0) scale(1); }
   .toolbar { align-items: center; border-bottom: 1px solid var(--line); display: flex; gap: 8px; min-width: 0; padding: 0 8px 0 12px; }
   .drag-grip { color: var(--muted); display: none; flex: 0 0 30px; height: 36px; place-items: center; touch-action: none; user-select: none; }
   .panel[data-position="floating"] .drag-grip { cursor: grab; display: grid; }
@@ -90,7 +109,7 @@ const CSS = String.raw`
   .panel[data-position="floating"].is-dragging .drag-grip, .panel[data-position="floating"].is-dragging .tabs { cursor: grabbing; }
   .drag-grip svg { fill: currentColor; height: 18px; opacity: .68; width: 10px; }
   .header-actions { align-items: center; display: flex; flex: 0 0 auto; gap: 4px; }
-  .position-switch { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 7px; display: inline-flex; flex: 0 0 198px; overflow: hidden; transition: background 140ms ease, border-color 140ms ease; width: 198px; }
+  .position-switch { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 7px; display: inline-flex; flex: 0 0 auto; overflow: hidden; transition: background 140ms ease, border-color 140ms ease; width: auto; }
   .position-switch:hover, .position-switch:focus-within { background: var(--layer); border-color: var(--line); }
   .position-switch:focus-within { border-color: var(--accent); }
   .position-option { align-items: center; background: transparent; border: 0; border-right: 1px solid transparent; color: var(--muted); cursor: pointer; display: inline-flex; flex: 0 0 28px; height: 32px; justify-content: center; opacity: .26; padding: 0; pointer-events: none; transition: background 140ms ease, border-color 140ms ease, color 140ms ease, opacity 110ms ease; visibility: visible; width: 28px; }
@@ -181,8 +200,148 @@ const CSS = String.raw`
   .ontology-actions { opacity: 0; pointer-events: none; }
   .ontology-term-row:hover .ontology-actions, .ontology-term-row:focus-within .ontology-actions { opacity: 1; pointer-events: auto; }
   .ontology-actions .locate-button { opacity: 1; }
+  .sparql-workbench { display: grid; gap: 15px; margin: 0 auto; max-width: 920px; min-width: 0; }
+  .sparql-intro { color: var(--muted); font-size: 12px; margin: 0; max-width: 72ch; }
+  .sparql-catalog { display: grid; gap: 6px; min-width: 0; }
+  .sparql-label { color: var(--ink); font-size: 12px; font-weight: 700; }
+  .sparql-select, .sparql-editor-shell {
+    background: var(--layer);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: var(--ink);
+    width: 100%;
+  }
+  .sparql-select { font: inherit; min-height: 38px; padding: 7px 10px; }
+  .sparql-editor-shell {
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .sparql-highlight, .sparql-editor {
+    box-sizing: border-box;
+    font: 12.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    min-height: 230px;
+    overflow-wrap: anywhere;
+    padding: 13px 14px;
+    tab-size: 2;
+    white-space: pre-wrap;
+    width: 100%;
+  }
+  .sparql-highlight {
+    border: 0;
+    inset: 0;
+    margin: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    z-index: 0;
+  }
+  .sparql-highlight code { font: inherit; }
+  .sparql-highlight code::after { content: " "; }
+  .sparql-editor {
+    -webkit-text-fill-color: transparent;
+    background: transparent;
+    border: 0;
+    caret-color: var(--ink);
+    color: transparent;
+    display: block;
+    overflow-x: hidden;
+    position: relative;
+    resize: vertical;
+    z-index: 1;
+  }
+  .sparql-editor::selection {
+    background: color-mix(in oklch, var(--accent), transparent 72%);
+  }
+  .sparql-select:hover, .sparql-editor-shell:hover { border-color: color-mix(in oklch, var(--accent), var(--line) 55%); }
+  .sparql-select:focus, .sparql-editor-shell:focus-within {
+    border-color: var(--accent);
+    outline: 3px solid color-mix(in oklch, var(--accent), transparent 78%);
+    outline-offset: 1px;
+  }
+  .sparql-description { color: var(--muted); font-size: 11px; margin: 0; min-height: 1.5em; }
+  .sparql-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 9px; }
+  .sparql-run, .sparql-reset {
+    border: 1px solid var(--accent);
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    min-height: 36px;
+    padding: 7px 13px;
+  }
+  .sparql-run { background: var(--accent); color: var(--paper); }
+  .sparql-run:hover { background: color-mix(in oklch, var(--accent), var(--ink) 12%); }
+  .sparql-run:disabled { cursor: wait; opacity: .62; }
+  .sparql-reset { background: transparent; border-color: var(--line); color: var(--muted); }
+  .sparql-reset:hover { background: var(--layer); color: var(--ink); }
+  .sparql-observe {
+    align-items: center;
+    color: var(--muted);
+    display: inline-flex;
+    font-size: 11px;
+    gap: 6px;
+    min-height: 36px;
+  }
+  .sparql-observe input { accent-color: var(--accent); height: 16px; margin: 0; width: 16px; }
+  .sparql-safety { color: var(--muted); flex: 1 1 240px; font-size: 10.5px; margin: 0; text-align: right; }
+  .sparql-output { border-top: 1px solid var(--line); min-height: 56px; padding-top: 14px; }
+  .sparql-status { color: var(--muted); font-size: 12px; margin: 0; }
+  .sparql-status[data-state="error"] {
+    background: color-mix(in oklch, var(--warning), transparent 88%);
+    border: 1px solid color-mix(in oklch, var(--warning), var(--line) 30%);
+    border-radius: 8px;
+    color: var(--ink);
+    padding: 10px 11px;
+  }
+  .sparql-summary { color: var(--muted); font-size: 11px; margin: 0 0 8px; }
+  .sparql-boolean { color: var(--accent); font: 750 28px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 4px 0; }
+  .sparql-table-wrap { border: 1px solid var(--line); border-radius: 8px; overflow: auto; }
+  .sparql-table { border-collapse: collapse; font-size: 11.5px; min-width: 100%; text-align: left; }
+  .sparql-table th { background: var(--layer); color: var(--muted); font-size: 10px; letter-spacing: .045em; padding: 8px 10px; position: sticky; text-transform: uppercase; top: 0; white-space: nowrap; }
+  .sparql-table td { border-top: 1px solid var(--line); max-width: 480px; padding: 8px 10px; vertical-align: top; }
+  .sparql-table code, .sparql-table a { color: var(--ink); font: 11.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+  .sparql-table a { color: var(--accent); text-decoration-color: color-mix(in oklch, currentColor, transparent 60%); text-underline-offset: 2px; }
+  .sparql-resource-term { display: block; min-width: 13ch; }
+  .sparql-table .sparql-resource-label {
+    color: var(--ink);
+    font: 650 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  .sparql-table .sparql-resource-label:hover { color: var(--accent); }
+  .sparql-literal-value { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; line-height: 1.5; }
+  .sparql-literal-qualifier { color: var(--muted); display: inline-block; font-size: 10.5px; margin-left: 5px; }
+  .sparql-unbound { color: var(--muted); }
+  .sparql-pagination { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .sparql-page-size-label { align-items: center; color: var(--muted); display: inline-flex; font-size: 11px; gap: 7px; }
+  .sparql-page-size {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    color: var(--ink);
+    font: inherit;
+    min-height: 32px;
+    padding: 4px 25px 4px 8px;
+  }
+  .sparql-page-size:hover { border-color: color-mix(in oklch, var(--accent), var(--line) 55%); }
+  .sparql-page-size:focus { border-color: var(--accent); outline: 3px solid color-mix(in oklch, var(--accent), transparent 78%); outline-offset: 1px; }
+  .sparql-page-status { color: var(--muted); flex: 1 1 auto; font-size: 11px; font-variant-numeric: tabular-nums; margin: 0; min-width: max-content; text-align: right; }
+  .sparql-page-button {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    color: var(--ink);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    min-height: 32px;
+    padding: 5px 10px;
+  }
+  .sparql-page-button:hover:not(:disabled) { background: var(--layer); border-color: color-mix(in oklch, var(--accent), var(--line) 55%); }
+  .sparql-page-button:disabled { color: var(--muted); cursor: default; opacity: .52; }
   pre { background: var(--layer); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); font: 12.5px/1.65 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; min-height: 100%; overflow: auto; padding: 16px 17px; tab-size: 2; white-space: pre; }
   .tok.iri, .tok.name { color: oklch(49% 0.17 290); }
+  .tok.variable { color: oklch(45% 0.13 235); }
   .tok.iri { text-decoration-color: color-mix(in oklch, currentColor, transparent 55%); text-underline-offset: 3px; }
   .tok.string { color: oklch(45% 0.12 145); }
   .tok.key, .tok.keyword { color: oklch(50% 0.15 32); }
@@ -282,11 +441,8 @@ const CSS = String.raw`
   .copy { background: transparent; border: 0; color: var(--accent); cursor: pointer; font-size: 12px; font-weight: 700; padding: 4px 5px; }
   .sr-only { height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; clip: rect(0,0,0,0); }
   @media (max-width: 760px) {
-    .panel { border-left: 0; width: 100vw; }
     .launcher { bottom: var(--ia2-rdf-launcher-bottom, 14px); right: 14px; }
     .launcher[data-position^="left"] { left: 14px; right: auto; }
-    .panel[data-position^="left"] { border-right: 0; }
-    .panel[data-position="floating"] { border: 1px solid var(--line); border-radius: 12px; bottom: auto; height: calc(100vh - 20px); left: 10px; right: auto; top: 10px; width: calc(100vw - 20px); }
     .toolbar { flex-wrap: wrap; padding: 8px 10px 0; }
     .drag-grip { order: 1; }
     .header-actions { margin-left: auto; order: 2; }
@@ -300,6 +456,13 @@ const CSS = String.raw`
     .discovery-item { grid-template-columns: minmax(0, 1fr); }
     .discovery-state { align-items: flex-start; min-width: 0; }
     .discovery-status { text-align: left; }
+    .sparql-safety { flex-basis: 100%; text-align: left; }
+    .sparql-highlight, .sparql-editor { min-height: 190px; }
+    .sparql-pagination { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+    .sparql-page-status { grid-column: 2; grid-row: 1; }
+    .sparql-page-button { min-width: 76px; }
+    .sparql-page-previous { grid-column: 1; grid-row: 2; justify-self: end; }
+    .sparql-page-next { grid-column: 2; grid-row: 2; }
   }
   @media (hover: none) {
     .preview-actions { opacity: 1; pointer-events: auto; }
@@ -312,16 +475,25 @@ const CSS = String.raw`
     :host { --ink: oklch(92% 0.012 286); --muted: oklch(70% 0.018 286); --paper: oklch(20% 0.016 286); --layer: oklch(24% 0.019 286); --line: oklch(34% 0.022 286); --accent: oklch(73% 0.15 294); --accent-soft: oklch(29% 0.05 294); }
     .launcher { background: var(--accent); color: oklch(18% 0.02 286); }
     .tok.iri, .tok.name { color: oklch(77% 0.13 290); }
+    .tok.variable { color: oklch(77% 0.1 235); }
     .tok.string { color: oklch(75% 0.11 145); }
     .tok.key, .tok.keyword { color: oklch(75% 0.12 42); }
     .tok.blank, .tok.number { color: oklch(77% 0.1 235); }
   }
-  @media (prefers-reduced-motion: reduce) { .launcher, .panel { transition: none; } }
+  @media (forced-colors: active) {
+    .sparql-highlight { display: none; }
+    .sparql-editor {
+      -webkit-text-fill-color: CanvasText;
+      color: CanvasText;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) { .launcher { transition: none; } }
+  ${WINDOW_PLACEMENT_CSS}
 `;
 
-type View = "turtle" | "json" | "navigator" | "sources" | "vocabulary" | "discovery" | "diagnostics";
-type SyncMode = "off" | "page" | "navigator";
-export type DrawerPosition = "right" | "right-top" | "right-bottom" | "floating" | "left" | "left-bottom" | "left-top";
+type View = "turtle" | "json" | "navigator" | "sources" | "vocabulary" | "discovery" | "sparql" | "diagnostics";
+type SyncMode = ScrollSyncMode;
+export type DrawerPosition = WindowPosition;
 type ResizeDirection = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
 type ResourcePreviewKind = "definition" | "resource";
 
@@ -330,6 +502,7 @@ const TAB_ICONS: Readonly<Record<View, string>> = {
   sources: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><rect x="2.5" y="3" width="13" height="9" rx="1.5"/><path d="M6 15h6M9 12v3"/></svg>',
   vocabulary: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="3.5" r="2"/><circle cx="4" cy="14" r="2"/><circle cx="14" cy="14" r="2"/><path d="M9 5.5v3M4 12V9h10v3"/></svg>',
   discovery: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="9" r="6.5"/><path d="m11.7 6.3-1.5 3.9-3.9 1.5 1.5-3.9z"/></svg>',
+  sparql: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M3 4.5h8M3 9h6M3 13.5h5"/><circle cx="13" cy="12" r="3"/><path d="m15.2 14.2 1.5 1.5"/></svg>',
   turtle: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="m6.5 4.5-4 4.5 4 4.5M11.5 4.5l4 4.5-4 4.5"/></svg>',
   json: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M7 3.5H5.5c-1 0-1.5.5-1.5 1.5v2c0 1-.5 1.5-1.5 2 1 .5 1.5 1 1.5 2v2c0 1 .5 1.5 1.5 1.5H7M11 3.5h1.5c1 0 1.5.5 1.5 1.5v2c0 1 .5 1.5 1.5 2-1 .5-1.5 1-1.5 2v2c0 1-.5 1.5-1.5 1.5H11"/></svg>',
   diagnostics: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M8 3.2 2.3 13a1.2 1.2 0 0 0 1 1.8h11.4a1.2 1.2 0 0 0 1-1.8L10 3.2a1.15 1.15 0 0 0-2 0Z"/><path d="M9 6.8v3.4M9 13h.01"/></svg>',
@@ -377,11 +550,31 @@ interface PersistedNavigatorState {
 interface FocusSnapshot {
   end?: number | null;
   key?: string;
-  kind: "close" | "copy" | "discovery-action" | "fallback" | "launcher" | "namespace" | "position" | "refresh" | "search" | "source" | "sync" | "tab" | "viewport";
+  kind: "close" | "copy" | "discovery-action" | "fallback" | "launcher" | "namespace" | "position" | "refresh" | "search" | "source" | "sparql-editor" | "sparql-observe" | "sparql-reset" | "sparql-run" | "sparql-suggestion" | "sync" | "tab" | "viewport";
   start?: number | null;
 }
 
 const SESSION_STATE_KEY = "ia2:rdf-navigator:state:v1";
+const DEFAULT_SPARQL_QUERY = `SELECT ?subject ?predicate ?object ?graph
+WHERE {
+  {
+    ?subject ?predicate ?object
+    BIND("default graph" AS ?graph)
+  }
+  UNION
+  {
+    GRAPH ?graph {
+      ?subject ?predicate ?object
+    }
+  }
+}
+LIMIT 100`;
+const DEFAULT_SPARQL_PAGE_SIZE = 25;
+const SPARQL_PAGE_SIZES = [10, 25, 50, 100] as const;
+const SPARQL_LABEL_PREDICATES = [
+  ...DEFAULT_LABEL_PREDICATES,
+  "http://www.w3.org/ns/shacl#name",
+] as const;
 const LAUNCHER_DRAG_THRESHOLD = 4;
 const LAUNCHER_EDGE_SNAP_DISTANCE = 28;
 const DISCOVERY_MAX_HTML_LENGTH = 2_000_000;
@@ -444,20 +637,6 @@ const RDFS_SCHEMA_SECTIONS: Record<string, string> = {
   subPropertyOf: "ch_subpropertyof",
 };
 
-const DRAWER_POSITIONS: ReadonlyArray<{ icon: string; label: string; position: DrawerPosition }> = [
-  { position: "right", label: "Right, full height", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M13 2h5v12h-5z"/></svg>' },
-  { position: "right-top", label: "Right, top half", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M13 2h5v5.5h-5z"/></svg>' },
-  { position: "right-bottom", label: "Right, bottom half", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M13 8.5h5V14h-5z"/></svg>' },
-  { position: "floating", label: "Floating, centered", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><rect class="position-region" x="5" y="4.5" width="10" height="7" rx="1"/></svg>' },
-  { position: "left", label: "Left, full height", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M2 2h5v12H2z"/></svg>' },
-  { position: "left-bottom", label: "Left, bottom half", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M2 8.5h5V14H2z"/></svg>' },
-  { position: "left-top", label: "Left, top half", icon: '<svg class="position-icon" viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x=".75" y=".75" width="18.5" height="14.5" rx="2"/><path class="position-region" d="M2 2h5v5.5H2z"/></svg>' },
-];
-
-function isDrawerPosition(value: unknown): value is DrawerPosition {
-  return typeof value === "string" && DRAWER_POSITIONS.some(({ position }) => position === value);
-}
-
 function isFloatingRect(value: unknown): value is FloatingRect {
   if (!value || typeof value !== "object") return false;
   const rect = value as Partial<Record<keyof FloatingRect, unknown>>;
@@ -508,19 +687,14 @@ interface SemanticSuggestion {
 interface SemanticSuggestionBuilder {
   domains: Set<string>;
   iri: string;
-  labels: Map<string, string>;
   ranges: Set<string>;
   statementCount: number;
   types: Set<string>;
 }
 
 const RDF_TYPE_IRI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-const RDFS_LABEL_IRI = "http://www.w3.org/2000/01/rdf-schema#label";
 const RDFS_DOMAIN_IRI = "http://www.w3.org/2000/01/rdf-schema#domain";
 const RDFS_RANGE_IRI = "http://www.w3.org/2000/01/rdf-schema#range";
-const SKOS_PREF_LABEL_IRI = "http://www.w3.org/2004/02/skos/core#prefLabel";
-const DCTERMS_TITLE_IRI = "http://purl.org/dc/terms/title";
-const SCHEMA_NAME_IRI = "https://schema.org/name";
 const TYPEAHEAD_LIMIT = 8;
 
 const TYPE_LABELS: Readonly<Record<string, string>> = {
@@ -744,6 +918,23 @@ function localDocumentUrl(document: Document, value: string, sourceDocumentIri =
   }
 }
 
+function retrievalUrlForSemanticIri(value: string, result: ExtractionResult): string {
+  try {
+    const termUrl = new URL(value);
+    const semanticDocumentUrl = new URL(result.sourceDocumentIri);
+    const termDocumentUrl = new URL(termUrl);
+    termDocumentUrl.hash = "";
+    semanticDocumentUrl.hash = "";
+    if (termDocumentUrl.href !== semanticDocumentUrl.href) return termUrl.href;
+
+    const retrievalUrl = new URL(result.retrievalDocumentIri);
+    retrievalUrl.hash = termUrl.hash;
+    return retrievalUrl.href;
+  } catch {
+    return value;
+  }
+}
+
 function navigateLocalDocument(document: Document, url: URL, event: MouseEvent): void {
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   event.preventDefault();
@@ -904,6 +1095,56 @@ function localNameForIri(iri: string): string {
   }
 }
 
+function readableLabelForIri(iri: string): string {
+  const localName = localNameForIri(iri);
+  const words = localName
+    .replace(/\.[A-Za-z0-9]+$/u, "")
+    .replace(/([\p{Ll}\d])(\p{Lu})/gu, "$1 $2")
+    .replace(/[_-]+/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+  if (!words) return compactIri(iri);
+  return `${words.charAt(0).toLocaleUpperCase()}${words.slice(1)}`;
+}
+
+function sparqlTermSignature(
+  term: SparqlResultTerm | undefined,
+  labels: ReadonlyMap<string, string>,
+): string {
+  if (!term) return "unbound";
+  const label = term.termType === "NamedNode" || term.termType === "BlankNode"
+    ? labels.get(`${term.termType}:${term.value}`) ?? ""
+    : "";
+  return JSON.stringify([
+    term.termType,
+    term.value,
+    term.datatype ?? "",
+    term.language ?? "",
+    term.direction ?? "",
+    label,
+  ]);
+}
+
+function sparqlPresentationSignature(
+  result: SparqlExecutionResult,
+  labels: ReadonlyMap<string, string>,
+): string {
+  if (result.kind === "ask") return `ask:${String(result.value)}`;
+  if (result.kind === "quads") {
+    const quads = result.quads.map((quad) => JSON.stringify([
+      sparqlTermSignature(quad.subject, labels),
+      sparqlTermSignature(quad.predicate, labels),
+      sparqlTermSignature(quad.object, labels),
+      sparqlTermSignature(quad.graph, labels),
+    ])).sort();
+    return JSON.stringify(["quads", quads]);
+  }
+  const rows = result.rows.map((row) => JSON.stringify(
+    result.variables.map((variable) => sparqlTermSignature(row[variable], labels)),
+  )).sort();
+  return JSON.stringify(["bindings", result.variables, rows]);
+}
+
 function semanticSuggestionsIn(result: ExtractionResult): SemanticSuggestion[] {
   const builders = new Map<string, SemanticSuggestionBuilder>();
   const ensure = (iri: string): SemanticSuggestionBuilder => {
@@ -912,7 +1153,6 @@ function semanticSuggestionsIn(result: ExtractionResult): SemanticSuggestion[] {
     const created: SemanticSuggestionBuilder = {
       domains: new Set(),
       iri,
-      labels: new Map(),
       ranges: new Set(),
       statementCount: 0,
       types: new Set(),
@@ -931,22 +1171,15 @@ function semanticSuggestionsIn(result: ExtractionResult): SemanticSuggestion[] {
     for (const iri of iris) ensure(iri).statementCount += 1;
     if (quad.subject.termType !== "NamedNode") continue;
     const subject = ensure(quad.subject.value);
-    if (
-      quad.object.termType === "Literal"
-      && [RDFS_LABEL_IRI, SKOS_PREF_LABEL_IRI, DCTERMS_TITLE_IRI, SCHEMA_NAME_IRI].includes(quad.predicate.value)
-    ) {
-      subject.labels.set(quad.predicate.value, quad.object.value);
-    }
     if (quad.predicate.value === RDF_TYPE_IRI && quad.object.termType === "NamedNode") subject.types.add(quad.object.value);
     if (quad.predicate.value === RDFS_DOMAIN_IRI) subject.domains.add(compactTerm(quad.object));
     if (quad.predicate.value === RDFS_RANGE_IRI) subject.ranges.add(compactTerm(quad.object));
   }
 
-  const labelPriority = [RDFS_LABEL_IRI, SKOS_PREF_LABEL_IRI, DCTERMS_TITLE_IRI, SCHEMA_NAME_IRI];
   return Array.from(builders.values()).map((builder) => {
     const display = compactIri(builder.iri);
     const localName = localNameForIri(builder.iri);
-    const label = labelPriority.map((predicate) => builder.labels.get(predicate)).find(Boolean) ?? "";
+    const label = labelFor(result.quads, builder.iri) ?? "";
     const kinds = Array.from(builder.types, (type) => TYPE_LABELS[type] ?? `type ${compactIri(type)}`).sort();
     const domains = Array.from(builder.domains).sort();
     const ranges = Array.from(builder.ranges).sort();
@@ -1105,6 +1338,17 @@ export class Ia2RdfNavigator extends HTMLElement {
   #open = false;
   #status = "";
   #navigatorQuery = "";
+  #sparqlSuggestions: SuggestedSparqlQuery[] = [];
+  #sparqlSuggestionDiagnostics: string[] = [];
+  #selectedSparqlSuggestionId = "";
+  #sparqlQuery = DEFAULT_SPARQL_QUERY;
+  #sparqlExecution: { error?: string; result?: SparqlExecutionResult; status: "idle" | "running" | "success" | "error" } = { status: "idle" };
+  #sparqlObserveChanges = true;
+  #sparqlPresentationSignature = "";
+  #sparqlResourceLabels = new Map<string, string>();
+  #sparqlPage = 0;
+  #sparqlPageSize = DEFAULT_SPARQL_PAGE_SIZE;
+  #sparqlRunId = 0;
   #disabledNamespaces = new Set<string>();
   #syncMode: SyncMode = "off";
   #position: DrawerPosition = "right";
@@ -1115,6 +1359,7 @@ export class Ia2RdfNavigator extends HTMLElement {
   #suppressLauncherClick = false;
   #linkPreviews = new Map<HTMLElement, LinkPreviewState>();
   #activeLinkPreview: HTMLElement | null = null;
+  #sparqlLinkPreview: HTMLElement | null = null;
   #linkPreviewZIndex = 20;
   #locateAnimation: Animation | null = null;
   #syncCleanup: (() => void) | null = null;
@@ -1213,6 +1458,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     state.navigationCleanup?.();
     preview.remove();
     this.#linkPreviews.delete(preview);
+    if (this.#sparqlLinkPreview === preview) this.#sparqlLinkPreview = null;
     if (this.#activeLinkPreview !== preview) return;
     const remaining = Array.from(this.#linkPreviews.keys()).at(-1) ?? null;
     this.#activeLinkPreview = null;
@@ -1365,9 +1611,26 @@ export class Ia2RdfNavigator extends HTMLElement {
     });
   }
 
-  #showLinkPreview(anchor: HTMLAnchorElement, x: number, y: number): void {
+  #navigateLinkPreview(preview: HTMLElement, href: string): void {
+    const frame = preview.querySelector<HTMLIFrameElement>(".resource-preview-frame");
+    const open = preview.querySelector<HTMLAnchorElement>(".resource-preview-open");
+    const url = preview.querySelector<HTMLElement>(".resource-preview-url");
+    if (!frame || !open || !url) return;
+    const previewKind: ResourcePreviewKind = preview.dataset.previewKind === "definition" ? "definition" : "resource";
+    const label = previewKind === "definition" ? "Definition" : "Resource";
+    preview.setAttribute("aria-label", `${label} preview of ${href}`);
+    url.textContent = href;
+    url.title = href;
+    open.href = href;
+    open.setAttribute("aria-label", `Open ${href} in a new tab`);
+    open.title = open.getAttribute("aria-label")!;
+    frame.title = `${label} preview of ${href}`;
+    this.#loadLinkPreviewFrame(preview, frame, href);
+  }
+
+  #showLinkPreview(anchor: HTMLAnchorElement, x: number, y: number): HTMLElement | null {
     const view = this.ownerDocument.defaultView;
-    if (!view || !this.shadowRoot || !anchor.isConnected) return;
+    if (!view || !this.shadowRoot || !anchor.isConnected) return null;
     const document = this.ownerDocument;
     const preview = document.createElement("section");
     preview.className = "resource-preview";
@@ -1450,29 +1713,38 @@ export class Ia2RdfNavigator extends HTMLElement {
     const handlePreviewNavigation = (event: MessageEvent): void => {
       const data = event.data as { href?: unknown; type?: unknown } | null;
       if (event.source !== frame.contentWindow || data?.type !== "ia2-rdf-preview-navigate" || typeof data.href !== "string" || !isWebIri(data.href)) return;
-      url.textContent = data.href;
-      url.title = data.href;
-      open.href = data.href;
-      this.#loadLinkPreviewFrame(preview, frame, data.href);
+      this.#navigateLinkPreview(preview, data.href);
     };
     view.addEventListener("message", handlePreviewNavigation);
     state.navigationCleanup = () => view.removeEventListener("message", handlePreviewNavigation);
     this.#loadLinkPreviewFrame(preview, frame, anchor.href);
+    return preview;
   }
 
-  #openLinkPreview(anchor: HTMLAnchorElement, event: MouseEvent): void {
+  #openLinkPreview(anchor: HTMLAnchorElement, event: MouseEvent): HTMLElement | null {
     const rect = anchor.getBoundingClientRect();
     const x = event.clientX || rect.left + Math.min(rect.width / 2, 24);
     const y = event.clientY || rect.top + Math.min(rect.height / 2, 12);
-    this.#showLinkPreview(anchor, x, y);
+    return this.#showLinkPreview(anchor, x, y);
+  }
+
+  #openSparqlLinkPreview(anchor: HTMLAnchorElement, event: MouseEvent): void {
+    const preview = this.#sparqlLinkPreview;
+    if (preview?.isConnected && this.#linkPreviews.has(preview)) {
+      this.#activateLinkPreview(preview);
+      this.#navigateLinkPreview(preview, anchor.href);
+      return;
+    }
+    this.#sparqlLinkPreview = this.#openLinkPreview(anchor, event);
   }
 
   #resourceAnchorForTarget(target: EventTarget | null): HTMLAnchorElement | null {
     if (!(target instanceof Element)) return null;
-    const anchor = target.closest<HTMLAnchorElement>("a.term-link[href], a.vocabulary-link[href], a.tok.iri[href]");
+    const anchor = target.closest<HTMLAnchorElement>("a.term-link[href], a.vocabulary-link[href], a.tok.iri[href], a.sparql-resource-label[href]");
     if (!anchor || !this.shadowRoot?.contains(anchor)) return null;
     const sourceDocumentIri = this.#result?.sourceDocumentIri ?? this.ownerDocument.URL;
-    return localDocumentUrl(this.ownerDocument, anchor.href, sourceDocumentIri) ? null : anchor;
+    const semanticIri = anchor.dataset.semanticIri ?? anchor.href;
+    return localDocumentUrl(this.ownerDocument, semanticIri, sourceDocumentIri) ? null : anchor;
   }
 
   #configureLinkClicks(): void {
@@ -1483,7 +1755,11 @@ export class Ia2RdfNavigator extends HTMLElement {
       const anchor = this.#resourceAnchorForTarget(event.target);
       if (!anchor || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
-      this.#openLinkPreview(anchor, event);
+      if (anchor.classList.contains("sparql-resource-label")) {
+        this.#openSparqlLinkPreview(anchor, event);
+      } else {
+        this.#openLinkPreview(anchor, event);
+      }
     });
   }
 
@@ -1492,7 +1768,7 @@ export class Ia2RdfNavigator extends HTMLElement {
       const serialized = this.ownerDocument.defaultView?.sessionStorage.getItem(SESSION_STATE_KEY);
       if (!serialized) return;
       const state = JSON.parse(serialized) as Partial<PersistedNavigatorState>;
-      if (isDrawerPosition(state.position)) this.#position = state.position;
+      if (isWindowPosition(state.position)) this.#position = state.position;
       if (isFloatingRect(state.floatingRect)) this.#floatingRect = this.#constrainFloatingRect(state.floatingRect);
       if (isLauncherPosition(state.launcherPosition)) this.#launcherPosition = state.launcherPosition;
     } catch {
@@ -1520,6 +1796,14 @@ export class Ia2RdfNavigator extends HTMLElement {
       const input = active as HTMLInputElement;
       return { kind: "search", start: input.selectionStart, end: input.selectionEnd };
     }
+    if (active.classList.contains("sparql-editor")) {
+      const input = active as HTMLTextAreaElement;
+      return { kind: "sparql-editor", start: input.selectionStart, end: input.selectionEnd };
+    }
+    if (active.classList.contains("sparql-suggestion")) return { kind: "sparql-suggestion" };
+    if (active.classList.contains("sparql-run")) return { kind: "sparql-run" };
+    if (active.classList.contains("sparql-reset")) return { kind: "sparql-reset" };
+    if (active.classList.contains("sparql-observe-input")) return { kind: "sparql-observe" };
     if (active.classList.contains("vocabulary-toggle") && active.dataset.namespace) return { kind: "namespace", key: active.dataset.namespace };
     if (active.classList.contains("sync-option") && active.dataset.syncMode) return { kind: "sync", key: active.dataset.syncMode };
     if (active.classList.contains("position-option") && active.dataset.position) return { kind: "position", key: active.dataset.position };
@@ -1538,6 +1822,11 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (!this.shadowRoot) return;
     let target: HTMLElement | null = null;
     if (snapshot.kind === "search") target = this.shadowRoot.querySelector<HTMLInputElement>(".navigator-search");
+    if (snapshot.kind === "sparql-editor") target = this.shadowRoot.querySelector<HTMLTextAreaElement>(".sparql-editor");
+    if (snapshot.kind === "sparql-suggestion") target = this.shadowRoot.querySelector<HTMLSelectElement>(".sparql-suggestion");
+    if (snapshot.kind === "sparql-run") target = this.shadowRoot.querySelector<HTMLButtonElement>(".sparql-run");
+    if (snapshot.kind === "sparql-reset") target = this.shadowRoot.querySelector<HTMLButtonElement>(".sparql-reset");
+    if (snapshot.kind === "sparql-observe") target = this.shadowRoot.querySelector<HTMLInputElement>(".sparql-observe-input");
     if (snapshot.kind === "namespace") {
       target = Array.from(this.shadowRoot.querySelectorAll<HTMLButtonElement>(".vocabulary-toggle"))
         .find((button) => button.dataset.namespace === snapshot.key) ?? null;
@@ -1557,6 +1846,9 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (snapshot.kind === "search" && target instanceof HTMLInputElement) {
       target.setSelectionRange(snapshot.start ?? target.value.length, snapshot.end ?? target.value.length);
     }
+    if (snapshot.kind === "sparql-editor" && target instanceof HTMLTextAreaElement) {
+      target.setSelectionRange(snapshot.start ?? target.value.length, snapshot.end ?? target.value.length);
+    }
   }
 
   #panelFocusables(): HTMLElement[] {
@@ -1569,29 +1861,49 @@ export class Ia2RdfNavigator extends HTMLElement {
 
   #observeDocument(): void {
     this.#observer?.disconnect();
-    this.#observer = new MutationObserver((records) => {
+    const Observer = this.ownerDocument.defaultView?.MutationObserver ?? MutationObserver;
+    this.#observer = new Observer((records) => {
       // Mutations inside the drawer's Shadow DOM are outside this observer.
       // Ignore the host itself in case another tool changes its attributes.
       if (!records.some((record) => record.target !== this && mutationAffectsExtraction(record))) return;
       if (this.#refreshTimer !== null) window.clearTimeout(this.#refreshTimer);
       this.#refreshTimer = window.setTimeout(() => {
         this.#refreshTimer = null;
-        this.refresh();
+        if (this.#sparqlExecution.status === "success") {
+          void this.#refreshAfterDocumentChange();
+        } else {
+          this.refresh();
+        }
       }, 120);
     });
-    this.#observer.observe(this.ownerDocument.documentElement, {
-      attributes: true,
-      characterData: true,
-      childList: true,
-      subtree: true,
-    });
+    try {
+      this.#observer.observe(this.ownerDocument.documentElement, {
+        attributes: true,
+        characterData: true,
+        childList: true,
+        subtree: true,
+      });
+    } catch {
+      // A custom element adopted into another browsing context can retain its
+      // defining realm in some hosts. Extraction and explicit dataset-change
+      // events remain available even when that host rejects DOM observation.
+      this.#observer = null;
+    }
   }
 
   #rebuildResult(): void {
-    if (!this.#sourceResult) return;
+    if (!this.#sourceResult) {
+      this.#result = null;
+      this.#sparqlResourceLabels.clear();
+      return;
+    }
     const contributions = Array.from(this.#discoveryLoads.values())
       .flatMap((state) => state.status === "loaded" && state.contribution ? [state.contribution] : []);
     this.#result = mergeDiscoveryContributions(this.#sourceResult, contributions);
+    this.#sparqlResourceLabels = termLabelMap(this.#result.quads, {
+      predicates: SPARQL_LABEL_PREDICATES,
+      languages: [this.ownerDocument.documentElement.lang || "en"],
+    });
   }
 
   #renderDiscoveryState(candidateId: string): void {
@@ -1708,18 +2020,29 @@ export class Ia2RdfNavigator extends HTMLElement {
     });
   }
 
-  #applySelectedSource(preserveDiscovery: boolean): void {
+  #applySelectedSource(preserveDiscovery: boolean, preserveSparqlExecution = false): void {
     const source = this.#sources.find((candidate) => candidate.id === this.#selectedSourceId) ?? this.#sources[0];
     if (!source) return;
-    const sourceChanged = this.#sourceResult !== source.result;
     this.#selectedSourceId = source.id;
     this.#sourceResult = source.result;
-    if (sourceChanged && !preserveDiscovery) {
+    if (!preserveDiscovery) {
       for (const state of this.#discoveryLoads.values()) state.controller?.abort();
       this.#discoveryLoads.clear();
     }
     this.#discoveryCandidates = detectDiscoveryCandidates(this.#sourceResult);
     this.#documentVocabulary = extractDocumentVocabulary(this.#sourceResult);
+    const queryCatalog = extractSuggestedSparqlQueryCatalog(this.#sourceResult);
+    this.#sparqlSuggestions = queryCatalog.queries;
+    this.#sparqlSuggestionDiagnostics = queryCatalog.diagnostics;
+    if (!this.#sparqlSuggestions.some((query) => query.id === this.#selectedSparqlSuggestionId)) {
+      this.#selectedSparqlSuggestionId = "";
+    }
+    if (!preserveSparqlExecution) {
+      this.#sparqlRunId += 1;
+      this.#sparqlPage = 0;
+      this.#sparqlExecution = { status: "idle" };
+      this.#sparqlPresentationSignature = "";
+    }
     const candidateIds = new Set(this.#discoveryCandidates.map((candidate) => candidate.id));
     for (const [candidateId, state] of this.#discoveryLoads) {
       if (candidateIds.has(candidateId)) continue;
@@ -1729,8 +2052,9 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.#rebuildResult();
   }
 
-  #rebuildSources(preserveDiscovery: boolean): void {
+  #rebuildSources(preserveDiscovery: boolean, preserveSparqlExecution = false): void {
     if (!this.#topSourceResult) return;
+    const previousSelectedSourceId = this.#selectedSourceId;
     const topUrl = this.ownerDocument.URL || this.ownerDocument.baseURI;
     let topOrigin = "Opaque origin";
     try { topOrigin = new URL(topUrl).origin; } catch { /* keep the explicit fallback */ }
@@ -1758,7 +2082,10 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (this.#selectedSourceId === top.id && top.result.quads.length === 0 && rdfChildren.length === 1) {
       this.#selectedSourceId = rdfChildren[0]!.id;
     }
-    this.#applySelectedSource(preserveDiscovery);
+    this.#applySelectedSource(
+      preserveDiscovery,
+      preserveSparqlExecution && previousSelectedSourceId === this.#selectedSourceId,
+    );
   }
 
   #selectSource(sourceId: string): void {
@@ -1796,12 +2123,76 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (focus) queueMicrotask(() => this.#restoreFocus(focus));
   }
 
+  #refreshExtraction(preserveSparqlExecution: boolean): void {
+    this.#topSourceResult = extractDataset(this.ownerDocument);
+    this.#directFrameSources = this.#extractDirectFrameSources();
+    this.#rebuildSources(true, preserveSparqlExecution);
+  }
+
+  #totalStatementCount(): number {
+    const activeSource = this.#sources.find((source) => source.id === this.#selectedSourceId) ?? this.#sources[0];
+    const sourceStatements = this.#sources.reduce((sum, source) => sum + source.result.quads.length, 0);
+    const selectedContributions = Math.max(0, (this.#result?.quads.length ?? 0) - (activeSource?.result.quads.length ?? 0));
+    return sourceStatements + selectedContributions;
+  }
+
+  #updateLiveStatementCount(): void {
+    const count = this.shadowRoot?.querySelector<HTMLElement>(".launcher .count");
+    if (count) count.textContent = String(this.#totalStatementCount());
+  }
+
+  #replaceSparqlOutput(): void {
+    const output = this.shadowRoot?.querySelector<HTMLElement>(".sparql-output");
+    if (!output) return;
+    output.replaceChildren();
+    this.#renderSparqlOutput(output);
+  }
+
+  async #rerunObservedSparql(): Promise<void> {
+    const query = this.#sparqlQuery.trim();
+    if (
+      !this.#sparqlObserveChanges
+      || !query
+      || !this.#result
+      || this.#sparqlExecution.status !== "success"
+    ) return;
+    const runId = ++this.#sparqlRunId;
+    const sourceResult = this.#result;
+    try {
+      const { executeSparql } = await import("./sparql-engine.js");
+      const result = await executeSparql(query, sourceResult);
+      if (runId !== this.#sparqlRunId) return;
+      const signature = sparqlPresentationSignature(result, this.#sparqlResourceLabels);
+      if (signature === this.#sparqlPresentationSignature) return;
+      this.#sparqlExecution = { result, status: "success" };
+      this.#sparqlPresentationSignature = signature;
+    } catch (error) {
+      if (runId !== this.#sparqlRunId) return;
+      this.#sparqlExecution = {
+        error: error instanceof Error ? error.message : "The query could not be run.",
+        status: "error",
+      };
+      this.#sparqlPresentationSignature = "";
+    }
+    if (this.#view === "sparql") this.#replaceSparqlOutput();
+  }
+
+  async #refreshAfterDocumentChange(): Promise<void> {
+    const selectedSourceId = this.#selectedSourceId;
+    this.#refreshExtraction(true);
+    if (selectedSourceId !== this.#selectedSourceId || this.#sparqlExecution.status !== "success") {
+      this.#render();
+      return;
+    }
+    if (this.#view === "sparql") this.#updateLiveStatementCount();
+    else this.#render();
+    await this.#rerunObservedSparql();
+  }
+
   /** Re-extract the current owner document and redraw every view. */
   refresh(): void {
     const focus = this.#captureFocus();
-    this.#topSourceResult = extractDataset(this.ownerDocument);
-    this.#directFrameSources = this.#extractDirectFrameSources();
-    this.#rebuildSources(true);
+    this.#refreshExtraction(false);
     this.#render();
     if (focus) queueMicrotask(() => this.#restoreFocus(focus));
   }
@@ -2163,6 +2554,28 @@ export class Ia2RdfNavigator extends HTMLElement {
     }
   }
 
+  #locateSparqlResource(semanticIri: string, event: MouseEvent): void {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const sourceDocumentIri = this.#result?.sourceDocumentIri ?? this.ownerDocument.URL;
+    const localUrl = localDocumentUrl(this.ownerDocument, semanticIri, sourceDocumentIri);
+    if (!localUrl) return;
+    const directTarget = locatableElementForUrl(this.ownerDocument, localUrl);
+    const semanticTarget = this.#result?.quads
+      .filter((quad) => quad.subject.termType === "NamedNode" && quad.subject.value === semanticIri)
+      .map((quad) => quad.source)
+      .find((source) => isLocatableSource(source));
+    const target = directTarget ?? semanticTarget;
+    if (!target) return;
+    event.preventDefault();
+    const view = this.ownerDocument.defaultView;
+    if (view) {
+      const currentUrl = new URL(this.ownerDocument.URL);
+      currentUrl.hash = localUrl.hash;
+      view.history.pushState(null, "", currentUrl.href);
+    }
+    this.#locateElement(target);
+  }
+
   #clearLocateEmphasis(): void {
     this.#locateAnimation?.cancel();
     this.#locateAnimation = null;
@@ -2239,7 +2652,7 @@ export class Ia2RdfNavigator extends HTMLElement {
       listen(item, "pointerenter", () => {
         item.classList.add("is-corresponding");
         emphasizeSource(source);
-        if (this.#syncMode === "navigator") {
+        if (this.#syncMode === "panel") {
           source.scrollIntoView({ behavior: view.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
         }
       });
@@ -2372,52 +2785,19 @@ export class Ia2RdfNavigator extends HTMLElement {
     filterCount.className = "filter-count";
     filterCount.setAttribute("for", search.id);
     filterCount.setAttribute("aria-live", "polite");
-    const syncControl = document.createElement("div");
-    syncControl.className = "sync-control";
-    const syncLabel = document.createElement("span");
-    syncLabel.className = "sync-label";
-    syncLabel.textContent = "Sync";
-    const syncSwitch = document.createElement("div");
-    syncSwitch.className = "sync-switch";
-    syncSwitch.setAttribute("role", "radiogroup");
-    syncSwitch.setAttribute("aria-label", "Scroll synchronization");
-    const syncOptions: HTMLButtonElement[] = [];
-    for (const [mode, icon, accessibleLabel] of [
-      ["off", `<svg class="sync-icon" viewBox="0 0 32 16" aria-hidden="true" focusable="false">
-        <path d="M16 2v5" />
-        <path d="M11.7 4.4a6 6 0 1 0 8.6 0" />
-      </svg>`, "Scroll synchronization off"],
-      ["page", `<svg class="sync-icon" viewBox="0 0 34 16" aria-hidden="true" focusable="false">
-        <rect x="1" y="2" width="8" height="12" rx="1.5" />
-        <path d="M3.5 5h3M3.5 8h3M3.5 11h3M11.5 8h9m-3-3 3 3-3 3" />
-        <circle cx="24" cy="4" r=".8" fill="currentColor" stroke="none" />
-        <circle cx="24" cy="8" r=".8" fill="currentColor" stroke="none" />
-        <circle cx="24" cy="12" r=".8" fill="currentColor" stroke="none" />
-        <path d="M27 4h6M27 8h6M27 12h6" />
-      </svg>`, "Follow page viewport in Navigator"],
-      ["navigator", `<svg class="sync-icon" viewBox="0 0 34 16" aria-hidden="true" focusable="false">
-        <circle cx="2" cy="4" r=".8" fill="currentColor" stroke="none" />
-        <circle cx="2" cy="8" r=".8" fill="currentColor" stroke="none" />
-        <circle cx="2" cy="12" r=".8" fill="currentColor" stroke="none" />
-        <path d="M5 4h6M5 8h6M5 12h6M22.5 8h-9m3-3-3 3 3 3" />
-        <rect x="25" y="2" width="8" height="12" rx="1.5" />
-        <path d="M27.5 5h3M27.5 8h3M27.5 11h3" />
-      </svg>`, "Follow Navigator in page"],
-    ] as const) {
-      const option = document.createElement("button");
-      option.className = "sync-option";
-      option.type = "button";
-      option.dataset.syncMode = mode;
-      option.setAttribute("role", "radio");
-      option.setAttribute("aria-checked", String(this.#syncMode === mode));
-      option.setAttribute("aria-label", accessibleLabel);
-      option.title = accessibleLabel;
-      option.tabIndex = this.#syncMode === mode ? 0 : -1;
-      option.innerHTML = icon;
-      syncOptions.push(option);
-      syncSwitch.append(option);
-    }
-    syncControl.append(syncLabel, syncSwitch);
+    const syncMarkup = document.createElement("div");
+    syncMarkup.innerHTML = scrollSyncControlsMarkup({
+      current: this.#syncMode,
+      controlClass: "sync-control",
+      labels: {
+        page: "Follow page viewport in Navigator",
+        panel: "Follow Navigator in page",
+      },
+      optionClass: "sync-option",
+      switchClass: "sync-switch",
+    });
+    const syncControl = syncMarkup.firstElementChild as HTMLElement;
+    const syncSwitch = syncControl.querySelector<HTMLElement>(".sync-switch")!;
     searchGroup.append(search, typeahead, filterCount, typeaheadStatus);
     filter.append(filterLabel, searchGroup, syncControl);
     tools.append(filter);
@@ -2713,32 +3093,12 @@ export class Ia2RdfNavigator extends HTMLElement {
     const setSyncMode = (mode: SyncMode, focus = false): void => {
       this.#syncMode = mode;
       hoveredSource = null;
-      for (const option of syncOptions) {
-        const selected = option.dataset.syncMode === mode;
-        option.setAttribute("aria-checked", String(selected));
-        option.tabIndex = selected ? 0 : -1;
-        if (selected && focus) option.focus();
-      }
+      updateScrollSyncControls(syncSwitch, mode, focus);
       applyFilter();
       configureSync();
     };
     this.#resetSyncControl = () => setSyncMode("off");
-    for (const option of syncOptions) {
-      option.addEventListener("click", () => setSyncMode(option.dataset.syncMode as SyncMode));
-    }
-    syncSwitch.addEventListener("keydown", (event) => {
-      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
-      event.preventDefault();
-      const current = event.target instanceof HTMLButtonElement
-        ? syncOptions.indexOf(event.target)
-        : syncOptions.findIndex((option) => option.getAttribute("aria-checked") === "true");
-      let next = current;
-      if (event.key === "Home") next = 0;
-      if (event.key === "End") next = syncOptions.length - 1;
-      if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (current + 1) % syncOptions.length;
-      if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (current - 1 + syncOptions.length) % syncOptions.length;
-      setSyncMode(syncOptions[next]!.dataset.syncMode as SyncMode, true);
-    });
+    bindScrollSyncControls(syncSwitch, (mode, focus) => setSyncMode(mode, focus));
     applyFilter();
     configureSync();
   }
@@ -3069,6 +3429,447 @@ export class Ia2RdfNavigator extends HTMLElement {
     container.append(intro, list);
   }
 
+  #redrawPreservingFocus(): void {
+    const focus = this.#captureFocus();
+    this.#render();
+    if (focus) queueMicrotask(() => this.#restoreFocus(focus));
+  }
+
+  #appendSparqlTerm(container: HTMLElement, term: SparqlResultTerm | undefined): void {
+    if (!term) {
+      const unbound = this.ownerDocument.createElement("span");
+      unbound.className = "sparql-unbound";
+      unbound.textContent = "—";
+      container.append(unbound);
+      return;
+    }
+    if (term.termType === "NamedNode" || term.termType === "BlankNode") {
+      const explicitLabel = this.#sparqlResourceLabels.get(`${term.termType}:${term.value}`);
+      if (term.termType === "BlankNode" && !explicitLabel) {
+        const identifier = this.ownerDocument.createElement("code");
+        identifier.textContent = `_:${term.value}`;
+        container.append(identifier);
+        return;
+      }
+      const resource = this.ownerDocument.createElement("span");
+      resource.className = "sparql-resource-term";
+      const readableLabel = term.termType === "NamedNode"
+        ? this.ownerDocument.createElement("a")
+        : this.ownerDocument.createElement("span");
+      readableLabel.className = "sparql-resource-label";
+      readableLabel.textContent = explicitLabel ?? readableLabelForIri(term.value);
+      if (readableLabel instanceof HTMLAnchorElement) {
+        const compactIriValue = compactIri(term.value);
+        const sourceDocumentIri = this.#result?.sourceDocumentIri ?? this.ownerDocument.URL;
+        const localUrl = localDocumentUrl(this.ownerDocument, term.value, sourceDocumentIri);
+        readableLabel.dataset.semanticIri = term.value;
+        readableLabel.href = this.#result
+          ? retrievalUrlForSemanticIri(term.value, this.#result)
+          : term.value;
+        if (localUrl) {
+          readableLabel.classList.add("local-term");
+          readableLabel.addEventListener("click", (event) => this.#locateSparqlResource(term.value, event));
+        } else {
+          readableLabel.target = "_blank";
+          readableLabel.rel = "noopener noreferrer";
+        }
+        readableLabel.title = term.value;
+        readableLabel.setAttribute("aria-label", `${readableLabel.textContent} (${compactIriValue})`);
+      } else {
+        readableLabel.title = `_:${term.value}`;
+      }
+      resource.append(readableLabel);
+      container.append(resource);
+      return;
+    }
+    if (term.termType === "DefaultGraph") {
+      const code = this.ownerDocument.createElement("code");
+      code.textContent = "default graph";
+      container.append(code);
+    } else if (term.termType === "Literal") {
+      const literal = this.ownerDocument.createElement("span");
+      literal.className = "sparql-literal";
+      const value = this.ownerDocument.createElement("span");
+      value.className = "sparql-literal-value";
+      value.textContent = term.value || "Empty string";
+      const suffix = term.language
+        ? `@${term.language}${term.direction ? `--${term.direction}` : ""}`
+        : term.datatype && term.datatype !== XSD_STRING
+          ? `^^${compactTerm({ termType: "NamedNode", value: term.datatype })}`
+          : "";
+      literal.append(value);
+      if (suffix) {
+        const qualifier = this.ownerDocument.createElement("code");
+        qualifier.className = "sparql-literal-qualifier";
+        qualifier.textContent = suffix;
+        literal.append(qualifier);
+      }
+      container.append(literal);
+    } else {
+      const code = this.ownerDocument.createElement("code");
+      code.textContent = term.value;
+      container.append(code);
+    }
+  }
+
+  #appendSparqlTable(
+    container: HTMLElement,
+    variables: readonly string[],
+    rows: readonly Record<string, SparqlResultTerm>[],
+  ): void {
+    const wrap = this.ownerDocument.createElement("div");
+    wrap.className = "sparql-table-wrap";
+    const table = this.ownerDocument.createElement("table");
+    table.className = "sparql-table";
+    const head = table.createTHead().insertRow();
+    for (const variable of variables) {
+      const cell = this.ownerDocument.createElement("th");
+      cell.scope = "col";
+      cell.textContent = `?${variable}`;
+      head.append(cell);
+    }
+    const body = table.createTBody();
+    for (const row of rows) {
+      const tableRow = body.insertRow();
+      for (const variable of variables) {
+        this.#appendSparqlTerm(tableRow.insertCell(), row[variable]);
+      }
+    }
+    wrap.append(table);
+    container.append(wrap);
+  }
+
+  #appendPaginatedSparqlTable(
+    container: HTMLElement,
+    variables: readonly string[],
+    rows: readonly Record<string, SparqlResultTerm>[],
+    noun: string,
+  ): void {
+    const summary = this.ownerDocument.createElement("p");
+    summary.className = "sparql-summary";
+    const resultBody = this.ownerDocument.createElement("div");
+    resultBody.className = "sparql-result-body";
+    container.append(summary, resultBody);
+
+    const showPagination = rows.length > SPARQL_PAGE_SIZES[0];
+    let pageSize: HTMLSelectElement | null = null;
+    let previous: HTMLButtonElement | null = null;
+    let next: HTMLButtonElement | null = null;
+    let pageStatus: HTMLParagraphElement | null = null;
+
+    if (showPagination) {
+      const pagination = this.ownerDocument.createElement("nav");
+      pagination.className = "sparql-pagination";
+      pagination.setAttribute("aria-label", "SPARQL result pages");
+
+      const pageSizeLabel = this.ownerDocument.createElement("label");
+      pageSizeLabel.className = "sparql-page-size-label";
+      pageSizeLabel.append("Rows per page");
+      pageSize = this.ownerDocument.createElement("select");
+      pageSize.className = "sparql-page-size";
+      for (const value of SPARQL_PAGE_SIZES) {
+        const option = this.ownerDocument.createElement("option");
+        option.value = String(value);
+        option.textContent = String(value);
+        option.selected = value === this.#sparqlPageSize;
+        pageSize.append(option);
+      }
+      pageSizeLabel.append(pageSize);
+
+      pageStatus = this.ownerDocument.createElement("p");
+      pageStatus.className = "sparql-page-status";
+      pageStatus.setAttribute("aria-live", "polite");
+
+      previous = this.ownerDocument.createElement("button");
+      previous.className = "sparql-page-button sparql-page-previous";
+      previous.type = "button";
+      previous.textContent = "Previous";
+
+      next = this.ownerDocument.createElement("button");
+      next.className = "sparql-page-button sparql-page-next";
+      next.type = "button";
+      next.textContent = "Next";
+
+      pagination.append(pageSizeLabel, pageStatus, previous, next);
+      container.append(pagination);
+    }
+
+    const renderPage = (): void => {
+      const pageCount = Math.max(1, Math.ceil(rows.length / this.#sparqlPageSize));
+      this.#sparqlPage = Math.min(Math.max(0, this.#sparqlPage), pageCount - 1);
+      const start = this.#sparqlPage * this.#sparqlPageSize;
+      const end = Math.min(start + this.#sparqlPageSize, rows.length);
+      summary.textContent = showPagination
+        ? `Showing ${start + 1} to ${end} of ${rows.length} ${noun}${rows.length === 1 ? "" : "s"}`
+        : `${rows.length} ${noun}${rows.length === 1 ? "" : "s"}`;
+      resultBody.replaceChildren();
+      if (rows.length) this.#appendSparqlTable(resultBody, variables, rows.slice(start, end));
+      if (pageStatus) pageStatus.textContent = `Page ${this.#sparqlPage + 1} of ${pageCount}`;
+      if (previous) previous.disabled = this.#sparqlPage === 0;
+      if (next) next.disabled = this.#sparqlPage === pageCount - 1;
+    };
+
+    pageSize?.addEventListener("change", () => {
+      const firstVisibleRow = this.#sparqlPage * this.#sparqlPageSize;
+      this.#sparqlPageSize = Number(pageSize?.value) || DEFAULT_SPARQL_PAGE_SIZE;
+      this.#sparqlPage = Math.floor(firstVisibleRow / this.#sparqlPageSize);
+      renderPage();
+    });
+    previous?.addEventListener("click", () => {
+      this.#sparqlPage -= 1;
+      renderPage();
+    });
+    next?.addEventListener("click", () => {
+      this.#sparqlPage += 1;
+      renderPage();
+    });
+    renderPage();
+  }
+
+  #renderSparqlOutput(container: HTMLElement): void {
+    container.className = "sparql-output";
+    if (this.#sparqlExecution.status === "idle") {
+      const status = this.ownerDocument.createElement("p");
+      status.className = "sparql-status";
+      status.textContent = "Run the query to inspect its results.";
+      container.append(status);
+      return;
+    }
+    if (this.#sparqlExecution.status === "running") {
+      const status = this.ownerDocument.createElement("p");
+      status.className = "sparql-status";
+      status.setAttribute("role", "status");
+      status.textContent = "Running locally…";
+      container.append(status);
+      return;
+    }
+    if (this.#sparqlExecution.status === "error") {
+      const status = this.ownerDocument.createElement("p");
+      status.className = "sparql-status";
+      status.dataset.state = "error";
+      status.setAttribute("role", "alert");
+      status.textContent = this.#sparqlExecution.error || "The query could not be run.";
+      container.append(status);
+      return;
+    }
+
+    const result = this.#sparqlExecution.result;
+    if (!result) return;
+    if (result.kind === "ask") {
+      const summary = this.ownerDocument.createElement("p");
+      summary.className = "sparql-summary";
+      summary.textContent = "ASK result";
+      const value = this.ownerDocument.createElement("p");
+      value.className = "sparql-boolean";
+      value.textContent = String(result.value);
+      container.append(summary, value);
+      return;
+    }
+    if (result.kind === "bindings") {
+      this.#appendPaginatedSparqlTable(
+        container,
+        result.variables,
+        result.rows,
+        "result",
+      );
+      return;
+    }
+
+    this.#appendPaginatedSparqlTable(
+      container,
+      ["subject", "predicate", "object", "graph"],
+      result.quads,
+      "statement",
+    );
+  }
+
+  async #runSparql(): Promise<void> {
+    const query = this.#sparqlQuery.trim();
+    if (!query || !this.#result || this.#sparqlExecution.status === "running") return;
+    const runId = ++this.#sparqlRunId;
+    const sourceResult = this.#result;
+    this.#sparqlPage = 0;
+    this.#sparqlExecution = { status: "running" };
+    this.#redrawPreservingFocus();
+    try {
+      const { executeSparql } = await import("./sparql-engine.js");
+      const result = await executeSparql(query, sourceResult);
+      if (runId !== this.#sparqlRunId) return;
+      this.#sparqlExecution = { result, status: "success" };
+      this.#sparqlPresentationSignature = sparqlPresentationSignature(result, this.#sparqlResourceLabels);
+    } catch (error) {
+      if (runId !== this.#sparqlRunId) return;
+      this.#sparqlExecution = {
+        error: error instanceof Error ? error.message : "The query could not be run.",
+        status: "error",
+      };
+      this.#sparqlPresentationSignature = "";
+    }
+    this.#redrawPreservingFocus();
+  }
+
+  #renderSparql(container: HTMLElement): void {
+    const workbench = this.ownerDocument.createElement("div");
+    workbench.className = "sparql-workbench";
+    const intro = this.ownerDocument.createElement("p");
+    intro.className = "sparql-intro";
+    intro.textContent = this.#sparqlSuggestions.length
+      ? "Choose a query suggested by this document or write your own. Suggestions are RDF resources, not Navigator configuration."
+      : "Write a SPARQL query against the RDF currently extracted from this document.";
+    workbench.append(intro);
+    if (this.#sparqlSuggestionDiagnostics.length > 0) {
+      const diagnostics = this.ownerDocument.createElement("p");
+      diagnostics.className = "sparql-status";
+      diagnostics.dataset.state = "error";
+      diagnostics.setAttribute("role", "alert");
+      diagnostics.textContent = this.#sparqlSuggestionDiagnostics.join(" ");
+      workbench.append(diagnostics);
+    }
+
+    if (this.#sparqlSuggestions.length) {
+      const catalog = this.ownerDocument.createElement("div");
+      catalog.className = "sparql-catalog";
+      const label = this.ownerDocument.createElement("label");
+      label.className = "sparql-label";
+      label.htmlFor = "ia2-sparql-suggestion";
+      label.textContent = "Suggested query";
+      const select = this.ownerDocument.createElement("select");
+      select.id = "ia2-sparql-suggestion";
+      select.className = "sparql-select sparql-suggestion";
+      const custom = this.ownerDocument.createElement("option");
+      custom.value = "";
+      custom.textContent = "Custom query";
+      select.append(custom);
+      for (const suggestion of this.#sparqlSuggestions) {
+        const option = this.ownerDocument.createElement("option");
+        option.value = suggestion.id;
+        option.textContent = suggestion.label;
+        option.selected = suggestion.id === this.#selectedSparqlSuggestionId;
+        select.append(option);
+      }
+      select.addEventListener("change", () => {
+        this.#selectedSparqlSuggestionId = select.value;
+        const suggestion = this.#sparqlSuggestions.find(({ id }) => id === select.value);
+        if (suggestion) this.#sparqlQuery = suggestion.query;
+        else this.#sparqlQuery = DEFAULT_SPARQL_QUERY;
+        this.#sparqlPage = 0;
+        this.#sparqlExecution = { status: "idle" };
+        this.#sparqlPresentationSignature = "";
+        this.#redrawPreservingFocus();
+      });
+      catalog.append(label, select);
+      const description = this.ownerDocument.createElement("p");
+      description.className = "sparql-description";
+      description.textContent = this.#sparqlSuggestions.find(({ id }) => id === this.#selectedSparqlSuggestionId)?.description ?? "";
+      catalog.append(description);
+      workbench.append(catalog);
+    }
+
+    const editorLabel = this.ownerDocument.createElement("label");
+    editorLabel.className = "sparql-catalog";
+    const editorHeading = this.ownerDocument.createElement("span");
+    editorHeading.className = "sparql-label";
+    editorHeading.textContent = "SPARQL query";
+    const editorShell = this.ownerDocument.createElement("div");
+    editorShell.className = "sparql-editor-shell";
+    const highlight = highlightedCode(this.#sparqlQuery, "sparql", this.ownerDocument);
+    highlight.className = "sparql-highlight";
+    highlight.setAttribute("aria-hidden", "true");
+    const editor = this.ownerDocument.createElement("textarea");
+    editor.className = "sparql-editor";
+    editor.autocapitalize = "off";
+    editor.autocomplete = "off";
+    editor.spellcheck = false;
+    editor.wrap = "soft";
+    editor.value = this.#sparqlQuery;
+    editor.setAttribute("aria-keyshortcuts", "Control+Enter Meta+Enter");
+    const refreshHighlight = (): void => {
+      const rendered = highlightedCode(editor.value, "sparql", this.ownerDocument);
+      highlight.replaceChildren(...rendered.childNodes);
+      highlight.scrollTop = editor.scrollTop;
+    };
+    editor.addEventListener("input", () => {
+      this.#sparqlQuery = editor.value;
+      refreshHighlight();
+      const suggestion = this.#sparqlSuggestions.find(({ id }) => id === this.#selectedSparqlSuggestionId);
+      if (suggestion?.query !== editor.value) {
+        this.#selectedSparqlSuggestionId = "";
+        const select = workbench.querySelector<HTMLSelectElement>(".sparql-suggestion");
+        if (select) select.value = "";
+        const description = workbench.querySelector<HTMLElement>(".sparql-description");
+        if (description) description.textContent = "";
+      }
+      if (this.#sparqlExecution.status !== "idle") {
+        this.#sparqlRunId += 1;
+        this.#sparqlPage = 0;
+        this.#sparqlExecution = { status: "idle" };
+        this.#sparqlPresentationSignature = "";
+        const output = workbench.querySelector<HTMLElement>(".sparql-output");
+        if (output) {
+          output.replaceChildren();
+          this.#renderSparqlOutput(output);
+        }
+      }
+    });
+    editor.addEventListener("scroll", () => {
+      highlight.scrollTop = editor.scrollTop;
+      editor.scrollLeft = 0;
+    });
+    editor.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || (!event.ctrlKey && !event.metaKey)) return;
+      event.preventDefault();
+      void this.#runSparql();
+    });
+    editorShell.append(highlight, editor);
+    editorLabel.append(editorHeading, editorShell);
+    workbench.append(editorLabel);
+
+    const actions = this.ownerDocument.createElement("div");
+    actions.className = "sparql-actions";
+    const run = this.ownerDocument.createElement("button");
+    run.className = "sparql-run";
+    run.type = "button";
+    run.disabled = this.#sparqlExecution.status === "running";
+    run.textContent = this.#sparqlExecution.status === "running" ? "Running…" : "Run query";
+    run.addEventListener("click", () => void this.#runSparql());
+    const reset = this.ownerDocument.createElement("button");
+    reset.className = "sparql-reset";
+    reset.type = "button";
+    reset.textContent = "Reset";
+    reset.addEventListener("click", () => {
+      this.#selectedSparqlSuggestionId = "";
+      this.#sparqlQuery = DEFAULT_SPARQL_QUERY;
+      this.#sparqlRunId += 1;
+      this.#sparqlPage = 0;
+      this.#sparqlExecution = { status: "idle" };
+      this.#sparqlPresentationSignature = "";
+      this.#redrawPreservingFocus();
+    });
+    const observe = this.ownerDocument.createElement("label");
+    observe.className = "sparql-observe";
+    const observeInput = this.ownerDocument.createElement("input");
+    observeInput.className = "sparql-observe-input";
+    observeInput.type = "checkbox";
+    observeInput.checked = this.#sparqlObserveChanges;
+    observeInput.addEventListener("change", () => {
+      this.#sparqlObserveChanges = observeInput.checked;
+      if (this.#sparqlObserveChanges) void this.#rerunObservedSparql();
+    });
+    observe.append(observeInput, "Observe changes");
+    const safety = this.ownerDocument.createElement("p");
+    safety.className = "sparql-safety";
+    safety.textContent = "Local dataset · Read-only";
+    actions.append(run, reset, observe, safety);
+    workbench.append(actions);
+
+    const output = this.ownerDocument.createElement("section");
+    output.setAttribute("aria-label", "SPARQL results");
+    output.setAttribute("aria-live", "polite");
+    this.#renderSparqlOutput(output);
+    workbench.append(output);
+    container.append(workbench);
+  }
+
   #render(): void {
     this.#stopFloatingInteraction();
     this.#stopLauncherInteraction();
@@ -3089,16 +3890,14 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (this.#view === "vocabulary" && !this.#documentVocabulary.count) this.#view = "navigator";
     if (this.#view === "sources" && this.#sources.length <= 1) this.#view = "navigator";
     const activeSource = this.#sources.find((source) => source.id === this.#selectedSourceId) ?? this.#sources[0];
-    const sourceStatements = this.#sources.reduce((sum, source) => sum + source.result.quads.length, 0);
-    const selectedContributions = Math.max(0, result.quads.length - (activeSource?.result.quads.length ?? 0));
-    const totalStatements = sourceStatements + selectedContributions;
+    const totalStatements = this.#totalStatementCount();
     this.shadowRoot.innerHTML = `
       <style>${CSS}</style>
       <button class="launcher" type="button" data-position="${this.#position}" aria-expanded="${this.#open}" aria-controls="ia2-rdf-panel" title="Open RDF Navigator. Drag to move."${this.hasAttribute("data-ia2-extension") ? " hidden" : ""}>
         <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="2.6" fill="currentColor"/><circle cx="18.5" cy="5" r="2.6" fill="currentColor"/><circle cx="18.5" cy="19" r="2.6" fill="currentColor"/><path d="M7.2 10.8 16 6.2M7.2 13.2 16 17.8" stroke="currentColor" stroke-width="1.8"/></svg></span>
         <span>RDF</span><span class="count">${totalStatements}</span>
       </button>
-      <aside class="panel" id="ia2-rdf-panel" data-open="${this.#open}" data-position="${this.#position}" aria-label="Document RDF" tabindex="-1">
+      <aside class="panel ia2-window-surface" id="ia2-rdf-panel" data-open="${this.#open}" data-position="${this.#position}" aria-label="Document RDF" tabindex="-1">
         <header class="toolbar">
           <span class="drag-grip" aria-hidden="true" title="Drag floating navigator"><svg viewBox="0 0 8 18"><circle cx="2" cy="4" r="1.2"/><circle cx="6" cy="4" r="1.2"/><circle cx="2" cy="9" r="1.2"/><circle cx="6" cy="9" r="1.2"/><circle cx="2" cy="14" r="1.2"/><circle cx="6" cy="14" r="1.2"/></svg></span>
           <div class="tabs" role="tablist" aria-label="RDF views" data-compact="0">
@@ -3106,14 +3905,18 @@ export class Ia2RdfNavigator extends HTMLElement {
             ${this.#sources.length > 1 ? tabMarkup("sources", this.#view === "sources", "Sources", "Sources", this.#sources.length, "document") : ""}
             ${this.#documentVocabulary.count ? tabMarkup("vocabulary", this.#view === "vocabulary", "Vocabulary", "Vocab", this.#documentVocabulary.count, "definition") : ""}
             ${this.#discoveryCandidates.length ? tabMarkup("discovery", this.#view === "discovery", "Discovery", "Discover", this.#discoveryCandidates.length, "candidate") : ""}
+            ${tabMarkup("sparql", this.#view === "sparql", "SPARQL", "Query", this.#sparqlSuggestions.length || undefined, "suggested query")}
             ${tabMarkup("turtle", this.#view === "turtle", "Turtle", "TTL")}
             ${tabMarkup("json", this.#view === "json", "JSON-LD", "JSON")}
             ${result.diagnostics.length ? tabMarkup("diagnostics", this.#view === "diagnostics", "Diagnostics", "Issues", result.diagnostics.length, "diagnostic") : ""}
           </div>
           <div class="header-actions">
-            <div class="position-switch" role="radiogroup" aria-label="Drawer position">
-              ${DRAWER_POSITIONS.map(({ icon, label, position }) => `<button class="position-option" type="button" role="radio" data-position="${position}" aria-checked="${this.#position === position}" aria-label="${label}" title="${label}" tabindex="${this.#position === position ? "0" : "-1"}">${icon}</button>`).join("")}
-            </div>
+            ${positionControlsMarkup({
+              ariaLabel: "Drawer position",
+              current: this.#position,
+              groupClass: "position-switch",
+              optionClass: "position-option",
+            })}
             <button class="icon-button refresh" type="button" aria-label="Refresh extraction" title="Refresh extraction">↻</button><button class="icon-button close" type="button" aria-label="Close RDF Navigator" title="Close">×</button>
           </div>
         </header>
@@ -3143,6 +3946,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (this.#view === "sources") this.#renderSources(viewport);
     if (this.#view === "vocabulary") this.#renderVocabulary(viewport);
     if (this.#view === "discovery") this.#renderDiscovery(viewport);
+    if (this.#view === "sparql") this.#renderSparql(viewport);
     if (this.#view === "diagnostics") this.#renderDiagnostics(viewport, result.diagnostics);
 
     const launcher = this.shadowRoot.querySelector<HTMLElement>(".launcher");
@@ -3198,20 +4002,11 @@ export class Ia2RdfNavigator extends HTMLElement {
         });
       });
     }
-    for (const option of positionOptions) {
-      option.addEventListener("click", () => applyPosition(option.dataset.position as DrawerPosition));
+    if (positionSwitch) {
+      bindWindowPositionControls(positionSwitch, (position, focus) => {
+        applyPosition(position, focus);
+      });
     }
-    positionSwitch?.addEventListener("keydown", (event) => {
-      if (!(event instanceof KeyboardEvent) || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
-      event.preventDefault();
-      const current = event.target instanceof HTMLButtonElement ? positionOptions.indexOf(event.target) : positionOptions.findIndex((option) => option.getAttribute("aria-checked") === "true");
-      let next = current;
-      if (event.key === "Home") next = 0;
-      if (event.key === "End") next = positionOptions.length - 1;
-      if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (current + 1) % positionOptions.length;
-      if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (current - 1 + positionOptions.length) % positionOptions.length;
-      applyPosition(positionOptions[next]!.dataset.position as DrawerPosition, true);
-    });
     this.shadowRoot.querySelector(".copy")?.addEventListener("click", () => void this.#copyCurrent());
     this.shadowRoot.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((button) => {
       button.addEventListener("click", () => this.#setView(button.dataset.view as View));

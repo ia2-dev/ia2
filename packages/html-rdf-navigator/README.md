@@ -4,6 +4,8 @@
 for inspecting the RDF dataset expressed by an IA² HTML document. It extracts
 the current DOM, leads with a source-oriented Navigator, provides Turtle/TriG
 and JSON-LD views, and correlates statements with their HTML carriers.
+The UI-independent extraction and serialization substrate lives in
+`@ia2-dev/html-rdf`.
 
 The component is presented as a movable side drawer, but the product is a
 document navigator rather than a serialization viewer.
@@ -40,7 +42,7 @@ For programmatic control, disable automatic mounting before import:
 
 ## Features
 
-- IA² Core 0.1 extraction from a `Document` or `DocumentFragment`
+- IA² Core 0.1 extraction from a `Document`, `DocumentFragment`, or `Element`
 - Navigator-first inspection with source correlation and vocabulary links
 - a Sources view for choosing among the top document and directly accessible
   embedded documents without merging their datasets
@@ -58,10 +60,12 @@ For programmatic control, disable automatic mounting before import:
 - conditional discovery of related knowledge through established RDF
   relationships and qualified DCAT roles
 - deliberate, credential-free HTML/RDF loading into separate named graphs
+- an editable, read-only SPARQL workbench over the selected extracted dataset
+- declarative suggested-query discovery from SHACL SPARQL executable resources
 - Turtle/TriG and JSON-LD serialization
 - live-DOM refresh through a debounced `MutationObserver`
 - independent diagnostics that do not abort valid statements
-- six persistent drawer positions across both sides of the viewport
+- nine persistent side, top, bottom, and floating drawer positions
 - keyboard access, visible focus, reduced motion, and responsive themes
 - Shadow DOM isolation from host-page and ReSpec styles
 
@@ -72,13 +76,16 @@ import {
   Ia2RdfNavigator,
   detectDiscoveryCandidates,
   extractDocumentVocabulary,
-  extractDataset,
+  extractSuggestedSparqlQueries,
   mergeDiscoveryContributions,
   mountRdfNavigator,
-  serializeJsonLd,
-  serializeTurtle,
   toPortableExtractionResult,
 } from "@ia2-dev/html-rdf-navigator";
+import {
+  extractDataset,
+  serializeJsonLd,
+  serializeTurtle,
+} from "@ia2-dev/html-rdf";
 ```
 
 `extractDataset(root?)` returns quads, declared graphs, diagnostics, and the
@@ -87,6 +94,10 @@ retrieval, semantic source, and RDF base IRIs. A single valid HTML
 an explicit `base[href]`, the RDF base IRI. Quads retain their source `Element`,
 which powers document navigation. The mounted Navigator reflects the runtime
 DOM, including semantic changes made by the host application.
+
+Navigator retains compatibility re-exports for its former extraction and
+serialization entry points. New consumers should import the substrate directly
+from `@ia2-dev/html-rdf` so data processing does not depend on a UI package.
 
 `extractDocumentVocabulary(result)` identifies named classes and properties
 defined in the source dataset. The mounted component presents them in a
@@ -110,6 +121,68 @@ launcher count covers all listed documents, but Turtle, JSON-LD, diagnostics,
 discovery, and source correlation always apply only to the selected document.
 Datasets are not silently unioned.
 
+## SPARQL workbench
+
+The SPARQL tab runs queries locally against the RDF/JS dataset extracted from
+the selected document. SELECT, ASK, CONSTRUCT, and DESCRIBE are supported.
+SPARQL Update is refused because the semantic DOM remains the source of truth.
+SELECT and graph results are paginated locally with selectable 10, 25, 50, or
+100-row pages. The complete result display remains limited to 500 rows or
+statements. The query engine is a lazy browser chunk, so it is not loaded until
+a person runs a query.
+
+A returned named node or blank node is presented with an available
+`rdfs:label`, `skos:prefLabel`, `schema:name`, `dcterms:title`, or `sh:name`
+from the selected dataset. Its RDF identifier remains visible and linked below
+the readable label. Ordinary `xsd:string` values omit the redundant datatype
+suffix; language and non-string datatype information remains visible.
+
+A document can publish suggested queries as RDF. Navigator recognizes resources
+typed as `sh:SPARQLExecutable` and the applicable executable subtype, then
+reads the query from `sh:select`, `sh:ask`, or `sh:construct`. Labels,
+descriptions, and ordering come from established RDFS, DCTERMS, and SHACL
+terms. The resource may live in any named graph.
+
+```html
+<div hidden>
+  <a
+    href="http://www.w3.org/ns/shacl#SPARQLExecutable"
+    rdf-subject="#named-resources-query"
+    rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    rdf-graph="#query-graph"
+  ></a>
+  <a
+    href="http://www.w3.org/ns/shacl#SPARQLSelectExecutable"
+    rdf-subject="#named-resources-query"
+    rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    rdf-graph="#query-graph"
+  ></a>
+  <span
+    rdf-subject="#named-resources-query"
+    rdf-predicate="http://www.w3.org/2000/01/rdf-schema#label"
+    rdf-graph="#query-graph"
+  >Named resources</span>
+  <data
+    rdf-subject="#named-resources-query"
+    rdf-predicate="http://www.w3.org/ns/shacl#select"
+    rdf-graph="#query-graph"
+    value="SELECT ?resource ?name
+WHERE {
+  GRAPH ?graph {
+    ?resource &lt;https://schema.org/name&gt; ?name
+  }
+}"
+  ></data>
+</div>
+```
+
+`extractSuggestedSparqlQueries(result)` exposes the same discovery step without
+the Web Component. This catalog convention is experimental UI behavior, not
+part of IA² HTML/RDF extraction and not presented as a new standard.
+The native `data[value]` carrier is intentional: HTML/RDF fallback text
+normalization collapses ASCII whitespace, while a query literal needs its
+authored line breaks preserved.
+
 Extension adapters can carry an extraction across an isolated frame boundary
 with `toPortableExtractionResult(result)` and supply it through
 `navigator.setSources(sources)`. Portable results replace live `Element`
@@ -127,9 +200,10 @@ npm run build
 npm pack --dry-run
 ```
 
-The published package contains the browser-ready ESM bundle, TypeScript
-declarations, README, and license. It has no runtime dependencies and does not
-execute RDF, SHACL, remote contexts, or retrieved scripts. Discovery retrieval
+The published package contains the browser-ready ESM bundle and lazy query
+chunk, TypeScript declarations, README, and license. It does not execute SHACL
+rules, remote contexts, or retrieved scripts. SPARQL executes only after
+explicit activation and only over a local RDF/JS dataset. Discovery retrieval
 and resource previews perform network activity only after explicit activation.
 Discovery fetches omit credentials and referrer information; cross-origin
 targets must permit browser access through CORS. Hovering a link never opens or

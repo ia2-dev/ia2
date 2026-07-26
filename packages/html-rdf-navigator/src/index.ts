@@ -1,11 +1,22 @@
+/** @deprecated Import from `@ia2-dev/html-rdf`. */
 export { extractDataset } from "./extract.js";
 export { detectDiscoveryCandidates, DISCOVERY_PREDICATES, mergeDiscoveryContributions } from "./discovery.js";
 export type { DiscoveryCandidate, DiscoveryContribution } from "./discovery.js";
 export { Ia2RdfNavigator } from "./navigator.js";
 export type { DrawerPosition } from "./navigator.js";
+/** @deprecated Import serializers from `@ia2-dev/html-rdf`. */
 export { serializeJsonLd, serializeTurtle, termToTurtle } from "./serialize.js";
 export { fromPortableExtractionResult, toPortableExtractionResult } from "./sources.js";
 export type { NavigatorSource, NavigatorSourceAccess, PortableExtractionResult, PortableNavigatorSource } from "./sources.js";
+export {
+  extractSuggestedSparqlQueries,
+  extractSuggestedSparqlQueryCatalog,
+} from "./suggested-queries.js";
+export type {
+  SuggestedSparqlQuery,
+  SuggestedSparqlQueryCatalog,
+  SuggestedSparqlQueryKind,
+} from "./suggested-queries.js";
 export { extractDocumentVocabulary } from "./vocabulary.js";
 export type { DocumentVocabulary, VocabularyDefinition, VocabularyKind } from "./vocabulary.js";
 export type * from "./model.js";
@@ -25,7 +36,6 @@ declare global {
 if (!customElements.get("ia2-rdf-navigator")) {
   customElements.define("ia2-rdf-navigator", Ia2RdfNavigator);
 }
-
 /** Add one RDF Navigator to a document, returning the existing instance when present. */
 export function mountRdfNavigator(target: Document = document): Ia2RdfNavigator {
   const existing = target.querySelector<Ia2RdfNavigator>("ia2-rdf-navigator");

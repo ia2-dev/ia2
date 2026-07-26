@@ -2510,6 +2510,18 @@ construct the object of the <code>rdf:reifies</code> statement. The
 triple inside that template is mentioned and, independently, also
 asserted by the visible link earlier in the page.</p>
 </section>
+<section id="completion-values-profile" class="level2 informative">
+<h2>Experimental completion-values artifact profile</h2>
+<p>This non-normative profile identifies a portable set of accepted values for
+an independently shaped HTML/RDF source document. It is an application profile,
+not an additional ontology and not a requirement of HTML/RDF extraction.</p>
+<p>A conforming companion identifies exactly one <code>prov:Entity</code> that
+declares this section with <code>dcterms:conformsTo</code>, identifies exactly
+one canonical source document with <code>prov:wasDerivedFrom</code>, and carries
+accepted values as ordinary RDF statements using the source document's focus
+nodes and property paths. A consumer MUST still validate those statements
+against the source document's current shapes before applying them.</p>
+</section>
 <section id="semantic-publication-profile" class="level2 informative">
 <a hidden class="no-link-warnings" href="http://purl.org/spar/doco/Section" rdf-subject="#semantic-publication-profile" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
 <a hidden class="no-link-warnings" href="#semantic-publication-profile" rdf-subject="" rdf-predicate="http://purl.org/dc/terms/hasPart">RDF</a>

@@ -109,10 +109,12 @@ test("serves the renderer form and delegates other routes to static assets", asy
   assert.match(formHtml, /Public Turtle or TriG URL/);
   assert.match(formHtml, /Included examples/);
   assert.match(formHtml, /Accessibility review/);
+  assert.match(formHtml, /Contract assignment/);
+  assert.match(formHtml, /Internal counsel review/);
   assert.match(formHtml, /Multi-audience incident/);
   assert.match(formHtml, /Independent contributions/);
   assert.match(formHtml, /Apollo 11 mission/);
-  assert.equal(formHtml.match(/<li><a data-render-example href="\/spec\/rdf-html\/examples\//g)?.length, 9);
+  assert.equal(formHtml.match(/<li><a data-render-example href="\/spec\/rdf-html\/examples\//g)?.length, 11);
   assert.match(formHtml, /href="\/spec\/rdf-html\/examples\/independent-contributions\.trig"/);
   assert.match(formHtml, /href="\/spec\/rdf-html\/examples\/multi-audience\.trig"/);
   assert.match(formHtml, /new URL\("\/render\/" \+ source\.href/);
