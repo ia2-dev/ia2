@@ -1,6 +1,6 @@
 {
   "name": "@ia2-dev/ui-primitives",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shared accessible UI vocabulary and interaction primitives for IA² components.",
   "author": "Yurii Rashkovskii",
   "homepage": "https://ia2.dev/",

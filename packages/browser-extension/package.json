@@ -1,12 +1,12 @@
 {
   "name": "@ia2-dev/browser-extension",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Chrome, Firefox, and Safari packaging for RDF/HTML rendering, automatic HARE viewing, and the IA² HTML/RDF Navigator.",
   "license": "MIT",
   "type": "module",
   "dependencies": {
-    "@ia2-dev/rdf-html": "0.1.0"
+    "@ia2-dev/rdf-html": "0.1.1"
   },
   "scripts": {
     "build": "node scripts/build.mjs",

@@ -1,6 +1,6 @@
 {
   "name": "@ia2-dev/rdf-html",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Parse RDF 1.2 descriptions of HTML documents and render direct HTML or inert inspection workspaces.",
   "author": "Yurii Rashkovskii",
   "homepage": "https://ia2.dev/spec/rdf-html",

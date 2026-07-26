@@ -1,6 +1,6 @@
 {
   "name": "@ia2-dev/html-rdf",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Dependency-free live DOM extraction and serialization for IA² HTML/RDF documents.",
   "author": "Yurii Rashkovskii",
   "homepage": "https://ia2.dev/spec/html-rdf",

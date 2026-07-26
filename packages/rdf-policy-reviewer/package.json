@@ -1,6 +1,6 @@
 {
   "name": "@ia2-dev/rdf-policy-reviewer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A live SHACL policy report and semantic-diff web component for HTML/RDF documents.",
   "author": "Yurii Rashkovskii",
   "homepage": "https://ia2.dev/",
@@ -58,7 +58,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@ia2-dev/html-rdf": "^0.1.0",
+    "@ia2-dev/html-rdf": "^0.1.1",
     "@rdfjs/data-model": "^2.1.2",
     "@rdfjs/dataset": "^2.0.3",
     "@rdfjs/types": "^2.0.1",
