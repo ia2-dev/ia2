@@ -601,15 +601,32 @@ describe("IA² RDF value editor", () => {
     const drawer = editor.shadowRoot!.querySelector<HTMLElement>(".drawer")!;
     const launcher = editor.shadowRoot!.querySelector<HTMLElement>(".launcher")!;
     const positions = editor.shadowRoot!.querySelectorAll<HTMLButtonElement>(".editor-position-option");
+    const positionControl = editor.shadowRoot!.querySelector<HTMLElement>(".ia2-position-control")!;
+    const positionTrigger = editor.shadowRoot!.querySelector<HTMLButtonElement>(".ia2-position-trigger")!;
+    const css = editor.shadowRoot!.querySelector("style")?.textContent ?? "";
 
     expect(positions).toHaveLength(9);
     expect(Array.from(positions, ({ dataset }) => dataset.position)).toContain("bottom");
     expect(Array.from(positions, ({ dataset }) => dataset.position)).toContain("top");
+    expect(css).toContain("container-name: value-editor");
+    expect(css).toContain("@container value-editor (max-width: 45rem)");
+    expect(css).toContain("grid-template-columns: auto minmax(0, 1fr) auto");
+    expect(css).toContain("grid-template-columns: 36px 36px");
+    expect(css).toContain("overflow-wrap: anywhere");
+    expect(css).toContain("white-space: normal");
     expect(drawer.dataset.position).toBe("right");
-    expect(editor.setPosition("floating")).toBe(true);
+    expect(positionTrigger.dataset.position).toBe("right");
+    positionTrigger.click();
+    expect(positionControl.dataset.expanded).toBe("true");
+    expect(positionTrigger.getAttribute("aria-expanded")).toBe("true");
+    editor.shadowRoot!
+      .querySelector<HTMLButtonElement>('.editor-position-option[data-position="floating"]')!
+      .click();
+    expect(positionControl.dataset.expanded).toBe("false");
     expect(drawer.dataset.position).toBe("floating");
     expect(launcher.dataset.position).toBe("floating");
     expect(editor.getAttribute("position")).toBe("floating");
+    expect(positionTrigger.dataset.position).toBe("floating");
     expect(editor.shadowRoot!.querySelector('[aria-label="Floating, centered"]')?.getAttribute("aria-checked"))
       .toBe("true");
 

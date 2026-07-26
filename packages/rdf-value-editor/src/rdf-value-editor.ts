@@ -1430,6 +1430,8 @@ export class Ia2RdfValueEditor extends HTMLElement {
           --ia2-window-width: 26rem;
           background: var(--editor-paper);
           color: var(--editor-ink);
+          container-name: value-editor;
+          container-type: inline-size;
           display: grid;
           grid-template-rows: auto auto minmax(0, 1fr);
           z-index: 40;
@@ -1443,9 +1445,10 @@ export class Ia2RdfValueEditor extends HTMLElement {
         }
         .drawer-head {
           border-bottom: 1px solid var(--editor-rule);
+          min-width: 0;
           padding: 1rem 1.1rem .9rem;
         }
-        .head-row { align-items: start; display: grid; gap: .75rem; grid-template-columns: minmax(8rem, 1fr) auto; }
+        .head-row { align-items: start; display: grid; gap: .75rem; grid-template-columns: minmax(0, 1fr) auto; min-width: 0; }
         h2 { font-size: 1.08rem; letter-spacing: -.02em; margin: 0; }
         .progress { color: var(--editor-muted); font-size: .75rem; line-height: 1.45; margin: .3rem 0 0; }
         .how-link {
@@ -1462,8 +1465,25 @@ export class Ia2RdfValueEditor extends HTMLElement {
           text-underline-offset: .2em;
         }
         .how-link:hover { text-decoration-color: currentColor; }
-        .head-actions { align-items: center; display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
-        .ia2-position-trigger, .ia2-position-label { display: none; }
+        .head-actions { align-items: center; display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; min-width: 0; }
+        .ia2-position-control { flex: 0 0 auto; position: relative; z-index: 14; }
+        .ia2-position-trigger {
+          align-items: center;
+          background: var(--editor-accent);
+          border: 0;
+          border-radius: 7px;
+          color: var(--editor-paper);
+          cursor: pointer;
+          display: none;
+          height: 36px;
+          justify-content: center;
+          padding: 0;
+          width: 36px;
+        }
+        .ia2-position-trigger:hover {
+          background: color-mix(in oklch, var(--editor-accent), var(--editor-ink) 12%);
+        }
+        .ia2-position-label { display: none; }
         .editor-position-switch {
           align-items: center;
           border: 1px solid transparent;
@@ -1507,7 +1527,7 @@ export class Ia2RdfValueEditor extends HTMLElement {
           opacity: 1;
           pointer-events: auto;
         }
-        :host([positioning="fixed"]) .editor-position-switch { display: none; }
+        :host([positioning="fixed"]) .ia2-position-control { display: none; }
         .text-button, .close {
           background: transparent;
           border: 1px solid var(--editor-rule);
@@ -1526,6 +1546,7 @@ export class Ia2RdfValueEditor extends HTMLElement {
           display: grid;
           gap: .35rem;
           min-height: 48px;
+          min-width: 0;
           padding: .35rem 1.1rem;
         }
         .editor-tools-row {
@@ -1540,6 +1561,8 @@ export class Ia2RdfValueEditor extends HTMLElement {
           display: inline-flex;
           flex: 0 0 auto;
           gap: 0;
+          max-width: 100%;
+          min-width: 0;
         }
         .data-button,
         .save-choice {
@@ -1618,7 +1641,7 @@ export class Ia2RdfValueEditor extends HTMLElement {
           stroke-width: 1.5;
           width: 32px;
         }
-        .controls { overflow: auto; padding: 0 1.1rem 2rem; }
+        .controls { min-width: 0; overflow: auto; padding: 0 1.1rem 2rem; }
         .group { border: 0; margin: 0; padding: 0; }
         .group + .group { margin-top: 1.15rem; }
         .group-title {
@@ -1842,14 +1865,94 @@ export class Ia2RdfValueEditor extends HTMLElement {
           padding: .4rem .65rem;
         }
         .inspect-rdf:hover { background: var(--editor-layer); }
+        @container value-editor (max-width: 45rem) {
+          .head-actions {
+            display: grid;
+            grid-template-columns: 36px 36px;
+          }
+          .ia2-position-control {
+            grid-column: 1;
+            grid-row: 1;
+          }
+          .apply-defaults {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            justify-content: center;
+            line-height: 1.2;
+            min-width: 0;
+            overflow-wrap: anywhere;
+            padding-inline: .35rem;
+            white-space: normal;
+            width: 100%;
+          }
+          .close {
+            grid-column: 2;
+            grid-row: 1;
+            width: 36px;
+          }
+          .ia2-position-trigger { display: inline-flex; }
+          .editor-position-switch {
+            align-items: stretch;
+            background: var(--editor-paper);
+            border-color: var(--editor-rule);
+            box-shadow: 0 12px 36px oklch(20% 0.03 286 / 20%);
+            display: none;
+            flex-direction: column;
+            min-width: 190px;
+            overflow: hidden;
+            padding: 4px;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+          }
+          .ia2-position-control[data-expanded="true"] .editor-position-switch {
+            display: flex;
+          }
+          .editor-position-option {
+            border: 0;
+            border-radius: 5px;
+            flex: 0 0 36px;
+            gap: 10px;
+            justify-content: flex-start;
+            opacity: 1;
+            padding: 0 10px;
+            pointer-events: auto;
+            width: 100%;
+          }
+          .editor-position-switch:hover .editor-position-option,
+          .editor-position-switch:focus-within .editor-position-option { border: 0; }
+          .editor-position-option[aria-checked="true"] {
+            background: var(--editor-accent-soft);
+            color: var(--editor-accent);
+          }
+          .ia2-position-label {
+            display: inline;
+            font-size: 12px;
+            font-weight: 650;
+            white-space: nowrap;
+          }
+          .editor-tools-row {
+            align-items: stretch;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+          }
+          .data-actions {
+            display: grid;
+            flex: none;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            width: 100%;
+          }
+          .data-button,
+          .save-choice { min-width: 0; }
+          .save-choice {
+            max-width: 100%;
+            width: 100%;
+          }
+          .sync-control { justify-self: start; }
+        }
         @media (max-width: 720px) {
           .drawer[data-position="floating"] .drawer-head { cursor: default; touch-action: auto; user-select: auto; }
-          .head-row { grid-template-columns: minmax(0, 1fr) auto; }
           .head-actions { align-items: start; justify-content: flex-end; }
-          .editor-tools-row { align-items: stretch; }
-          .data-actions { flex: 1 1 auto; }
-          .save-choice { flex: 1 1 auto; min-width: 0; }
-          .editor-position-switch { display: none; }
           .launcher { bottom: 4.35rem; right: .75rem; }
           .launcher[data-position^="left"] { left: .75rem; right: auto; }
           .architecture-window {
