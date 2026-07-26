@@ -54,6 +54,55 @@ describe("Ia2RdfNavigator", () => {
     expect(drawer.shadowRoot?.querySelector('[data-view="navigator"]')?.getAttribute("aria-selected")).toBe("true");
   });
 
+  it("browses SHACL shapes without presenting inspection as validation", () => {
+    document.body.innerHTML = `
+      <span id="legal-name-field">[Legal name]</span>
+      <a hidden href="http://www.w3.org/ns/shacl#PropertyGroup" rdf-subject="#parties-group" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+      <span hidden rdf-subject="#parties-group" rdf-predicate="http://www.w3.org/ns/shacl#name">Agreement and parties</span>
+      <a hidden href="http://www.w3.org/ns/shacl#PropertyShape" rdf-subject="#legal-name-shape" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+      <span hidden rdf-subject="#legal-name-shape" rdf-predicate="http://www.w3.org/ns/shacl#name">Assignor legal name</span>
+      <a hidden href="#parties-group" rdf-subject="#legal-name-shape" rdf-predicate="http://www.w3.org/ns/shacl#group"></a>
+      <a hidden href="#assignor" rdf-subject="#legal-name-shape" rdf-predicate="http://www.w3.org/ns/shacl#targetNode"></a>
+      <a hidden href="https://schema.org/legalName" rdf-subject="#legal-name-shape" rdf-predicate="http://www.w3.org/ns/shacl#path"></a>
+      <data hidden value="1" rdf-subject="#legal-name-shape" rdf-predicate="http://www.w3.org/ns/shacl#minCount" rdf-datatype="http://www.w3.org/2001/XMLSchema#integer"></data>
+      <a hidden href="http://www.w3.org/ns/oa#Annotation" rdf-subject="#legal-name-presentation" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"></a>
+      <a hidden href="#legal-name-shape" rdf-subject="#legal-name-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasBody"></a>
+      <a hidden href="#legal-name-field" rdf-subject="#legal-name-presentation" rdf-predicate="http://www.w3.org/ns/oa#hasTarget"></a>
+    `;
+    const field = document.getElementById("legal-name-field")!;
+    field.scrollIntoView = vi.fn();
+    field.animate = vi.fn(() => ({ cancel: vi.fn() } as unknown as Animation));
+
+    const drawer = mountRdfNavigator();
+    const tabs = Array.from(drawer.shadowRoot?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ?? []);
+    expect(tabs.map((tab) => tab.textContent)).toEqual([
+      "Navigator",
+      "Shapes (1)",
+      "SPARQL",
+      "Turtle",
+      "JSON-LD",
+    ]);
+
+    drawer.shadowRoot?.querySelector<HTMLButtonElement>('[data-view="shapes"]')?.click();
+    const root = drawer.shadowRoot!;
+    expect(root.querySelector(".shapes-intro")?.textContent).toContain("does not run SHACL validation");
+    expect(root.querySelector(".shape-group-heading h3")?.textContent).toBe("Agreement and parties");
+    expect(root.querySelector(".shape-name")?.textContent).toBe("Assignor legal name");
+    expect(root.querySelector(".shape-summary-meta")?.textContent).toContain("Property shape");
+
+    root.querySelector<HTMLDetailsElement>(".shape-row")!.open = true;
+    expect(root.querySelector(".shape-detail")?.textContent).toContain("schema:legalName");
+    expect(root.querySelector(".shape-detail")?.textContent).toContain("Min Count");
+    root.querySelector<HTMLButtonElement>(".shape-locate")?.click();
+    expect(field.scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "center" });
+
+    const search = root.querySelector<HTMLInputElement>(".shapes-search")!;
+    search.value = "nonexistent constraint";
+    search.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(root.querySelector(".shapes-empty")?.textContent).toBe("No shapes match this filter.");
+    expect(root.querySelector<HTMLElement>(".shapes-empty")?.hidden).toBe(false);
+  });
+
   it("compacts ODRL authority terms", () => {
     document.body.innerHTML = '<a href="https://example.com/draft-permission" rdf-subject="https://example.com/policy" rdf-predicate="http://www.w3.org/ns/odrl/2/permission">Draft amendment</a>';
     const drawer = mountRdfNavigator();

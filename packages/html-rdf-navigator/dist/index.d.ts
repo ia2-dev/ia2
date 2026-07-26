@@ -10,6 +10,8 @@ export { fromPortableExtractionResult, toPortableExtractionResult } from "./sour
 export type { NavigatorSource, NavigatorSourceAccess, PortableExtractionResult, PortableNavigatorSource } from "./sources.js";
 export { extractSuggestedSparqlQueries, extractSuggestedSparqlQueryCatalog, } from "./suggested-queries.js";
 export type { SuggestedSparqlQuery, SuggestedSparqlQueryCatalog, SuggestedSparqlQueryKind, } from "./suggested-queries.js";
+export { extractShaclCatalog } from "./shacl.js";
+export type { ShaclCatalog, ShaclPropertyGroup, ShaclShape, ShaclShapeKind, } from "./shacl.js";
 export { extractDocumentVocabulary } from "./vocabulary.js";
 export type { DocumentVocabulary, VocabularyDefinition, VocabularyKind } from "./vocabulary.js";
 export type * from "./model.js";

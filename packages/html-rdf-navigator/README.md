@@ -48,6 +48,8 @@ For programmatic control, disable automatic mounting before import:
   embedded documents without merging their datasets
 - a conditional Vocabulary view for document-defined classes and properties,
   including RDFS subclass and subproperty trees
+- a conditional Shapes view for browsing SHACL node and property shapes,
+  targets, paths, groups, and constraints without executing validation
 - live, case-insensitive filtering across terms, IRIs, graphs, and carriers
 - semantic typeahead from in-document labels, OWL/RDF kinds, domains, and ranges
 - namespace filters discovered from every named-node URL
@@ -76,6 +78,7 @@ import {
   Ia2RdfNavigator,
   detectDiscoveryCandidates,
   extractDocumentVocabulary,
+  extractShaclCatalog,
   extractSuggestedSparqlQueries,
   mergeDiscoveryContributions,
   mountRdfNavigator,
@@ -104,6 +107,15 @@ defined in the source dataset. The mounted component presents them in a
 Vocabulary tab only when definitions exist. Local terms correlate with their
 HTML definition carriers in both directions; external hierarchy parents remain
 linked context rather than being counted as local definitions.
+
+`extractShaclCatalog(result)` identifies explicit `sh:NodeShape` and
+`sh:PropertyShape` resources as well as shapes implied by SHACL targets,
+`sh:path`, `sh:property`, and direct shape-valued constraints. The mounted
+component presents the catalog in a Shapes tab only when shapes exist. It
+preserves property groups and ordering, shows targets, paths, nested property
+references, constraints, and named graph identity, and can locate a visible
+document field when a Web Annotation links that field to the shape. Browsing is
+descriptive: it does not produce a validation report or execute SHACL rules.
 
 `detectDiscoveryCandidates(result)` normalizes recognized direct relationships
 and qualified DCAT relationships without performing network activity. The

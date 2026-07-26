@@ -17,6 +17,13 @@ export type {
   SuggestedSparqlQueryCatalog,
   SuggestedSparqlQueryKind,
 } from "./suggested-queries.js";
+export { extractShaclCatalog } from "./shacl.js";
+export type {
+  ShaclCatalog,
+  ShaclPropertyGroup,
+  ShaclShape,
+  ShaclShapeKind,
+} from "./shacl.js";
 export { extractDocumentVocabulary } from "./vocabulary.js";
 export type { DocumentVocabulary, VocabularyDefinition, VocabularyKind } from "./vocabulary.js";
 export type * from "./model.js";

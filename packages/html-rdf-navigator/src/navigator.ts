@@ -1,5 +1,6 @@
 import { extractDataset } from "./extract.js";
 import {
+  annotationTargetIris,
   DEFAULT_LABEL_PREDICATES,
   labelFor,
   termLabelMap,
@@ -33,6 +34,11 @@ import {
 } from "./model.js";
 import { compactTerm, containsTripleTerms, PREFIXES, serializeJsonLd, serializeTurtle } from "./serialize.js";
 import { fromPortableExtractionResult, type NavigatorSource, type PortableNavigatorSource } from "./sources.js";
+import {
+  extractShaclCatalog,
+  type ShaclCatalog,
+  type ShaclShape,
+} from "./shacl.js";
 import {
   extractSuggestedSparqlQueryCatalog,
   type SuggestedSparqlQuery,
@@ -200,6 +206,59 @@ const CSS = String.raw`
   .ontology-actions { opacity: 0; pointer-events: none; }
   .ontology-term-row:hover .ontology-actions, .ontology-term-row:focus-within .ontology-actions { opacity: 1; pointer-events: auto; }
   .ontology-actions .locate-button { opacity: 1; }
+  .shapes-browser { margin: 0 auto; max-width: 920px; }
+  .shapes-intro { color: var(--muted); font-size: 12px; margin: 0 0 15px; max-width: 70ch; }
+  .shapes-tools { align-items: center; background: color-mix(in oklch, var(--paper), transparent 4%); border-bottom: 1px solid var(--line); display: grid; gap: 10px; grid-template-columns: minmax(180px, 1fr) auto; margin: 0 0 18px; padding: 0 0 12px; position: sticky; top: -18px; z-index: 4; }
+  .shapes-search {
+    background: var(--layer);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--ink);
+    font: inherit;
+    height: 36px;
+    min-width: 0;
+    padding: 6px 10px;
+    width: 100%;
+  }
+  .shapes-search:hover { border-color: color-mix(in oklch, var(--accent), var(--line) 55%); }
+  .shapes-search:focus { border-color: var(--accent); outline: 3px solid color-mix(in oklch, var(--accent), transparent 78%); outline-offset: 1px; }
+  .shapes-filter-count { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .shape-group + .shape-group { margin-top: 24px; }
+  .shape-group-heading { align-items: baseline; border-bottom: 1px solid var(--line); display: flex; gap: 8px; margin: 0; padding: 0 2px 8px; }
+  .shape-group-heading h3 { font-size: 13px; margin: 0; }
+  .shape-group-count { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .shape-list { list-style: none; margin: 0; padding: 0; }
+  .shape-row { border-bottom: 1px solid var(--line); }
+  .shape-row summary { align-items: start; cursor: pointer; display: grid; gap: 6px 12px; grid-template-columns: minmax(0, 1fr) auto; list-style: none; padding: 12px 5px; }
+  .shape-row summary::-webkit-details-marker { display: none; }
+  .shape-row summary::after { color: var(--muted); content: "›"; font-size: 20px; line-height: 1; margin-top: 2px; transform: rotate(0); transition: transform 160ms cubic-bezier(.22,1,.36,1); }
+  .shape-row[open] summary::after { transform: rotate(90deg); }
+  .shape-row summary:hover, .shape-row summary:focus-visible { background: color-mix(in oklch, var(--accent-soft), transparent 34%); }
+  .shape-row summary:focus-visible { border-radius: 7px; outline: 2px solid color-mix(in oklch, var(--accent), transparent 25%); outline-offset: -3px; }
+  .shape-summary-copy { min-width: 0; }
+  .shape-name { display: block; font-size: 13px; font-weight: 700; line-height: 1.35; }
+  .shape-identifier { color: var(--muted); display: block; font: 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin-top: 2px; overflow-wrap: anywhere; }
+  .shape-summary-meta { align-items: center; display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+  .shape-kind, .shape-stat { border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 10px; line-height: 1.2; padding: 3px 6px; }
+  .shape-kind { background: var(--accent-soft); border-color: color-mix(in oklch, var(--accent), var(--paper) 74%); color: color-mix(in oklch, var(--accent), var(--ink) 22%); }
+  .shape-detail { background: color-mix(in oklch, var(--layer), transparent 48%); border-radius: 8px; margin: 0 4px 12px; padding: 14px 15px 16px; }
+  .shape-description { color: var(--muted); font-size: 11.5px; margin: 0 0 13px; max-width: 70ch; }
+  .shape-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 13px; }
+  .shape-locate { align-items: center; background: transparent; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); cursor: pointer; display: inline-flex; font-size: 11px; font-weight: 700; gap: 6px; min-height: 32px; padding: 5px 9px; }
+  .shape-locate:hover { background: var(--paper); border-color: color-mix(in oklch, var(--accent), var(--line) 55%); color: var(--accent); }
+  .shape-block + .shape-block { margin-top: 13px; }
+  .shape-block h4 { color: var(--muted); font-size: 10px; letter-spacing: .045em; margin: 0 0 5px; text-transform: uppercase; }
+  .shape-facts { margin: 0; }
+  .shape-fact { border-top: 1px solid color-mix(in oklch, var(--line), transparent 22%); display: grid; gap: 8px; grid-template-columns: minmax(105px, .34fr) minmax(0, 1fr); padding: 7px 0; }
+  .shape-fact:first-child { border-top: 0; }
+  .shape-fact dt { color: var(--muted); font-size: 10.5px; margin: 0; }
+  .shape-fact dd { margin: 0; min-width: 0; }
+  .shape-value + .shape-value { margin-top: 5px; }
+  .shape-value-label { display: block; font-size: 11.5px; font-weight: 650; line-height: 1.35; }
+  .shape-value code { color: var(--muted); display: block; font: 10.5px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+  .shape-value .term-link { color: var(--accent); }
+  .shape-literal { font-size: 11.5px; line-height: 1.45; overflow-wrap: anywhere; }
+  .shapes-empty { color: var(--muted); font-size: 12px; margin: 24px 0; text-align: center; }
   .sparql-workbench { display: grid; gap: 15px; margin: 0 auto; max-width: 920px; min-width: 0; }
   .sparql-intro { color: var(--muted); font-size: 12px; margin: 0; max-width: 72ch; }
   .sparql-catalog { display: grid; gap: 6px; min-width: 0; }
@@ -453,6 +512,8 @@ const CSS = String.raw`
     .sync-control { grid-column: 2; justify-self: end; }
     .quad { grid-template-columns: minmax(0, 1fr); }
     .quad-actions { justify-content: flex-start; max-width: none; }
+    .shapes-tools { top: -18px; }
+    .shape-fact { grid-template-columns: minmax(0, 1fr); gap: 2px; }
     .discovery-item { grid-template-columns: minmax(0, 1fr); }
     .discovery-state { align-items: flex-start; min-width: 0; }
     .discovery-status { text-align: left; }
@@ -491,7 +552,7 @@ const CSS = String.raw`
   ${WINDOW_PLACEMENT_CSS}
 `;
 
-type View = "turtle" | "json" | "navigator" | "sources" | "vocabulary" | "discovery" | "sparql" | "diagnostics";
+type View = "turtle" | "json" | "navigator" | "sources" | "vocabulary" | "shapes" | "discovery" | "sparql" | "diagnostics";
 type SyncMode = ScrollSyncMode;
 export type DrawerPosition = WindowPosition;
 type ResizeDirection = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
@@ -501,6 +562,7 @@ const TAB_ICONS: Readonly<Record<View, string>> = {
   navigator: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="3" cy="5" r=".8" fill="currentColor" stroke="none"/><circle cx="3" cy="9" r=".8" fill="currentColor" stroke="none"/><circle cx="3" cy="13" r=".8" fill="currentColor" stroke="none"/><path d="M6 5h9M6 9h9M6 13h9"/></svg>',
   sources: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><rect x="2.5" y="3" width="13" height="9" rx="1.5"/><path d="M6 15h6M9 12v3"/></svg>',
   vocabulary: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="3.5" r="2"/><circle cx="4" cy="14" r="2"/><circle cx="14" cy="14" r="2"/><path d="M9 5.5v3M4 12V9h10v3"/></svg>',
+  shapes: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M3 3.5h5v5H3zM10 9.5h5v5h-5zM8 6h3v3.5"/><path d="m4.3 11.8 1.3 1.3 2.6-3"/></svg>',
   discovery: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="9" r="6.5"/><path d="m11.7 6.3-1.5 3.9-3.9 1.5 1.5-3.9z"/></svg>',
   sparql: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M3 4.5h8M3 9h6M3 13.5h5"/><circle cx="13" cy="12" r="3"/><path d="m15.2 14.2 1.5 1.5"/></svg>',
   turtle: '<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="m6.5 4.5-4 4.5 4 4.5M11.5 4.5l4 4.5-4 4.5"/></svg>',
@@ -550,7 +612,7 @@ interface PersistedNavigatorState {
 interface FocusSnapshot {
   end?: number | null;
   key?: string;
-  kind: "close" | "copy" | "discovery-action" | "fallback" | "launcher" | "namespace" | "position" | "refresh" | "search" | "source" | "sparql-editor" | "sparql-observe" | "sparql-reset" | "sparql-run" | "sparql-suggestion" | "sync" | "tab" | "viewport";
+  kind: "close" | "copy" | "discovery-action" | "fallback" | "launcher" | "namespace" | "position" | "refresh" | "search" | "shapes-search" | "source" | "sparql-editor" | "sparql-observe" | "sparql-reset" | "sparql-run" | "sparql-suggestion" | "sync" | "tab" | "viewport";
   start?: number | null;
 }
 
@@ -725,6 +787,40 @@ const NON_RENDERED_ELEMENTS = new Set([
 function elementLabel(element: Element): string {
   const id = element.id ? `#${element.id}` : "";
   return `<${element.localName}${id}>`;
+}
+
+function resourceKey(term: SubjectTerm | ObjectTerm | GraphTerm): string | null {
+  return term.termType === "NamedNode" || term.termType === "BlankNode"
+    ? `${term.termType}:${term.value}`
+    : null;
+}
+
+function readableResourceName(term: SubjectTerm): string {
+  if (term.termType === "BlankNode") return `Blank node ${term.value}`;
+  try {
+    const url = new URL(term.value);
+    const fragment = decodeURIComponent(url.hash.slice(1));
+    if (fragment) return fragment.replaceAll(/[-_]+/g, " ");
+    const segment = url.pathname.split("/").filter(Boolean).at(-1);
+    return decodeURIComponent(segment ?? term.value).replaceAll(/[-_]+/g, " ");
+  } catch {
+    return term.value;
+  }
+}
+
+function shaclPredicateLabel(iri: string): string {
+  const localName = iri.startsWith("http://www.w3.org/ns/shacl#")
+    ? iri.slice("http://www.w3.org/ns/shacl#".length)
+    : compactTerm({ termType: "NamedNode", value: iri });
+  return localName
+    .replaceAll(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replaceAll(/[-_]+/g, " ")
+    .replace(/^./, (character) => character.toUpperCase());
+}
+
+function shapeKindLabel(shape: ShaclShape): string {
+  if (shape.kinds.length > 1) return "Node + property shape";
+  return shape.kinds[0] === "property" ? "Property shape" : "Node shape";
 }
 
 function isWebIri(value: string): boolean {
@@ -1334,10 +1430,12 @@ export class Ia2RdfNavigator extends HTMLElement {
   #discoveryCandidates: DiscoveryCandidate[] = [];
   #discoveryLoads = new Map<string, DiscoveryLoadState>();
   #documentVocabulary: DocumentVocabulary = { classes: [], count: 0, definitions: [], properties: [] };
+  #shaclCatalog: ShaclCatalog = { count: 0, groups: [], shapes: [] };
   #view: View = "navigator";
   #open = false;
   #status = "";
   #navigatorQuery = "";
+  #shapesQuery = "";
   #sparqlSuggestions: SuggestedSparqlQuery[] = [];
   #sparqlSuggestionDiagnostics: string[] = [];
   #selectedSparqlSuggestionId = "";
@@ -1796,6 +1894,10 @@ export class Ia2RdfNavigator extends HTMLElement {
       const input = active as HTMLInputElement;
       return { kind: "search", start: input.selectionStart, end: input.selectionEnd };
     }
+    if (active.classList.contains("shapes-search")) {
+      const input = active as HTMLInputElement;
+      return { kind: "shapes-search", start: input.selectionStart, end: input.selectionEnd };
+    }
     if (active.classList.contains("sparql-editor")) {
       const input = active as HTMLTextAreaElement;
       return { kind: "sparql-editor", start: input.selectionStart, end: input.selectionEnd };
@@ -1822,6 +1924,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (!this.shadowRoot) return;
     let target: HTMLElement | null = null;
     if (snapshot.kind === "search") target = this.shadowRoot.querySelector<HTMLInputElement>(".navigator-search");
+    if (snapshot.kind === "shapes-search") target = this.shadowRoot.querySelector<HTMLInputElement>(".shapes-search");
     if (snapshot.kind === "sparql-editor") target = this.shadowRoot.querySelector<HTMLTextAreaElement>(".sparql-editor");
     if (snapshot.kind === "sparql-suggestion") target = this.shadowRoot.querySelector<HTMLSelectElement>(".sparql-suggestion");
     if (snapshot.kind === "sparql-run") target = this.shadowRoot.querySelector<HTMLButtonElement>(".sparql-run");
@@ -1844,6 +1947,9 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (!target && snapshot.kind === "fallback") target = this.shadowRoot.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
     target?.focus({ preventScroll: true });
     if (snapshot.kind === "search" && target instanceof HTMLInputElement) {
+      target.setSelectionRange(snapshot.start ?? target.value.length, snapshot.end ?? target.value.length);
+    }
+    if (snapshot.kind === "shapes-search" && target instanceof HTMLInputElement) {
       target.setSelectionRange(snapshot.start ?? target.value.length, snapshot.end ?? target.value.length);
     }
     if (snapshot.kind === "sparql-editor" && target instanceof HTMLTextAreaElement) {
@@ -1894,12 +2000,14 @@ export class Ia2RdfNavigator extends HTMLElement {
   #rebuildResult(): void {
     if (!this.#sourceResult) {
       this.#result = null;
+      this.#shaclCatalog = { count: 0, groups: [], shapes: [] };
       this.#sparqlResourceLabels.clear();
       return;
     }
     const contributions = Array.from(this.#discoveryLoads.values())
       .flatMap((state) => state.status === "loaded" && state.contribution ? [state.contribution] : []);
     this.#result = mergeDiscoveryContributions(this.#sourceResult, contributions);
+    this.#shaclCatalog = extractShaclCatalog(this.#result);
     this.#sparqlResourceLabels = termLabelMap(this.#result.quads, {
       predicates: SPARQL_LABEL_PREDICATES,
       languages: [this.ownerDocument.documentElement.lang || "en"],
@@ -2094,6 +2202,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.#applySelectedSource(false);
     this.#view = "navigator";
     this.#navigatorQuery = "";
+    this.#shapesQuery = "";
     this.#disabledNamespaces.clear();
     this.#syncMode = "off";
     this.#render();
@@ -3103,6 +3212,291 @@ export class Ia2RdfNavigator extends HTMLElement {
     configureSync();
   }
 
+  #renderShapes(container: HTMLElement): void {
+    const result = this.#result;
+    if (!result || !this.#shaclCatalog.count) return;
+    const document = this.ownerDocument;
+    const browser = document.createElement("div");
+    browser.className = "shapes-browser";
+
+    const intro = document.createElement("p");
+    intro.className = "shapes-intro";
+    intro.textContent = "Shape definitions found in the extracted dataset. This view exposes targets, paths, groups, and constraints; it does not run SHACL validation or rules.";
+    browser.append(intro);
+
+    const tools = document.createElement("div");
+    tools.className = "shapes-tools";
+    const search = document.createElement("input");
+    search.className = "shapes-search";
+    search.type = "search";
+    search.placeholder = "Filter shapes, paths, targets, or constraints";
+    search.setAttribute("aria-label", search.placeholder);
+    search.value = this.#shapesQuery;
+    const filterCount = document.createElement("span");
+    filterCount.className = "shapes-filter-count";
+    tools.append(search, filterCount);
+    browser.append(tools);
+
+    const labels = termLabelMap(result.quads, {
+      predicates: SPARQL_LABEL_PREDICATES,
+      languages: [document.documentElement.lang || "en"],
+    });
+    const shapeLabel = (shape: ShaclShape): string => shape.label ?? readableResourceName(shape.term);
+
+    const termValue = (term: ObjectTerm | GraphTerm): HTMLElement => {
+      const value = document.createElement("div");
+      value.className = "shape-value";
+      if (term.termType === "Literal") {
+        const literal = document.createElement("span");
+        literal.className = "shape-literal";
+        literal.textContent = term.value;
+        value.append(literal);
+        if (term.datatype.value !== XSD_STRING || term.language || term.direction) {
+          const qualifier = document.createElement("code");
+          qualifier.textContent = [
+            term.language ? `@${term.language}${term.direction ? `--${term.direction}` : ""}` : "",
+            term.datatype.value !== XSD_STRING ? compactTerm(term.datatype) : "",
+          ].filter(Boolean).join(" · ");
+          value.append(qualifier);
+        }
+        return value;
+      }
+      const label = labels.get(resourceKey(term)!);
+      if (label) {
+        const readable = document.createElement("span");
+        readable.className = "shape-value-label";
+        readable.textContent = label;
+        value.append(readable);
+      }
+      value.append(termCode(document, term, "", "", undefined, result.sourceDocumentIri));
+      return value;
+    };
+
+    const factBlock = (
+      parent: HTMLElement,
+      title: string,
+      quads: readonly Quad[],
+    ): void => {
+      if (!quads.length) return;
+      const block = document.createElement("section");
+      block.className = "shape-block";
+      const heading = document.createElement("h4");
+      heading.textContent = title;
+      const facts = document.createElement("dl");
+      facts.className = "shape-facts";
+      const grouped = new Map<string, Quad[]>();
+      for (const quad of quads) {
+        const key = quad.predicate.value;
+        const values = grouped.get(key) ?? [];
+        values.push(quad);
+        grouped.set(key, values);
+      }
+      for (const [predicate, values] of grouped) {
+        const fact = document.createElement("div");
+        fact.className = "shape-fact";
+        const name = document.createElement("dt");
+        name.textContent = shaclPredicateLabel(predicate);
+        const objects = document.createElement("dd");
+        values.forEach((quad) => objects.append(termValue(quad.object)));
+        fact.append(name, objects);
+        facts.append(fact);
+      }
+      block.append(heading, facts);
+      parent.append(block);
+    };
+
+    const definitionBlock = (parent: HTMLElement, shape: ShaclShape): void => {
+      const block = document.createElement("section");
+      block.className = "shape-block";
+      const heading = document.createElement("h4");
+      heading.textContent = "Definition";
+      const facts = document.createElement("dl");
+      facts.className = "shape-facts";
+      const definition = document.createElement("div");
+      definition.className = "shape-fact";
+      const definitionName = document.createElement("dt");
+      definitionName.textContent = "Shape";
+      const definitionValue = document.createElement("dd");
+      definitionValue.append(termValue(shape.term));
+      definition.append(definitionName, definitionValue);
+      facts.append(definition);
+      if (shape.graphs.length) {
+        const graph = document.createElement("div");
+        graph.className = "shape-fact";
+        const graphName = document.createElement("dt");
+        graphName.textContent = shape.graphs.length === 1 ? "Graph" : "Graphs";
+        const graphValue = document.createElement("dd");
+        shape.graphs.forEach((term) => graphValue.append(termValue(term)));
+        graph.append(graphName, graphValue);
+        facts.append(graph);
+      }
+      block.append(heading, facts);
+      parent.append(block);
+    };
+
+    const rows: HTMLDetailsElement[] = [];
+    const shapesByGroup = new Map<string, ShaclShape[]>();
+    for (const shape of this.#shaclCatalog.shapes) {
+      const key = shape.group ? resourceKey(shape.group)! : "";
+      const shapes = shapesByGroup.get(key) ?? [];
+      shapes.push(shape);
+      shapesByGroup.set(key, shapes);
+    }
+    const orderedGroups = [
+      ...this.#shaclCatalog.groups.map((group) => ({
+        key: resourceKey(group.term)!,
+        label: group.label ?? readableResourceName(group.term),
+      })),
+      { key: "", label: "Ungrouped shapes" },
+    ];
+
+    for (const group of orderedGroups) {
+      const shapes = shapesByGroup.get(group.key) ?? [];
+      if (!shapes.length) continue;
+      const section = document.createElement("section");
+      section.className = "shape-group";
+      const groupHeading = document.createElement("header");
+      groupHeading.className = "shape-group-heading";
+      const title = document.createElement("h3");
+      title.textContent = group.label;
+      const count = document.createElement("span");
+      count.className = "shape-group-count";
+      count.textContent = `${shapes.length} ${shapes.length === 1 ? "shape" : "shapes"}`;
+      groupHeading.append(title, count);
+      const list = document.createElement("div");
+      list.className = "shape-list";
+
+      for (const shape of shapes) {
+        const details = document.createElement("details");
+        details.className = "shape-row";
+        const name = shapeLabel(shape);
+        const searchText = [
+          name,
+          compactTerm(shape.term),
+          group.label,
+          ...shape.quads.flatMap((quad) => [
+            quad.predicate.value,
+            termSearchText(quad.object),
+          ]),
+        ].join(" ").toLocaleLowerCase();
+        details.dataset.search = searchText;
+
+        const summary = document.createElement("summary");
+        const summaryCopy = document.createElement("span");
+        summaryCopy.className = "shape-summary-copy";
+        const shapeName = document.createElement("span");
+        shapeName.className = "shape-name";
+        shapeName.textContent = name;
+        const identifier = document.createElement("span");
+        identifier.className = "shape-identifier";
+        identifier.textContent = compactTerm(shape.term);
+        const metadata = document.createElement("span");
+        metadata.className = "shape-summary-meta";
+        const kind = document.createElement("span");
+        kind.className = "shape-kind";
+        kind.textContent = shapeKindLabel(shape);
+        metadata.append(kind);
+        if (shape.targets.length) {
+          const targetCount = document.createElement("span");
+          targetCount.className = "shape-stat";
+          targetCount.textContent = `${shape.targets.length} ${shape.targets.length === 1 ? "target" : "targets"}`;
+          metadata.append(targetCount);
+        }
+        if (shape.paths.length) {
+          const pathCount = document.createElement("span");
+          pathCount.className = "shape-stat";
+          pathCount.textContent = `${shape.paths.length} ${shape.paths.length === 1 ? "path" : "paths"}`;
+          metadata.append(pathCount);
+        }
+        if (shape.constraints.length) {
+          const constraintCount = document.createElement("span");
+          constraintCount.className = "shape-stat";
+          constraintCount.textContent = `${shape.constraints.length} ${shape.constraints.length === 1 ? "constraint" : "constraints"}`;
+          metadata.append(constraintCount);
+        }
+        summaryCopy.append(shapeName, identifier, metadata);
+        summary.append(summaryCopy);
+
+        const detail = document.createElement("div");
+        detail.className = "shape-detail";
+        if (shape.description) {
+          const description = document.createElement("p");
+          description.className = "shape-description";
+          description.textContent = shape.description;
+          detail.append(description);
+        }
+
+        const relatedIris = new Set(annotationTargetIris(result.quads, shape.term));
+        for (const target of shape.targets) {
+          if (
+            target.predicate.value === "http://www.w3.org/ns/shacl#targetNode"
+            && target.object.termType === "NamedNode"
+          ) relatedIris.add(target.object.value);
+        }
+        const relatedTargets = Array.from(relatedIris)
+          .flatMap((iri) => {
+            const target = locatableElementForTerm(
+              document,
+              { termType: "NamedNode", value: iri },
+              result.sourceDocumentIri,
+            );
+            return target ? [target] : [];
+          })
+          .filter((target, index, targets) => targets.indexOf(target) === index);
+        if (relatedTargets.length) {
+          const actions = document.createElement("div");
+          actions.className = "shape-actions";
+          relatedTargets.slice(0, 4).forEach((target) => {
+            const locate = document.createElement("button");
+            locate.className = "shape-locate";
+            locate.type = "button";
+            locate.textContent = `⌖ Locate ${elementLabel(target)}`;
+            locate.addEventListener("click", () => this.#locateElement(target));
+            actions.append(locate);
+          });
+          detail.append(actions);
+        }
+
+        definitionBlock(detail, shape);
+        factBlock(detail, "Targets", shape.targets);
+        factBlock(detail, "Path", shape.paths);
+        factBlock(detail, "Property shapes", shape.properties);
+        factBlock(detail, "Constraints", shape.constraints);
+        details.append(summary, detail);
+        list.append(details);
+        rows.push(details);
+      }
+      section.append(groupHeading, list);
+      browser.append(section);
+    }
+
+    const empty = document.createElement("p");
+    empty.className = "shapes-empty";
+    empty.textContent = "No shapes match this filter.";
+    empty.hidden = true;
+    browser.append(empty);
+    container.append(browser);
+
+    const applyFilter = (): void => {
+      this.#shapesQuery = search.value;
+      const query = search.value.trim().toLocaleLowerCase();
+      let visible = 0;
+      rows.forEach((row) => {
+        const matches = !query || row.dataset.search?.includes(query);
+        row.hidden = !matches;
+        if (matches) visible += 1;
+      });
+      browser.querySelectorAll<HTMLElement>(".shape-group").forEach((section) => {
+        section.hidden = !Array.from(section.querySelectorAll<HTMLDetailsElement>(".shape-row"))
+          .some((row) => !row.hidden);
+      });
+      filterCount.textContent = query && visible !== rows.length ? `${visible} of ${rows.length}` : `${rows.length} shapes`;
+      empty.hidden = visible > 0;
+    };
+    search.addEventListener("input", applyFilter);
+    applyFilter();
+  }
+
   #renderDiagnostics(container: HTMLElement, diagnostics: Diagnostic[]): void {
     if (!diagnostics.length) {
       const empty = document.createElement("p");
@@ -3888,6 +4282,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (this.#view === "diagnostics" && !result.diagnostics.length) this.#view = "navigator";
     if (this.#view === "discovery" && !this.#discoveryCandidates.length) this.#view = "navigator";
     if (this.#view === "vocabulary" && !this.#documentVocabulary.count) this.#view = "navigator";
+    if (this.#view === "shapes" && !this.#shaclCatalog.count) this.#view = "navigator";
     if (this.#view === "sources" && this.#sources.length <= 1) this.#view = "navigator";
     const activeSource = this.#sources.find((source) => source.id === this.#selectedSourceId) ?? this.#sources[0];
     const totalStatements = this.#totalStatementCount();
@@ -3904,6 +4299,7 @@ export class Ia2RdfNavigator extends HTMLElement {
             ${tabMarkup("navigator", this.#view === "navigator", "Navigator", "Nav")}
             ${this.#sources.length > 1 ? tabMarkup("sources", this.#view === "sources", "Sources", "Sources", this.#sources.length, "document") : ""}
             ${this.#documentVocabulary.count ? tabMarkup("vocabulary", this.#view === "vocabulary", "Vocabulary", "Vocab", this.#documentVocabulary.count, "definition") : ""}
+            ${this.#shaclCatalog.count ? tabMarkup("shapes", this.#view === "shapes", "Shapes", "Shapes", this.#shaclCatalog.count, "shape") : ""}
             ${this.#discoveryCandidates.length ? tabMarkup("discovery", this.#view === "discovery", "Discovery", "Discover", this.#discoveryCandidates.length, "candidate") : ""}
             ${tabMarkup("sparql", this.#view === "sparql", "SPARQL", "Query", this.#sparqlSuggestions.length || undefined, "suggested query")}
             ${tabMarkup("turtle", this.#view === "turtle", "Turtle", "TTL")}
@@ -3945,6 +4341,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     if (this.#view === "navigator") this.#renderNavigator(viewport, result);
     if (this.#view === "sources") this.#renderSources(viewport);
     if (this.#view === "vocabulary") this.#renderVocabulary(viewport);
+    if (this.#view === "shapes") this.#renderShapes(viewport);
     if (this.#view === "discovery") this.#renderDiscovery(viewport);
     if (this.#view === "sparql") this.#renderSparql(viewport);
     if (this.#view === "diagnostics") this.#renderDiagnostics(viewport, result.diagnostics);
