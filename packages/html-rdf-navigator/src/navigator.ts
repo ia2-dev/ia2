@@ -457,7 +457,7 @@ const CSS = String.raw`
   .vocabulary-link { align-items: center; border-left: 1px solid var(--line); color: var(--muted); display: inline-flex; padding: 5px 7px; text-decoration: none; }
   .vocabulary-link:hover { background: var(--accent-soft); color: var(--accent); }
   .external-mark { color: var(--muted); font-size: 10px; }
-  .quad { border-bottom: 1px solid var(--line); display: grid; gap: 7px; grid-template-columns: minmax(0, 1fr) auto; padding-block: 13px; padding-inline: calc(2px + var(--rdf-indent, 0px)) 2px; position: relative; }
+  .quad { border-bottom: 1px solid var(--line); contain-intrinsic-size: auto 88px; content-visibility: auto; display: grid; gap: 7px; grid-template-columns: minmax(0, 1fr) auto; padding-block: 13px; padding-inline: calc(2px + var(--rdf-indent, 0px)) 2px; position: relative; }
   .quad.is-corresponding { background: color-mix(in oklch, var(--accent-soft), transparent 30%); border-radius: 7px; }
   .quad:first-child { padding-top: 0; }
   .quad code { display: block; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
