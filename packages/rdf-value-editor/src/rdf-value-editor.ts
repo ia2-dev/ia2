@@ -364,6 +364,13 @@ export class Ia2RdfValueEditor extends HTMLElement {
   #runtimeData: HTMLElement | null = null;
   #launcher: HTMLButtonElement | null = null;
   #drawer: HTMLElement | null = null;
+  #quickEditor: HTMLElement | null = null;
+  #quickBody: HTMLElement | null = null;
+  #quickBinding: Binding | null = null;
+  #quickPlaceholder: HTMLElement | null = null;
+  #quickRowParent: Node | null = null;
+  #quickRowNextSibling: ChildNode | null = null;
+  #quickPositionCleanup: (() => void) | null = null;
   #progress: HTMLElement | null = null;
   #controls: HTMLElement | null = null;
   #helpTrigger: HTMLButtonElement | null = null;
@@ -431,6 +438,7 @@ export class Ia2RdfValueEditor extends HTMLElement {
   #teardown(): void {
     this.#directNavigationVersion += 1;
     this.#validationVersion += 1;
+    this.#hideQuickEditor(false);
     this.#runtimeData?.remove();
     this.#runtimeData = null;
     this.#syncCleanup?.();
@@ -460,6 +468,7 @@ export class Ia2RdfValueEditor extends HTMLElement {
   }
 
   open(): void {
+    this.#hideQuickEditor(false);
     this.#returnFocus = this.#launcher;
     this.#show();
     this.#drawer?.querySelector<HTMLElement>("input, select, button")?.focus();
@@ -474,7 +483,8 @@ export class Ia2RdfValueEditor extends HTMLElement {
   }
 
   close(): void {
-    this.#hide(true);
+    if (this.#quickEditor?.hasAttribute("data-open")) this.#hideQuickEditor(true);
+    else this.#hide(true);
   }
 
   #hide(restoreFocus: boolean): void {
@@ -578,6 +588,7 @@ export class Ia2RdfValueEditor extends HTMLElement {
       const placeholder = completed.getElementById(state.placeholder.id);
       if (!isHtmlElementNode(placeholder)) continue;
       delete placeholder.dataset.rdfValueEditorBacklink;
+      delete placeholder.dataset.rdfValueEditorActiveBacklink;
       this.#restoreAttribute(placeholder, "role", state.role);
       this.#restoreAttribute(placeholder, "tabindex", state.tabIndex);
       this.#restoreAttribute(placeholder, "aria-label", state.ariaLabel);
@@ -961,31 +972,47 @@ export class Ia2RdfValueEditor extends HTMLElement {
 
   #setupBacklinks(): void {
     const sourceDocument = this.#sourceDocument();
-    this.#backlinkStyles = sourceDocument.createElement("style");
-    this.#backlinkStyles.dataset.ia2RdfValueEditorBacklinks = "";
-    this.#backlinkStyles.textContent = `
-      [data-rdf-value-editor-backlink] {
-        border-radius: .15em;
-        cursor: pointer;
-      }
-      [data-rdf-value-editor-backlink]:hover {
-        outline: 2px solid var(--ia2-rdf-value-editor-backlink-hover, oklch(55% 0.17 294 / 48%));
-        outline-offset: 2px;
-      }
-      [data-rdf-value-editor-backlink]:focus-visible {
-        outline: 3px solid var(--ia2-rdf-value-editor-backlink-focus, oklch(81% 0.15 135));
-        outline-offset: 2px;
-      }
-    `;
-    const styleRoot = this.#resolvedSourceRoot?.nodeType === 11
-      ? this.#resolvedSourceRoot
-      : sourceDocument.head;
-    styleRoot.append(this.#backlinkStyles);
+    if (this.getAttribute("backlink-styling") !== "host") {
+      this.#backlinkStyles = sourceDocument.createElement("style");
+      this.#backlinkStyles.dataset.ia2RdfValueEditorBacklinks = "";
+      this.#backlinkStyles.textContent = `
+        [data-rdf-value-editor-backlink] {
+          border-radius: .15em;
+          cursor: pointer;
+        }
+        [data-rdf-value-editor-backlink]:hover {
+          outline: 2px solid var(--ia2-rdf-value-editor-backlink-hover, oklch(55% 0.17 294 / 48%));
+          outline-offset: 2px;
+        }
+        [data-rdf-value-editor-backlink]:focus-visible {
+          outline: 3px solid var(--ia2-rdf-value-editor-backlink-focus, oklch(81% 0.15 135));
+          outline-offset: 2px;
+        }
+        [data-rdf-value-editor-active-backlink] {
+          background: var(--ia2-rdf-value-editor-backlink-active-background, oklch(90% 0.065 294));
+          border-radius: .15em;
+          box-decoration-break: clone;
+          box-shadow: 0 0 0 2px var(--ia2-rdf-value-editor-backlink-active, oklch(55% 0.17 294));
+          -webkit-box-decoration-break: clone;
+        }
+      `;
+      const styleRoot = this.#resolvedSourceRoot?.nodeType === 11
+        ? this.#resolvedSourceRoot
+        : sourceDocument.head;
+      styleRoot.append(this.#backlinkStyles);
+    }
 
     for (const binding of this.#bindings) {
       for (const placeholder of binding.placeholders) {
         const activate = (): void => {
-          this.#revealBinding(binding, placeholder);
+          if (
+            this.getAttribute("backlink-mode") === "full"
+            || placeholder.ownerDocument !== this.ownerDocument
+          ) {
+            this.#revealBinding(binding, placeholder);
+          } else {
+            this.#showQuickEditor(binding, placeholder);
+          }
         };
         const pointerdown = (event: PointerEvent): void => {
           if (event.button !== 0) return;
@@ -1034,6 +1061,7 @@ export class Ia2RdfValueEditor extends HTMLElement {
       placeholder.removeEventListener("click", state.click);
       placeholder.removeEventListener("keydown", state.keydown);
       delete placeholder.dataset.rdfValueEditorBacklink;
+      delete placeholder.dataset.rdfValueEditorActiveBacklink;
       this.#restoreAttribute(placeholder, "role", state.role);
       this.#restoreAttribute(placeholder, "tabindex", state.tabIndex);
       this.#restoreAttribute(placeholder, "aria-label", state.ariaLabel);
@@ -1083,7 +1111,260 @@ export class Ia2RdfValueEditor extends HTMLElement {
     ));
   }
 
+  #quickNavigationDestination(
+    offset: -1 | 1,
+  ): { binding: Binding; placeholder: HTMLElement } | undefined {
+    const currentBinding = this.#quickBinding;
+    const currentPlaceholder = this.#quickPlaceholder;
+    if (!currentBinding || !currentPlaceholder) return undefined;
+    const active = this.#activeBindings();
+    const candidates = this.#bindings.flatMap((binding) => {
+      if (
+        binding === currentBinding
+        || !active.has(binding)
+        || !this.#bindingRows.has(binding.key)
+      ) return [];
+      return binding.placeholders.flatMap((placeholder) => {
+        if (
+          !placeholder.isConnected
+          || placeholder.hidden
+          || placeholder.closest("[hidden]")
+        ) return [];
+        const position = currentPlaceholder.compareDocumentPosition(placeholder);
+        const isInDirection = offset === 1
+          ? Boolean(position & Node.DOCUMENT_POSITION_FOLLOWING)
+          : Boolean(position & Node.DOCUMENT_POSITION_PRECEDING);
+        return isInDirection ? [{ binding, placeholder }] : [];
+      });
+    });
+    candidates.sort((left, right) => {
+      const position = left.placeholder.compareDocumentPosition(right.placeholder);
+      const documentOrder = position & Node.DOCUMENT_POSITION_FOLLOWING
+        ? -1
+        : position & Node.DOCUMENT_POSITION_PRECEDING ? 1 : 0;
+      return offset === 1 ? documentOrder : -documentOrder;
+    });
+    return candidates[0];
+  }
+
+  #restoreQuickRow(): void {
+    const binding = this.#quickBinding;
+    const parent = this.#quickRowParent;
+    if (!binding || !parent) return;
+    const row = this.#bindingRows.get(binding.key);
+    if (!row) return;
+    const next = this.#quickRowNextSibling;
+    if (next?.parentNode === parent) parent.insertBefore(row, next);
+    else parent.appendChild(row);
+    this.#quickRowParent = null;
+    this.#quickRowNextSibling = null;
+  }
+
+  #hideQuickEditor(restoreFocus: boolean): void {
+    const returnFocus = this.#quickPlaceholder ?? this.#returnFocus;
+    if (this.#quickPlaceholder) {
+      delete this.#quickPlaceholder.dataset.rdfValueEditorActiveBacklink;
+    }
+    this.#quickPositionCleanup?.();
+    this.#quickPositionCleanup = null;
+    this.#restoreQuickRow();
+    this.#quickEditor?.removeAttribute("data-open");
+    this.#quickEditor?.setAttribute("inert", "");
+    this.#quickEditor?.removeAttribute("aria-label");
+    this.#launcher?.setAttribute("aria-expanded", "false");
+    this.#quickBinding = null;
+    this.#quickPlaceholder = null;
+    if (restoreFocus) returnFocus?.focus();
+    this.#returnFocus = null;
+  }
+
+  #positionQuickEditor(): void {
+    const panel = this.#quickEditor;
+    const placeholder = this.#quickPlaceholder;
+    const view = this.ownerDocument.defaultView;
+    if (!panel || !placeholder || !view || !panel.hasAttribute("data-open")) return;
+    const anchor = placeholder.getBoundingClientRect();
+    const fragments = Array.from(placeholder.getClientRects()).filter(
+      (rect) => rect.width > 0 && rect.height > 0,
+    );
+    const anchorTop = fragments.length > 0
+      ? Math.min(...fragments.map((rect) => rect.top))
+      : anchor.top;
+    const anchorBottom = fragments.length > 0
+      ? Math.max(...fragments.map((rect) => rect.bottom))
+      : anchor.bottom;
+    let readingRect = anchor;
+    for (
+      let ancestor = placeholder.parentElement;
+      ancestor;
+      ancestor = ancestor.parentElement
+    ) {
+      const display = view.getComputedStyle(ancestor).display;
+      const candidate = ancestor.getBoundingClientRect();
+      if (
+        display !== "contents"
+        && !display.startsWith("inline")
+        && candidate.width > 0
+      ) {
+        readingRect = candidate;
+        break;
+      }
+    }
+    const panelRect = panel.getBoundingClientRect();
+    const gap = 8;
+    const inset = 12;
+    const width = panelRect.width || Math.min(340, view.innerWidth - inset * 2);
+    const height = panelRect.height || 190;
+    const left = Math.min(
+      Math.max(readingRect.left + (readingRect.width - width) / 2, inset),
+      Math.max(inset, view.innerWidth - width - inset),
+    );
+    const below = anchorBottom + gap;
+    const top = below + height <= view.innerHeight - inset
+      ? below
+      : Math.max(inset, anchorTop - height - gap);
+    panel.style.left = `${Math.round(left)}px`;
+    panel.style.top = `${Math.round(top)}px`;
+  }
+
+  #updateQuickNavigation(): void {
+    const panel = this.#quickEditor;
+    const binding = this.#quickBinding;
+    if (!panel || !binding) return;
+    const previous = this.#quickNavigationDestination(-1);
+    const next = this.#quickNavigationDestination(1);
+    const previousButton = panel.querySelector<HTMLButtonElement>(".quick-prev");
+    const nextButton = panel.querySelector<HTMLButtonElement>(".quick-next");
+    if (previousButton) {
+      previousButton.disabled = !previous;
+      previousButton.title = previous ? `Previous: ${previous.binding.label}` : "No previous field";
+      previousButton.setAttribute(
+        "aria-label",
+        previous ? `Previous field: ${previous.binding.label}` : "No previous field",
+      );
+    }
+    if (nextButton) {
+      nextButton.disabled = !next;
+      nextButton.title = next ? `Next: ${next.binding.label}` : "No next field";
+      nextButton.setAttribute(
+        "aria-label",
+        next ? `Next field: ${next.binding.label}` : "No next field",
+      );
+    }
+  }
+
+  #showQuickEditor(binding: Binding, returnFocus: HTMLElement): void {
+    const revealedBinding = this.#isBindingActive(binding)
+      ? binding
+      : this.#controllingBinding(binding) ?? binding;
+    const row = this.#bindingRows.get(revealedBinding.key);
+    const control = this.#bindingControls.get(revealedBinding.key);
+    const panel = this.#quickEditor;
+    const body = this.#quickBody;
+    if (!row || !control || !panel || !body) return;
+
+    if (this.#drawer?.hasAttribute("data-open")) this.#hide(false);
+    this.#quickPositionCleanup?.();
+    this.#quickPositionCleanup = null;
+    this.#restoreQuickRow();
+    if (this.#quickPlaceholder) {
+      delete this.#quickPlaceholder.dataset.rdfValueEditorActiveBacklink;
+    }
+
+    this.#returnFocus = returnFocus;
+    this.#quickBinding = revealedBinding;
+    this.#quickPlaceholder = returnFocus;
+    returnFocus.dataset.rdfValueEditorActiveBacklink = "";
+    this.#quickRowParent = row.parentNode;
+    this.#quickRowNextSibling = row.nextSibling;
+    const group = revealedBinding.groupKey
+      ? this.ownerDocument.createElement("p")
+      : undefined;
+    if (group) {
+      group.className = "quick-group";
+      group.textContent = revealedBinding.groupLabel;
+      body.replaceChildren(group, row);
+    } else {
+      body.replaceChildren(row);
+    }
+    panel.setAttribute(
+      "aria-label",
+      revealedBinding.groupKey
+        ? `Edit ${revealedBinding.label} in ${revealedBinding.groupLabel}`
+        : `Edit ${revealedBinding.label}`,
+    );
+    panel.setAttribute("data-open", "");
+    panel.removeAttribute("inert");
+    this.#launcher?.setAttribute("aria-expanded", "true");
+    this.#updateQuickNavigation();
+
+    const view = this.ownerDocument.defaultView;
+    if (view) {
+      let frame = 0;
+      const position = (): void => {
+        if (view.requestAnimationFrame) {
+          view.cancelAnimationFrame(frame);
+          frame = view.requestAnimationFrame(() => this.#positionQuickEditor());
+        } else {
+          this.#positionQuickEditor();
+        }
+      };
+      view.addEventListener("resize", position, { passive: true });
+      view.addEventListener("scroll", position, { capture: true, passive: true });
+      this.#quickPositionCleanup = () => {
+        view.cancelAnimationFrame?.(frame);
+        view.removeEventListener("resize", position);
+        view.removeEventListener("scroll", position, true);
+      };
+      position();
+      if (view.requestAnimationFrame) {
+        view.requestAnimationFrame(() => control.focus({ preventScroll: true }));
+      } else {
+        view.setTimeout(() => control.focus({ preventScroll: true }), 0);
+      }
+    } else {
+      this.#positionQuickEditor();
+      control.focus({ preventScroll: true });
+    }
+  }
+
+  #navigateQuickEditor(offset: -1 | 1): void {
+    const destination = this.#quickNavigationDestination(offset);
+    if (!destination) return;
+    const { binding, placeholder } = destination;
+    const view = this.ownerDocument.defaultView;
+    placeholder.scrollIntoView?.({
+      behavior: view?.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "center",
+    });
+    this.#showQuickEditor(binding, placeholder);
+  }
+
+  async #finishQuickEditor(): Promise<void> {
+    const binding = this.#quickBinding;
+    const control = binding ? this.#bindingControls.get(binding.key) : undefined;
+    if (!binding || !control) return;
+    this.#acceptValue(binding, control);
+    await this.#validationPromise;
+    if (binding.error) {
+      control.focus({ preventScroll: true });
+      return;
+    }
+    this.#hideQuickEditor(true);
+  }
+
+  #expandQuickEditor(): void {
+    const binding = this.#quickBinding;
+    const placeholder = this.#quickPlaceholder;
+    if (!binding || !placeholder) return;
+    this.#hideQuickEditor(false);
+    this.#revealBinding(binding, placeholder);
+  }
+
   #revealBinding(binding: Binding, returnFocus: HTMLElement): void {
+    this.#hideQuickEditor(false);
     const revealedBinding = this.#isBindingActive(binding)
       ? binding
       : this.#controllingBinding(binding) ?? binding;
@@ -1442,6 +1723,102 @@ export class Ia2RdfValueEditor extends HTMLElement {
           cursor: default;
           touch-action: auto;
           user-select: auto;
+        }
+        .quick-editor {
+          background: var(--editor-paper);
+          border: 1px solid var(--editor-rule);
+          border-radius: 12px;
+          box-shadow:
+            0 18px 50px oklch(28% 0.03 60 / 12%),
+            0 2px 8px oklch(28% 0.03 60 / 7%);
+          color: var(--editor-ink);
+          display: grid;
+          max-height: calc(100vh - 24px);
+          opacity: 0;
+          overflow: hidden;
+          pointer-events: none;
+          position: fixed;
+          transform: translateY(-4px) scale(.99);
+          transition:
+            opacity 140ms ease,
+            transform 180ms cubic-bezier(.22, 1, .36, 1),
+            visibility 180ms;
+          visibility: hidden;
+          width: min(340px, calc(100vw - 24px));
+          z-index: var(--ia2-window-dialog-layer, 2147483040);
+        }
+        .quick-editor[data-open] {
+          opacity: 1;
+          pointer-events: auto;
+          transform: none;
+          visibility: visible;
+        }
+        .quick-body {
+          min-width: 0;
+          overflow: auto;
+          padding: .15rem 1rem .55rem;
+        }
+        .quick-group {
+          color: var(--editor-muted);
+          font-size: .62rem;
+          font-weight: 780;
+          letter-spacing: .045em;
+          margin: .75rem 0 -.45rem;
+          text-transform: uppercase;
+        }
+        .quick-body .field {
+          border: 0;
+          padding: .85rem 0 .65rem;
+        }
+        .quick-actions {
+          align-items: center;
+          border-top: 1px solid var(--editor-rule);
+          display: flex;
+          gap: .35rem;
+          justify-content: flex-end;
+          padding: .55rem;
+        }
+        .quick-action {
+          background: transparent;
+          border: 1px solid var(--editor-rule);
+          border-radius: 7px;
+          color: var(--editor-ink);
+          cursor: pointer;
+          font-size: .7rem;
+          font-weight: 720;
+          min-height: 36px;
+          padding: .4rem .65rem;
+        }
+        .quick-action:hover { background: var(--editor-accent-soft); }
+        .quick-action:disabled {
+          background: transparent;
+          color: color-mix(in oklch, var(--editor-muted), transparent 45%);
+          cursor: default;
+        }
+        .quick-expand {
+          align-items: center;
+          border-color: transparent;
+          color: var(--editor-accent);
+          display: inline-flex;
+          gap: .35rem;
+          margin-right: auto;
+        }
+        .quick-expand-icon {
+          fill: none;
+          height: 14px;
+          stroke: currentColor;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+          stroke-width: 1.65;
+          width: 14px;
+        }
+        .quick-done {
+          background: var(--editor-accent);
+          border-color: var(--editor-accent);
+          color: var(--editor-paper);
+        }
+        .quick-done:hover {
+          background: color-mix(in oklch, var(--editor-accent), var(--editor-ink) 12%);
         }
         .drawer-head {
           border-bottom: 1px solid var(--editor-rule);
@@ -1974,13 +2351,27 @@ export class Ia2RdfValueEditor extends HTMLElement {
           .architecture-footer span { display: none; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .architecture-window { transition: none; }
+          .architecture-window, .quick-editor { transition: none; }
         }
         ${WINDOW_PLACEMENT_CSS}
       </style>
       <button class="launcher ia2-window-launcher" type="button" data-position="${this.#position}" aria-expanded="false" aria-controls="ia2-rdf-value-editor-drawer">
         ${panelLabel} <span class="count">${this.#bindings.length}</span>
       </button>
+      <section class="quick-editor" role="dialog" aria-modal="false" inert>
+        <div class="quick-body"></div>
+        <footer class="quick-actions">
+          <button class="quick-action quick-expand" type="button">
+            <svg class="quick-expand-icon" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4"></path>
+            </svg>
+            <span>Expand</span>
+          </button>
+          <button class="quick-action quick-prev" type="button">Prev</button>
+          <button class="quick-action quick-next" type="button" aria-keyshortcuts="Enter">Next</button>
+          <button class="quick-action quick-done" type="button">Done</button>
+        </footer>
+      </section>
       <aside class="drawer ia2-window-surface" id="ia2-rdf-value-editor-drawer" data-position="${this.#position}" aria-label="${panelLabel}" inert>
         <header class="drawer-head">
           <div class="head-row">
@@ -2129,6 +2520,8 @@ export class Ia2RdfValueEditor extends HTMLElement {
 
     this.#launcher = root.querySelector<HTMLButtonElement>(".launcher");
     this.#drawer = root.querySelector<HTMLElement>(".drawer");
+    this.#quickEditor = root.querySelector<HTMLElement>(".quick-editor");
+    this.#quickBody = root.querySelector<HTMLElement>(".quick-body");
     this.#progress = root.querySelector<HTMLElement>(".progress");
     this.#controls = root.querySelector<HTMLElement>(".controls");
     this.#helpTrigger = root.querySelector<HTMLButtonElement>(".how-link");
@@ -2136,6 +2529,30 @@ export class Ia2RdfValueEditor extends HTMLElement {
     this.#dataStatus = root.querySelector<HTMLElement>(".data-status");
     this.#loadInput = root.querySelector<HTMLInputElement>(".load-input");
     this.#launcher?.addEventListener("click", () => this.open());
+    root.querySelector(".quick-expand")?.addEventListener("click", () => this.#expandQuickEditor());
+    root.querySelector(".quick-prev")?.addEventListener("click", () => this.#navigateQuickEditor(-1));
+    root.querySelector(".quick-next")?.addEventListener("click", () => this.#navigateQuickEditor(1));
+    root.querySelector(".quick-done")?.addEventListener("click", () => void this.#finishQuickEditor());
+    this.#quickEditor?.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        this.#hideQuickEditor(true);
+        return;
+      }
+      if (
+        event.key !== "Enter"
+        || event.isComposing
+        || event.altKey
+        || event.ctrlKey
+        || event.metaKey
+        || event.shiftKey
+        || !(event.target instanceof HTMLElement)
+        || !event.target.matches("input, select")
+      ) return;
+      const next = this.#quickEditor?.querySelector<HTMLButtonElement>(".quick-next");
+      if (!next || next.disabled) return;
+      event.preventDefault();
+      this.#navigateQuickEditor(1);
+    });
     root.querySelector(".close")?.addEventListener("click", () => this.close());
     root.querySelector(".apply-defaults")?.addEventListener("click", () => this.#applyDefaults());
     root.querySelector(".load-values")?.addEventListener("click", () => this.#loadInput?.click());
@@ -2699,6 +3116,10 @@ export class Ia2RdfValueEditor extends HTMLElement {
       const title = `${ariaLabel} in ${this.#panelLabel()}`;
       state.placeholder.setAttribute("aria-label", ariaLabel);
       state.placeholder.setAttribute("title", title);
+    }
+    if (this.#quickEditor?.hasAttribute("data-open")) {
+      this.#updateQuickNavigation();
+      this.#positionQuickEditor();
     }
     if (this.#syncMode !== "off" && this.#drawer?.hasAttribute("data-open")) {
       this.#configureSync();

@@ -383,13 +383,169 @@ describe("IA² RDF value editor", () => {
     ))).toBe(false);
   });
 
-  it("optionally backlinks every visible value to its generated control", async () => {
+  it("opens one anchored field from a backlink and navigates, validates, completes, or expands", async () => {
+    const editor = await mount({ backlinks: "" });
+    const firstPlaceholder = document.querySelector<HTMLElement>("#name-one")!;
+    const repeatedPlaceholder = document.querySelector<HTMLElement>("#name-two")!;
+    const noticePlaceholder = document.querySelector<HTMLElement>("#notice-days")!;
+    const nameInput = Array.from(editor.shadowRoot!.querySelectorAll<HTMLInputElement>(".controls input"))
+      .find((input) => input.previousElementSibling?.textContent === "Party legal name")!;
+    const noticeInput = Array.from(editor.shadowRoot!.querySelectorAll<HTMLInputElement>(".controls input"))
+      .find((input) => input.previousElementSibling?.textContent === "Notice period")!;
+    firstPlaceholder.getBoundingClientRect = () => ({
+      bottom: 140,
+      height: 20,
+      left: 80,
+      right: 180,
+      top: 120,
+      width: 100,
+      x: 80,
+      y: 120,
+      toJSON: () => ({}),
+    });
+    noticePlaceholder.scrollIntoView = vi.fn();
+
+    firstPlaceholder.dispatchEvent(new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+    }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    const quickEditor = editor.shadowRoot!.querySelector<HTMLElement>(".quick-editor")!;
+    expect(quickEditor.hasAttribute("data-open")).toBe(true);
+    expect(quickEditor.getAttribute("aria-label")).toBe("Edit Party legal name");
+    expect(editor.shadowRoot!.querySelector(".drawer")?.hasAttribute("data-open")).toBe(false);
+    expect(quickEditor.querySelectorAll(".field")).toHaveLength(1);
+    expect(quickEditor.querySelector("label")?.textContent).toBe("Party legal name");
+    expect(editor.shadowRoot!.activeElement).toBe(nameInput);
+    expect(firstPlaceholder.dataset.rdfValueEditorActiveBacklink).toBe("");
+    expect(quickEditor.querySelector(".quick-expand svg")?.getAttribute("aria-hidden")).toBe("true");
+    expect(quickEditor.querySelector(".quick-expand")?.textContent).toContain("Expand");
+    expect(quickEditor.querySelector(".quick-next")?.getAttribute("aria-keyshortcuts")).toBe("Enter");
+    expect(quickEditor.style.left).not.toBe("");
+    expect(quickEditor.style.top).not.toBe("");
+
+    nameInput.value = "";
+    nameInput.dispatchEvent(new Event("input", { bubbles: true }));
+    editor.shadowRoot!.querySelector<HTMLButtonElement>(".quick-done")!.click();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(quickEditor.hasAttribute("data-open")).toBe(true);
+    expect(quickEditor.querySelector(".error")?.textContent).toBe("This value is required.");
+    expect(quickEditor.querySelectorAll(".error")).toHaveLength(1);
+    expect(editor.shadowRoot!.activeElement).toBe(nameInput);
+
+    nameInput.value = "Sample Entity LLC";
+    nameInput.dispatchEvent(new Event("input", { bubbles: true }));
+    await editor.validate();
+    expect(editor.exportCompletedDocument()).not.toContain(
+      "data-rdf-value-editor-active-backlink",
+    );
+    expect(nameInput.dispatchEvent(new KeyboardEvent("keydown", {
+      bubbles: true,
+      cancelable: true,
+      key: "Enter",
+    }))).toBe(false);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(noticePlaceholder.scrollIntoView).toHaveBeenCalledWith({
+      behavior: "smooth",
+      block: "center",
+    });
+    expect(quickEditor.querySelector("label")?.textContent).toBe("Notice period");
+    expect(editor.shadowRoot!.activeElement).toBe(noticeInput);
+    expect(firstPlaceholder.hasAttribute("data-rdf-value-editor-active-backlink")).toBe(false);
+    expect(noticePlaceholder.dataset.rdfValueEditorActiveBacklink).toBe("");
+    expect(editor.shadowRoot!.querySelector(".controls")?.contains(nameInput)).toBe(true);
+    expect(editor.shadowRoot!.querySelector(".controls")?.contains(noticeInput)).toBe(false);
+
+    editor.shadowRoot!.querySelector<HTMLButtonElement>(".quick-prev")!.click();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(quickEditor.querySelector("label")?.textContent).toBe("Party legal name");
+    expect(repeatedPlaceholder.dataset.rdfValueEditorActiveBacklink).toBe("");
+    editor.shadowRoot!.querySelector<HTMLButtonElement>(".quick-done")!.click();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(quickEditor.hasAttribute("data-open")).toBe(false);
+    expect(document.activeElement).toBe(repeatedPlaceholder);
+    expect(repeatedPlaceholder.hasAttribute("data-rdf-value-editor-active-backlink")).toBe(false);
+
+    noticePlaceholder.dispatchEvent(new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+    }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    editor.shadowRoot!.querySelector<HTMLButtonElement>(".quick-expand")!.click();
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    expect(quickEditor.hasAttribute("data-open")).toBe(false);
+    expect(editor.shadowRoot!.querySelector(".drawer")?.hasAttribute("data-open")).toBe(true);
+    expect(editor.shadowRoot!.activeElement).toBe(noticeInput);
+    expect(noticePlaceholder.hasAttribute("data-rdf-value-editor-active-backlink")).toBe(false);
+  });
+
+  it("anchors the compact editor to the reading block and all wrapped line fragments", async () => {
+    const editor = await mount({ backlinks: "" });
+    const placeholder = document.querySelector<HTMLElement>("#name-one")!;
+    const readingBlock = placeholder.parentElement!;
+    placeholder.getBoundingClientRect = () => ({
+      bottom: 166,
+      height: 46,
+      left: 70,
+      right: 690,
+      top: 120,
+      width: 620,
+      x: 70,
+      y: 120,
+      toJSON: () => ({}),
+    });
+    placeholder.getClientRects = () => [
+      {
+        bottom: 140,
+        height: 20,
+        left: 120,
+        right: 690,
+        top: 120,
+        width: 570,
+        x: 120,
+        y: 120,
+        toJSON: () => ({}),
+      },
+      {
+        bottom: 166,
+        height: 20,
+        left: 70,
+        right: 95,
+        top: 146,
+        width: 25,
+        x: 70,
+        y: 146,
+        toJSON: () => ({}),
+      },
+    ] as unknown as DOMRectList;
+    readingBlock.getBoundingClientRect = () => ({
+      bottom: 220,
+      height: 140,
+      left: 100,
+      right: 700,
+      top: 80,
+      width: 600,
+      x: 100,
+      y: 80,
+      toJSON: () => ({}),
+    });
+
+    placeholder.click();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    const quickEditor = editor.shadowRoot!.querySelector<HTMLElement>(".quick-editor")!;
+    expect(quickEditor.style.left).toBe("230px");
+    expect(quickEditor.style.top).toBe("174px");
+  });
+
+  it("can opt backlinks out of compact editing and open the full panel directly", async () => {
     const scrollTo = vi.fn();
     Object.defineProperty(HTMLElement.prototype, "scrollTo", {
       configurable: true,
       value: scrollTo,
     });
-    const editor = await mount({ backlinks: "" });
+    const editor = await mount({ backlinks: "", "backlink-mode": "full" });
     const firstPlaceholder = document.querySelector<HTMLElement>("#name-one")!;
     const repeatedPlaceholder = document.querySelector<HTMLElement>("#name-two")!;
     const nameInput = Array.from(editor.shadowRoot!.querySelectorAll<HTMLInputElement>(".controls input"))
@@ -467,6 +623,23 @@ describe("IA² RDF value editor", () => {
     }));
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(editor.shadowRoot!.activeElement).toBe(nameInput);
+  });
+
+  it("lets the host style the stable backlink states without injected defaults", async () => {
+    const editor = await mount({
+      backlinks: "",
+      "backlink-styling": "host",
+    });
+    const placeholder = document.querySelector<HTMLElement>("#name-one")!;
+
+    expect(document.head.querySelector("[data-ia2-rdf-value-editor-backlinks]")).toBeNull();
+    expect(placeholder.dataset.rdfValueEditorBacklink).toBe("");
+
+    placeholder.click();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(placeholder.dataset.rdfValueEditorActiveBacklink).toBe("");
+    expect(editor.shadowRoot!.querySelector(".quick-editor")?.hasAttribute("data-open")).toBe(true);
   });
 
   it("leaves visible value interactions unchanged unless backlinks are enabled", async () => {
@@ -1126,6 +1299,101 @@ describe("IA² RDF value editor", () => {
     expect(completed).toContain("<title>External shaped source</title>");
     expect(completed).toContain("External Entity");
     expect(completed).not.toContain("host-only");
+  });
+
+  it("uses visible contract order across SHACL groups and shows group context", async () => {
+    const parsed = new DOMParser().parseFromString(assignmentHtml, "text/html");
+    document.documentElement.setAttribute("rdf-version", "1.2");
+    document.head.innerHTML = parsed.head.innerHTML;
+    document.body.innerHTML = parsed.body.innerHTML;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const editor = document.querySelector<Ia2RdfValueEditor>("ia2-rdf-value-editor")!;
+    const contractDate = document.querySelector<HTMLElement>("#underlying-contract-date-value")!;
+    const exhibitTreatment = document.querySelector<HTMLElement>("#exhibit-choice-value")!;
+    const transactionDescription = document.querySelector<HTMLElement>("#transaction-description-value")!;
+    const scrollIntoView = vi.fn();
+    exhibitTreatment.scrollIntoView = scrollIntoView;
+    contractDate.scrollIntoView = scrollIntoView;
+    contractDate.dispatchEvent(new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+    }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    const quickEditor = editor.shadowRoot!.querySelector<HTMLElement>(".quick-editor")!;
+    expect(quickEditor.getAttribute("aria-label"))
+      .toBe("Edit Underlying contract date in Agreement terms");
+    expect(quickEditor.querySelector(".quick-group")?.textContent).toBe("Agreement terms");
+    expect(quickEditor.querySelector("label")?.textContent).toBe("Underlying contract date");
+    expect(
+      quickEditor.querySelector(".quick-next")?.getAttribute("aria-label"),
+    ).toBe("Next field: Exhibit treatment");
+
+    quickEditor.querySelector<HTMLInputElement>("input")!.dispatchEvent(new KeyboardEvent("keydown", {
+      bubbles: true,
+      cancelable: true,
+      key: "Enter",
+    }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "center" });
+    expect(quickEditor.getAttribute("aria-label"))
+      .toBe("Edit Exhibit treatment in Drafting decisions");
+    expect(quickEditor.querySelector(".quick-group")?.textContent).toBe("Drafting decisions");
+    expect(quickEditor.querySelector("label")?.textContent).toBe("Exhibit treatment");
+    expect(exhibitTreatment.dataset.rdfValueEditorActiveBacklink).toBe("");
+    expect(transactionDescription.hasAttribute("data-rdf-value-editor-active-backlink")).toBe(false);
+    expect(
+      quickEditor.querySelector(".quick-prev")?.getAttribute("aria-label"),
+    ).toBe("Previous field: Underlying contract date");
+  });
+
+  it("quick-edits and advances between fillables in the assignment contract page", async () => {
+    const parsed = new DOMParser().parseFromString(assignmentHtml, "text/html");
+    document.documentElement.setAttribute("rdf-version", "1.2");
+    document.head.innerHTML = parsed.head.innerHTML;
+    document.body.innerHTML = parsed.body.innerHTML;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const editor = document.querySelector<Ia2RdfValueEditor>("ia2-rdf-value-editor")!;
+    const firstBacklink = document.querySelector<HTMLElement>("[data-rdf-value-editor-backlink]")!;
+    const scrollIntoView = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value: scrollIntoView,
+    });
+    firstBacklink.dispatchEvent(new KeyboardEvent("keydown", {
+      bubbles: true,
+      cancelable: true,
+      key: "Enter",
+    }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    const quickEditor = editor.shadowRoot!.querySelector<HTMLElement>(".quick-editor")!;
+    const firstLabel = quickEditor.querySelector("label")?.textContent;
+    expect(quickEditor.hasAttribute("data-open")).toBe(true);
+    expect(firstLabel).toBe(firstBacklink.getAttribute("aria-label")?.replace(/^Edit /u, ""));
+    expect(quickEditor.querySelectorAll(".field")).toHaveLength(1);
+    expect(editor.shadowRoot!.querySelector(".drawer")?.hasAttribute("data-open")).toBe(false);
+    expect(firstBacklink.dataset.rdfValueEditorActiveBacklink).toBe("");
+
+    quickEditor.querySelector<HTMLInputElement | HTMLSelectElement>("input, select")!
+      .dispatchEvent(new KeyboardEvent("keydown", {
+        bubbles: true,
+        cancelable: true,
+        key: "Enter",
+      }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(quickEditor.querySelector("label")?.textContent).not.toBe(firstLabel);
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "center" });
+    expect(firstBacklink.hasAttribute("data-rdf-value-editor-active-backlink")).toBe(false);
+    expect(document.querySelectorAll("[data-rdf-value-editor-active-backlink]")).toHaveLength(1);
+
+    editor.shadowRoot!.querySelector<HTMLButtonElement>(".quick-expand")!.click();
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    expect(quickEditor.hasAttribute("data-open")).toBe(false);
+    expect(editor.shadowRoot!.querySelector(".drawer")?.hasAttribute("data-open")).toBe(true);
   });
 
   it("authors the assignment without document-specific configuration or model issues", async () => {

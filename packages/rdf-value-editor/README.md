@@ -212,11 +212,46 @@ console.log(report.conforms, report.issues);
 ## Backlinks
 
 The boolean `backlinks` attribute turns each discovered visible value into an
-accessible route to its generated control. Click, Enter, or Space opens the
-panel, scrolls the control into view, and focuses it. Direct backlink navigation
-temporarily takes priority over scroll synchronization, then restores the
-selected sync behavior without changing its mode. Without `backlinks`, the
-host's visible interactions remain unchanged.
+accessible route to its generated control. Click, Enter, or Space opens a
+compact panel beside the value with only that field, its validation, and
+`Done`, `Prev`, `Next`, and `Expand` actions. Previous and next move through the
+active fillables in visible document order, independent of the complete
+editor's SHACL group order. They skip repeated carriers of the same value,
+scroll the next value into view, and re-anchor the panel. An explicitly declared
+SHACL group name appears as quiet context above the field. The correlated
+document value remains highlighted while its compact editor is open. The panel
+aligns to the surrounding reading block, including when the value wraps across
+lines. Enter in the field performs Next. Expand opens the complete editor at the
+same field.
+
+Set `backlink-mode="full"` to opt out of compact editing and make backlinks open
+the complete panel directly. Direct full-panel navigation temporarily takes
+priority over scroll synchronization, then restores the selected sync behavior
+without changing its mode. Without `backlinks`, the host's visible interactions
+remain unchanged.
+
+The component exposes two stable CSS state hooks in its source document:
+`[data-rdf-value-editor-backlink]` marks every editable value and
+`[data-rdf-value-editor-active-backlink]` marks the value currently open in the
+compact editor. Set `backlink-styling="host"` to suppress the component's
+injected backlink styles and let the host document implement those states:
+
+```css
+[data-rdf-value-editor-backlink] {
+  cursor: pointer;
+}
+
+[data-rdf-value-editor-backlink]:focus-visible {
+  outline: 3px solid var(--document-focus);
+  outline-offset: 2px;
+}
+
+[data-rdf-value-editor-active-backlink] {
+  background: var(--document-selection);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+```
 
 ## Shared window and synchronization vocabulary
 

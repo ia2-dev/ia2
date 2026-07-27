@@ -136,6 +136,23 @@
       background: oklch(95% 0.035 25);
       border-bottom-color: oklch(53% 0.16 25);
     }
+    [data-rdf-value-editor-backlink] {
+      border-radius: .12em;
+      cursor: pointer;
+    }
+    [data-rdf-value-editor-backlink]:hover {
+      background: oklch(94% 0.025 294);
+    }
+    [data-rdf-value-editor-backlink]:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+    [data-rdf-value-editor-active-backlink] {
+      background: oklch(91.5% 0.042 294);
+      border-bottom-color: oklch(57% 0.12 294);
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
 
     .recitals { font-family: var(--legal); margin-bottom: 2rem; }
     .section-heading {
@@ -2152,6 +2169,7 @@ ORDER BY ?party"></data>
     runtime-graph="#runtime-graph"
     position="right"
     backlinks
+    backlink-styling="host"
   ></ia2-rdf-value-editor>
   <script type="module" src="/packages/rdf-value-editor/dist/rdf-value-editor.js"></script>
   <script type="module" src="/packages/html-rdf-navigator/dist/html-rdf-navigator.js"></script>
