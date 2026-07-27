@@ -1,6 +1,6 @@
 {
   "name": "@ia2-dev/rdf-value-editor",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "A SHACL- and Web Annotation-driven RDF value editor for HTML/RDF datasets.",
   "author": "Yurii Rashkovskii",
   "homepage": "https://ia2.dev/",
