@@ -405,13 +405,25 @@ describe("IA² RDF value editor", () => {
     });
     noticePlaceholder.scrollIntoView = vi.fn();
 
-    firstPlaceholder.dispatchEvent(new MouseEvent("click", {
+    firstPlaceholder.dispatchEvent(new MouseEvent("pointerdown", {
       bubbles: true,
+      button: 0,
       cancelable: true,
     }));
     await new Promise((resolve) => setTimeout(resolve, 20));
 
     const quickEditor = editor.shadowRoot!.querySelector<HTMLElement>(".quick-editor")!;
+    expect(quickEditor.hasAttribute("data-open")).toBe(false);
+    firstPlaceholder.focus();
+    firstPlaceholder.dispatchEvent(new MouseEvent("click", {
+      bubbles: true,
+      button: 0,
+      cancelable: true,
+      detail: 1,
+    }));
+    expect(editor.shadowRoot!.activeElement).toBe(nameInput);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
     expect(quickEditor.hasAttribute("data-open")).toBe(true);
     expect(quickEditor.getAttribute("aria-label")).toBe("Edit Party legal name");
     expect(editor.shadowRoot!.querySelector(".drawer")?.hasAttribute("data-open")).toBe(false);

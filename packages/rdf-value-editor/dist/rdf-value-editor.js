@@ -6461,8 +6461,9 @@ var Ia2RdfValueEditor = class extends HTMLElement {
     }
     for (const binding of this.#bindings) {
       for (const placeholder of binding.placeholders) {
+        const opensFullEditor = () => this.getAttribute("backlink-mode") === "full" || placeholder.ownerDocument !== this.ownerDocument;
         const activate = () => {
-          if (this.getAttribute("backlink-mode") === "full" || placeholder.ownerDocument !== this.ownerDocument) {
+          if (opensFullEditor()) {
             this.#revealBinding(binding, placeholder);
           } else {
             this.#showQuickEditor(binding, placeholder);
@@ -6471,11 +6472,11 @@ var Ia2RdfValueEditor = class extends HTMLElement {
         const pointerdown = (event) => {
           if (event.button !== 0) return;
           event.preventDefault();
-          activate();
+          if (opensFullEditor()) activate();
         };
         const click = (event) => {
           event.preventDefault();
-          if (event.detail !== 0) return;
+          if (event.detail !== 0 && opensFullEditor()) return;
           activate();
         };
         const keydown = (event) => {
@@ -6695,6 +6696,7 @@ var Ia2RdfValueEditor = class extends HTMLElement {
     panel.removeAttribute("inert");
     this.#launcher?.setAttribute("aria-expanded", "true");
     this.#updateQuickNavigation();
+    control.focus({ preventScroll: true });
     const view = this.ownerDocument.defaultView;
     if (view) {
       let frame = 0;
@@ -6714,14 +6716,8 @@ var Ia2RdfValueEditor = class extends HTMLElement {
         view.removeEventListener("scroll", position, true);
       };
       position();
-      if (view.requestAnimationFrame) {
-        view.requestAnimationFrame(() => control.focus({ preventScroll: true }));
-      } else {
-        view.setTimeout(() => control.focus({ preventScroll: true }), 0);
-      }
     } else {
       this.#positionQuickEditor();
-      control.focus({ preventScroll: true });
     }
   }
   #navigateQuickEditor(offset) {
@@ -7058,7 +7054,7 @@ ${subject}`;
           transition:
             opacity 140ms ease,
             transform 180ms cubic-bezier(.22, 1, .36, 1),
-            visibility 180ms;
+            visibility 0s linear 180ms;
           visibility: hidden;
           width: min(340px, calc(100vw - 24px));
           z-index: var(--ia2-window-dialog-layer, 2147483040);
@@ -7067,6 +7063,7 @@ ${subject}`;
           opacity: 1;
           pointer-events: auto;
           transform: none;
+          transition-delay: 0s, 0s, 0s;
           visibility: visible;
         }
         .quick-body {
