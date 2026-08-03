@@ -449,6 +449,8 @@ const CSS = String.raw`
   .filter-count { color: var(--muted); display: block; font-size: 10px; font-variant-numeric: tabular-nums; line-height: 15px; margin: 2px 2px 0; min-height: 15px; white-space: nowrap; }
   .filter-count:empty { visibility: hidden; }
   .navigator { list-style: none; margin: 0; padding: 0; }
+  .navigator-spacer { border: 0; height: var(--navigator-spacer-height, 0); list-style: none; padding: 0; pointer-events: none; }
+  .navigator-spacer[hidden] + .quad { padding-top: 0; }
   .vocabularies { margin: 0; padding: 0 2px; position: relative; }
   .vocabularies::before, .vocabularies::after { bottom: 7px; content: ""; opacity: 0; pointer-events: none; position: absolute; top: 23px; transition: opacity 140ms ease; width: 28px; z-index: 2; }
   .vocabularies::before { background: linear-gradient(90deg, var(--paper) 15%, transparent); left: 2px; }
@@ -680,6 +682,9 @@ WHERE {
 LIMIT 100`;
 const DEFAULT_SPARQL_PAGE_SIZE = 25;
 const SPARQL_PAGE_SIZES = [10, 25, 50, 100] as const;
+const NAVIGATOR_WINDOW_SIZE = 100;
+const NAVIGATOR_WINDOW_OVERSCAN = 25;
+const NAVIGATOR_ROW_ESTIMATED_HEIGHT = 88;
 const SPARQL_LABEL_PREDICATES = [
   ...DEFAULT_LABEL_PREDICATES,
   "http://www.w3.org/ns/shacl#name",
@@ -790,6 +795,14 @@ function isLauncherPosition(value: unknown): value is LauncherPosition {
 
 interface NavigatorRow {
   item: HTMLLIElement;
+  index: number;
+  namespaces: Set<string>;
+  quad: Quad;
+  searchText: string;
+}
+
+interface NavigatorRowData {
+  index: number;
   namespaces: Set<string>;
   quad: Quad;
   searchText: string;
@@ -1565,6 +1578,7 @@ export class Ia2RdfNavigator extends HTMLElement {
   #contentRendered = false;
   #analysisDirty = false;
   #analysisIdleHandle: number | null = null;
+  #revealedSource: Element | null = null;
 
   constructor() {
     super();
@@ -2535,7 +2549,9 @@ export class Ia2RdfNavigator extends HTMLElement {
     this.#navigatorQuery = "";
     this.#disabledNamespaces.clear();
     this.#syncMode = "off";
+    this.#revealedSource = source;
     this.#render();
+    this.#revealedSource = null;
     this.#persistSessionState();
     this.open("panel");
 
@@ -3269,6 +3285,7 @@ export class Ia2RdfNavigator extends HTMLElement {
     }
     const list = document.createElement("ol");
     list.className = "navigator";
+    list.setAttribute("aria-label", "RDF statements");
     const carriers = new Set(result.quads.map((quad) => quad.source));
     const localUrlCache = new Map<string, URL | null>();
     const targetCache = new Map<string, Element | null>();
@@ -3281,10 +3298,23 @@ export class Ia2RdfNavigator extends HTMLElement {
       source: Element;
       sourceId: string;
     }>();
-    const rows: NavigatorRow[] = [];
-    result.quads.forEach((quad, index) => {
+    const rowData: NavigatorRowData[] = result.quads.map((quad, index) => ({
+      index,
+      namespaces: new Set(namespacesInQuad(quad).map((entry) => entry.namespace)),
+      quad,
+      searchText: quadSearchText(quad),
+    }));
+    let rows: NavigatorRow[] = [];
+    let filteredRows = rowData;
+    let rowsInitialized = false;
+    let windowStart = 0;
+    let windowEnd = 0;
+    let lastFilterKey = "";
+    let configureSync = (): void => {};
+    const renderRow = ({ index, namespaces, quad, searchText }: NavigatorRowData): NavigatorRow => {
       const item = document.createElement("li");
       item.className = "quad";
+      item.dataset.navigatorIndex = String(index);
       const depth = rdfCarrierDepth(quad.source, carriers);
       const visualDepth = Math.min(depth, 6);
       item.dataset.depth = String(depth);
@@ -3351,9 +3381,8 @@ export class Ia2RdfNavigator extends HTMLElement {
       actions.append(createToggle(false, !hasChildren));
       if (hasChildren) actions.append(createToggle(true));
       item.append(terms, actions);
-      list.append(item);
-      rows.push({ item, namespaces: new Set(namespacesInQuad(quad).map((entry) => entry.namespace)), quad, searchText: quadSearchText(quad) });
-    });
+      return { index, item, namespaces, quad, searchText };
+    };
     list.addEventListener("click", (event) => {
       if (!(event.target instanceof Element)) return;
       const localLink = event.target.closest<HTMLAnchorElement>("a.local-term");
@@ -3387,29 +3416,149 @@ export class Ia2RdfNavigator extends HTMLElement {
       if (!item || (event.relatedTarget instanceof Node && item.contains(event.relatedTarget))) return;
       this.#clearLocateEmphasis();
     });
-    container.append(list);
-    this.#navigatorRows = rows;
     const noMatches = document.createElement("p");
     noMatches.className = "empty filter-empty";
     noMatches.textContent = "No statements match the active filters.";
     noMatches.hidden = true;
-    container.append(noMatches);
+    const topSpacer = document.createElement("li");
+    topSpacer.className = "navigator-spacer navigator-spacer-top";
+    topSpacer.setAttribute("role", "presentation");
+    const bottomSpacer = document.createElement("li");
+    bottomSpacer.className = "navigator-spacer navigator-spacer-bottom";
+    bottomSpacer.setAttribute("role", "presentation");
+    const windowStatus = document.createElement("p");
+    windowStatus.className = "sr-only navigator-window-status";
+    windowStatus.setAttribute("role", "status");
+    windowStatus.setAttribute("aria-live", "polite");
+    windowStatus.setAttribute("aria-atomic", "true");
+    container.append(list, noMatches, windowStatus);
+    const rowHeights = new Map<number, number>();
+    const measureRows = (): void => {
+      for (const row of rows) {
+        const height = row.item.getBoundingClientRect().height;
+        if (Number.isFinite(height) && height > 0) rowHeights.set(row.index, height);
+      }
+    };
+    const rowHeight = (row: NavigatorRowData): number => rowHeights.get(row.index) ?? NAVIGATOR_ROW_ESTIMATED_HEIGHT;
+    const rangeHeight = (start: number, end: number): number => {
+      let height = 0;
+      for (let index = start; index < end; index += 1) height += rowHeight(filteredRows[index]!);
+      return height;
+    };
+    const rowIndexAtOffset = (offset: number): number => {
+      let remaining = Math.max(0, offset);
+      for (let index = 0; index < filteredRows.length; index += 1) {
+        const height = rowHeight(filteredRows[index]!);
+        if (remaining < height) return index;
+        remaining -= height;
+      }
+      return Math.max(0, filteredRows.length - 1);
+    };
+    const startForTarget = (targetIndex: number): number => {
+      const maxStart = Math.max(0, filteredRows.length - NAVIGATOR_WINDOW_SIZE);
+      const unclamped = Math.max(0, targetIndex - NAVIGATOR_WINDOW_OVERSCAN);
+      const snapped = Math.floor(unclamped / NAVIGATOR_WINDOW_OVERSCAN) * NAVIGATOR_WINDOW_OVERSCAN;
+      return Math.min(snapped, maxStart);
+    };
+    const renderWindow = (targetIndex = 0): void => {
+      measureRows();
+      const activeElement = this.shadowRoot?.activeElement;
+      const reusableRows = new Map(rows.map((row) => [row.index, row]));
+      windowStart = startForTarget(Math.min(Math.max(0, targetIndex), Math.max(0, filteredRows.length - 1)));
+      windowEnd = Math.min(windowStart + NAVIGATOR_WINDOW_SIZE, filteredRows.length);
+      rows = filteredRows.slice(windowStart, windowEnd).map((data) => reusableRows.get(data.index) ?? renderRow(data));
+      rows.forEach(({ item }, index) => {
+        item.setAttribute("aria-posinset", String(windowStart + index + 1));
+        item.setAttribute("aria-setsize", String(filteredRows.length));
+      });
+      const topHeight = rangeHeight(0, windowStart);
+      const bottomHeight = rangeHeight(windowEnd, filteredRows.length);
+      topSpacer.style.setProperty("--navigator-spacer-height", `${Math.round(topHeight)}px`);
+      bottomSpacer.style.setProperty("--navigator-spacer-height", `${Math.round(bottomHeight)}px`);
+      topSpacer.hidden = topHeight === 0;
+      bottomSpacer.hidden = bottomHeight === 0;
+      list.setAttribute("aria-busy", "true");
+      list.replaceChildren(topSpacer, ...rows.map(({ item }) => item), bottomSpacer);
+      list.setAttribute("aria-busy", "false");
+      list.dataset.windowStart = String(windowStart);
+      list.dataset.windowEnd = String(windowEnd);
+      this.#navigatorRows = rows;
+      rowsInitialized = true;
+      windowStatus.textContent = filteredRows.length
+        ? `Loaded statements ${windowStart + 1} to ${windowEnd} of ${filteredRows.length}`
+        : "No statements loaded";
+      if (activeElement instanceof HTMLElement && list.contains(activeElement)) {
+        queueMicrotask(() => activeElement.focus({ preventScroll: true }));
+      }
+    };
+    const updateWindowForScroll = (): void => {
+      if (filteredRows.length <= NAVIGATOR_WINDOW_SIZE || list.hidden) return;
+      measureRows();
+      const targetIndex = rowIndexAtOffset(Math.max(0, container.scrollTop - list.offsetTop));
+      const insideWindow = targetIndex >= windowStart + NAVIGATOR_WINDOW_OVERSCAN
+        && targetIndex < windowEnd - NAVIGATOR_WINDOW_OVERSCAN;
+      if (insideWindow) return;
+      renderWindow(targetIndex);
+      configureSync();
+    };
+    container.addEventListener("scroll", updateWindowForScroll, { passive: true });
+    list.addEventListener("focusin", (event) => {
+      if (!(event.target instanceof Element)) return;
+      const item = event.target.closest<HTMLElement>(".quad");
+      if (!item) return;
+      const dataIndex = Number(item.dataset.navigatorIndex);
+      const filteredIndex = filteredRows.findIndex(({ index }) => index === dataIndex);
+      let targetIndex: number | null = null;
+      if (filteredIndex >= windowEnd - 3 && windowEnd < filteredRows.length) {
+        targetIndex = filteredIndex + NAVIGATOR_WINDOW_OVERSCAN;
+      } else if (filteredIndex <= windowStart + 2 && windowStart > 0) {
+        targetIndex = filteredIndex - NAVIGATOR_WINDOW_OVERSCAN;
+      }
+      if (targetIndex === null) return;
+      renderWindow(targetIndex);
+      configureSync();
+    });
     let hoveredSource: Element | null = null;
     applyFilter = (): void => {
       this.#navigatorQuery = search.value;
       const query = search.value.trim().toLocaleLowerCase();
-      let matchCount = 0;
-      rows.forEach(({ item, namespaces, quad, searchText }) => {
+      const filterKey = `${query}\u0000${this.#syncMode}\u0000${Array.from(this.#disabledNamespaces).sort().join("\u0000")}`;
+      const filterChanged = rowsInitialized && filterKey !== lastFilterKey;
+      lastFilterKey = filterKey;
+      const viewportMatches = new Map<Element, boolean>();
+      filteredRows = rowData.filter(({ namespaces, quad, searchText }) => {
         const matchesNamespace = Array.from(namespaces).every((namespace) => !this.#disabledNamespaces.has(namespace));
         const matchesSync = this.#syncMode === "page"
-          ? isInPageViewport(quad.source)
+          ? viewportMatches.get(quad.source) ?? (() => {
+            const matches = isInPageViewport(quad.source);
+            viewportMatches.set(quad.source, matches);
+            return matches;
+          })()
           : this.#syncMode === "panel"
             ? isLocatableSource(quad.source)
             : true;
-        const matches = quad.source === hoveredSource || (matchesNamespace && matchesSync && (!query || searchText.includes(query)));
-        item.hidden = !matches;
-        if (matches) matchCount += 1;
+        return quad.source === hoveredSource || (matchesNamespace && matchesSync && (!query || searchText.includes(query)));
       });
+      const preferredSource = this.#revealedSource ?? hoveredSource;
+      const preferredIndex = preferredSource
+        ? filteredRows.findIndex(({ quad }) => quad.source === preferredSource)
+        : -1;
+      if (rowData.length <= NAVIGATOR_WINDOW_SIZE) {
+        if (!rowsInitialized) {
+          const matchingRows = filteredRows;
+          filteredRows = rowData;
+          const revealedIndex = this.#revealedSource
+            ? rowData.findIndex(({ quad }) => quad.source === this.#revealedSource)
+            : 0;
+          renderWindow(Math.max(0, revealedIndex));
+          filteredRows = matchingRows;
+        }
+        const matchingIndices = new Set(filteredRows.map(({ index }) => index));
+        rows.forEach(({ index, item }) => { item.hidden = !matchingIndices.has(index); });
+      } else {
+        if (filterChanged && preferredIndex < 0) container.scrollTop = Math.min(container.scrollTop, list.offsetTop);
+        renderWindow(preferredIndex >= 0 ? preferredIndex : filterChanged ? 0 : windowStart);
+      }
       namespaceButtons.forEach((button, namespace) => {
         const active = !this.#disabledNamespaces.has(namespace);
         const count = vocabularies.find((vocabulary) => vocabulary.namespace === namespace)?.count ?? 0;
@@ -3420,9 +3569,10 @@ export class Ia2RdfNavigator extends HTMLElement {
       });
       const hasNamespaceFilter = vocabularies.some((vocabulary) => this.#disabledNamespaces.has(vocabulary.namespace));
       const filtering = Boolean(query) || hasNamespaceFilter || this.#syncMode !== "off";
-      filterCount.textContent = filtering && matchCount !== rows.length ? `${matchCount} of ${rows.length}` : "";
-      noMatches.hidden = !filtering || matchCount > 0;
-      list.hidden = filtering && matchCount === 0;
+      filterCount.textContent = filtering && filteredRows.length !== rowData.length ? `${filteredRows.length} of ${rowData.length}` : "";
+      noMatches.hidden = !filtering || filteredRows.length > 0;
+      list.hidden = filtering && filteredRows.length === 0;
+      configureSync();
     };
     let visibleSuggestions: SemanticSuggestion[] = [];
     let activeSuggestion = -1;
@@ -3529,7 +3679,7 @@ export class Ia2RdfNavigator extends HTMLElement {
       }
       if (event.key === "Tab") closeTypeahead();
     });
-    const configureSync = (): void => {
+    configureSync = (): void => {
       this.#configureNavigatorSync(container, rows, applyFilter, (source) => {
         hoveredSource = source;
         applyFilter();
@@ -3540,12 +3690,10 @@ export class Ia2RdfNavigator extends HTMLElement {
       hoveredSource = null;
       updateScrollSyncControls(syncSwitch, mode, focus);
       applyFilter();
-      configureSync();
     };
     this.#resetSyncControl = () => setSyncMode("off");
     bindScrollSyncControls(syncSwitch, (mode, focus) => setSyncMode(mode, focus));
     applyFilter();
-    configureSync();
   }
 
   #renderShapes(container: HTMLElement): void {

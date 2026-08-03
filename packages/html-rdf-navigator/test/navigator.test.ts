@@ -1448,6 +1448,55 @@ describe("Ia2RdfNavigator", () => {
     expect(count?.textContent).toBe("0 of 2");
   });
 
+  it("windows large datasets as the navigator scrolls and filters offscreen statements", () => {
+    document.body.innerHTML = Array.from({ length: 250 }, (_, index) => (
+      `<span rdf-subject="https://example.com/person/${index}" rdf-predicate="https://schema.org/name">Person ${index}</span>`
+    )).join("");
+    const drawer = mountRdfNavigator();
+    const root = drawer.shadowRoot!;
+    const viewport = root.querySelector<HTMLElement>(".viewport")!;
+    const list = root.querySelector<HTMLOListElement>(".navigator")!;
+    const search = root.querySelector<HTMLInputElement>(".navigator-search")!;
+    const status = root.querySelector<HTMLElement>(".navigator-window-status")!;
+
+    expect(root.querySelectorAll(".quad")).toHaveLength(100);
+    expect(status.textContent).toBe("Loaded statements 1 to 100 of 250");
+    expect(root.querySelector(".navigator-pagination")).toBeNull();
+
+    viewport.scrollTop = 190 * 88;
+    viewport.dispatchEvent(new Event("scroll"));
+    expect(root.querySelectorAll(".quad")).toHaveLength(100);
+    expect(root.querySelector(".quad")?.textContent).toContain("Person 150");
+    expect(root.querySelector(".quad")?.getAttribute("aria-posinset")).toBe("151");
+    expect(root.querySelector(".quad")?.getAttribute("aria-setsize")).toBe("250");
+    expect(status.textContent).toBe("Loaded statements 151 to 250 of 250");
+    expect(list.dataset.windowStart).toBe("150");
+    expect(root.querySelector<HTMLElement>(".navigator-spacer-top")?.hidden).toBe(false);
+
+    search.value = "Person 249";
+    search.dispatchEvent(new Event("input"));
+    expect(root.querySelectorAll(".quad")).toHaveLength(1);
+    expect(root.querySelector(".quad")?.textContent).toContain("Person 249");
+    expect(root.querySelector(".filter-count")?.textContent).toBe("1 of 250");
+    expect(status.textContent).toBe("Loaded statements 1 to 1 of 1");
+  });
+
+  it("opens the large-dataset window containing a requested statement carrier", async () => {
+    document.body.innerHTML = Array.from({ length: 250 }, (_, index) => (
+      `<span rdf-subject="https://example.com/person/${index}" rdf-predicate="https://schema.org/name">Person ${index}</span>`
+    )).join("");
+    const target = document.body.querySelectorAll("span")[240]!;
+    target.scrollIntoView = vi.fn();
+    target.animate = vi.fn(() => ({ cancel: vi.fn() }) as unknown as Animation);
+    const drawer = mountRdfNavigator();
+
+    expect(drawer.revealSource(target)).toBe(true);
+    await Promise.resolve();
+    expect(drawer.shadowRoot?.querySelector(".quad")?.textContent).toContain("Person 150");
+    expect(drawer.shadowRoot?.querySelector(".navigator-window-status")?.textContent).toBe("Loaded statements 151 to 250 of 250");
+    expect(drawer.shadowRoot?.querySelector(".quad.is-corresponding")?.textContent).toContain("Person 240");
+  });
+
   it("suggests ontology terms by labels, OWL kinds, domains, and ranges", () => {
     document.body.innerHTML = [
       '<a href="http://www.w3.org/2002/07/owl#Class" rdf-subject="https://example.com/Person" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Class</a>',
