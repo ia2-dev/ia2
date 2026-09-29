@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ "${1:-}" = "--probe" ]; then
+  command -v scala-cli >/dev/null || { echo "scala-cli is not installed" >&2; exit 1; }
+  exit 0
+fi
+exec scala-cli run "$here/Extract.scala" "$here/CarrierProfile.scala" --quiet -- "$1"

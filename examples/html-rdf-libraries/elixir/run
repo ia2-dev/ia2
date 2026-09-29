@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ "${1:-}" = "--probe" ]; then
+  command -v mix >/dev/null || { echo "elixir/mix is not installed" >&2; exit 1; }
+  (cd "$here" && mix deps.loadpaths --no-deps-check) >/dev/null 2>&1 || { echo "run mix deps.get in elixir" >&2; exit 1; }
+  exit 0
+fi
+cd "$here"
+exec mix run -e 'HtmlRdfExample.main(System.argv())' -- "$1"

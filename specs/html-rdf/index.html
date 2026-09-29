@@ -44,7 +44,7 @@
       rdf-datatype="http://www.w3.org/2001/XMLSchema#date"
     >
     <meta
-      content="2026-07-15"
+      content="2026-07-19"
       rdf-subject=""
       rdf-predicate="http://purl.org/dc/terms/modified"
       rdf-datatype="http://www.w3.org/2001/XMLSchema#date"
@@ -1582,6 +1582,46 @@ class="sourceCode html"><code class="sourceCode html"><span id="cb39-1"><a href=
 <p>The lexical form is <code>01</code>, even though the visible text is
 <code>1 item</code>.</p>
 </section>
+</section>
+<section id="machine-readable-binding-profile" class="level3 informative">
+<a hidden class="no-link-warnings" href="http://purl.org/spar/doco/Section" rdf-subject="#machine-readable-binding-profile" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+<a hidden class="no-link-warnings" href="#machine-readable-binding-profile" rdf-subject="#statement-construction" rdf-predicate="http://purl.org/dc/terms/hasPart">RDF</a>
+<a hidden class="no-link-warnings" href="#machine-readable-binding-profile-title" rdf-subject="#machine-readable-binding-profile" rdf-predicate="http://www.essepuntato.it/2008/12/pattern#containsAsHeader">RDF</a>
+<a hidden class="no-link-warnings" href="http://purl.org/spar/doco/SectionTitle" rdf-subject="#machine-readable-binding-profile-title" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>
+<span hidden rdf-subject="#machine-readable-binding-profile" rdf-predicate="http://purl.org/dc/terms/title">Machine-readable binding profile</span>
+<h3 id="machine-readable-binding-profile-title" rdf-predicate="http://purl.org/spar/c4o/hasContent">Machine-readable binding profile</h3>
+<p>The Core 0.1 native carrier rules are also published as a versioned
+<a href="binding-profile/core-0.1.ttl">RDF binding profile</a>. This
+profile is an implementation aid, not a second extraction algorithm.
+The normative requirements in this document remain authoritative.</p>
+<p>The profile records, for every native carrier, an RDF/HTML element
+class, an RDF/HTML attribute term, the resulting term kind, and the
+value transformation. It also supplies the DOM local-name spelling of
+every referenced element and attribute. The
+<a href="https://html.spec.whatwg.org/multipage/microdata.html#values">HTML
+Living Standard value algorithm</a> is identified as a source, while
+the profile records the deliberate Core 0.1 choices from the normative
+tables above.</p>
+<p>A consumer needs only basic RDF statement access, not SPARQL:</p>
+<ol>
+<li>select the named profile resource and iterate its
+<code>htmlrdf:carrierRule</code> objects;</li>
+<li>for each rule, follow <code>htmlrdf:elementClass</code> to one
+<code>rdfhtml:tagName</code> and <code>htmlrdf:valueAttribute</code> to
+one <code>rdfhtml:attributeLocalName</code>;</li>
+<li>read the carrier type and <code>htmlrdf:transformation</code>; and</li>
+<li>index the resulting record by the pair of DOM local names.</li>
+</ol>
+<p>The resulting dictionary is sufficient to select and interpret the
+native attribute carrier. The extractor still applies the surrounding
+rules for competing carriers, templates, local keys, canonical IRI
+resolution, literal metadata, and diagnostics.</p>
+<p>For environments that do not load RDF configuration, the project
+also publishes an equivalent
+<a href="binding-profile/core-0.1.json">neutral JSON table</a> and
+generates small native source tables for the language examples. These
+artifacts are generated at build time and require no runtime profile
+fetch.</p>
 </section>
 <section id="literal-datatype-language-and-direction" class="level3">
 <a hidden class="no-link-warnings" href="http://purl.org/spar/doco/Section" rdf-subject="#literal-datatype-language-and-direction" rdf-predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">RDF</a>

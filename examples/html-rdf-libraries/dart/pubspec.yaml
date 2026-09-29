@@ -1,0 +1,7 @@
+name: html_rdf_library_example
+publish_to: none
+environment:
+  sdk: ^3.8.0
+dependencies:
+  html: ^0.15.6
+  http: ^1.4.0

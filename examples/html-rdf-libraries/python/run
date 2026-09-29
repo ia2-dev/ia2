@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ -x "$here/.venv/bin/python" ]; then python="$here/.venv/bin/python"; else python=${PYTHON:-python3}; fi
+if [ "${1:-}" = "--probe" ]; then
+  command -v "$python" >/dev/null || { echo "python3 is not installed" >&2; exit 1; }
+  "$python" -c "import httpx, html5lib, lxml" >/dev/null 2>&1 || { echo "install python/requirements.txt" >&2; exit 1; }
+  exit 0
+fi
+exec "$python" "$here/extract.py" "$1"

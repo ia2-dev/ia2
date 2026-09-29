@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ "${1:-}" = "--probe" ]; then
+  command -v dart >/dev/null || { echo "dart is not installed" >&2; exit 1; }
+  test -f "$here/.dart_tool/package_config.json" || { echo "run dart pub get in dart" >&2; exit 1; }
+  exit 0
+fi
+cd "$here"
+exec dart run bin/extract.dart "$1"

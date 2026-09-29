@@ -1,0 +1,63 @@
+name: Test HTML/RDF library examples
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/test-html-rdf-libraries.yml
+      - examples/html-rdf-libraries/**
+      - package.json
+      - scripts/build-site.mjs
+      - site/guide/index.html
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/test-html-rdf-libraries.yml
+      - examples/html-rdf-libraries/**
+      - package.json
+      - scripts/build-site.mjs
+      - site/guide/index.html
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    name: ${{ matrix.language }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { id: javascript-typescript, language: "JavaScript / TypeScript" }
+          - { id: python, language: "Python" }
+          - { id: java, language: "Java" }
+          - { id: kotlin, language: "Kotlin" }
+          - { id: scala, language: "Scala" }
+          - { id: csharp, language: "C# / .NET" }
+          - { id: go, language: "Go" }
+          - { id: rust, language: "Rust" }
+          - { id: php, language: "PHP 8.4+" }
+          - { id: ruby, language: "Ruby" }
+          - { id: swift, language: "Swift" }
+          - { id: dart, language: "Dart" }
+          - { id: c, language: "C" }
+          - { id: cpp, language: "C++" }
+          - { id: elixir, language: "Elixir" }
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Run conformance example
+        env:
+          HTML_RDF_ONLY: ${{ matrix.id }}
+        run: node examples/html-rdf-libraries/test-containers.mjs

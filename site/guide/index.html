@@ -104,6 +104,7 @@
             <li><a href="#literals">Literal metadata</a></li>
             <li><a href="#graphs">Graphs and triple terms</a></li>
             <li><a href="#live-dom">Live DOM</a></li>
+            <li><a href="#libraries">Parser libraries</a></li>
             <li><a href="#rdf-html">RDF/HTML rendering</a></li>
             <li><a href="#hare">HARE bundles</a></li>
             <li><a href="#agent-skills">Agent skills</a></li>
@@ -447,6 +448,163 @@ _:location &lt;https://schema.org/name&gt; "Lab 3" .</code></div>
               <li><strong>Live acquisition:</strong> extract the current light DOM after the host application changes it.</li>
               <li><strong>Separate fragments:</strong> pass a template’s <code>content</code> explicitly when that inert fragment is the intended root.</li>
             </ul>
+          </section>
+
+          <section id="libraries" class="guide-section" aria-labelledby="libraries-title">
+            <h2
+              id="libraries-title"
+              rdf-subject="#libraries"
+              rdf-predicate="http://purl.org/dc/terms/title"
+            >Start with the parser your stack already trusts.</h2>
+            <p class="section-lede">
+              Choose a language, open its source, and follow one small
+              end-to-end example: fetch inert HTML, parse it as HTML5, find
+              statement carriers by attribute name, and turn their native HTML
+              values into RDF terms. No RDFa parser or script execution is
+              involved.
+            </p>
+
+            <p>
+              Each version resolves the document’s canonical IRI and shows four
+              representative objects: visible text, a relative link, an exact
+              date, and a direction-aware language string. The examples use one
+              compact <a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/fixture/index.html">HTML/RDF document</a>
+              so the foldouts make library and language idioms easy to compare.
+              The smallest useful discovery query is
+              <code>[rdf-predicate]</code>, or
+              <code>//*[@rdf-predicate]</code> with XPath.
+            </p>
+
+            <p>
+              The element-to-value choices are not repeated by hand in every
+              example. A versioned
+              <a href="/spec/html-rdf/binding-profile/core-0.1.ttl">RDF binding profile</a>
+              names each native carrier and its transformation. A small build
+              step compiles that dictionary into the native table imported by
+              each foldout. Applications that do not need RDF profile loading
+              can use the equivalent
+              <a href="/spec/html-rdf/binding-profile/core-0.1.json">neutral JSON table</a>.
+              Neither form requires SPARQL at runtime.
+            </p>
+
+            <div class="guide-note">
+              <p>
+                <strong>The dictionary is policy; the example is the adapter.</strong>
+                The generated table answers which attribute carries a value
+                and whether it is an IRI or literal. The readable source in
+                each foldout still shows how that language fetches HTML,
+                queries by attribute name, crosses template boundaries,
+                resolves IRIs, normalizes fallback text, and constructs terms.
+              </p>
+            </div>
+
+            <div class="library-catalog">
+              <div class="library-catalog-header" aria-hidden="true">
+                <span>Language</span><span>Fetch</span><span>HTML parser</span><span>Source</span>
+              </div>
+
+              <details class="library-example">
+                <summary><span class="library-name">JavaScript / TypeScript</span><span class="library-tool"><span class="library-meta-label">Fetch: </span><code>fetch</code></span><span class="library-tool"><span class="library-meta-label">Parser: </span>jsdom</span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>javascript-typescript/extract.mjs</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/javascript-typescript/extract.mjs">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="javascript-typescript/extract.mjs" data-language="javascript">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">Python</span><span class="library-tool"><span class="library-meta-label">Fetch: </span>HTTPX</span><span class="library-tool"><span class="library-meta-label">Parser: </span>html5lib + lxml</span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>python/extract.py</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/python/extract.py">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="python/extract.py" data-language="python">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">Java</span><span class="library-tool"><span class="library-meta-label">Fetch: </span><code>HttpClient</code></span><span class="library-tool"><span class="library-meta-label">Parser: </span>jsoup</span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>java/src/main/java/dev/ia2/example/Extract.java</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/java/src/main/java/dev/ia2/example/Extract.java">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="java/src/main/java/dev/ia2/example/Extract.java" data-language="java">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">Kotlin</span><span class="library-tool"><span class="library-meta-label">Fetch: </span>Ktor Client</span><span class="library-tool"><span class="library-meta-label">Parser: </span>jsoup</span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>kotlin/src/main/kotlin/Main.kt</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/kotlin/src/main/kotlin/Main.kt">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="kotlin/src/main/kotlin/Main.kt" data-language="kotlin">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">Scala</span><span class="library-tool"><span class="library-meta-label">Fetch: </span>sttp client</span><span class="library-tool"><span class="library-meta-label">Parser: </span>jsoup</span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>scala/Extract.scala</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/scala/Extract.scala">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="scala/Extract.scala" data-language="scala">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">C# / .NET</span><span class="library-tool"><span class="library-meta-label">Fetch: </span><code>HttpClient</code></span><span class="library-tool"><span class="library-meta-label">Parser: </span>AngleSharp</span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>csharp/Program.cs</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/csharp/Program.cs">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="csharp/Program.cs" data-language="csharp">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">Go</span><span class="library-tool"><span class="library-meta-label">Fetch: </span><code>net/http</code></span><span class="library-tool"><span class="library-meta-label">Parser: </span><code>x/net/html</code> + goquery</span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>go/main.go</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/go/main.go">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="go/main.go" data-language="go">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">Rust</span><span class="library-tool"><span class="library-meta-label">Fetch: </span>reqwest</span><span class="library-tool"><span class="library-meta-label">Parser: </span>scraper + html5ever</span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>rust/src/main.rs</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/rust/src/main.rs">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="rust/src/main.rs" data-language="rust">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">PHP 8.4+</span><span class="library-tool"><span class="library-meta-label">Fetch: </span>Symfony HttpClient</span><span class="library-tool"><span class="library-meta-label">Parser: </span><code>Dom\HTMLDocument</code></span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>php/extract.php</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/php/extract.php">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="php/extract.php" data-language="php">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">Ruby</span><span class="library-tool"><span class="library-meta-label">Fetch: </span>Faraday</span><span class="library-tool"><span class="library-meta-label">Parser: </span>Nokogiri HTML5</span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>ruby/extract.rb</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/ruby/extract.rb">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="ruby/extract.rb" data-language="ruby">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">Swift</span><span class="library-tool"><span class="library-meta-label">Fetch: </span><code>URLSession</code></span><span class="library-tool"><span class="library-meta-label">Parser: </span>SwiftSoup</span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>swift/Sources/HtmlRdfExample/main.swift</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/swift/Sources/HtmlRdfExample/main.swift">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="swift/Sources/HtmlRdfExample/main.swift" data-language="swift">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">Dart</span><span class="library-tool"><span class="library-meta-label">Fetch: </span><code>package:http</code></span><span class="library-tool"><span class="library-meta-label">Parser: </span><code>package:html</code></span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>dart/bin/extract.dart</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/dart/bin/extract.dart">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="dart/bin/extract.dart" data-language="dart">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">C</span><span class="library-tool"><span class="library-meta-label">Fetch: </span>libcurl</span><span class="library-tool"><span class="library-meta-label">Parser: </span>Lexbor</span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>c/extract.c</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/c/extract.c">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="c/extract.c" data-language="c">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">C++</span><span class="library-tool"><span class="library-meta-label">Fetch: </span>libcurl</span><span class="library-tool"><span class="library-meta-label">Parser: </span>Lexbor</span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>cpp/extract.cpp</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/cpp/extract.cpp">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="cpp/extract.cpp" data-language="cpp">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+
+              <details class="library-example">
+                <summary><span class="library-name">Elixir</span><span class="library-tool"><span class="library-meta-label">Fetch: </span>Req</span><span class="library-tool"><span class="library-meta-label">Parser: </span>Floki + html5ever</span><span class="library-disclosure">View source <span aria-hidden="true">⌄</span></span></summary>
+                <figure class="code-sample library-code"><figcaption><span>elixir/lib/html_rdf_example.ex</span><span class="library-code-actions"><a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/elixir/lib/html_rdf_example.ex">GitHub</a><button type="button" data-copy>Copy</button></span></figcaption><pre><code data-library-source="elixir/lib/html_rdf_example.ex" data-language="elixir">Source is added from the example file during the site build.</code></pre></figure>
+              </details>
+            </div>
+
+            <div class="guide-note">
+              <p>
+                <strong>Preserve the template boundary.</strong> Browser-like
+                DOM implementations keep template contents in a separate
+                <code>DocumentFragment</code>. Tree-oriented libraries may
+                expose those nodes as ordinary descendants, so their examples
+                explicitly suppress candidates below a <code>template</code>
+                during document extraction.
+              </p>
+            </div>
+
+            <p>
+              Treat the example closest to your stack as a starting point, not
+              as a complete extractor. Adapt its fetch policy, error handling,
+              and RDF term representation to your application, then extend it
+              with every carrier, blank-node keys, named and empty graphs,
+              nested RDF 1.2 triple terms, diagnostics, and the exact IRI rules
+              in the normative specification. The
+              <a href="https://github.com/ia2-dev/ia2/blob/main/examples/html-rdf-libraries/README.md">example directory</a>
+              includes dependency manifests, generated native tables, and
+              commands for running each version. The canonical
+              <a href="https://github.com/ia2-dev/ia2/blob/main/specs/html-rdf/binding-profile/core-0.1.ttl">Turtle profile</a>
+              and its
+              <a href="https://github.com/ia2-dev/ia2/blob/main/scripts/generate-html-rdf-binding-profile.mjs">deterministic compiler</a>
+              are also available on GitHub.
+            </p>
           </section>
 
           <section id="rdf-html" class="guide-section" aria-labelledby="rdf-html-title">

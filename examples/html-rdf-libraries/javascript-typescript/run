@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ "${1:-}" = "--probe" ]; then
+  command -v node >/dev/null || { echo "node is not installed" >&2; exit 1; }
+  (cd "$here" && node -e "import('jsdom')") >/dev/null 2>&1 || { echo "run npm install in javascript-typescript" >&2; exit 1; }
+  exit 0
+fi
+cd "$here"
+exec node extract.mjs "$1"

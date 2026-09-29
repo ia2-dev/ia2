@@ -1,0 +1,112 @@
+@prefix htmlrdf: <https://ia2.dev/spec/html-rdf#> .
+@prefix rdfhtml: <https://ia2.dev/spec/rdf-html#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://ia2.dev/spec/html-rdf/binding-profile/core-0.1>
+    a htmlrdf:HostBindingProfile ;
+    dcterms:title "IA² HTML/RDF Core 0.1 host binding profile"@en ;
+    dcterms:description "A query-free RDF dictionary for selecting native HTML object carriers."@en ;
+    dcterms:conformsTo <https://ia2.dev/spec/html-rdf> ;
+    dcterms:source <https://html.spec.whatwg.org/multipage/microdata.html#values> ;
+    htmlrdf:fallbackTransformation htmlrdf:NormalizedDescendantText ;
+    htmlrdf:carrierRule
+        htmlrdf:aHref,
+        htmlrdf:areaHref,
+        htmlrdf:linkHref,
+        htmlrdf:audioSrc,
+        htmlrdf:embedSrc,
+        htmlrdf:iframeSrc,
+        htmlrdf:imgSrc,
+        htmlrdf:inputSrc,
+        htmlrdf:scriptSrc,
+        htmlrdf:sourceSrc,
+        htmlrdf:trackSrc,
+        htmlrdf:videoSrc,
+        htmlrdf:blockquoteCite,
+        htmlrdf:delCite,
+        htmlrdf:insCite,
+        htmlrdf:qCite,
+        htmlrdf:formAction,
+        htmlrdf:buttonFormaction,
+        htmlrdf:inputFormaction,
+        htmlrdf:objectData,
+        htmlrdf:videoPoster,
+        htmlrdf:metaContent,
+        htmlrdf:dataValue,
+        htmlrdf:timeDatetime .
+
+htmlrdf:HostBindingProfile a rdfs:Class .
+htmlrdf:CarrierRule a rdfs:Class .
+htmlrdf:IriCarrierRule rdfs:subClassOf htmlrdf:CarrierRule .
+htmlrdf:LiteralCarrierRule rdfs:subClassOf htmlrdf:CarrierRule .
+htmlrdf:Transformation a rdfs:Class .
+htmlrdf:carrierRule a rdf:Property .
+htmlrdf:elementClass a rdf:Property .
+htmlrdf:valueAttribute a rdf:Property .
+htmlrdf:transformation a rdf:Property .
+htmlrdf:fallbackTransformation a rdf:Property .
+
+htmlrdf:ResolveRdfIriReference a htmlrdf:Transformation .
+htmlrdf:ExactAttributeValue a htmlrdf:Transformation .
+htmlrdf:NormalizedDescendantText a htmlrdf:Transformation .
+
+rdfhtml:A rdfhtml:tagName "a" .
+rdfhtml:Area rdfhtml:tagName "area" .
+rdfhtml:Audio rdfhtml:tagName "audio" .
+rdfhtml:Blockquote rdfhtml:tagName "blockquote" .
+rdfhtml:Button rdfhtml:tagName "button" .
+rdfhtml:Data rdfhtml:tagName "data" .
+rdfhtml:Del rdfhtml:tagName "del" .
+rdfhtml:Embed rdfhtml:tagName "embed" .
+rdfhtml:Form rdfhtml:tagName "form" .
+rdfhtml:Iframe rdfhtml:tagName "iframe" .
+rdfhtml:Img rdfhtml:tagName "img" .
+rdfhtml:Input rdfhtml:tagName "input" .
+rdfhtml:Ins rdfhtml:tagName "ins" .
+rdfhtml:Link rdfhtml:tagName "link" .
+rdfhtml:Meta rdfhtml:tagName "meta" .
+rdfhtml:Object rdfhtml:tagName "object" .
+rdfhtml:Q rdfhtml:tagName "q" .
+rdfhtml:Script rdfhtml:tagName "script" .
+rdfhtml:Source rdfhtml:tagName "source" .
+rdfhtml:Time rdfhtml:tagName "time" .
+rdfhtml:Track rdfhtml:tagName "track" .
+rdfhtml:Video rdfhtml:tagName "video" .
+
+rdfhtml:action rdfhtml:attributeLocalName "action" .
+rdfhtml:cite rdfhtml:attributeLocalName "cite" .
+rdfhtml:content rdfhtml:attributeLocalName "content" .
+rdfhtml:dataAttribute rdfhtml:attributeLocalName "data" .
+rdfhtml:dateTime rdfhtml:attributeLocalName "datetime" .
+rdfhtml:formAction rdfhtml:attributeLocalName "formaction" .
+rdfhtml:href rdfhtml:attributeLocalName "href" .
+rdfhtml:poster rdfhtml:attributeLocalName "poster" .
+rdfhtml:src rdfhtml:attributeLocalName "src" .
+rdfhtml:value rdfhtml:attributeLocalName "value" .
+
+htmlrdf:aHref a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:A ; htmlrdf:valueAttribute rdfhtml:href ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:areaHref a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Area ; htmlrdf:valueAttribute rdfhtml:href ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:linkHref a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Link ; htmlrdf:valueAttribute rdfhtml:href ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:audioSrc a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Audio ; htmlrdf:valueAttribute rdfhtml:src ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:embedSrc a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Embed ; htmlrdf:valueAttribute rdfhtml:src ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:iframeSrc a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Iframe ; htmlrdf:valueAttribute rdfhtml:src ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:imgSrc a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Img ; htmlrdf:valueAttribute rdfhtml:src ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:inputSrc a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Input ; htmlrdf:valueAttribute rdfhtml:src ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:scriptSrc a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Script ; htmlrdf:valueAttribute rdfhtml:src ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:sourceSrc a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Source ; htmlrdf:valueAttribute rdfhtml:src ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:trackSrc a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Track ; htmlrdf:valueAttribute rdfhtml:src ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:videoSrc a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Video ; htmlrdf:valueAttribute rdfhtml:src ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:blockquoteCite a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Blockquote ; htmlrdf:valueAttribute rdfhtml:cite ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:delCite a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Del ; htmlrdf:valueAttribute rdfhtml:cite ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:insCite a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Ins ; htmlrdf:valueAttribute rdfhtml:cite ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:qCite a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Q ; htmlrdf:valueAttribute rdfhtml:cite ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:formAction a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Form ; htmlrdf:valueAttribute rdfhtml:action ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:buttonFormaction a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Button ; htmlrdf:valueAttribute rdfhtml:formAction ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:inputFormaction a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Input ; htmlrdf:valueAttribute rdfhtml:formAction ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:objectData a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Object ; htmlrdf:valueAttribute rdfhtml:dataAttribute ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:videoPoster a htmlrdf:IriCarrierRule ; htmlrdf:elementClass rdfhtml:Video ; htmlrdf:valueAttribute rdfhtml:poster ; htmlrdf:transformation htmlrdf:ResolveRdfIriReference .
+htmlrdf:metaContent a htmlrdf:LiteralCarrierRule ; htmlrdf:elementClass rdfhtml:Meta ; htmlrdf:valueAttribute rdfhtml:content ; htmlrdf:transformation htmlrdf:ExactAttributeValue .
+htmlrdf:dataValue a htmlrdf:LiteralCarrierRule ; htmlrdf:elementClass rdfhtml:Data ; htmlrdf:valueAttribute rdfhtml:value ; htmlrdf:transformation htmlrdf:ExactAttributeValue .
+htmlrdf:timeDatetime a htmlrdf:LiteralCarrierRule ; htmlrdf:elementClass rdfhtml:Time ; htmlrdf:valueAttribute rdfhtml:dateTime ; htmlrdf:transformation htmlrdf:ExactAttributeValue .

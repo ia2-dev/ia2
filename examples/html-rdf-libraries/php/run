@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ "${1:-}" = "--probe" ]; then
+  command -v php >/dev/null || { echo "php is not installed" >&2; exit 1; }
+  php -r 'exit(PHP_VERSION_ID >= 80400 ? 0 : 1);' || { echo "PHP 8.4 or newer is required" >&2; exit 1; }
+  test -f "$here/vendor/autoload.php" || { echo "run composer install in php" >&2; exit 1; }
+  exit 0
+fi
+exec php "$here/extract.php" "$1"

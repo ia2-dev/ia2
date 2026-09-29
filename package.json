@@ -15,12 +15,17 @@
     "build:navigator": "npm --prefix packages/html-rdf-navigator run build",
     "build:rdf-html": "npm --prefix packages/rdf-html run build",
     "build:site": "node scripts/build-site.mjs",
-    "check": "npm --prefix packages/rdf-html run check && npm run check:rdf-html-examples && npm --prefix packages/html-rdf-navigator run check && npm --prefix packages/browser-extension run check && npm --prefix packages/hare-viewer run check && node --check worker.js",
+    "check": "npm run check:html-rdf-profile && npm --prefix packages/rdf-html run check && npm run check:rdf-html-examples && npm --prefix packages/html-rdf-navigator run check && npm --prefix packages/browser-extension run check && npm --prefix packages/hare-viewer run check && node --check worker.js",
+    "check:html-rdf-profile": "node scripts/generate-html-rdf-binding-profile.mjs --check",
     "check:rdf-html-examples": "npm run build:rdf-html && node scripts/generate-rdf-html-examples.mjs --check",
     "dev": "npm run build && wrangler dev --var RDF_HTML_ALLOW_LOCALHOST:true",
     "generate:rdf-html-examples": "npm run build:rdf-html && node scripts/generate-rdf-html-examples.mjs",
+    "generate:html-rdf-profile": "node scripts/generate-html-rdf-binding-profile.mjs",
     "deploy": "npm run build && wrangler deploy",
-    "test": "npm --prefix packages/rdf-html test && npm --prefix packages/html-rdf-navigator test && npm --prefix packages/browser-extension test && npm --prefix packages/hare-viewer test && npm run test:worker",
+    "test": "npm --prefix packages/rdf-html test && npm --prefix packages/html-rdf-navigator test && npm --prefix packages/browser-extension test && npm --prefix packages/hare-viewer test && npm run test:worker && npm run test:library-examples",
+    "test:library-examples": "node examples/html-rdf-libraries/test-containers.mjs",
+    "test:library-examples:available": "node examples/html-rdf-libraries/test.mjs",
+    "test:library-examples:containers": "node examples/html-rdf-libraries/test-containers.mjs",
     "test:worker": "npm run build:rdf-html && node --test test/worker.test.mjs",
     "test:ae2e": "npm run test:ae2e:navigator && npm run test:ae2e:extension",
     "test:ae2e:navigator": "npm run build:navigator && playwright test",
@@ -33,6 +38,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
+    "highlight.js": "^11.11.1",
     "web-ext": "^8.10.0",
     "wrangler": "^4.111.0"
   }

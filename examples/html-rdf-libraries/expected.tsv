@@ -1,0 +1,4 @@
+https://example.test/review#item	https://schema.org/citation	I	https://example.test/evidence/42			
+https://example.test/review#item	https://schema.org/dateModified	L	2026-07-19	http://www.w3.org/2001/XMLSchema#date		
+https://example.test/review#item	https://schema.org/description	L	مراجعة المورد	http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString	ar	rtl
+https://example.test/review#item	https://schema.org/name	L	Northstar review	http://www.w3.org/2001/XMLSchema#string		

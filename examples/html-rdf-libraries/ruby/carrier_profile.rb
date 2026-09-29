@@ -1,0 +1,27 @@
+# Generated from specs/html-rdf/binding-profile/core-0.1.ttl. Do not edit.
+CARRIER_RULES = [
+  ["a", "href", "iri", "ResolveRdfIriReference"].freeze,
+  ["area", "href", "iri", "ResolveRdfIriReference"].freeze,
+  ["audio", "src", "iri", "ResolveRdfIriReference"].freeze,
+  ["blockquote", "cite", "iri", "ResolveRdfIriReference"].freeze,
+  ["button", "formaction", "iri", "ResolveRdfIriReference"].freeze,
+  ["data", "value", "literal", "ExactAttributeValue"].freeze,
+  ["del", "cite", "iri", "ResolveRdfIriReference"].freeze,
+  ["embed", "src", "iri", "ResolveRdfIriReference"].freeze,
+  ["form", "action", "iri", "ResolveRdfIriReference"].freeze,
+  ["iframe", "src", "iri", "ResolveRdfIriReference"].freeze,
+  ["img", "src", "iri", "ResolveRdfIriReference"].freeze,
+  ["input", "formaction", "iri", "ResolveRdfIriReference"].freeze,
+  ["input", "src", "iri", "ResolveRdfIriReference"].freeze,
+  ["ins", "cite", "iri", "ResolveRdfIriReference"].freeze,
+  ["link", "href", "iri", "ResolveRdfIriReference"].freeze,
+  ["meta", "content", "literal", "ExactAttributeValue"].freeze,
+  ["object", "data", "iri", "ResolveRdfIriReference"].freeze,
+  ["q", "cite", "iri", "ResolveRdfIriReference"].freeze,
+  ["script", "src", "iri", "ResolveRdfIriReference"].freeze,
+  ["source", "src", "iri", "ResolveRdfIriReference"].freeze,
+  ["time", "datetime", "literal", "ExactAttributeValue"].freeze,
+  ["track", "src", "iri", "ResolveRdfIriReference"].freeze,
+  ["video", "poster", "iri", "ResolveRdfIriReference"].freeze,
+  ["video", "src", "iri", "ResolveRdfIriReference"].freeze
+].freeze

@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ "${1:-}" = "--probe" ]; then
+  command -v cmake >/dev/null || { echo "cmake is not installed" >&2; exit 1; }
+  pkg-config --exists lexbor libcurl || { echo "Lexbor and libcurl development packages are required" >&2; exit 1; }
+  exit 0
+fi
+cmake -S "$here" -B "$here/.build" >/dev/null
+cmake --build "$here/.build" >/dev/null
+exec "$here/.build/html-rdf-cpp" "$1"

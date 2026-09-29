@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ "${1:-}" = "--probe" ]; then
+  command -v mvn >/dev/null || { echo "maven is not installed" >&2; exit 1; }
+  (cd "$here" && mvn -q -o dependency:go-offline) >/dev/null 2>&1 || { echo "run mvn dependency:go-offline in java" >&2; exit 1; }
+  exit 0
+fi
+cd "$here"
+exec mvn -q compile exec:java -Dexec.args="$1"

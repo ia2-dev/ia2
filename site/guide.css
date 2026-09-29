@@ -390,6 +390,196 @@ html {
   font-weight: 750;
 }
 
+.library-catalog {
+  border-top: 1px solid var(--line);
+  margin: 2.5rem 0;
+}
+
+.library-catalog-header,
+.library-example summary {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(11rem, 1.15fr) minmax(8rem, 0.8fr) minmax(10rem, 1fr) auto;
+}
+
+.library-catalog-header {
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  padding: 0.8rem 1rem;
+  text-transform: uppercase;
+}
+
+.library-example {
+  border-bottom: 1px solid var(--line);
+}
+
+.library-example summary {
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+  padding: 0.9rem 1rem;
+  transition: background-color 160ms cubic-bezier(0.22, 1, 0.36, 1), color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.library-example summary::-webkit-details-marker {
+  display: none;
+}
+
+.library-example summary:hover,
+.library-example[open] summary {
+  background: var(--violet-soft);
+}
+
+.library-example summary:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: -3px;
+}
+
+.library-example[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.library-name {
+  color: var(--violet-ink);
+  font-weight: 750;
+}
+
+.library-tool {
+  line-height: 1.5;
+}
+
+.library-meta-label {
+  display: none;
+}
+
+.library-disclosure {
+  align-items: center;
+  color: var(--violet);
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 750;
+  gap: 0.45rem;
+  justify-self: end;
+  white-space: nowrap;
+}
+
+.library-disclosure > span {
+  display: inline-block;
+  font-size: 1rem;
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.library-example[open] .library-disclosure > span {
+  transform: rotate(180deg);
+}
+
+.library-code {
+  border: 0;
+  margin: 0;
+}
+
+.library-code figcaption {
+  gap: 1rem;
+}
+
+.library-code figcaption > span:first-child {
+  font: 0.72rem/1.5 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+  text-transform: none;
+}
+
+.library-code-actions {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.45rem;
+}
+
+.library-code-actions a {
+  align-items: center;
+  border: 1px solid oklch(75% 0.08 294 / 35%);
+  border-radius: 5px;
+  color: var(--hero-ink);
+  display: inline-flex;
+  font: 700 0.72rem/1 "Avenir Next", Avenir, sans-serif;
+  min-height: 2rem;
+  padding: 0 0.7rem;
+  text-decoration: none;
+}
+
+.library-code-actions a:hover {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: var(--semantic-ink, var(--violet-ink));
+}
+
+.library-code-actions a:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.library-code pre {
+  max-height: min(70vh, 40rem);
+  padding: clamp(1.35rem, 3vw, 2rem);
+  scrollbar-gutter: stable;
+}
+
+.library-code pre code {
+  display: block;
+  font-size: 0.86rem;
+  line-height: 1.8;
+  min-width: 100%;
+  tab-size: 4;
+  width: max-content;
+}
+
+.library-code .hljs-comment,
+.library-code .hljs-quote {
+  color: oklch(72% 0.025 286);
+  font-style: italic;
+}
+
+.library-code .hljs-keyword,
+.library-code .hljs-literal,
+.library-code .hljs-selector-tag {
+  color: oklch(82% 0.13 135);
+}
+
+.library-code .hljs-built_in,
+.library-code .hljs-class .hljs-title,
+.library-code .hljs-title.class_,
+.library-code .hljs-type {
+  color: oklch(84% 0.1 294);
+}
+
+.library-code .hljs-attr,
+.library-code .hljs-attribute,
+.library-code .hljs-property,
+.library-code .hljs-title.function_,
+.library-code .hljs-variable {
+  color: oklch(86% 0.08 235);
+}
+
+.library-code .hljs-number,
+.library-code .hljs-symbol,
+.library-code .hljs-template-variable {
+  color: oklch(82% 0.12 40);
+}
+
+.library-code .hljs-doctag,
+.library-code .hljs-regexp,
+.library-code .hljs-string {
+  color: oklch(88% 0.08 85);
+}
+
+.library-code .hljs-meta,
+.library-code .hljs-params,
+.library-code .hljs-punctuation {
+  color: oklch(84% 0.03 286);
+}
+
 .guide-fine-print {
   color: var(--muted);
   font-size: 0.84rem;
@@ -607,11 +797,59 @@ html {
   .rdf-result code {
     font-size: 0.75rem;
   }
+
+  .library-catalog-header {
+    display: none;
+  }
+
+  .library-example summary {
+    align-items: start;
+    gap: 0.25rem 1rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-block: 1rem;
+  }
+
+  .library-name {
+    grid-column: 1;
+  }
+
+  .library-tool {
+    color: var(--muted);
+    font-size: 0.82rem;
+    grid-column: 1;
+  }
+
+  .library-meta-label {
+    color: var(--page-ink);
+    display: inline;
+    font-weight: 750;
+  }
+
+  .library-disclosure {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+  }
+
+  .library-code figcaption {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .library-code pre code {
+    font-size: 0.78rem;
+    line-height: 1.75;
+  }
+
+  .library-code-actions {
+    align-self: flex-start;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .guide-toc a,
-  .guide-next-list strong {
+  .guide-next-list strong,
+  .library-disclosure > span,
+  .library-example summary {
     transition: none;
   }
 }

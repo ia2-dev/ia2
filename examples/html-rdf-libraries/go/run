@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ "${1:-}" = "--probe" ]; then
+  command -v go >/dev/null || { echo "go is not installed" >&2; exit 1; }
+  (cd "$here" && GOPROXY=off go list -mod=mod ./...) >/dev/null 2>&1 || { echo "run go mod download in go" >&2; exit 1; }
+  exit 0
+fi
+cd "$here"
+exec go run . "$1"

@@ -1,0 +1,17 @@
+[
+  { "id": "javascript-typescript", "label": "JavaScript / TypeScript", "fetch": "fetch", "parser": "jsdom", "source": "javascript-typescript/extract.mjs", "run": "javascript-typescript/run" },
+  { "id": "python", "label": "Python", "fetch": "HTTPX", "parser": "html5lib + lxml", "source": "python/extract.py", "run": "python/run" },
+  { "id": "java", "label": "Java", "fetch": "java.net.http.HttpClient", "parser": "jsoup", "source": "java/src/main/java/dev/ia2/example/Extract.java", "run": "java/run" },
+  { "id": "kotlin", "label": "Kotlin", "fetch": "Ktor Client", "parser": "jsoup", "source": "kotlin/src/main/kotlin/Main.kt", "run": "kotlin/run" },
+  { "id": "scala", "label": "Scala", "fetch": "sttp client", "parser": "jsoup", "source": "scala/Extract.scala", "run": "scala/run" },
+  { "id": "csharp", "label": "C# / .NET", "fetch": "HttpClient", "parser": "AngleSharp", "source": "csharp/Program.cs", "run": "csharp/run" },
+  { "id": "go", "label": "Go", "fetch": "net/http", "parser": "x/net/html + goquery", "source": "go/main.go", "run": "go/run" },
+  { "id": "rust", "label": "Rust", "fetch": "reqwest", "parser": "scraper + html5ever", "source": "rust/src/main.rs", "run": "rust/run" },
+  { "id": "php", "label": "PHP 8.4+", "fetch": "Symfony HttpClient", "parser": "Dom\\HTMLDocument", "source": "php/extract.php", "run": "php/run" },
+  { "id": "ruby", "label": "Ruby", "fetch": "Faraday", "parser": "Nokogiri::HTML5", "source": "ruby/extract.rb", "run": "ruby/run" },
+  { "id": "swift", "label": "Swift", "fetch": "URLSession", "parser": "SwiftSoup", "source": "swift/Sources/HtmlRdfExample/main.swift", "run": "swift/run" },
+  { "id": "dart", "label": "Dart", "fetch": "package:http", "parser": "package:html", "source": "dart/bin/extract.dart", "run": "dart/run" },
+  { "id": "c", "label": "C", "fetch": "libcurl", "parser": "Lexbor", "source": "c/extract.c", "run": "c/run" },
+  { "id": "cpp", "label": "C++", "fetch": "libcurl", "parser": "Lexbor", "source": "cpp/extract.cpp", "run": "cpp/run" },
+  { "id": "elixir", "label": "Elixir", "fetch": "Req", "parser": "Floki + html5ever", "source": "elixir/lib/html_rdf_example.ex", "run": "elixir/run" }
+]

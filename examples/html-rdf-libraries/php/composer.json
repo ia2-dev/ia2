@@ -1,0 +1,6 @@
+{
+  "require": {
+    "php": ">=8.4",
+    "symfony/http-client": "^7.3"
+  }
+}

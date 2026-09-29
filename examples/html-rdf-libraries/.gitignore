@@ -1,0 +1,16 @@
+**/.build/
+**/.bsp/
+**/.bundle/
+**/.dart_tool/
+**/.gradle/
+**/.scala-build/
+**/.venv/
+**/_build/
+**/__pycache__/
+**/deps/
+**/obj/
+**/build/
+**/node_modules/
+**/target/
+**/vendor/
+csharp/bin/

@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ "${1:-}" = "--probe" ]; then
+  command -v swift >/dev/null || { echo "swift is not installed" >&2; exit 1; }
+  (cd "$here" && swift package resolve --skip-update) >/dev/null 2>&1 || { echo "run swift package resolve in swift" >&2; exit 1; }
+  exit 0
+fi
+cd "$here"
+exec swift run --skip-update --quiet HtmlRdfExample "$1"

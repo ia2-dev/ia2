@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ "${1:-}" = "--probe" ]; then
+  command -v dotnet >/dev/null || { echo "dotnet is not installed" >&2; exit 1; }
+  test -f "$here/obj/project.assets.json" || { echo "run dotnet restore in csharp" >&2; exit 1; }
+  exit 0
+fi
+cd "$here"
+exec dotnet run --no-restore -- "$1"

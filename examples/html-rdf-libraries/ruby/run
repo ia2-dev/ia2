@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ -x /opt/homebrew/opt/ruby/bin/ruby ]; then
+  ruby_exec=/opt/homebrew/opt/ruby/bin/ruby
+  bundle_exec=/opt/homebrew/opt/ruby/bin/bundle
+else
+  ruby_exec=$(command -v ruby || true)
+  bundle_exec=$(command -v bundle || true)
+fi
+if [ "${1:-}" = "--probe" ]; then
+  test -n "$bundle_exec" || { echo "bundler is not installed" >&2; exit 1; }
+  (cd "$here" && "$bundle_exec" check) >/dev/null 2>&1 || { echo "run bundle install in ruby" >&2; exit 1; }
+  exit 0
+fi
+cd "$here"
+exec "$bundle_exec" exec "$ruby_exec" extract.rb "$1"

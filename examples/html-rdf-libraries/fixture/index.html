@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" rdf-version="1.2">
+  <head>
+    <meta charset="utf-8">
+    <link rel="canonical" href="https://example.test/review">
+    <title>HTML/RDF library fixture</title>
+  </head>
+  <body>
+    <h1
+      rdf-subject="#item"
+      rdf-predicate="https://schema.org/name"
+    >Northstar <span>review</span></h1>
+
+    <a
+      href="/evidence/42"
+      rdf-subject="#item"
+      rdf-predicate="https://schema.org/citation"
+    >Evidence 42</a>
+
+    <time
+      datetime="2026-07-19"
+      rdf-subject="#item"
+      rdf-predicate="https://schema.org/dateModified"
+      rdf-datatype="http://www.w3.org/2001/XMLSchema#date"
+    >July 19, 2026</time>
+
+    <p
+      lang="ar"
+      dir="rtl"
+      rdf-subject="#item"
+      rdf-predicate="https://schema.org/description"
+    >مراجعة المورد</p>
+
+    <template id="inert-content">
+      <span
+        rdf-subject="#item"
+        rdf-predicate="https://schema.org/name"
+      >This statement is inert during document extraction.</span>
+    </template>
+  </body>
+</html>

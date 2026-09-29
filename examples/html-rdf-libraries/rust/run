@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ "${1:-}" = "--probe" ]; then
+  command -v cargo >/dev/null || { echo "cargo is not installed" >&2; exit 1; }
+  (cd "$here" && cargo metadata --offline --format-version 1) >/dev/null 2>&1 || { echo "run cargo fetch in rust" >&2; exit 1; }
+  exit 0
+fi
+cd "$here"
+exec cargo run --quiet -- "$1"
